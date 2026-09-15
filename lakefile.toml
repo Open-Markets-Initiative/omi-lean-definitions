@@ -1,0 +1,8 @@
+name = "omi-lean-protocols"
+version = "1.0.0"
+defaultTargets = ["Omi"]
+
+[[lean_lib]]
+name = "Omi"
+roots = ["Omi", "iex", "nasdaq", "tests"]
+globs = ["Omi.+", "iex.+", "nasdaq.+", "tests.+"]

@@ -1,0 +1,24 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Lean
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+
+      - name: Check Definitions and Tests
+        run: lake build
+
+

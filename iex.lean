@@ -1,0 +1,7 @@
+import iex.deep.iexequities_deep_v1_06
+import iex.deep.iexequities_deep_v1_08
+import iex.deepplus.iexequities_deepplus_v1_01
+import iex.deepplus.iexequities_deepplus_v1_04
+import iex.tops.iexequities_tops_v1_56
+import iex.tops.iexequities_tops_v1_64
+import iex.tops.iexequities_tops_v1_66

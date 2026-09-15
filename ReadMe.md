@@ -3,6 +3,8 @@
 Omi [Lean](https://lean-lang.org/ "The Lean theorem prover and programming language") protocols describe common binary exchange protocols as Lean 4 definitions that carry their own proofs: for every message, decoding what was encoded gives the message back and the encoding is exactly as wide as the specification says; the dispatch on the message type selects the message that was written; and where the model states a length prefix or a message count, the framing decodes back as well.
 
 
+[![Lean](https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/About/Images/Lean.png)](https://lean-lang.org/)
+
 These definitions are checked with the Lean toolchain: [lake](https://lean-lang.org/doc/reference/latest/ "The Lean language reference")
 ## Usage
 

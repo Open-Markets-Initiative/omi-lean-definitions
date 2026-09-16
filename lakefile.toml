@@ -9,4 +9,4 @@ roots = ["Omi.Wire", "cme.brokertecust.Cme_Globex_BrokerTecUst_v10_1_Tcp", "cme.
 [[lean_lib]]
 name = "tests"
 srcDir = ".github/tests"
-roots = ["test_cme_globex_mdp3_sbe_v1_5", "test_cme_globex_mdp3_sbe_v1_8", "test_cme_globex_mdp3_sbe_v1_9", "test_iex_iexequities_deep_iextp_v1_06", "test_iex_iexequities_deepplus_iextp_v1_01", "test_iex_iexequities_tops_iextp_v1_56", "test_iex_iexequities_tops_iextp_v1_64", "test_jpx_osederivatives_geniuminet_itch_v5_0_6", "test_nasdaq_nsmequities_totalview_itch_v5_0_2017", "test_nasdaq_nsmequities_totalview_itch_v5_0_2023", "test_nasdaq_ntxequities_totalview_itch_v5_0", "test_nasdaq_psxequities_totalview_itch_v5_0"]
+roots = ["test_cme_globex_mdp3_sbe_v1_5", "test_cme_globex_mdp3_sbe_v1_8", "test_cme_globex_mdp3_sbe_v1_9", "test_iex_iexequities_deep_iextp_v1_06", "test_iex_iexequities_tops_iextp_v1_56", "test_iex_iexequities_tops_iextp_v1_64", "test_jpx_osederivatives_geniuminet_itch_v5_0_6", "test_nasdaq_nsmequities_totalview_itch_v5_0_2017", "test_nasdaq_nsmequities_totalview_itch_v5_0_2023", "test_nasdaq_ntxequities_totalview_itch_v5_0", "test_nasdaq_psxequities_totalview_itch_v5_0"]

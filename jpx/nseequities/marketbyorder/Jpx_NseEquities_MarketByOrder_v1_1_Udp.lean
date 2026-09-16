@@ -15,10 +15,14 @@ Prices with implied decimals are proven as the integers on the wire.
 namespace Omi.JpxNseequitiesMarketbyorderFlexV11Udp
 
 /-- Triggered Side: one byte code -/
+def TriggeredSide.codes : List UInt8 :=
+  [0x53, 0x42, 0x20]
+
 inductive TriggeredSide where
   | sellOrder -- Sell Order
   | buyOrder -- Buy Order
   | itayoseExecution -- Itayose Execution
+  | unlisted (byte : { byte : UInt8 // byte ∉ TriggeredSide.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace TriggeredSide
@@ -27,21 +31,29 @@ def toByte : TriggeredSide → UInt8
   | .sellOrder => 0x53
   | .buyOrder => 0x42
   | .itayoseExecution => 0x20
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option TriggeredSide :=
-  if byte = 0x53 then some .sellOrder
-  else if byte = 0x42 then some .buyOrder
-  else if byte = 0x20 then some .itayoseExecution
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : TriggeredSide :=
+  if byte = 0x53 then .sellOrder
+  else if byte = 0x42 then .buyOrder
+  else .itayoseExecution
 
-theorem ofByte?_toByte (value : TriggeredSide) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : TriggeredSide :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : TriggeredSide) : ofByte value.toByte = value := by
+  cases value with
+  | sellOrder => decide
+  | buyOrder => decide
+  | itayoseExecution => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : TriggeredSide) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (TriggeredSide × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : TriggeredSide) : (encode value).length = 1 :=
@@ -49,14 +61,18 @@ def decode : List UInt8 → Option (TriggeredSide × List UInt8)
 
 @[simp] theorem decode_encode (value : TriggeredSide) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end TriggeredSide
 
 /-- Side: one byte code -/
+def Side.codes : List UInt8 :=
+  [0x53, 0x42]
+
 inductive Side where
   | sellOrder -- Sell Order
   | buyOrder -- Buy Order
+  | unlisted (byte : { byte : UInt8 // byte ∉ Side.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace Side
@@ -64,20 +80,27 @@ namespace Side
 def toByte : Side → UInt8
   | .sellOrder => 0x53
   | .buyOrder => 0x42
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option Side :=
-  if byte = 0x53 then some .sellOrder
-  else if byte = 0x42 then some .buyOrder
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : Side :=
+  if byte = 0x53 then .sellOrder
+  else .buyOrder
 
-theorem ofByte?_toByte (value : Side) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : Side :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : Side) : ofByte value.toByte = value := by
+  cases value with
+  | sellOrder => decide
+  | buyOrder => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : Side) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (Side × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : Side) : (encode value).length = 1 :=
@@ -85,7 +108,7 @@ def decode : List UInt8 → Option (Side × List UInt8)
 
 @[simp] theorem decode_encode (value : Side) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end Side
 

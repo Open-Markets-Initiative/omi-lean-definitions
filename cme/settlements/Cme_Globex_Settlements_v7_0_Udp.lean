@@ -17,10 +17,14 @@ Prices with implied decimals are proven as the integers on the wire.
 namespace Omi.CmeGlobexSettlementsSbeV70Udp
 
 /-- Low Px Ind: one byte code -/
+def LowPxInd.codes : List UInt8 :=
+  [0x41, 0x42, 0x54]
+
 inductive LowPxInd where
   | ask -- Ask
   | bid -- Bid
   | trade -- Trade
+  | unlisted (byte : { byte : UInt8 // byte ∉ LowPxInd.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace LowPxInd
@@ -29,21 +33,29 @@ def toByte : LowPxInd → UInt8
   | .ask => 0x41
   | .bid => 0x42
   | .trade => 0x54
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option LowPxInd :=
-  if byte = 0x41 then some .ask
-  else if byte = 0x42 then some .bid
-  else if byte = 0x54 then some .trade
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : LowPxInd :=
+  if byte = 0x41 then .ask
+  else if byte = 0x42 then .bid
+  else .trade
 
-theorem ofByte?_toByte (value : LowPxInd) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : LowPxInd :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : LowPxInd) : ofByte value.toByte = value := by
+  cases value with
+  | ask => decide
+  | bid => decide
+  | trade => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : LowPxInd) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (LowPxInd × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : LowPxInd) : (encode value).length = 1 :=
@@ -51,15 +63,19 @@ def decode : List UInt8 → Option (LowPxInd × List UInt8)
 
 @[simp] theorem decode_encode (value : LowPxInd) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end LowPxInd
 
 /-- High Px Ind: one byte code -/
+def HighPxInd.codes : List UInt8 :=
+  [0x41, 0x42, 0x54]
+
 inductive HighPxInd where
   | ask -- Ask
   | bid -- Bid
   | trade -- Trade
+  | unlisted (byte : { byte : UInt8 // byte ∉ HighPxInd.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace HighPxInd
@@ -68,21 +84,29 @@ def toByte : HighPxInd → UInt8
   | .ask => 0x41
   | .bid => 0x42
   | .trade => 0x54
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option HighPxInd :=
-  if byte = 0x41 then some .ask
-  else if byte = 0x42 then some .bid
-  else if byte = 0x54 then some .trade
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : HighPxInd :=
+  if byte = 0x41 then .ask
+  else if byte = 0x42 then .bid
+  else .trade
 
-theorem ofByte?_toByte (value : HighPxInd) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : HighPxInd :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : HighPxInd) : ofByte value.toByte = value := by
+  cases value with
+  | ask => decide
+  | bid => decide
+  | trade => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : HighPxInd) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (HighPxInd × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : HighPxInd) : (encode value).length = 1 :=
@@ -90,7 +114,7 @@ def decode : List UInt8 → Option (HighPxInd × List UInt8)
 
 @[simp] theorem decode_encode (value : HighPxInd) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end HighPxInd
 

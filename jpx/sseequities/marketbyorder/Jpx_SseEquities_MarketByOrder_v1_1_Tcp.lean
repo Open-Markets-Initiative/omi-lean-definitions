@@ -15,6 +15,9 @@ Prices with implied decimals are proven as the integers on the wire.
 namespace Omi.JpxSseequitiesMarketbyorderFlexV11Tcp
 
 /-- Result Code: one byte code -/
+def ResultCode.codes : List UInt8 :=
+  [0x41, 0x4F, 0x55, 0x53, 0x54, 0x4D, 0x5A]
+
 inductive ResultCode where
   | accepted -- Accepted
   | outOfService -- Out Of Service
@@ -23,6 +26,7 @@ inductive ResultCode where
   | incorrectPacketType -- Incorrect Packet Type
   | incorrectMcgNumber -- Incorrect Mcg Number
   | otherError -- Other Error
+  | unlisted (byte : { byte : UInt8 // byte ∉ ResultCode.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace ResultCode
@@ -35,25 +39,37 @@ def toByte : ResultCode → UInt8
   | .incorrectPacketType => 0x54
   | .incorrectMcgNumber => 0x4D
   | .otherError => 0x5A
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option ResultCode :=
-  if byte = 0x41 then some .accepted
-  else if byte = 0x4F then some .outOfService
-  else if byte = 0x55 then some .incorrectUserId
-  else if byte = 0x53 then some .incorrectSequenceNumber
-  else if byte = 0x54 then some .incorrectPacketType
-  else if byte = 0x4D then some .incorrectMcgNumber
-  else if byte = 0x5A then some .otherError
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : ResultCode :=
+  if byte = 0x41 then .accepted
+  else if byte = 0x4F then .outOfService
+  else if byte = 0x55 then .incorrectUserId
+  else if byte = 0x53 then .incorrectSequenceNumber
+  else if byte = 0x54 then .incorrectPacketType
+  else if byte = 0x4D then .incorrectMcgNumber
+  else .otherError
 
-theorem ofByte?_toByte (value : ResultCode) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : ResultCode :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : ResultCode) : ofByte value.toByte = value := by
+  cases value with
+  | accepted => decide
+  | outOfService => decide
+  | incorrectUserId => decide
+  | incorrectSequenceNumber => decide
+  | incorrectPacketType => decide
+  | incorrectMcgNumber => decide
+  | otherError => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : ResultCode) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (ResultCode × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : ResultCode) : (encode value).length = 1 :=
@@ -61,7 +77,7 @@ def decode : List UInt8 → Option (ResultCode × List UInt8)
 
 @[simp] theorem decode_encode (value : ResultCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end ResultCode
 

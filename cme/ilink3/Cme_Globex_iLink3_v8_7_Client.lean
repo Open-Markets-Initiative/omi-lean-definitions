@@ -19,12 +19,16 @@ Prices with implied decimals are proven as the integers on the wire.
 namespace Omi.CmeGlobexIlink3SbeV87Client
 
 /-- Ord Type: one byte code -/
+def OrdType.codes : List UInt8 :=
+  [0x31, 0x32, 0x33, 0x34, 0x4B]
+
 inductive OrdType where
   | marketwithProtection -- Marketwith Protection
   | limit -- Limit
   | stopwithProtection -- Stopwith Protection
   | stopLimit -- Stop Limit
   | marketWithLeftoverAsLimit -- Market With Leftover As Limit
+  | unlisted (byte : { byte : UInt8 // byte ∉ OrdType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace OrdType
@@ -35,23 +39,33 @@ def toByte : OrdType → UInt8
   | .stopwithProtection => 0x33
   | .stopLimit => 0x34
   | .marketWithLeftoverAsLimit => 0x4B
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option OrdType :=
-  if byte = 0x31 then some .marketwithProtection
-  else if byte = 0x32 then some .limit
-  else if byte = 0x33 then some .stopwithProtection
-  else if byte = 0x34 then some .stopLimit
-  else if byte = 0x4B then some .marketWithLeftoverAsLimit
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : OrdType :=
+  if byte = 0x31 then .marketwithProtection
+  else if byte = 0x32 then .limit
+  else if byte = 0x33 then .stopwithProtection
+  else if byte = 0x34 then .stopLimit
+  else .marketWithLeftoverAsLimit
 
-theorem ofByte?_toByte (value : OrdType) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : OrdType :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : OrdType) : ofByte value.toByte = value := by
+  cases value with
+  | marketwithProtection => decide
+  | limit => decide
+  | stopwithProtection => decide
+  | stopLimit => decide
+  | marketWithLeftoverAsLimit => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : OrdType) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (OrdType × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : OrdType) : (encode value).length = 1 :=
@@ -59,14 +73,18 @@ def decode : List UInt8 → Option (OrdType × List UInt8)
 
 @[simp] theorem decode_encode (value : OrdType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end OrdType
 
 /-- Execution Mode: one byte code -/
+def ExecutionMode.codes : List UInt8 :=
+  [0x41, 0x50]
+
 inductive ExecutionMode where
   | aggressive -- Aggressive
   | passive -- Passive
+  | unlisted (byte : { byte : UInt8 // byte ∉ ExecutionMode.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace ExecutionMode
@@ -74,20 +92,27 @@ namespace ExecutionMode
 def toByte : ExecutionMode → UInt8
   | .aggressive => 0x41
   | .passive => 0x50
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option ExecutionMode :=
-  if byte = 0x41 then some .aggressive
-  else if byte = 0x50 then some .passive
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : ExecutionMode :=
+  if byte = 0x41 then .aggressive
+  else .passive
 
-theorem ofByte?_toByte (value : ExecutionMode) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : ExecutionMode :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : ExecutionMode) : ofByte value.toByte = value := by
+  cases value with
+  | aggressive => decide
+  | passive => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : ExecutionMode) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (ExecutionMode × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : ExecutionMode) : (encode value).length = 1 :=
@@ -95,14 +120,18 @@ def decode : List UInt8 → Option (ExecutionMode × List UInt8)
 
 @[simp] theorem decode_encode (value : ExecutionMode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end ExecutionMode
 
 /-- List Update Action: one byte code -/
+def ListUpdateAction.codes : List UInt8 :=
+  [0x41, 0x44]
+
 inductive ListUpdateAction where
   | add -- Add
   | delete -- Delete
+  | unlisted (byte : { byte : UInt8 // byte ∉ ListUpdateAction.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace ListUpdateAction
@@ -110,20 +139,27 @@ namespace ListUpdateAction
 def toByte : ListUpdateAction → UInt8
   | .add => 0x41
   | .delete => 0x44
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option ListUpdateAction :=
-  if byte = 0x41 then some .add
-  else if byte = 0x44 then some .delete
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : ListUpdateAction :=
+  if byte = 0x41 then .add
+  else .delete
 
-theorem ofByte?_toByte (value : ListUpdateAction) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : ListUpdateAction :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : ListUpdateAction) : ofByte value.toByte = value := by
+  cases value with
+  | add => decide
+  | delete => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : ListUpdateAction) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (ListUpdateAction × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : ListUpdateAction) : (encode value).length = 1 :=
@@ -131,14 +167,18 @@ def decode : List UInt8 → Option (ListUpdateAction × List UInt8)
 
 @[simp] theorem decode_encode (value : ListUpdateAction) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end ListUpdateAction
 
 /-- Cmta Giveup Cd: one byte code -/
+def CmtaGiveupCd.codes : List UInt8 :=
+  [0x47, 0x53]
+
 inductive CmtaGiveupCd where
   | giveUp -- Give Up
   | sgXoffset -- Sg Xoffset
+  | unlisted (byte : { byte : UInt8 // byte ∉ CmtaGiveupCd.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace CmtaGiveupCd
@@ -146,20 +186,27 @@ namespace CmtaGiveupCd
 def toByte : CmtaGiveupCd → UInt8
   | .giveUp => 0x47
   | .sgXoffset => 0x53
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option CmtaGiveupCd :=
-  if byte = 0x47 then some .giveUp
-  else if byte = 0x53 then some .sgXoffset
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : CmtaGiveupCd :=
+  if byte = 0x47 then .giveUp
+  else .sgXoffset
 
-theorem ofByte?_toByte (value : CmtaGiveupCd) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : CmtaGiveupCd :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : CmtaGiveupCd) : ofByte value.toByte = value := by
+  cases value with
+  | giveUp => decide
+  | sgXoffset => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : CmtaGiveupCd) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (CmtaGiveupCd × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : CmtaGiveupCd) : (encode value).length = 1 :=
@@ -167,14 +214,18 @@ def decode : List UInt8 → Option (CmtaGiveupCd × List UInt8)
 
 @[simp] theorem decode_encode (value : CmtaGiveupCd) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end CmtaGiveupCd
 
 /-- Self Match Prevention Instruction: one byte code -/
+def SelfMatchPreventionInstruction.codes : List UInt8 :=
+  [0x4E, 0x4F]
+
 inductive SelfMatchPreventionInstruction where
   | cancelNewest -- Cancel Newest
   | cancelOldest -- Cancel Oldest
+  | unlisted (byte : { byte : UInt8 // byte ∉ SelfMatchPreventionInstruction.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace SelfMatchPreventionInstruction
@@ -182,20 +233,27 @@ namespace SelfMatchPreventionInstruction
 def toByte : SelfMatchPreventionInstruction → UInt8
   | .cancelNewest => 0x4E
   | .cancelOldest => 0x4F
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option SelfMatchPreventionInstruction :=
-  if byte = 0x4E then some .cancelNewest
-  else if byte = 0x4F then some .cancelOldest
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : SelfMatchPreventionInstruction :=
+  if byte = 0x4E then .cancelNewest
+  else .cancelOldest
 
-theorem ofByte?_toByte (value : SelfMatchPreventionInstruction) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : SelfMatchPreventionInstruction :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : SelfMatchPreventionInstruction) : ofByte value.toByte = value := by
+  cases value with
+  | cancelNewest => decide
+  | cancelOldest => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : SelfMatchPreventionInstruction) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (SelfMatchPreventionInstruction × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : SelfMatchPreventionInstruction) : (encode value).length = 1 :=
@@ -203,11 +261,14 @@ def decode : List UInt8 → Option (SelfMatchPreventionInstruction × List UInt8
 
 @[simp] theorem decode_encode (value : SelfMatchPreventionInstruction) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end SelfMatchPreventionInstruction
 
 /-- Cust Order Handling Inst: one byte code -/
+def CustOrderHandlingInst.codes : List UInt8 :=
+  [0x43, 0x44, 0x47, 0x48, 0x57, 0x59]
+
 inductive CustOrderHandlingInst where
   | fcMprovidedscreen -- Fc Mprovidedscreen
   | otherprovidedscreen -- Otherprovidedscreen
@@ -215,6 +276,7 @@ inductive CustOrderHandlingInst where
   | algoEngine -- Algo Engine
   | deskElectronic -- Desk Electronic
   | clientElectronic -- Client Electronic
+  | unlisted (byte : { byte : UInt8 // byte ∉ CustOrderHandlingInst.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace CustOrderHandlingInst
@@ -226,24 +288,35 @@ def toByte : CustOrderHandlingInst → UInt8
   | .algoEngine => 0x48
   | .deskElectronic => 0x57
   | .clientElectronic => 0x59
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option CustOrderHandlingInst :=
-  if byte = 0x43 then some .fcMprovidedscreen
-  else if byte = 0x44 then some .otherprovidedscreen
-  else if byte = 0x47 then some .fcmapIorFix
-  else if byte = 0x48 then some .algoEngine
-  else if byte = 0x57 then some .deskElectronic
-  else if byte = 0x59 then some .clientElectronic
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : CustOrderHandlingInst :=
+  if byte = 0x43 then .fcMprovidedscreen
+  else if byte = 0x44 then .otherprovidedscreen
+  else if byte = 0x47 then .fcmapIorFix
+  else if byte = 0x48 then .algoEngine
+  else if byte = 0x57 then .deskElectronic
+  else .clientElectronic
 
-theorem ofByte?_toByte (value : CustOrderHandlingInst) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : CustOrderHandlingInst :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : CustOrderHandlingInst) : ofByte value.toByte = value := by
+  cases value with
+  | fcMprovidedscreen => decide
+  | otherprovidedscreen => decide
+  | fcmapIorFix => decide
+  | algoEngine => decide
+  | deskElectronic => decide
+  | clientElectronic => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : CustOrderHandlingInst) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (CustOrderHandlingInst × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : CustOrderHandlingInst) : (encode value).length = 1 :=
@@ -251,14 +324,18 @@ def decode : List UInt8 → Option (CustOrderHandlingInst × List UInt8)
 
 @[simp] theorem decode_encode (value : CustOrderHandlingInst) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end CustOrderHandlingInst
 
 /-- Mass Action Ord Typ: one byte code -/
+def MassActionOrdTyp.codes : List UInt8 :=
+  [0x32, 0x34]
+
 inductive MassActionOrdTyp where
   | limit -- Limit
   | stopLimit -- Stop Limit
+  | unlisted (byte : { byte : UInt8 // byte ∉ MassActionOrdTyp.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace MassActionOrdTyp
@@ -266,20 +343,27 @@ namespace MassActionOrdTyp
 def toByte : MassActionOrdTyp → UInt8
   | .limit => 0x32
   | .stopLimit => 0x34
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option MassActionOrdTyp :=
-  if byte = 0x32 then some .limit
-  else if byte = 0x34 then some .stopLimit
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : MassActionOrdTyp :=
+  if byte = 0x32 then .limit
+  else .stopLimit
 
-theorem ofByte?_toByte (value : MassActionOrdTyp) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : MassActionOrdTyp :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : MassActionOrdTyp) : ofByte value.toByte = value := by
+  cases value with
+  | limit => decide
+  | stopLimit => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : MassActionOrdTyp) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (MassActionOrdTyp × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : MassActionOrdTyp) : (encode value).length = 1 :=
@@ -287,7 +371,7 @@ def decode : List UInt8 → Option (MassActionOrdTyp × List UInt8)
 
 @[simp] theorem decode_encode (value : MassActionOrdTyp) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end MassActionOrdTyp
 

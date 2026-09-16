@@ -15,6 +15,9 @@ Prices with implied decimals are proven as the integers on the wire.
 namespace Omi.CmeGlobexBrokertecustSbeV101Tcp
 
 /-- Md Entry Type: one byte code -/
+def MdEntryType.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x34, 0x35, 0x37, 0x38, 0x39, 0x45, 0x46, 0x4A]
+
 inductive MdEntryType where
   | bid -- Bid
   | offer -- Offer
@@ -27,6 +30,7 @@ inductive MdEntryType where
   | impliedBid -- Implied Bid
   | impliedOffer -- Implied Offer
   | bookReset -- Book Reset
+  | unlisted (byte : { byte : UInt8 // byte ∉ MdEntryType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace MdEntryType
@@ -43,29 +47,45 @@ def toByte : MdEntryType → UInt8
   | .impliedBid => 0x45
   | .impliedOffer => 0x46
   | .bookReset => 0x4A
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option MdEntryType :=
-  if byte = 0x30 then some .bid
-  else if byte = 0x31 then some .offer
-  else if byte = 0x32 then some .trade
-  else if byte = 0x34 then some .openPrice
-  else if byte = 0x35 then some .closePrice
-  else if byte = 0x37 then some .highTradePrice
-  else if byte = 0x38 then some .lowTradePrice
-  else if byte = 0x39 then some .vwap
-  else if byte = 0x45 then some .impliedBid
-  else if byte = 0x46 then some .impliedOffer
-  else if byte = 0x4A then some .bookReset
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : MdEntryType :=
+  if byte = 0x30 then .bid
+  else if byte = 0x31 then .offer
+  else if byte = 0x32 then .trade
+  else if byte = 0x34 then .openPrice
+  else if byte = 0x35 then .closePrice
+  else if byte = 0x37 then .highTradePrice
+  else if byte = 0x38 then .lowTradePrice
+  else if byte = 0x39 then .vwap
+  else if byte = 0x45 then .impliedBid
+  else if byte = 0x46 then .impliedOffer
+  else .bookReset
 
-theorem ofByte?_toByte (value : MdEntryType) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : MdEntryType :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : MdEntryType) : ofByte value.toByte = value := by
+  cases value with
+  | bid => decide
+  | offer => decide
+  | trade => decide
+  | openPrice => decide
+  | closePrice => decide
+  | highTradePrice => decide
+  | lowTradePrice => decide
+  | vwap => decide
+  | impliedBid => decide
+  | impliedOffer => decide
+  | bookReset => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : MdEntryType) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (MdEntryType × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : MdEntryType) : (encode value).length = 1 :=
@@ -73,7 +93,7 @@ def decode : List UInt8 → Option (MdEntryType × List UInt8)
 
 @[simp] theorem decode_encode (value : MdEntryType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end MdEntryType
 

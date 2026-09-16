@@ -21,6 +21,9 @@ Prices with implied decimals are proven as the integers on the wire.
 namespace Omi.IexIexequitiesDeepIextpV108
 
 /-- System Event: one byte code -/
+def SystemEvent.codes : List UInt8 :=
+  [0x4F, 0x53, 0x52, 0x4D, 0x45, 0x43]
+
 inductive SystemEvent where
   | startOfMessages -- Start Of Messages
   | startOfSystemHours -- Start Of System Hours
@@ -28,6 +31,7 @@ inductive SystemEvent where
   | endOfRegularMarketHours -- End Of Regular Market Hours
   | endOfSystemHours -- End Of System Hours
   | endOfMessages -- End Of Messages
+  | unlisted (byte : { byte : UInt8 // byte ∉ SystemEvent.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace SystemEvent
@@ -39,24 +43,35 @@ def toByte : SystemEvent → UInt8
   | .endOfRegularMarketHours => 0x4D
   | .endOfSystemHours => 0x45
   | .endOfMessages => 0x43
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option SystemEvent :=
-  if byte = 0x4F then some .startOfMessages
-  else if byte = 0x53 then some .startOfSystemHours
-  else if byte = 0x52 then some .startOfRegularMarketHours
-  else if byte = 0x4D then some .endOfRegularMarketHours
-  else if byte = 0x45 then some .endOfSystemHours
-  else if byte = 0x43 then some .endOfMessages
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : SystemEvent :=
+  if byte = 0x4F then .startOfMessages
+  else if byte = 0x53 then .startOfSystemHours
+  else if byte = 0x52 then .startOfRegularMarketHours
+  else if byte = 0x4D then .endOfRegularMarketHours
+  else if byte = 0x45 then .endOfSystemHours
+  else .endOfMessages
 
-theorem ofByte?_toByte (value : SystemEvent) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : SystemEvent :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : SystemEvent) : ofByte value.toByte = value := by
+  cases value with
+  | startOfMessages => decide
+  | startOfSystemHours => decide
+  | startOfRegularMarketHours => decide
+  | endOfRegularMarketHours => decide
+  | endOfSystemHours => decide
+  | endOfMessages => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : SystemEvent) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (SystemEvent × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : SystemEvent) : (encode value).length = 1 :=
@@ -64,16 +79,20 @@ def decode : List UInt8 → Option (SystemEvent × List UInt8)
 
 @[simp] theorem decode_encode (value : SystemEvent) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end SystemEvent
 
 /-- Trading Status: one byte code -/
+def TradingStatus.codes : List UInt8 :=
+  [0x48, 0x4F, 0x50, 0x54]
+
 inductive TradingStatus where
   | tradingHaltedAcrossAllUsEquityMarkets -- Trading Halted Across All Us Equity Markets
   | tradingHaltReleasedIntoAnOrderAcceptancePeriodOnIex -- Trading Halt Released Into An Order Acceptance Period On Iex
   | tradingPausedAndOrderAcceptancePeriodOnIex -- Trading Paused And Order Acceptance Period On Iex
   | tradingOnIex -- Trading On Iex
+  | unlisted (byte : { byte : UInt8 // byte ∉ TradingStatus.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace TradingStatus
@@ -83,22 +102,31 @@ def toByte : TradingStatus → UInt8
   | .tradingHaltReleasedIntoAnOrderAcceptancePeriodOnIex => 0x4F
   | .tradingPausedAndOrderAcceptancePeriodOnIex => 0x50
   | .tradingOnIex => 0x54
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option TradingStatus :=
-  if byte = 0x48 then some .tradingHaltedAcrossAllUsEquityMarkets
-  else if byte = 0x4F then some .tradingHaltReleasedIntoAnOrderAcceptancePeriodOnIex
-  else if byte = 0x50 then some .tradingPausedAndOrderAcceptancePeriodOnIex
-  else if byte = 0x54 then some .tradingOnIex
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : TradingStatus :=
+  if byte = 0x48 then .tradingHaltedAcrossAllUsEquityMarkets
+  else if byte = 0x4F then .tradingHaltReleasedIntoAnOrderAcceptancePeriodOnIex
+  else if byte = 0x50 then .tradingPausedAndOrderAcceptancePeriodOnIex
+  else .tradingOnIex
 
-theorem ofByte?_toByte (value : TradingStatus) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : TradingStatus :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : TradingStatus) : ofByte value.toByte = value := by
+  cases value with
+  | tradingHaltedAcrossAllUsEquityMarkets => decide
+  | tradingHaltReleasedIntoAnOrderAcceptancePeriodOnIex => decide
+  | tradingPausedAndOrderAcceptancePeriodOnIex => decide
+  | tradingOnIex => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : TradingStatus) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (TradingStatus × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : TradingStatus) : (encode value).length = 1 :=
@@ -106,16 +134,20 @@ def decode : List UInt8 → Option (TradingStatus × List UInt8)
 
 @[simp] theorem decode_encode (value : TradingStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end TradingStatus
 
 /-- Retail Liquidity Indicator: one byte code -/
+def RetailLiquidityIndicator.codes : List UInt8 :=
+  [0x20, 0x41, 0x42, 0x43]
+
 inductive RetailLiquidityIndicator where
   | notApplicable -- Not Applicable
   | buyInterest -- Buy Interest
   | sellInterest -- Sell Interest
   | buyAndSellInterest -- Buy And Sell Interest
+  | unlisted (byte : { byte : UInt8 // byte ∉ RetailLiquidityIndicator.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace RetailLiquidityIndicator
@@ -125,22 +157,31 @@ def toByte : RetailLiquidityIndicator → UInt8
   | .buyInterest => 0x41
   | .sellInterest => 0x42
   | .buyAndSellInterest => 0x43
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option RetailLiquidityIndicator :=
-  if byte = 0x20 then some .notApplicable
-  else if byte = 0x41 then some .buyInterest
-  else if byte = 0x42 then some .sellInterest
-  else if byte = 0x43 then some .buyAndSellInterest
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : RetailLiquidityIndicator :=
+  if byte = 0x20 then .notApplicable
+  else if byte = 0x41 then .buyInterest
+  else if byte = 0x42 then .sellInterest
+  else .buyAndSellInterest
 
-theorem ofByte?_toByte (value : RetailLiquidityIndicator) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : RetailLiquidityIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : RetailLiquidityIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | notApplicable => decide
+  | buyInterest => decide
+  | sellInterest => decide
+  | buyAndSellInterest => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : RetailLiquidityIndicator) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (RetailLiquidityIndicator × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : RetailLiquidityIndicator) : (encode value).length = 1 :=
@@ -148,14 +189,18 @@ def decode : List UInt8 → Option (RetailLiquidityIndicator × List UInt8)
 
 @[simp] theorem decode_encode (value : RetailLiquidityIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end RetailLiquidityIndicator
 
 /-- Operational Halt Status: one byte code -/
+def OperationalHaltStatus.codes : List UInt8 :=
+  [0x4F, 0x4E]
+
 inductive OperationalHaltStatus where
   | iexSpecificOperationalTradingHalt -- Iex Specific Operational Trading Halt
   | notOperationallyHaltedOnIex -- Not Operationally Halted On Iex
+  | unlisted (byte : { byte : UInt8 // byte ∉ OperationalHaltStatus.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace OperationalHaltStatus
@@ -163,20 +208,27 @@ namespace OperationalHaltStatus
 def toByte : OperationalHaltStatus → UInt8
   | .iexSpecificOperationalTradingHalt => 0x4F
   | .notOperationallyHaltedOnIex => 0x4E
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option OperationalHaltStatus :=
-  if byte = 0x4F then some .iexSpecificOperationalTradingHalt
-  else if byte = 0x4E then some .notOperationallyHaltedOnIex
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : OperationalHaltStatus :=
+  if byte = 0x4F then .iexSpecificOperationalTradingHalt
+  else .notOperationallyHaltedOnIex
 
-theorem ofByte?_toByte (value : OperationalHaltStatus) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : OperationalHaltStatus :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : OperationalHaltStatus) : ofByte value.toByte = value := by
+  cases value with
+  | iexSpecificOperationalTradingHalt => decide
+  | notOperationallyHaltedOnIex => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : OperationalHaltStatus) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (OperationalHaltStatus × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : OperationalHaltStatus) : (encode value).length = 1 :=
@@ -184,17 +236,21 @@ def decode : List UInt8 → Option (OperationalHaltStatus × List UInt8)
 
 @[simp] theorem decode_encode (value : OperationalHaltStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end OperationalHaltStatus
 
 /-- Detail: one byte code -/
+def Detail.codes : List UInt8 :=
+  [0x20, 0x41, 0x43, 0x44, 0x4E]
+
 inductive Detail where
   | noPriceTestInPlace -- No Price Test In Place
   | shortSalePriceTestRestrictionInEffectDueToAnIntradayPriceDropInTheSecurity -- Short Sale Price Test Restriction In Effect Due To An Intraday Price Drop In The Security
   | shortSalePriceTestRestrictionRemainsInEffectFromPriorDay -- Short Sale Price Test Restriction Remains In Effect From Prior Day
   | shortSalePriceTestRestrictionDeactivated -- Short Sale Price Test Restriction Deactivated
   | notAvailable -- Not Available
+  | unlisted (byte : { byte : UInt8 // byte ∉ Detail.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace Detail
@@ -205,23 +261,33 @@ def toByte : Detail → UInt8
   | .shortSalePriceTestRestrictionRemainsInEffectFromPriorDay => 0x43
   | .shortSalePriceTestRestrictionDeactivated => 0x44
   | .notAvailable => 0x4E
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option Detail :=
-  if byte = 0x20 then some .noPriceTestInPlace
-  else if byte = 0x41 then some .shortSalePriceTestRestrictionInEffectDueToAnIntradayPriceDropInTheSecurity
-  else if byte = 0x43 then some .shortSalePriceTestRestrictionRemainsInEffectFromPriorDay
-  else if byte = 0x44 then some .shortSalePriceTestRestrictionDeactivated
-  else if byte = 0x4E then some .notAvailable
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : Detail :=
+  if byte = 0x20 then .noPriceTestInPlace
+  else if byte = 0x41 then .shortSalePriceTestRestrictionInEffectDueToAnIntradayPriceDropInTheSecurity
+  else if byte = 0x43 then .shortSalePriceTestRestrictionRemainsInEffectFromPriorDay
+  else if byte = 0x44 then .shortSalePriceTestRestrictionDeactivated
+  else .notAvailable
 
-theorem ofByte?_toByte (value : Detail) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : Detail :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : Detail) : ofByte value.toByte = value := by
+  cases value with
+  | noPriceTestInPlace => decide
+  | shortSalePriceTestRestrictionInEffectDueToAnIntradayPriceDropInTheSecurity => decide
+  | shortSalePriceTestRestrictionRemainsInEffectFromPriorDay => decide
+  | shortSalePriceTestRestrictionDeactivated => decide
+  | notAvailable => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : Detail) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (Detail × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : Detail) : (encode value).length = 1 :=
@@ -229,14 +295,18 @@ def decode : List UInt8 → Option (Detail × List UInt8)
 
 @[simp] theorem decode_encode (value : Detail) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end Detail
 
 /-- Security Event: one byte code -/
+def SecurityEvent.codes : List UInt8 :=
+  [0x4F, 0x43]
+
 inductive SecurityEvent where
   | openingProcessComplete -- Opening Process Complete
   | closingProcessComplete -- Closing Process Complete
+  | unlisted (byte : { byte : UInt8 // byte ∉ SecurityEvent.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace SecurityEvent
@@ -244,20 +314,27 @@ namespace SecurityEvent
 def toByte : SecurityEvent → UInt8
   | .openingProcessComplete => 0x4F
   | .closingProcessComplete => 0x43
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option SecurityEvent :=
-  if byte = 0x4F then some .openingProcessComplete
-  else if byte = 0x43 then some .closingProcessComplete
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : SecurityEvent :=
+  if byte = 0x4F then .openingProcessComplete
+  else .closingProcessComplete
 
-theorem ofByte?_toByte (value : SecurityEvent) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : SecurityEvent :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : SecurityEvent) : ofByte value.toByte = value := by
+  cases value with
+  | openingProcessComplete => decide
+  | closingProcessComplete => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : SecurityEvent) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (SecurityEvent × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : SecurityEvent) : (encode value).length = 1 :=
@@ -265,14 +342,18 @@ def decode : List UInt8 → Option (SecurityEvent × List UInt8)
 
 @[simp] theorem decode_encode (value : SecurityEvent) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end SecurityEvent
 
 /-- Price Type: one byte code -/
+def PriceType.codes : List UInt8 :=
+  [0x51, 0x4D]
+
 inductive PriceType where
   | iexOfficialOpeningPrice -- Iex Official Opening Price
   | iexOfficialClosingPrice -- Iex Official Closing Price
+  | unlisted (byte : { byte : UInt8 // byte ∉ PriceType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace PriceType
@@ -280,20 +361,27 @@ namespace PriceType
 def toByte : PriceType → UInt8
   | .iexOfficialOpeningPrice => 0x51
   | .iexOfficialClosingPrice => 0x4D
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option PriceType :=
-  if byte = 0x51 then some .iexOfficialOpeningPrice
-  else if byte = 0x4D then some .iexOfficialClosingPrice
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : PriceType :=
+  if byte = 0x51 then .iexOfficialOpeningPrice
+  else .iexOfficialClosingPrice
 
-theorem ofByte?_toByte (value : PriceType) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : PriceType :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : PriceType) : ofByte value.toByte = value := by
+  cases value with
+  | iexOfficialOpeningPrice => decide
+  | iexOfficialClosingPrice => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : PriceType) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (PriceType × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : PriceType) : (encode value).length = 1 :=
@@ -301,17 +389,21 @@ def decode : List UInt8 → Option (PriceType × List UInt8)
 
 @[simp] theorem decode_encode (value : PriceType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end PriceType
 
 /-- Auction Type: one byte code -/
+def AuctionType.codes : List UInt8 :=
+  [0x4F, 0x43, 0x49, 0x48, 0x56]
+
 inductive AuctionType where
   | openingAuction -- Opening Auction
   | closingAuction -- Closing Auction
   | ipoAuction -- Ipo Auction
   | haltAuction -- Halt Auction
   | volatilityAuction -- Volatility Auction
+  | unlisted (byte : { byte : UInt8 // byte ∉ AuctionType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace AuctionType
@@ -322,23 +414,33 @@ def toByte : AuctionType → UInt8
   | .ipoAuction => 0x49
   | .haltAuction => 0x48
   | .volatilityAuction => 0x56
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option AuctionType :=
-  if byte = 0x4F then some .openingAuction
-  else if byte = 0x43 then some .closingAuction
-  else if byte = 0x49 then some .ipoAuction
-  else if byte = 0x48 then some .haltAuction
-  else if byte = 0x56 then some .volatilityAuction
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : AuctionType :=
+  if byte = 0x4F then .openingAuction
+  else if byte = 0x43 then .closingAuction
+  else if byte = 0x49 then .ipoAuction
+  else if byte = 0x48 then .haltAuction
+  else .volatilityAuction
 
-theorem ofByte?_toByte (value : AuctionType) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : AuctionType :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : AuctionType) : ofByte value.toByte = value := by
+  cases value with
+  | openingAuction => decide
+  | closingAuction => decide
+  | ipoAuction => decide
+  | haltAuction => decide
+  | volatilityAuction => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : AuctionType) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (AuctionType × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : AuctionType) : (encode value).length = 1 :=
@@ -346,15 +448,19 @@ def decode : List UInt8 → Option (AuctionType × List UInt8)
 
 @[simp] theorem decode_encode (value : AuctionType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end AuctionType
 
 /-- Imbalance Side: one byte code -/
+def ImbalanceSide.codes : List UInt8 :=
+  [0x42, 0x53, 0x4E]
+
 inductive ImbalanceSide where
   | buy -- Buy
   | sell -- Sell
   | none_ -- None
+  | unlisted (byte : { byte : UInt8 // byte ∉ ImbalanceSide.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace ImbalanceSide
@@ -363,21 +469,29 @@ def toByte : ImbalanceSide → UInt8
   | .buy => 0x42
   | .sell => 0x53
   | .none_ => 0x4E
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option ImbalanceSide :=
-  if byte = 0x42 then some .buy
-  else if byte = 0x53 then some .sell
-  else if byte = 0x4E then some .none_
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : ImbalanceSide :=
+  if byte = 0x42 then .buy
+  else if byte = 0x53 then .sell
+  else .none_
 
-theorem ofByte?_toByte (value : ImbalanceSide) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : ImbalanceSide :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : ImbalanceSide) : ofByte value.toByte = value := by
+  cases value with
+  | buy => decide
+  | sell => decide
+  | none_ => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : ImbalanceSide) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (ImbalanceSide × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : ImbalanceSide) : (encode value).length = 1 :=
@@ -385,7 +499,7 @@ def decode : List UInt8 → Option (ImbalanceSide × List UInt8)
 
 @[simp] theorem decode_encode (value : ImbalanceSide) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end ImbalanceSide
 

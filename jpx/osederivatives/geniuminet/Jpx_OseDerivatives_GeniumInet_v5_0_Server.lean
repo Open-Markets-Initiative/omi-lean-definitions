@@ -17,9 +17,13 @@ Prices with implied decimals are proven as the integers on the wire.
 namespace Omi.JpxOsederivativesGeniuminetOuchV50Server
 
 /-- Side: one byte code -/
+def Side.codes : List UInt8 :=
+  [0x42, 0x53]
+
 inductive Side where
   | buy -- Buy
   | sell -- Sell
+  | unlisted (byte : { byte : UInt8 // byte ∉ Side.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
 namespace Side
@@ -27,20 +31,27 @@ namespace Side
 def toByte : Side → UInt8
   | .buy => 0x42
   | .sell => 0x53
+  | .unlisted byte => byte.val
 
-def ofByte? (byte : UInt8) : Option Side :=
-  if byte = 0x42 then some .buy
-  else if byte = 0x53 then some .sell
-  else none
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : Side :=
+  if byte = 0x42 then .buy
+  else .sell
 
-theorem ofByte?_toByte (value : Side) : ofByte? value.toByte = some value := by
-  cases value <;> decide
+def ofByte (byte : UInt8) : Side :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : Side) : ofByte value.toByte = value := by
+  cases value with
+  | buy => decide
+  | sell => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : Side) : List UInt8 :=
   [value.toByte]
 
 def decode : List UInt8 → Option (Side × List UInt8)
-  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
 @[simp] theorem encode_length (value : Side) : (encode value).length = 1 :=
@@ -48,7 +59,7 @@ def decode : List UInt8 → Option (Side × List UInt8)
 
 @[simp] theorem decode_encode (value : Side) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte?_toByte]
+  simp [decode, encode, ofByte_toByte]
 
 end Side
 

@@ -1,4 +1,4 @@
-name = "omi-lean-protocols"
+name = "omi-lean-definitions"
 version = "1.0.0"
 defaultTargets = ["Omi"]
 

@@ -1,6 +1,6 @@
-# Omi Lean Protocols
+# Omi Lean Definitions
 
-Omi [Lean](https://lean-lang.org/ "The Lean theorem prover and programming language") protocols describe common binary exchange protocols as Lean 4 definitions that carry their own proofs: for every message, decoding what was encoded gives the message back and the encoding is exactly as wide as the specification says; the dispatch on the message type selects the message that was written; and where the model states a length prefix or a message count, the framing decodes back as well.
+Omi [Lean](https://lean-lang.org/ "The Lean theorem prover and programming language") definitions describe common binary exchange protocols as Lean 4 modules that carry their own proofs.
 
 
 [![Lean](https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/About/Images/Lean.png)](https://lean-lang.org/)
@@ -26,15 +26,15 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 ## Testing
 
-[![Build](https://github.com/Open-Markets-Initiative/omi-lean-protocols/actions/workflows/build.yml/badge.svg)](https://github.com/Open-Markets-Initiative/omi-lean-protocols/actions/workflows/build.yml)
+[![Build](https://github.com/Open-Markets-Initiative/omi-lean-definitions/actions/workflows/build.yml/badge.svg)](https://github.com/Open-Markets-Initiative/omi-lean-definitions/actions/workflows/build.yml)
 
 The build checks every proof. The tests under `tests/` decode captured packets from [omi-data-packets](https://github.com/Open-Markets-Initiative/omi-data-packets "Omi Data Packets") and require each to be consumed exactly; each is a theorem decided at build time, so a failing test fails the build.
 
-Please report any parsing errors as an [issue](https://github.com/Open-Markets-Initiative/omi-lean-protocols/issues "Omi Lean Issues").  Include a small note on the protocol and version, and a minimal capture demonstrating the problem. Also consider including a link or pdf specification documenting the correct behavior.
+Please report any parsing errors as an [issue](https://github.com/Open-Markets-Initiative/omi-lean-definitions/issues "Omi Lean Issues").  Include a small note on the protocol and version, and a minimal capture demonstrating the problem. Also consider including a link or pdf specification documenting the correct behavior.
 
 ## Open Markets Initiative
 
-The Open Markets Initiative (Omi) is a group of technologists dedicated to enhancing the stability of electronic financial markets using modern development methods.
+[![Omi](https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/About/Images/Logo.png)](https://github.com/Open-Markets-Initiative/Directory)  The Open Markets Initiative (Omi) is a group of technologists dedicated to enhancing the stability of electronic financial markets using modern development methods.
 
 Other generated code can be found at [Omi Projects](https://github.com/Open-Markets-Initiative/Directory/tree/main/Projects "Open Markets Initiative Projects"); for Omi rules and regulations, see [Omi Directory](https://github.com/Open-Markets-Initiative/Directory "Open Markets Initiative Directory").
 ## Organizations
@@ -82,13 +82,13 @@ Enjoy.
 [Nasdaq.NtxEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxEquities/TotalView.md "TX TotalView Itch"
 [Nasdaq.PsxEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PsxEquities/TotalView.md "TotalView Itch"
 
-[Iex.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-protocols/tree/main/iex "Investors Exchange"
-[Nasdaq.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-protocols/tree/main/nasdaq "National Association of Securities Dealers Automated Quotations (Nasdaq)"
+[Iex.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/iex "Investors Exchange"
+[Nasdaq.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq "National Association of Securities Dealers Automated Quotations (Nasdaq)"
 
-[IexEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-protocols/tree/main/iex "IEX Equities"
-[NsmEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-protocols/tree/main/nasdaq/nsmequities "Nasdaq Stock Market"
-[NtxEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-protocols/tree/main/nasdaq/ntxequities "Nasdaq Texas"
-[PsxEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-protocols/tree/main/nasdaq/psxequities "Nasdaq PSX"
+[IexEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/iex "IEX Equities"
+[NsmEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/nsmequities "Nasdaq Stock Market"
+[NtxEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/ntxequities "Nasdaq Texas"
+[PsxEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/psxequities "Nasdaq PSX"
 
 [Kaitai.Definitions.Repository]: https://github.com/Open-Markets-Initiative/omi-kaitai-struct-definitions "Omi Kaitai Struct Definitions"
 [Dfdl.Definitions.Repository]: https://github.com/Open-Markets-Initiative/omi-dfdl-definitions "Omi DFDL Definitions"

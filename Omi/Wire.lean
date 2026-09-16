@@ -164,8 +164,41 @@ theorem encodeMany_length_ge (encode : α → List UInt8) (nonempty : ∀ item, 
     have := nonempty first
     omega
 
-/-- A list whose length fits an `n` byte count, so a count written from it needs no side condition -/
-def Bounded (n : Nat) (α : Type) := { items : List α // items.length < 256 ^ n }
+/-- The length of a list of items each at most `most` bytes -/
+theorem encodeMany_length_le (encode : α → List UInt8) (most : Nat)
+    (bounded : ∀ item, (encode item).length ≤ most) (items : List α) :
+    (encodeMany encode items).length ≤ most * items.length := by
+  induction items with
+  | nil => simp [encodeMany]
+  | cons first others ih =>
+    simp only [encodeMany, List.flatMap_cons, List.length_append, List.length_cons]
+    simp only [encodeMany] at ih
+    have := bounded first
+    rw [Nat.mul_add, Nat.mul_one]
+    omega
+
+/-- One byte of variable length data: the item of a list sized by a length field -/
+def Byte.encode (byte : UInt8) : List UInt8 :=
+  [byte]
+
+def Byte.decode : List UInt8 → Option (UInt8 × List UInt8)
+  | byte :: rest => some (byte, rest)
+  | [] => none
+
+@[simp] theorem Byte.encode_length (byte : UInt8) : (Byte.encode byte).length = 1 :=
+  rfl
+
+theorem Byte.encode_length_pos (byte : UInt8) : (Byte.encode byte).length > 0 := by
+  rw [Byte.encode_length]
+  decide
+
+@[simp] theorem Byte.decode_encode (byte : UInt8) (rest : List UInt8) :
+    Byte.decode (Byte.encode byte ++ rest) = some (byte, rest) :=
+  rfl
+
+/-- A list whose length fits an `n` byte count, so a count written from it needs no side condition.
+    Reducible, so a proof may see through it to the list and its bound -/
+abbrev Bounded (n : Nat) (α : Type) := { items : List α // items.length < 256 ^ n }
 
 instance [DecidableEq α] : DecidableEq (Bounded n α) :=
   inferInstanceAs (DecidableEq { items : List α // items.length < 256 ^ n })
@@ -180,6 +213,24 @@ theorem Bounded.length_lt (bounded : Bounded n α) : bounded.val.length < 256 ^ 
 @[simp] theorem Bounded.mk_val (bounded : Bounded n α) (fits : bounded.val.length < 256 ^ n) :
     (⟨bounded.val, fits⟩ : Bounded n α) = bounded :=
   rfl
+
+/-- Bytes to the end of a frame, at most `most` of them, so the frame's length prefix always fits -/
+abbrev Capped (most : Nat) := { bytes : List UInt8 // bytes.length ≤ most }
+
+theorem Capped.length_le (capped : Capped most) : capped.val.length ≤ most :=
+  capped.property
+
+/-- A count written from a bounded list reads that list back: the count fits its bytes, so the
+    decoder reads exactly as many items as were written -/
+theorem decodeMany_bounded (n : Nat) (encode : α → List UInt8) (decode : List UInt8 → Option (α × List UInt8))
+    (roundtrip : ∀ item rest, decode (encode item ++ rest) = some (item, rest))
+    (items : Bounded n α) (rest : List UInt8) :
+    decodeMany decode (BitVec.ofNat (8 * n) items.val.length).toNat (encodeMany encode items.val ++ rest)
+      = some (items.val, rest) := by
+  have fits : items.val.length < 2 ^ (8 * n) := by
+    rw [Nat.pow_mul]
+    exact items.length_lt
+  rw [BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits, decodeMany_encodeMany encode decode roundtrip]
 
 /-- Items decoded until the bytes run out, each decoder call handed at most `fuel` more turns -/
 def decodeAll (item : List UInt8 → Option (α × List UInt8)) : Nat → List UInt8 → Option (List α)
@@ -286,5 +337,50 @@ theorem decodeFramedLE_encodeFramedLE (n offset : Nat) (encode : α → List UIn
 theorem encodeFramedLE_length (n offset : Nat) (encode : α → List UInt8) (item : α) :
     (encodeFramedLE n offset encode item).length = n + (encode item).length := by
   simp [encodeFramedLE]
+
+/-- Read the prefix, take the bytes it counts, and decode them as a body that runs to their end -/
+def decodeFramedAll (n offset : Nat) (decode : List UInt8 → Option α) (bytes : List UInt8) :
+    Option (α × List UInt8) := do
+  let (length, bytes) ← decodeUInt n bytes
+  let (body, rest) ← take? (length.toNat - offset) bytes
+  let item ← decode body
+  pure (item, rest)
+
+theorem decodeFramedAll_encodeFramed (n offset : Nat) (encode : α → List UInt8)
+    (decode : List UInt8 → Option α)
+    (whole : ∀ item, decode (encode item) = some item)
+    (fits : ∀ item, (encode item).length + offset < 256 ^ n)
+    (item : α) (rest : List UInt8) :
+    decodeFramedAll n offset decode (encodeFramed n offset encode item ++ rest) = some (item, rest) := by
+  have bound : (encode item).length + offset < 2 ^ (8 * n) := by
+    rw [Nat.pow_mul]
+    exact fits item
+  unfold decodeFramedAll encodeFramed
+  rw [List.append_assoc, decodeUInt_encodeUInt]
+  simp only [Bind.bind, Option.bind_some, BitVec.toNat_ofNat]
+  rw [Nat.mod_eq_of_lt bound, Nat.add_sub_cancel, take?_append rfl]
+  simp [whole]
+
+def decodeFramedAllLE (n offset : Nat) (decode : List UInt8 → Option α) (bytes : List UInt8) :
+    Option (α × List UInt8) := do
+  let (length, bytes) ← decodeUIntLE n bytes
+  let (body, rest) ← take? (length.toNat - offset) bytes
+  let item ← decode body
+  pure (item, rest)
+
+theorem decodeFramedAllLE_encodeFramedLE (n offset : Nat) (encode : α → List UInt8)
+    (decode : List UInt8 → Option α)
+    (whole : ∀ item, decode (encode item) = some item)
+    (fits : ∀ item, (encode item).length + offset < 256 ^ n)
+    (item : α) (rest : List UInt8) :
+    decodeFramedAllLE n offset decode (encodeFramedLE n offset encode item ++ rest) = some (item, rest) := by
+  have bound : (encode item).length + offset < 2 ^ (8 * n) := by
+    rw [Nat.pow_mul]
+    exact fits item
+  unfold decodeFramedAllLE encodeFramedLE
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE]
+  simp only [Bind.bind, Option.bind_some, BitVec.toNat_ofNat]
+  rw [Nat.mod_eq_of_lt bound, Nat.add_sub_cancel, take?_append rfl]
+  simp [whole]
 
 end Omi

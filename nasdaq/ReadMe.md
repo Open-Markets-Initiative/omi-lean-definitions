@@ -1,0 +1,61 @@
+[![Nasdaq](https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Images/Logo.png)](https://www.nasdaq.com)
+
+
+## National Association of Securities Dealers Automated Quotations (Nasdaq)
+
+| Division | [Protocol][Omi.Nasdaq.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Date | Size | [Status][Omi.Glossary.Status] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Nasdaq.Specifications] |
+| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| [NsmEquities][NsmEquities.Exchange] | [TotalView][Nasdaq.NsmEquities.TotalView] | [Itch][Omi.Encoding.Itch] | [5.0.2023][Nasdaq.NsmEquities.TotalView.Itch.v5.0.2023.Definition] | 4/28/2023 | 2916 | [Active][Omi.Glossary.Status.Active] | [Verified][Omi.Glossary.Testing.Verified] | [url][Nasdaq.NsmEquities.TotalView.Itch.v5.0.2023.Url] - [pdf][Nasdaq.NsmEquities.TotalView.Itch.v5.0.2023.Pdf] |
+| [NsmEquities][NsmEquities.Exchange] | [TotalView][Nasdaq.NsmEquities.TotalView] | [Itch][Omi.Encoding.Itch] | [5.0.2017][Nasdaq.NsmEquities.TotalView.Itch.v5.0.2017.Definition] | 9/12/2017 | 2645 | [Deprecated][Omi.Glossary.Status.Deprecated] | [Verified][Omi.Glossary.Testing.Verified] | [url][Nasdaq.NsmEquities.TotalView.Itch.v5.0.2017.Url] - [pdf][Nasdaq.NsmEquities.TotalView.Itch.v5.0.2017.Pdf] |
+| [NtxEquities][NtxEquities.Exchange] | [TotalView][Nasdaq.NtxEquities.TotalView] | [Itch][Omi.Encoding.Itch] | [5.0][Nasdaq.NtxEquities.TotalView.Itch.v5.0.Definition] | 2/13/2026 | 2682 | [Active][Omi.Glossary.Status.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Nasdaq.NtxEquities.TotalView.Itch.v5.0.Url] - [pdf][Nasdaq.NtxEquities.TotalView.Itch.v5.0.Pdf] |
+| [PsxEquities][PsxEquities.Exchange] | [TotalView][Nasdaq.PsxEquities.TotalView] | [Itch][Omi.Encoding.Itch] | [5.0.2018][Nasdaq.PsxEquities.TotalView.Itch.v5.0.2018.Definition] | 5/3/2018 | 2501 | [Active][Omi.Glossary.Status.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Nasdaq.PsxEquities.TotalView.Itch.v5.0.2018.Url] - [pdf][Nasdaq.PsxEquities.TotalView.Itch.v5.0.2018.Pdf] |
+| [PsxEquities][PsxEquities.Exchange] | [TotalView][Nasdaq.PsxEquities.TotalView] | [Itch][Omi.Encoding.Itch] | [5.0][Nasdaq.PsxEquities.TotalView.Itch.v5.0.Definition] | 2/13/2026 | 2504 | [Deprecated][Omi.Glossary.Status.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Nasdaq.PsxEquities.TotalView.Itch.v5.0.Url] - [pdf][Nasdaq.PsxEquities.TotalView.Itch.v5.0.Pdf] |
+
+
+Nasdaq: [website](https://www.nasdaq.com "Go to National Association of Securities Dealers Automated Quotations (Nasdaq)")
+
+
+## Open Markets Initiative
+
+[![Omi](https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/About/Images/Logo.png)](https://github.com/Open-Markets-Initiative/Directory)  The Open Markets Initiative (Omi) is a group of technologists dedicated to enhancing the stability of electronic financial markets using modern development methods.
+
+Other generated code can be found at [Omi Projects](https://github.com/Open-Markets-Initiative/Directory/tree/main/Projects "Open Markets Initiative Projects"); for Omi rules and regulations, see [Omi Directory](https://github.com/Open-Markets-Initiative/Directory "Open Markets Initiative Directory").
+
+[Omi.Glossary.Status]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Status.md "Protocol Deployment Status"
+[Omi.Glossary.Status.Active]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Status.md "Deployment Status: Protocol is in active production"
+[Omi.Glossary.Status.Deprecated]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Status.md "Deployment Status: Protocol is no longer in active use"
+[Omi.Glossary.Status.Pending]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Status.md "Deployment Status: Protocol is not yet deployed to an active production environment"
+[Omi.Glossary.Status.Unknown]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Status.md "Deployment Status: Protocol deployment status is unknown"
+[Omi.Glossary.Status.Header]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Status.md "Deployment Status: Header only protocol provided for debugging"
+[Omi.Glossary.Testing]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Protocol Testing Status"
+[Omi.Glossary.Testing.Verified]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has been tested on live data"
+[Omi.Glossary.Testing.Incomplete]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has been tested on live data but contains known issues"
+[Omi.Glossary.Testing.Beta]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has not been tested and structure is speculative"
+[Omi.Glossary.Testing.Untested]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has not been tested on live data"
+[Omi.Glossary.Testing.Unavailable]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol does not state a testing status"
+[Omi.Encoding.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Protocols/ReadMe.md "Encoding Directory"
+[Omi.Nasdaq.Protocol.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Nasdaq/Protocols "Nasdaq Protocol Directory"
+[Omi.Nasdaq.Specifications]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Nasdaq/Specifications "Nasdaq Specifications Directory"
+[Omi.Encoding.Itch]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Itch.md "Itch Encoding"
+[NsmEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Nasdaq/Protocols/NsmEquities "Nasdaq NsmEquities"
+[NtxEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Nasdaq/Protocols/NtxEquities "Nasdaq NtxEquities"
+[PsxEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Nasdaq/Protocols/PsxEquities "Nasdaq PsxEquities"
+[Nasdaq.NsmEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NsmEquities/TotalView.md "TotalView Itch"
+[Nasdaq.NtxEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxEquities/TotalView.md "TX TotalView Itch"
+[Nasdaq.PsxEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PsxEquities/TotalView.md "TotalView Itch"
+
+[Nasdaq.NsmEquities.TotalView.Itch.v5.0.2017.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/nasdaq/nsmequities/totalview/NsmEquities_TotalView_v5_0_2017.lean "Nasdaq NsmEquities TotalView Itch v5.0.2017 Lean Definition"
+[Nasdaq.NsmEquities.TotalView.Itch.v5.0.2017.Url]: http://www.nasdaqtrader.com/Trader.aspx?id=dpspecs "National Association of Securities Dealers Automated Quotations (Nasdaq) 5.0.2017 Url"
+[Nasdaq.NsmEquities.TotalView.Itch.v5.0.2017.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Specifications/NsmEquities/Nasdaq.NsmEquities.TotalView.Itch.v5.0.2017.pdf "National Association of Securities Dealers Automated Quotations (Nasdaq) 5.0.2017 Pdf"
+[Nasdaq.NsmEquities.TotalView.Itch.v5.0.2023.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/nasdaq/nsmequities/totalview/NsmEquities_TotalView_v5_0_2023.lean "Nasdaq NsmEquities TotalView Itch v5.0.2023 Lean Definition"
+[Nasdaq.NsmEquities.TotalView.Itch.v5.0.2023.Url]: http://www.nasdaqtrader.com/Trader.aspx?id=dpspecs "National Association of Securities Dealers Automated Quotations (Nasdaq) 5.0.2023 Url"
+[Nasdaq.NsmEquities.TotalView.Itch.v5.0.2023.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Specifications/NsmEquities/TotalView/Nasdaq%20TotalView%20ITCH%20(5.0%20-%202023).pdf "National Association of Securities Dealers Automated Quotations (Nasdaq) 5.0.2023 Pdf"
+[Nasdaq.NtxEquities.TotalView.Itch.v5.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/nasdaq/ntxequities/totalview/NtxEquities_TotalView_v5_0.lean "Nasdaq NtxEquities TotalView Itch v5.0 Lean Definition"
+[Nasdaq.NtxEquities.TotalView.Itch.v5.0.Url]: http://www.nasdaqtrader.com/Trader.aspx?id=dpspecs "National Association of Securities Dealers Automated Quotations (Nasdaq) 5.0 Url"
+[Nasdaq.NtxEquities.TotalView.Itch.v5.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Specifications/NtxEquities/Nasdaq.NtxEquities.TotalView.Itch.v5.0.20260213.pdf "National Association of Securities Dealers Automated Quotations (Nasdaq) 5.0 Pdf"
+[Nasdaq.PsxEquities.TotalView.Itch.v5.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/nasdaq/psxequities/totalview/PsxEquities_TotalView_v5_0.lean "Nasdaq PsxEquities TotalView Itch v5.0 Lean Definition"
+[Nasdaq.PsxEquities.TotalView.Itch.v5.0.Url]: http://www.nasdaqtrader.com/content/technicalsupport/specifications/dataproducts/PSXTVITCHSpecification.pdf "National Association of Securities Dealers Automated Quotations (Nasdaq) 5.0 Url"
+[Nasdaq.PsxEquities.TotalView.Itch.v5.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Specifications/PsxEquities/Nasdaq.PsxEquities.TotalView.Itch.v5.0.20260213.pdf "National Association of Securities Dealers Automated Quotations (Nasdaq) 5.0 Pdf"
+[Nasdaq.PsxEquities.TotalView.Itch.v5.0.2018.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/nasdaq/psxequities/totalview/PsxEquities_TotalView_v5_0_2018.lean "Nasdaq PsxEquities TotalView Itch v5.0.2018 Lean Definition"
+[Nasdaq.PsxEquities.TotalView.Itch.v5.0.2018.Url]: http://www.nasdaqtrader.com/content/technicalsupport/specifications/dataproducts/PSXTVITCHSpecification.pdf "National Association of Securities Dealers Automated Quotations (Nasdaq) 5.0.2018 Url"
+[Nasdaq.PsxEquities.TotalView.Itch.v5.0.2018.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Specifications/PsxEquities/Nasdaq.PsxEquities.TotalView.Itch.v5.0.2018.pdf "National Association of Securities Dealers Automated Quotations (Nasdaq) 5.0.2018 Pdf"

@@ -769,7 +769,7 @@ theorem encode_length_pos (message : QuoteUpdateMessage) : (encode message).leng
 
 end QuoteUpdateMessage
 
-/-- Trade Report Message: 37 bytes -/
+/-- Trade Report Message: 41 bytes -/
 structure TradeReportMessage where
   saleConditionFlags : BitVec 8
   timestamp : BitVec 64
@@ -777,6 +777,7 @@ structure TradeReportMessage where
   size : BitVec 32
   price : BitVec 64
   tradeId : BitVec 64
+  reserved4 : BitVec 32
   deriving DecidableEq, Repr
 
 namespace TradeReportMessage
@@ -788,6 +789,7 @@ def encode (message : TradeReportMessage) : List UInt8 :=
     ++ encodeUIntLE 4 message.size
     ++ encodeUIntLE 8 message.price
     ++ encodeUIntLE 8 message.tradeId
+    ++ encodeUIntLE 4 message.reserved4
 
 def decode (bytes : List UInt8) : Option (TradeReportMessage × List UInt8) := do
   let (saleConditionFlags, bytes) ← decodeUIntLE 1 bytes
@@ -796,9 +798,10 @@ def decode (bytes : List UInt8) : Option (TradeReportMessage × List UInt8) := d
   let (size, bytes) ← decodeUIntLE 4 bytes
   let (price, bytes) ← decodeUIntLE 8 bytes
   let (tradeId, bytes) ← decodeUIntLE 8 bytes
-  pure ({ saleConditionFlags, timestamp, symbol, size, price, tradeId }, bytes)
+  let (reserved4, bytes) ← decodeUIntLE 4 bytes
+  pure ({ saleConditionFlags, timestamp, symbol, size, price, tradeId, reserved4 }, bytes)
 
-@[simp] theorem encode_length (message : TradeReportMessage) : (encode message).length = 37 := by
+@[simp] theorem encode_length (message : TradeReportMessage) : (encode message).length = 41 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, Alpha.encode_length]
 
@@ -815,6 +818,8 @@ theorem encode_length_pos (message : TradeReportMessage) : (encode message).leng
   rw [decodeUIntLE_encodeUIntLE]
   simp only [Option.bind_some]
   rw [Alpha.decode_encode]
+  simp only [Option.bind_some]
+  rw [decodeUIntLE_encodeUIntLE]
   simp only [Option.bind_some]
   rw [decodeUIntLE_encodeUIntLE]
   simp only [Option.bind_some]
@@ -871,7 +876,7 @@ theorem encode_length_pos (message : OfficialPriceMessage) : (encode message).le
 
 end OfficialPriceMessage
 
-/-- Trade Break Message: 37 bytes -/
+/-- Trade Break Message: 41 bytes -/
 structure TradeBreakMessage where
   saleConditionFlags : BitVec 8
   timestamp : BitVec 64
@@ -879,6 +884,7 @@ structure TradeBreakMessage where
   size : BitVec 32
   price : BitVec 64
   tradeId : BitVec 64
+  reserved4 : BitVec 32
   deriving DecidableEq, Repr
 
 namespace TradeBreakMessage
@@ -890,6 +896,7 @@ def encode (message : TradeBreakMessage) : List UInt8 :=
     ++ encodeUIntLE 4 message.size
     ++ encodeUIntLE 8 message.price
     ++ encodeUIntLE 8 message.tradeId
+    ++ encodeUIntLE 4 message.reserved4
 
 def decode (bytes : List UInt8) : Option (TradeBreakMessage × List UInt8) := do
   let (saleConditionFlags, bytes) ← decodeUIntLE 1 bytes
@@ -898,9 +905,10 @@ def decode (bytes : List UInt8) : Option (TradeBreakMessage × List UInt8) := do
   let (size, bytes) ← decodeUIntLE 4 bytes
   let (price, bytes) ← decodeUIntLE 8 bytes
   let (tradeId, bytes) ← decodeUIntLE 8 bytes
-  pure ({ saleConditionFlags, timestamp, symbol, size, price, tradeId }, bytes)
+  let (reserved4, bytes) ← decodeUIntLE 4 bytes
+  pure ({ saleConditionFlags, timestamp, symbol, size, price, tradeId, reserved4 }, bytes)
 
-@[simp] theorem encode_length (message : TradeBreakMessage) : (encode message).length = 37 := by
+@[simp] theorem encode_length (message : TradeBreakMessage) : (encode message).length = 41 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, Alpha.encode_length]
 
@@ -917,6 +925,8 @@ theorem encode_length_pos (message : TradeBreakMessage) : (encode message).lengt
   rw [decodeUIntLE_encodeUIntLE]
   simp only [Option.bind_some]
   rw [Alpha.decode_encode]
+  simp only [Option.bind_some]
+  rw [decodeUIntLE_encodeUIntLE]
   simp only [Option.bind_some]
   rw [decodeUIntLE_encodeUIntLE]
   simp only [Option.bind_some]

@@ -3,11 +3,12 @@ import Omi.Wire
 /-!
 # Investors Exchange Top Of Book v1.56
 
-Generated from the binary model, with the proofs the model's rules call for:
-each message decodes back to what was encoded and is exactly as wide as the model says;
-the dispatch on the message type selects the message that was written;
-the length prefix the size rule states frames each message;
-and the packet the count rule states carries its messages back.
+Generated from the binary model, with the proofs the model's rules call for: every record
+decodes back to what was encoded; a message dispatch selects the message its type names;
+a count is written from the list it counts; a length prefix is written from the bytes it frames;
+and a packet read to the end of its data decodes to the messages that were written.
+
+Note: a Message Count of 0 marks Heartbeat and carries no messages; the decoder reads it as a count and the encoder never writes it.
 
 Note: Security Directory Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
 
@@ -15,13 +16,74 @@ Note: Quote Update Flags is a bit field set, proven as its 1 byte integer rather
 
 Note: Sale Condition Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
 
-Note: a Message Count of 0 marks Heartbeat and carries no messages; the decoder reads it as a count and the encoder never writes it.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/
 
 namespace Omi.IexIexequitiesTopsIextpV156
+
+/-- Message Type: one byte code -/
+inductive MessageType where
+  | systemEventMessage -- System Event Message
+  | securityDirectoryMessage -- Security Directory Message
+  | tradingStatusMessage -- Trading Status Message
+  | operationalHaltStatusMessage -- Operational Halt Status Message
+  | shortSalePriceTestStatusMessage -- Short Sale Price Test Status Message
+  | securityEventMessage -- Security Event Message
+  | quoteUpdateMessage -- Quote Update Message
+  | tradeReportMessage -- Trade Report Message
+  | officialPriceMessage -- Official Price Message
+  | tradeBreakMessage -- Trade Break Message
+  | auctionInformationMessage -- Auction Information Message
+  deriving DecidableEq, Repr
+
+namespace MessageType
+
+def toByte : MessageType → UInt8
+  | .systemEventMessage => 0x53
+  | .securityDirectoryMessage => 0x44
+  | .tradingStatusMessage => 0x48
+  | .operationalHaltStatusMessage => 0x4F
+  | .shortSalePriceTestStatusMessage => 0x50
+  | .securityEventMessage => 0x45
+  | .quoteUpdateMessage => 0x51
+  | .tradeReportMessage => 0x54
+  | .officialPriceMessage => 0x58
+  | .tradeBreakMessage => 0x42
+  | .auctionInformationMessage => 0x41
+
+def ofByte? (byte : UInt8) : Option MessageType :=
+  if byte = 0x53 then some .systemEventMessage
+  else if byte = 0x44 then some .securityDirectoryMessage
+  else if byte = 0x48 then some .tradingStatusMessage
+  else if byte = 0x4F then some .operationalHaltStatusMessage
+  else if byte = 0x50 then some .shortSalePriceTestStatusMessage
+  else if byte = 0x45 then some .securityEventMessage
+  else if byte = 0x51 then some .quoteUpdateMessage
+  else if byte = 0x54 then some .tradeReportMessage
+  else if byte = 0x58 then some .officialPriceMessage
+  else if byte = 0x42 then some .tradeBreakMessage
+  else if byte = 0x41 then some .auctionInformationMessage
+  else none
+
+theorem ofByte?_toByte (value : MessageType) : ofByte? value.toByte = some value := by
+  cases value <;> decide
+
+def encode (value : MessageType) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (MessageType × List UInt8)
+  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : MessageType) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : MessageType) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte?_toByte]
+
+end MessageType
 
 /-- System Event: one byte code -/
 inductive SystemEvent where
@@ -364,6 +426,9 @@ def decode (bytes : List UInt8) : Option (SystemEventMessage × List UInt8) := d
 @[simp] theorem encode_length (message : SystemEventMessage) : (encode message).length = 9 := by
   simp [encode]
 
+theorem encode_length_pos (message : SystemEventMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : SystemEventMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -383,7 +448,7 @@ structure SecurityDirectoryMessage where
 namespace SecurityDirectoryMessage
 
 def encode (message : SecurityDirectoryMessage) : List UInt8 :=
-  encodeUInt 1 message.securityDirectoryFlags
+  encodeUIntLE 1 message.securityDirectoryFlags
     ++ encodeUIntLE 8 message.timestamp
     ++ Alpha.encode message.symbol
     ++ encodeUIntLE 4 message.roundLotSize
@@ -391,7 +456,7 @@ def encode (message : SecurityDirectoryMessage) : List UInt8 :=
     ++ encodeUInt 1 message.luldTier
 
 def decode (bytes : List UInt8) : Option (SecurityDirectoryMessage × List UInt8) := do
-  let (securityDirectoryFlags, bytes) ← decodeUInt 1 bytes
+  let (securityDirectoryFlags, bytes) ← decodeUIntLE 1 bytes
   let (timestamp, bytes) ← decodeUIntLE 8 bytes
   let (symbol, bytes) ← Alpha.decode 8 bytes
   let (roundLotSize, bytes) ← decodeUIntLE 4 bytes
@@ -400,6 +465,9 @@ def decode (bytes : List UInt8) : Option (SecurityDirectoryMessage × List UInt8
   pure ({ securityDirectoryFlags, timestamp, symbol, roundLotSize, adjustedPocPrice, luldTier }, bytes)
 
 @[simp] theorem encode_length (message : SecurityDirectoryMessage) : (encode message).length = 30 := by
+  simp [encode]
+
+theorem encode_length_pos (message : SecurityDirectoryMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : SecurityDirectoryMessage) (rest : List UInt8) :
@@ -434,6 +502,9 @@ def decode (bytes : List UInt8) : Option (TradingStatusMessage × List UInt8) :=
 @[simp] theorem encode_length (message : TradingStatusMessage) : (encode message).length = 21 := by
   simp [encode]
 
+theorem encode_length_pos (message : TradingStatusMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : TradingStatusMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -461,6 +532,9 @@ def decode (bytes : List UInt8) : Option (OperationalHaltStatusMessage × List U
   pure ({ operationalHaltStatus, timestamp, symbol }, bytes)
 
 @[simp] theorem encode_length (message : OperationalHaltStatusMessage) : (encode message).length = 17 := by
+  simp [encode]
+
+theorem encode_length_pos (message : OperationalHaltStatusMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : OperationalHaltStatusMessage) (rest : List UInt8) :
@@ -495,6 +569,9 @@ def decode (bytes : List UInt8) : Option (ShortSalePriceTestStatusMessage × Lis
 @[simp] theorem encode_length (message : ShortSalePriceTestStatusMessage) : (encode message).length = 18 := by
   simp [encode]
 
+theorem encode_length_pos (message : ShortSalePriceTestStatusMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : ShortSalePriceTestStatusMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -524,6 +601,9 @@ def decode (bytes : List UInt8) : Option (SecurityEventMessage × List UInt8) :=
 @[simp] theorem encode_length (message : SecurityEventMessage) : (encode message).length = 17 := by
   simp [encode]
 
+theorem encode_length_pos (message : SecurityEventMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : SecurityEventMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -544,7 +624,7 @@ structure QuoteUpdateMessage where
 namespace QuoteUpdateMessage
 
 def encode (message : QuoteUpdateMessage) : List UInt8 :=
-  encodeUInt 1 message.quoteUpdateFlags
+  encodeUIntLE 1 message.quoteUpdateFlags
     ++ encodeUIntLE 8 message.timestamp
     ++ Alpha.encode message.symbol
     ++ encodeUIntLE 4 message.bidSize
@@ -553,7 +633,7 @@ def encode (message : QuoteUpdateMessage) : List UInt8 :=
     ++ encodeUIntLE 4 message.askSize
 
 def decode (bytes : List UInt8) : Option (QuoteUpdateMessage × List UInt8) := do
-  let (quoteUpdateFlags, bytes) ← decodeUInt 1 bytes
+  let (quoteUpdateFlags, bytes) ← decodeUIntLE 1 bytes
   let (timestamp, bytes) ← decodeUIntLE 8 bytes
   let (symbol, bytes) ← Alpha.decode 8 bytes
   let (bidSize, bytes) ← decodeUIntLE 4 bytes
@@ -563,6 +643,9 @@ def decode (bytes : List UInt8) : Option (QuoteUpdateMessage × List UInt8) := d
   pure ({ quoteUpdateFlags, timestamp, symbol, bidSize, bidPrice, askPrice, askSize }, bytes)
 
 @[simp] theorem encode_length (message : QuoteUpdateMessage) : (encode message).length = 41 := by
+  simp [encode]
+
+theorem encode_length_pos (message : QuoteUpdateMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : QuoteUpdateMessage) (rest : List UInt8) :
@@ -584,7 +667,7 @@ structure TradeReportMessage where
 namespace TradeReportMessage
 
 def encode (message : TradeReportMessage) : List UInt8 :=
-  encodeUInt 1 message.saleConditionFlags
+  encodeUIntLE 1 message.saleConditionFlags
     ++ encodeUIntLE 8 message.timestamp
     ++ Alpha.encode message.symbol
     ++ encodeUIntLE 4 message.size
@@ -592,7 +675,7 @@ def encode (message : TradeReportMessage) : List UInt8 :=
     ++ encodeUIntLE 8 message.tradeId
 
 def decode (bytes : List UInt8) : Option (TradeReportMessage × List UInt8) := do
-  let (saleConditionFlags, bytes) ← decodeUInt 1 bytes
+  let (saleConditionFlags, bytes) ← decodeUIntLE 1 bytes
   let (timestamp, bytes) ← decodeUIntLE 8 bytes
   let (symbol, bytes) ← Alpha.decode 8 bytes
   let (size, bytes) ← decodeUIntLE 4 bytes
@@ -601,6 +684,9 @@ def decode (bytes : List UInt8) : Option (TradeReportMessage × List UInt8) := d
   pure ({ saleConditionFlags, timestamp, symbol, size, price, tradeId }, bytes)
 
 @[simp] theorem encode_length (message : TradeReportMessage) : (encode message).length = 37 := by
+  simp [encode]
+
+theorem encode_length_pos (message : TradeReportMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : TradeReportMessage) (rest : List UInt8) :
@@ -635,6 +721,9 @@ def decode (bytes : List UInt8) : Option (OfficialPriceMessage × List UInt8) :=
 @[simp] theorem encode_length (message : OfficialPriceMessage) : (encode message).length = 25 := by
   simp [encode]
 
+theorem encode_length_pos (message : OfficialPriceMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : OfficialPriceMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -654,7 +743,7 @@ structure TradeBreakMessage where
 namespace TradeBreakMessage
 
 def encode (message : TradeBreakMessage) : List UInt8 :=
-  encodeUInt 1 message.saleConditionFlags
+  encodeUIntLE 1 message.saleConditionFlags
     ++ encodeUIntLE 8 message.timestamp
     ++ Alpha.encode message.symbol
     ++ encodeUIntLE 4 message.size
@@ -662,7 +751,7 @@ def encode (message : TradeBreakMessage) : List UInt8 :=
     ++ encodeUIntLE 8 message.tradeId
 
 def decode (bytes : List UInt8) : Option (TradeBreakMessage × List UInt8) := do
-  let (saleConditionFlags, bytes) ← decodeUInt 1 bytes
+  let (saleConditionFlags, bytes) ← decodeUIntLE 1 bytes
   let (timestamp, bytes) ← decodeUIntLE 8 bytes
   let (symbol, bytes) ← Alpha.decode 8 bytes
   let (size, bytes) ← decodeUIntLE 4 bytes
@@ -671,6 +760,9 @@ def decode (bytes : List UInt8) : Option (TradeBreakMessage × List UInt8) := do
   pure ({ saleConditionFlags, timestamp, symbol, size, price, tradeId }, bytes)
 
 @[simp] theorem encode_length (message : TradeBreakMessage) : (encode message).length = 37 := by
+  simp [encode]
+
+theorem encode_length_pos (message : TradeBreakMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : TradeBreakMessage) (rest : List UInt8) :
@@ -735,14 +827,17 @@ def decode (bytes : List UInt8) : Option (AuctionInformationMessage × List UInt
 @[simp] theorem encode_length (message : AuctionInformationMessage) : (encode message).length = 79 := by
   simp [encode]
 
+theorem encode_length_pos (message : AuctionInformationMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : AuctionInformationMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
 
 end AuctionInformationMessage
 
-/-- Any message, selected by Message Type -/
-inductive Message where
+/-- Any Message Data, selected by Message Type -/
+inductive MessageData where
   | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
   | securityDirectoryMessage (message : SecurityDirectoryMessage) -- 'D' 0x44
   | tradingStatusMessage (message : TradingStatusMessage) -- 'H' 0x48
@@ -756,74 +851,120 @@ inductive Message where
   | auctionInformationMessage (message : AuctionInformationMessage) -- 'A' 0x41
   deriving DecidableEq, Repr
 
+namespace MessageData
+
+/-- The Message Type each message is sent under -/
+def tag : MessageData → BitVec 8
+  | .systemEventMessage _ => 83
+  | .securityDirectoryMessage _ => 68
+  | .tradingStatusMessage _ => 72
+  | .operationalHaltStatusMessage _ => 79
+  | .shortSalePriceTestStatusMessage _ => 80
+  | .securityEventMessage _ => 69
+  | .quoteUpdateMessage _ => 81
+  | .tradeReportMessage _ => 84
+  | .officialPriceMessage _ => 88
+  | .tradeBreakMessage _ => 66
+  | .auctionInformationMessage _ => 65
+
+def encode : MessageData → List UInt8
+  | .systemEventMessage message => SystemEventMessage.encode message
+  | .securityDirectoryMessage message => SecurityDirectoryMessage.encode message
+  | .tradingStatusMessage message => TradingStatusMessage.encode message
+  | .operationalHaltStatusMessage message => OperationalHaltStatusMessage.encode message
+  | .shortSalePriceTestStatusMessage message => ShortSalePriceTestStatusMessage.encode message
+  | .securityEventMessage message => SecurityEventMessage.encode message
+  | .quoteUpdateMessage message => QuoteUpdateMessage.encode message
+  | .tradeReportMessage message => TradeReportMessage.encode message
+  | .officialPriceMessage message => OfficialPriceMessage.encode message
+  | .tradeBreakMessage message => TradeBreakMessage.encode message
+  | .auctionInformationMessage message => AuctionInformationMessage.encode message
+
+def decode (tag : BitVec 8) (bytes : List UInt8) : Option (MessageData × List UInt8) :=
+  if tag = 83 then (SystemEventMessage.decode bytes).map fun (message, rest) => (.systemEventMessage message, rest)
+  else if tag = 68 then (SecurityDirectoryMessage.decode bytes).map fun (message, rest) => (.securityDirectoryMessage message, rest)
+  else if tag = 72 then (TradingStatusMessage.decode bytes).map fun (message, rest) => (.tradingStatusMessage message, rest)
+  else if tag = 79 then (OperationalHaltStatusMessage.decode bytes).map fun (message, rest) => (.operationalHaltStatusMessage message, rest)
+  else if tag = 80 then (ShortSalePriceTestStatusMessage.decode bytes).map fun (message, rest) => (.shortSalePriceTestStatusMessage message, rest)
+  else if tag = 69 then (SecurityEventMessage.decode bytes).map fun (message, rest) => (.securityEventMessage message, rest)
+  else if tag = 81 then (QuoteUpdateMessage.decode bytes).map fun (message, rest) => (.quoteUpdateMessage message, rest)
+  else if tag = 84 then (TradeReportMessage.decode bytes).map fun (message, rest) => (.tradeReportMessage message, rest)
+  else if tag = 88 then (OfficialPriceMessage.decode bytes).map fun (message, rest) => (.officialPriceMessage message, rest)
+  else if tag = 66 then (TradeBreakMessage.decode bytes).map fun (message, rest) => (.tradeBreakMessage message, rest)
+  else if tag = 65 then (AuctionInformationMessage.decode bytes).map fun (message, rest) => (.auctionInformationMessage message, rest)
+  else none
+
+@[simp] theorem decode_encode (message : MessageData) (rest : List UInt8) :
+    decode (tag message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, tag]
+
+end MessageData
+
+/-- Message -/
+structure Message where
+  messageData : MessageData
+  deriving DecidableEq, Repr
+
 namespace Message
 
-def encode : Message → List UInt8
-  | .systemEventMessage message => 0x53 :: SystemEventMessage.encode message
-  | .securityDirectoryMessage message => 0x44 :: SecurityDirectoryMessage.encode message
-  | .tradingStatusMessage message => 0x48 :: TradingStatusMessage.encode message
-  | .operationalHaltStatusMessage message => 0x4F :: OperationalHaltStatusMessage.encode message
-  | .shortSalePriceTestStatusMessage message => 0x50 :: ShortSalePriceTestStatusMessage.encode message
-  | .securityEventMessage message => 0x45 :: SecurityEventMessage.encode message
-  | .quoteUpdateMessage message => 0x51 :: QuoteUpdateMessage.encode message
-  | .tradeReportMessage message => 0x54 :: TradeReportMessage.encode message
-  | .officialPriceMessage message => 0x58 :: OfficialPriceMessage.encode message
-  | .tradeBreakMessage message => 0x42 :: TradeBreakMessage.encode message
-  | .auctionInformationMessage message => 0x41 :: AuctionInformationMessage.encode message
+def encodeBody (message : Message) : List UInt8 :=
+  MessageType.encode (MessageData.tag message.messageData)
+    ++ MessageData.encode message.messageData
 
-def decode (bytes : List UInt8) : Option (Message × List UInt8) :=
-  match bytes with
-  | [] => none
-  | tag :: rest =>
-    if tag = 0x53 then (SystemEventMessage.decode rest).map fun (message, rest) => (.systemEventMessage message, rest)
-    else if tag = 0x44 then (SecurityDirectoryMessage.decode rest).map fun (message, rest) => (.securityDirectoryMessage message, rest)
-    else if tag = 0x48 then (TradingStatusMessage.decode rest).map fun (message, rest) => (.tradingStatusMessage message, rest)
-    else if tag = 0x4F then (OperationalHaltStatusMessage.decode rest).map fun (message, rest) => (.operationalHaltStatusMessage message, rest)
-    else if tag = 0x50 then (ShortSalePriceTestStatusMessage.decode rest).map fun (message, rest) => (.shortSalePriceTestStatusMessage message, rest)
-    else if tag = 0x45 then (SecurityEventMessage.decode rest).map fun (message, rest) => (.securityEventMessage message, rest)
-    else if tag = 0x51 then (QuoteUpdateMessage.decode rest).map fun (message, rest) => (.quoteUpdateMessage message, rest)
-    else if tag = 0x54 then (TradeReportMessage.decode rest).map fun (message, rest) => (.tradeReportMessage message, rest)
-    else if tag = 0x58 then (OfficialPriceMessage.decode rest).map fun (message, rest) => (.officialPriceMessage message, rest)
-    else if tag = 0x42 then (TradeBreakMessage.decode rest).map fun (message, rest) => (.tradeBreakMessage message, rest)
-    else if tag = 0x41 then (AuctionInformationMessage.decode rest).map fun (message, rest) => (.auctionInformationMessage message, rest)
-    else none
+def decodeBody (bytes : List UInt8) : Option (Message × List UInt8) := do
+  let (messageType, bytes) ← MessageType.decode bytes
+  let (messageData, bytes) ← MessageData.decode messageType bytes
+  pure ({ messageData }, bytes)
+
+theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
+    decodeBody (encodeBody message ++ rest) = some (message, rest) := by
+  simp [decodeBody, encodeBody, List.append_assoc]
+
+/-- Every body fits the length prefix -/
+theorem encodeBody_length_lt (message : Message) : (encodeBody message).length + 0 < 65536 := by
+  cases h : message.messageData with
+  | systemEventMessage inner =>
+    simp [encodeBody, h, MessageData.encode, SystemEventMessage.encode]
+  | securityDirectoryMessage inner =>
+    simp [encodeBody, h, MessageData.encode, SecurityDirectoryMessage.encode]
+  | tradingStatusMessage inner =>
+    simp [encodeBody, h, MessageData.encode, TradingStatusMessage.encode]
+  | operationalHaltStatusMessage inner =>
+    simp [encodeBody, h, MessageData.encode, OperationalHaltStatusMessage.encode]
+  | shortSalePriceTestStatusMessage inner =>
+    simp [encodeBody, h, MessageData.encode, ShortSalePriceTestStatusMessage.encode]
+  | securityEventMessage inner =>
+    simp [encodeBody, h, MessageData.encode, SecurityEventMessage.encode]
+  | quoteUpdateMessage inner =>
+    simp [encodeBody, h, MessageData.encode, QuoteUpdateMessage.encode]
+  | tradeReportMessage inner =>
+    simp [encodeBody, h, MessageData.encode, TradeReportMessage.encode]
+  | officialPriceMessage inner =>
+    simp [encodeBody, h, MessageData.encode, OfficialPriceMessage.encode]
+  | tradeBreakMessage inner =>
+    simp [encodeBody, h, MessageData.encode, TradeBreakMessage.encode]
+  | auctionInformationMessage inner =>
+    simp [encodeBody, h, MessageData.encode, AuctionInformationMessage.encode]
+
+/-- Size rule: Message Length counts the bytes after it, so it is written from the body -/
+def encode : Message → List UInt8 :=
+  encodeFramedLE 2 0 encodeBody
+
+def decode : List UInt8 → Option (Message × List UInt8) :=
+  decodeFramedLE 2 0 decodeBody
 
 @[simp] theorem decode_encode (message : Message) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  cases message <;> simp [decode, encode]
+    decode (encode message ++ rest) = some (message, rest) :=
+  decodeFramedLE_encodeFramedLE 2 0 encodeBody decodeBody decodeBody_encodeBody encodeBody_length_lt message rest
+
+theorem encode_length_pos (message : Message) : (encode message).length > 0 := by
+  unfold encode
+  rw [encodeFramedLE_length]
+  omega
 
 end Message
 
-namespace Message
-
-/-- Every message fits the length prefix -/
-theorem encode_length_lt (message : Message) : (encode message).length < 65536 := by
-  cases message <;> simp [encode]
-
-/-- Size rule: Message Length counts the bytes after it, so it is written from the encoded message -/
-def frame (message : Message) : List UInt8 :=
-  encodeUIntLE 2 (BitVec.ofNat 16 ((encode message).length)) ++ encode message
-
-def unframe (bytes : List UInt8) : Option (Message × List UInt8) := do
-  let (length, bytes) ← decodeUIntLE 2 bytes
-  let (body, rest) ← take? (length.toNat) bytes
-  let (message, tail) ← decode body
-  guard tail.isEmpty
-  pure (message, rest)
-
-@[simp] theorem frame_length (message : Message) : (frame message).length = 2 + (encode message).length := by
-  simp [frame]
-
-@[simp] theorem unframe_frame (message : Message) (rest : List UInt8) :
-    unframe (frame message ++ rest) = some (message, rest) := by
-  have fits := encode_length_lt message
-  have whole := decode_encode message []
-  rw [List.append_nil] at whole
-  simp [unframe, frame, guard, List.append_assoc, BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits, take?_append rfl, whole]
-
-end Message
-
-/-- Packet: header fields and the messages Message Count counts -/
+/-- Packet -/
 structure Packet where
   version : BitVec 8
   reserved : Alpha 1
@@ -834,23 +975,23 @@ structure Packet where
   streamOffset : BitVec 64
   firstMessageSequenceNumber : BitVec 64
   sendTime : BitVec 64
-  messages : List Message
+  message : Bounded 2 Message
   deriving DecidableEq, Repr
 
 namespace Packet
 
-def encode (packet : Packet) : List UInt8 :=
-  encodeUIntLE 1 packet.version
-    ++ Alpha.encode packet.reserved
-    ++ encodeUIntLE 2 packet.messageProtocolId
-    ++ encodeUIntLE 4 packet.channelId
-    ++ encodeUIntLE 4 packet.sessionId
-    ++ encodeUIntLE 2 packet.payloadLength
-    ++ encodeUIntLE 2 (BitVec.ofNat 16 packet.messages.length)
-    ++ encodeUIntLE 8 packet.streamOffset
-    ++ encodeUIntLE 8 packet.firstMessageSequenceNumber
-    ++ encodeUIntLE 8 packet.sendTime
-    ++ encodeMany Message.frame packet.messages
+def encode (message : Packet) : List UInt8 :=
+  encodeUIntLE 1 message.version
+    ++ Alpha.encode message.reserved
+    ++ encodeUIntLE 2 message.messageProtocolId
+    ++ encodeUIntLE 4 message.channelId
+    ++ encodeUIntLE 4 message.sessionId
+    ++ encodeUIntLE 2 message.payloadLength
+    ++ encodeUIntLE 2 (BitVec.ofNat 16 message.message.val.length)
+    ++ encodeUIntLE 8 message.streamOffset
+    ++ encodeUIntLE 8 message.firstMessageSequenceNumber
+    ++ encodeUIntLE 8 message.sendTime
+    ++ encodeMany Message.encode message.message.val
 
 def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (version, bytes) ← decodeUIntLE 1 bytes
@@ -863,14 +1004,15 @@ def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (streamOffset, bytes) ← decodeUIntLE 8 bytes
   let (firstMessageSequenceNumber, bytes) ← decodeUIntLE 8 bytes
   let (sendTime, bytes) ← decodeUIntLE 8 bytes
-  let (messages, bytes) ← decodeMany Message.unframe messageCount.toNat bytes
-  pure ({ version, reserved, messageProtocolId, channelId, sessionId, payloadLength, streamOffset, firstMessageSequenceNumber, sendTime, messages }, bytes)
+  let (message_, bytes) ← decodeMany Message.decode messageCount.toNat bytes
+  if fits_message : message_.length < 65536 then
+    pure ({ version, reserved, messageProtocolId, channelId, sessionId, payloadLength, streamOffset, firstMessageSequenceNumber, sendTime, message := ⟨message_, fits_message⟩ }, bytes)
+  else none
 
-/-- A packet decodes back to what was encoded, as long as its messages fit the count -/
-theorem decode_encode (packet : Packet) (rest : List UInt8) (fits : packet.messages.length < 65536) :
-    decode (encode packet ++ rest) = some (packet, rest) := by
-  simp [decode, encode, List.append_assoc, BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits,
-        decodeMany_encodeMany Message.frame Message.unframe Message.unframe_frame]
+@[simp] theorem decode_encode (message : Packet) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  have fits_message : message.message.val.length < 65536 := by simpa using message.message.length_lt
+  simp [decode, encode, List.append_assoc, Nat.mod_eq_of_lt fits_message, fits_message, decodeMany_encodeMany Message.encode Message.decode Message.decode_encode]
 
 end Packet
 

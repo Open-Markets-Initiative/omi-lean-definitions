@@ -3,11 +3,10 @@ import Omi.Wire
 /-!
 # National Association of Securities Dealers Automated Quotations (Nasdaq) TotalView Itch v5.0.2023
 
-Generated from the binary model, with the proofs the model's rules call for:
-each message decodes back to what was encoded and is exactly as wide as the model says;
-the dispatch on the message type selects the message that was written;
-the length prefix the size rule states frames each message;
-and the packet the count rule states carries its messages back.
+Generated from the binary model, with the proofs the model's rules call for: every record
+decodes back to what was encoded; a message dispatch selects the message its type names;
+a count is written from the list it counts; a length prefix is written from the bytes it frames;
+and a packet read to the end of its data decodes to the messages that were written.
 
 Note: a Message Count of 0 marks Heartbeat and carries no messages; the decoder reads it as a count and the encoder never writes it.
 
@@ -18,6 +17,105 @@ Prices with implied decimals are proven as the integers on the wire.
 -/
 
 namespace Omi.NasdaqNsmequitiesTotalviewItchV502023
+
+/-- Message Type: one byte code -/
+inductive MessageType where
+  | systemEventMessage -- System Event Message
+  | stockDirectoryMessage -- Stock Directory Message
+  | stockTradingActionMessage -- Stock Trading Action Message
+  | regShoShortSalePriceTestRestrictedIndicatorMessage -- Reg Sho Short Sale Price Test Restricted Indicator Message
+  | marketParticipantPositionMessage -- Market Participant Position Message
+  | mwcbDeclineLevelMessage -- Mwcb Decline Level Message
+  | mwcbStatusLevelMessage -- Mwcb Status Level Message
+  | ipoQuotingPeriodUpdate -- Ipo Quoting Period Update
+  | luldAuctionCollarMessage -- Luld Auction Collar Message
+  | operationalHaltMessage -- Operational Halt Message
+  | addOrderNoMpidAttributionMessage -- Add Order No Mpid Attribution Message
+  | addOrderWithMpidAttributionMessage -- Add Order With Mpid Attribution Message
+  | orderExecutedMessage -- Order Executed Message
+  | orderExecutedWithPriceMessage -- Order Executed With Price Message
+  | orderCancelMessage -- Order Cancel Message
+  | orderDeleteMessage -- Order Delete Message
+  | orderReplaceMessage -- Order Replace Message
+  | nonCrossTradeMessage -- Non Cross Trade Message
+  | crossTradeMessage -- Cross Trade Message
+  | brokenTradeMessage -- Broken Trade Message
+  | netOrderImbalanceIndicatorMessage -- Net Order Imbalance Indicator Message
+  | retailPriceImprovementIndicatorMessage -- Retail Price Improvement Indicator Message
+  | directListingWithCapitalRaisePriceDiscoveryMessage -- Direct Listing With Capital Raise Price Discovery Message
+  deriving DecidableEq, Repr
+
+namespace MessageType
+
+def toByte : MessageType → UInt8
+  | .systemEventMessage => 0x53
+  | .stockDirectoryMessage => 0x52
+  | .stockTradingActionMessage => 0x48
+  | .regShoShortSalePriceTestRestrictedIndicatorMessage => 0x59
+  | .marketParticipantPositionMessage => 0x4C
+  | .mwcbDeclineLevelMessage => 0x56
+  | .mwcbStatusLevelMessage => 0x57
+  | .ipoQuotingPeriodUpdate => 0x4B
+  | .luldAuctionCollarMessage => 0x4A
+  | .operationalHaltMessage => 0x68
+  | .addOrderNoMpidAttributionMessage => 0x41
+  | .addOrderWithMpidAttributionMessage => 0x46
+  | .orderExecutedMessage => 0x45
+  | .orderExecutedWithPriceMessage => 0x43
+  | .orderCancelMessage => 0x58
+  | .orderDeleteMessage => 0x44
+  | .orderReplaceMessage => 0x55
+  | .nonCrossTradeMessage => 0x50
+  | .crossTradeMessage => 0x51
+  | .brokenTradeMessage => 0x42
+  | .netOrderImbalanceIndicatorMessage => 0x49
+  | .retailPriceImprovementIndicatorMessage => 0x4E
+  | .directListingWithCapitalRaisePriceDiscoveryMessage => 0x4F
+
+def ofByte? (byte : UInt8) : Option MessageType :=
+  if byte = 0x53 then some .systemEventMessage
+  else if byte = 0x52 then some .stockDirectoryMessage
+  else if byte = 0x48 then some .stockTradingActionMessage
+  else if byte = 0x59 then some .regShoShortSalePriceTestRestrictedIndicatorMessage
+  else if byte = 0x4C then some .marketParticipantPositionMessage
+  else if byte = 0x56 then some .mwcbDeclineLevelMessage
+  else if byte = 0x57 then some .mwcbStatusLevelMessage
+  else if byte = 0x4B then some .ipoQuotingPeriodUpdate
+  else if byte = 0x4A then some .luldAuctionCollarMessage
+  else if byte = 0x68 then some .operationalHaltMessage
+  else if byte = 0x41 then some .addOrderNoMpidAttributionMessage
+  else if byte = 0x46 then some .addOrderWithMpidAttributionMessage
+  else if byte = 0x45 then some .orderExecutedMessage
+  else if byte = 0x43 then some .orderExecutedWithPriceMessage
+  else if byte = 0x58 then some .orderCancelMessage
+  else if byte = 0x44 then some .orderDeleteMessage
+  else if byte = 0x55 then some .orderReplaceMessage
+  else if byte = 0x50 then some .nonCrossTradeMessage
+  else if byte = 0x51 then some .crossTradeMessage
+  else if byte = 0x42 then some .brokenTradeMessage
+  else if byte = 0x49 then some .netOrderImbalanceIndicatorMessage
+  else if byte = 0x4E then some .retailPriceImprovementIndicatorMessage
+  else if byte = 0x4F then some .directListingWithCapitalRaisePriceDiscoveryMessage
+  else none
+
+theorem ofByte?_toByte (value : MessageType) : ofByte? value.toByte = some value := by
+  cases value <;> decide
+
+def encode (value : MessageType) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (MessageType × List UInt8)
+  | byte :: rest => (ofByte? byte).map fun value => (value, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : MessageType) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : MessageType) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte?_toByte]
+
+end MessageType
 
 /-- Event Code: one byte code -/
 inductive EventCode where
@@ -1227,6 +1325,9 @@ def decode (bytes : List UInt8) : Option (SystemEventMessage × List UInt8) := d
 @[simp] theorem encode_length (message : SystemEventMessage) : (encode message).length = 11 := by
   simp [encode]
 
+theorem encode_length_pos (message : SystemEventMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : SystemEventMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -1298,6 +1399,9 @@ def decode (bytes : List UInt8) : Option (StockDirectoryMessage × List UInt8) :
 @[simp] theorem encode_length (message : StockDirectoryMessage) : (encode message).length = 38 := by
   simp [encode]
 
+theorem encode_length_pos (message : StockDirectoryMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : StockDirectoryMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -1339,6 +1443,9 @@ def decode (bytes : List UInt8) : Option (StockTradingActionMessage × List UInt
 @[simp] theorem encode_length (message : StockTradingActionMessage) : (encode message).length = 24 := by
   simp [encode]
 
+theorem encode_length_pos (message : StockTradingActionMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : StockTradingActionMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -1372,6 +1479,9 @@ def decode (bytes : List UInt8) : Option (RegShoShortSalePriceTestRestrictedIndi
   pure ({ locateCode, trackingNumber, timestamp, stock, regShoAction }, bytes)
 
 @[simp] theorem encode_length (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) : (encode message).length = 19 := by
+  simp [encode]
+
+theorem encode_length_pos (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) (rest : List UInt8) :
@@ -1418,6 +1528,9 @@ def decode (bytes : List UInt8) : Option (MarketParticipantPositionMessage × Li
 @[simp] theorem encode_length (message : MarketParticipantPositionMessage) : (encode message).length = 25 := by
   simp [encode]
 
+theorem encode_length_pos (message : MarketParticipantPositionMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : MarketParticipantPositionMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -1456,6 +1569,9 @@ def decode (bytes : List UInt8) : Option (MwcbDeclineLevelMessage × List UInt8)
 @[simp] theorem encode_length (message : MwcbDeclineLevelMessage) : (encode message).length = 34 := by
   simp [encode]
 
+theorem encode_length_pos (message : MwcbDeclineLevelMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : MwcbDeclineLevelMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -1486,6 +1602,9 @@ def decode (bytes : List UInt8) : Option (MwcbStatusLevelMessage × List UInt8) 
   pure ({ stockLocate, trackingNumber, timestamp, breachedLevel }, bytes)
 
 @[simp] theorem encode_length (message : MwcbStatusLevelMessage) : (encode message).length = 11 := by
+  simp [encode]
+
+theorem encode_length_pos (message : MwcbStatusLevelMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : MwcbStatusLevelMessage) (rest : List UInt8) :
@@ -1527,6 +1646,9 @@ def decode (bytes : List UInt8) : Option (IpoQuotingPeriodUpdate × List UInt8) 
   pure ({ stockLocate, trackingNumber, timestamp, stock, ipoQuotationReleaseTime, ipoQuotationReleaseQualifier, ipoPrice }, bytes)
 
 @[simp] theorem encode_length (message : IpoQuotingPeriodUpdate) : (encode message).length = 27 := by
+  simp [encode]
+
+theorem encode_length_pos (message : IpoQuotingPeriodUpdate) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : IpoQuotingPeriodUpdate) (rest : List UInt8) :
@@ -1573,6 +1695,9 @@ def decode (bytes : List UInt8) : Option (LuldAuctionCollarMessage × List UInt8
 @[simp] theorem encode_length (message : LuldAuctionCollarMessage) : (encode message).length = 34 := by
   simp [encode]
 
+theorem encode_length_pos (message : LuldAuctionCollarMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : LuldAuctionCollarMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -1609,6 +1734,9 @@ def decode (bytes : List UInt8) : Option (OperationalHaltMessage × List UInt8) 
   pure ({ stockLocate, trackingNumber, timestamp, stock, marketCode, operationalHaltAction }, bytes)
 
 @[simp] theorem encode_length (message : OperationalHaltMessage) : (encode message).length = 20 := by
+  simp [encode]
+
+theorem encode_length_pos (message : OperationalHaltMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : OperationalHaltMessage) (rest : List UInt8) :
@@ -1653,6 +1781,9 @@ def decode (bytes : List UInt8) : Option (AddOrderNoMpidAttributionMessage × Li
   pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber, buySellIndicator, shares, stock, price }, bytes)
 
 @[simp] theorem encode_length (message : AddOrderNoMpidAttributionMessage) : (encode message).length = 35 := by
+  simp [encode]
+
+theorem encode_length_pos (message : AddOrderNoMpidAttributionMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : AddOrderNoMpidAttributionMessage) (rest : List UInt8) :
@@ -1702,6 +1833,9 @@ def decode (bytes : List UInt8) : Option (AddOrderWithMpidAttributionMessage × 
 @[simp] theorem encode_length (message : AddOrderWithMpidAttributionMessage) : (encode message).length = 39 := by
   simp [encode]
 
+theorem encode_length_pos (message : AddOrderWithMpidAttributionMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : AddOrderWithMpidAttributionMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -1738,6 +1872,9 @@ def decode (bytes : List UInt8) : Option (OrderExecutedMessage × List UInt8) :=
   pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber, executedShares, matchNumber }, bytes)
 
 @[simp] theorem encode_length (message : OrderExecutedMessage) : (encode message).length = 30 := by
+  simp [encode]
+
+theorem encode_length_pos (message : OrderExecutedMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : OrderExecutedMessage) (rest : List UInt8) :
@@ -1784,6 +1921,9 @@ def decode (bytes : List UInt8) : Option (OrderExecutedWithPriceMessage × List 
 @[simp] theorem encode_length (message : OrderExecutedWithPriceMessage) : (encode message).length = 35 := by
   simp [encode]
 
+theorem encode_length_pos (message : OrderExecutedWithPriceMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : OrderExecutedWithPriceMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -1819,6 +1959,9 @@ def decode (bytes : List UInt8) : Option (OrderCancelMessage × List UInt8) := d
 @[simp] theorem encode_length (message : OrderCancelMessage) : (encode message).length = 22 := by
   simp [encode]
 
+theorem encode_length_pos (message : OrderCancelMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : OrderCancelMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -1849,6 +1992,9 @@ def decode (bytes : List UInt8) : Option (OrderDeleteMessage × List UInt8) := d
   pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber }, bytes)
 
 @[simp] theorem encode_length (message : OrderDeleteMessage) : (encode message).length = 18 := by
+  simp [encode]
+
+theorem encode_length_pos (message : OrderDeleteMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : OrderDeleteMessage) (rest : List UInt8) :
@@ -1890,6 +2036,9 @@ def decode (bytes : List UInt8) : Option (OrderReplaceMessage × List UInt8) := 
   pure ({ stockLocate, trackingNumber, timestamp, originalOrderReferenceNumber, newOrderReferenceNumber, shares, price }, bytes)
 
 @[simp] theorem encode_length (message : OrderReplaceMessage) : (encode message).length = 34 := by
+  simp [encode]
+
+theorem encode_length_pos (message : OrderReplaceMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : OrderReplaceMessage) (rest : List UInt8) :
@@ -1939,6 +2088,9 @@ def decode (bytes : List UInt8) : Option (NonCrossTradeMessage × List UInt8) :=
 @[simp] theorem encode_length (message : NonCrossTradeMessage) : (encode message).length = 43 := by
   simp [encode]
 
+theorem encode_length_pos (message : NonCrossTradeMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : NonCrossTradeMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -1983,6 +2135,9 @@ def decode (bytes : List UInt8) : Option (CrossTradeMessage × List UInt8) := do
 @[simp] theorem encode_length (message : CrossTradeMessage) : (encode message).length = 39 := by
   simp [encode]
 
+theorem encode_length_pos (message : CrossTradeMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : CrossTradeMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -2013,6 +2168,9 @@ def decode (bytes : List UInt8) : Option (BrokenTradeMessage × List UInt8) := d
   pure ({ stockLocate, trackingNumber, timestamp, matchNumber }, bytes)
 
 @[simp] theorem encode_length (message : BrokenTradeMessage) : (encode message).length = 18 := by
+  simp [encode]
+
+theorem encode_length_pos (message : BrokenTradeMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : BrokenTradeMessage) (rest : List UInt8) :
@@ -2071,6 +2229,9 @@ def decode (bytes : List UInt8) : Option (NetOrderImbalanceIndicatorMessage × L
 @[simp] theorem encode_length (message : NetOrderImbalanceIndicatorMessage) : (encode message).length = 49 := by
   simp [encode]
 
+theorem encode_length_pos (message : NetOrderImbalanceIndicatorMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : NetOrderImbalanceIndicatorMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
@@ -2104,6 +2265,9 @@ def decode (bytes : List UInt8) : Option (RetailPriceImprovementIndicatorMessage
   pure ({ stockLocate, trackingNumber, timestamp, stock, interestFlag }, bytes)
 
 @[simp] theorem encode_length (message : RetailPriceImprovementIndicatorMessage) : (encode message).length = 19 := by
+  simp [encode]
+
+theorem encode_length_pos (message : RetailPriceImprovementIndicatorMessage) : (encode message).length > 0 := by
   simp [encode]
 
 @[simp] theorem decode_encode (message : RetailPriceImprovementIndicatorMessage) (rest : List UInt8) :
@@ -2159,14 +2323,17 @@ def decode (bytes : List UInt8) : Option (DirectListingWithCapitalRaisePriceDisc
 @[simp] theorem encode_length (message : DirectListingWithCapitalRaisePriceDiscoveryMessage) : (encode message).length = 47 := by
   simp [encode]
 
+theorem encode_length_pos (message : DirectListingWithCapitalRaisePriceDiscoveryMessage) : (encode message).length > 0 := by
+  simp [encode]
+
 @[simp] theorem decode_encode (message : DirectListingWithCapitalRaisePriceDiscoveryMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode, List.append_assoc]
 
 end DirectListingWithCapitalRaisePriceDiscoveryMessage
 
-/-- Any message, selected by Message Type -/
-inductive Message where
+/-- Any Payload, selected by Message Type -/
+inductive Payload where
   | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
   | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
   | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
@@ -2192,124 +2359,207 @@ inductive Message where
   | directListingWithCapitalRaisePriceDiscoveryMessage (message : DirectListingWithCapitalRaisePriceDiscoveryMessage) -- 'O' 0x4F
   deriving DecidableEq, Repr
 
+namespace Payload
+
+/-- The Message Type each message is sent under -/
+def tag : Payload → BitVec 8
+  | .systemEventMessage _ => 83
+  | .stockDirectoryMessage _ => 82
+  | .stockTradingActionMessage _ => 72
+  | .regShoShortSalePriceTestRestrictedIndicatorMessage _ => 89
+  | .marketParticipantPositionMessage _ => 76
+  | .mwcbDeclineLevelMessage _ => 86
+  | .mwcbStatusLevelMessage _ => 87
+  | .ipoQuotingPeriodUpdate _ => 75
+  | .luldAuctionCollarMessage _ => 74
+  | .operationalHaltMessage _ => 104
+  | .addOrderNoMpidAttributionMessage _ => 65
+  | .addOrderWithMpidAttributionMessage _ => 70
+  | .orderExecutedMessage _ => 69
+  | .orderExecutedWithPriceMessage _ => 67
+  | .orderCancelMessage _ => 88
+  | .orderDeleteMessage _ => 68
+  | .orderReplaceMessage _ => 85
+  | .nonCrossTradeMessage _ => 80
+  | .crossTradeMessage _ => 81
+  | .brokenTradeMessage _ => 66
+  | .netOrderImbalanceIndicatorMessage _ => 73
+  | .retailPriceImprovementIndicatorMessage _ => 78
+  | .directListingWithCapitalRaisePriceDiscoveryMessage _ => 79
+
+def encode : Payload → List UInt8
+  | .systemEventMessage message => SystemEventMessage.encode message
+  | .stockDirectoryMessage message => StockDirectoryMessage.encode message
+  | .stockTradingActionMessage message => StockTradingActionMessage.encode message
+  | .regShoShortSalePriceTestRestrictedIndicatorMessage message => RegShoShortSalePriceTestRestrictedIndicatorMessage.encode message
+  | .marketParticipantPositionMessage message => MarketParticipantPositionMessage.encode message
+  | .mwcbDeclineLevelMessage message => MwcbDeclineLevelMessage.encode message
+  | .mwcbStatusLevelMessage message => MwcbStatusLevelMessage.encode message
+  | .ipoQuotingPeriodUpdate message => IpoQuotingPeriodUpdate.encode message
+  | .luldAuctionCollarMessage message => LuldAuctionCollarMessage.encode message
+  | .operationalHaltMessage message => OperationalHaltMessage.encode message
+  | .addOrderNoMpidAttributionMessage message => AddOrderNoMpidAttributionMessage.encode message
+  | .addOrderWithMpidAttributionMessage message => AddOrderWithMpidAttributionMessage.encode message
+  | .orderExecutedMessage message => OrderExecutedMessage.encode message
+  | .orderExecutedWithPriceMessage message => OrderExecutedWithPriceMessage.encode message
+  | .orderCancelMessage message => OrderCancelMessage.encode message
+  | .orderDeleteMessage message => OrderDeleteMessage.encode message
+  | .orderReplaceMessage message => OrderReplaceMessage.encode message
+  | .nonCrossTradeMessage message => NonCrossTradeMessage.encode message
+  | .crossTradeMessage message => CrossTradeMessage.encode message
+  | .brokenTradeMessage message => BrokenTradeMessage.encode message
+  | .netOrderImbalanceIndicatorMessage message => NetOrderImbalanceIndicatorMessage.encode message
+  | .retailPriceImprovementIndicatorMessage message => RetailPriceImprovementIndicatorMessage.encode message
+  | .directListingWithCapitalRaisePriceDiscoveryMessage message => DirectListingWithCapitalRaisePriceDiscoveryMessage.encode message
+
+def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
+  if tag = 83 then (SystemEventMessage.decode bytes).map fun (message, rest) => (.systemEventMessage message, rest)
+  else if tag = 82 then (StockDirectoryMessage.decode bytes).map fun (message, rest) => (.stockDirectoryMessage message, rest)
+  else if tag = 72 then (StockTradingActionMessage.decode bytes).map fun (message, rest) => (.stockTradingActionMessage message, rest)
+  else if tag = 89 then (RegShoShortSalePriceTestRestrictedIndicatorMessage.decode bytes).map fun (message, rest) => (.regShoShortSalePriceTestRestrictedIndicatorMessage message, rest)
+  else if tag = 76 then (MarketParticipantPositionMessage.decode bytes).map fun (message, rest) => (.marketParticipantPositionMessage message, rest)
+  else if tag = 86 then (MwcbDeclineLevelMessage.decode bytes).map fun (message, rest) => (.mwcbDeclineLevelMessage message, rest)
+  else if tag = 87 then (MwcbStatusLevelMessage.decode bytes).map fun (message, rest) => (.mwcbStatusLevelMessage message, rest)
+  else if tag = 75 then (IpoQuotingPeriodUpdate.decode bytes).map fun (message, rest) => (.ipoQuotingPeriodUpdate message, rest)
+  else if tag = 74 then (LuldAuctionCollarMessage.decode bytes).map fun (message, rest) => (.luldAuctionCollarMessage message, rest)
+  else if tag = 104 then (OperationalHaltMessage.decode bytes).map fun (message, rest) => (.operationalHaltMessage message, rest)
+  else if tag = 65 then (AddOrderNoMpidAttributionMessage.decode bytes).map fun (message, rest) => (.addOrderNoMpidAttributionMessage message, rest)
+  else if tag = 70 then (AddOrderWithMpidAttributionMessage.decode bytes).map fun (message, rest) => (.addOrderWithMpidAttributionMessage message, rest)
+  else if tag = 69 then (OrderExecutedMessage.decode bytes).map fun (message, rest) => (.orderExecutedMessage message, rest)
+  else if tag = 67 then (OrderExecutedWithPriceMessage.decode bytes).map fun (message, rest) => (.orderExecutedWithPriceMessage message, rest)
+  else if tag = 88 then (OrderCancelMessage.decode bytes).map fun (message, rest) => (.orderCancelMessage message, rest)
+  else if tag = 68 then (OrderDeleteMessage.decode bytes).map fun (message, rest) => (.orderDeleteMessage message, rest)
+  else if tag = 85 then (OrderReplaceMessage.decode bytes).map fun (message, rest) => (.orderReplaceMessage message, rest)
+  else if tag = 80 then (NonCrossTradeMessage.decode bytes).map fun (message, rest) => (.nonCrossTradeMessage message, rest)
+  else if tag = 81 then (CrossTradeMessage.decode bytes).map fun (message, rest) => (.crossTradeMessage message, rest)
+  else if tag = 66 then (BrokenTradeMessage.decode bytes).map fun (message, rest) => (.brokenTradeMessage message, rest)
+  else if tag = 73 then (NetOrderImbalanceIndicatorMessage.decode bytes).map fun (message, rest) => (.netOrderImbalanceIndicatorMessage message, rest)
+  else if tag = 78 then (RetailPriceImprovementIndicatorMessage.decode bytes).map fun (message, rest) => (.retailPriceImprovementIndicatorMessage message, rest)
+  else if tag = 79 then (DirectListingWithCapitalRaisePriceDiscoveryMessage.decode bytes).map fun (message, rest) => (.directListingWithCapitalRaisePriceDiscoveryMessage message, rest)
+  else none
+
+@[simp] theorem decode_encode (message : Payload) (rest : List UInt8) :
+    decode (tag message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, tag]
+
+end Payload
+
+/-- Message -/
+structure Message where
+  payload : Payload
+  deriving DecidableEq, Repr
+
 namespace Message
 
-def encode : Message → List UInt8
-  | .systemEventMessage message => 0x53 :: SystemEventMessage.encode message
-  | .stockDirectoryMessage message => 0x52 :: StockDirectoryMessage.encode message
-  | .stockTradingActionMessage message => 0x48 :: StockTradingActionMessage.encode message
-  | .regShoShortSalePriceTestRestrictedIndicatorMessage message => 0x59 :: RegShoShortSalePriceTestRestrictedIndicatorMessage.encode message
-  | .marketParticipantPositionMessage message => 0x4C :: MarketParticipantPositionMessage.encode message
-  | .mwcbDeclineLevelMessage message => 0x56 :: MwcbDeclineLevelMessage.encode message
-  | .mwcbStatusLevelMessage message => 0x57 :: MwcbStatusLevelMessage.encode message
-  | .ipoQuotingPeriodUpdate message => 0x4B :: IpoQuotingPeriodUpdate.encode message
-  | .luldAuctionCollarMessage message => 0x4A :: LuldAuctionCollarMessage.encode message
-  | .operationalHaltMessage message => 0x68 :: OperationalHaltMessage.encode message
-  | .addOrderNoMpidAttributionMessage message => 0x41 :: AddOrderNoMpidAttributionMessage.encode message
-  | .addOrderWithMpidAttributionMessage message => 0x46 :: AddOrderWithMpidAttributionMessage.encode message
-  | .orderExecutedMessage message => 0x45 :: OrderExecutedMessage.encode message
-  | .orderExecutedWithPriceMessage message => 0x43 :: OrderExecutedWithPriceMessage.encode message
-  | .orderCancelMessage message => 0x58 :: OrderCancelMessage.encode message
-  | .orderDeleteMessage message => 0x44 :: OrderDeleteMessage.encode message
-  | .orderReplaceMessage message => 0x55 :: OrderReplaceMessage.encode message
-  | .nonCrossTradeMessage message => 0x50 :: NonCrossTradeMessage.encode message
-  | .crossTradeMessage message => 0x51 :: CrossTradeMessage.encode message
-  | .brokenTradeMessage message => 0x42 :: BrokenTradeMessage.encode message
-  | .netOrderImbalanceIndicatorMessage message => 0x49 :: NetOrderImbalanceIndicatorMessage.encode message
-  | .retailPriceImprovementIndicatorMessage message => 0x4E :: RetailPriceImprovementIndicatorMessage.encode message
-  | .directListingWithCapitalRaisePriceDiscoveryMessage message => 0x4F :: DirectListingWithCapitalRaisePriceDiscoveryMessage.encode message
+def encodeBody (message : Message) : List UInt8 :=
+  MessageType.encode (Payload.tag message.payload)
+    ++ Payload.encode message.payload
 
-def decode (bytes : List UInt8) : Option (Message × List UInt8) :=
-  match bytes with
-  | [] => none
-  | tag :: rest =>
-    if tag = 0x53 then (SystemEventMessage.decode rest).map fun (message, rest) => (.systemEventMessage message, rest)
-    else if tag = 0x52 then (StockDirectoryMessage.decode rest).map fun (message, rest) => (.stockDirectoryMessage message, rest)
-    else if tag = 0x48 then (StockTradingActionMessage.decode rest).map fun (message, rest) => (.stockTradingActionMessage message, rest)
-    else if tag = 0x59 then (RegShoShortSalePriceTestRestrictedIndicatorMessage.decode rest).map fun (message, rest) => (.regShoShortSalePriceTestRestrictedIndicatorMessage message, rest)
-    else if tag = 0x4C then (MarketParticipantPositionMessage.decode rest).map fun (message, rest) => (.marketParticipantPositionMessage message, rest)
-    else if tag = 0x56 then (MwcbDeclineLevelMessage.decode rest).map fun (message, rest) => (.mwcbDeclineLevelMessage message, rest)
-    else if tag = 0x57 then (MwcbStatusLevelMessage.decode rest).map fun (message, rest) => (.mwcbStatusLevelMessage message, rest)
-    else if tag = 0x4B then (IpoQuotingPeriodUpdate.decode rest).map fun (message, rest) => (.ipoQuotingPeriodUpdate message, rest)
-    else if tag = 0x4A then (LuldAuctionCollarMessage.decode rest).map fun (message, rest) => (.luldAuctionCollarMessage message, rest)
-    else if tag = 0x68 then (OperationalHaltMessage.decode rest).map fun (message, rest) => (.operationalHaltMessage message, rest)
-    else if tag = 0x41 then (AddOrderNoMpidAttributionMessage.decode rest).map fun (message, rest) => (.addOrderNoMpidAttributionMessage message, rest)
-    else if tag = 0x46 then (AddOrderWithMpidAttributionMessage.decode rest).map fun (message, rest) => (.addOrderWithMpidAttributionMessage message, rest)
-    else if tag = 0x45 then (OrderExecutedMessage.decode rest).map fun (message, rest) => (.orderExecutedMessage message, rest)
-    else if tag = 0x43 then (OrderExecutedWithPriceMessage.decode rest).map fun (message, rest) => (.orderExecutedWithPriceMessage message, rest)
-    else if tag = 0x58 then (OrderCancelMessage.decode rest).map fun (message, rest) => (.orderCancelMessage message, rest)
-    else if tag = 0x44 then (OrderDeleteMessage.decode rest).map fun (message, rest) => (.orderDeleteMessage message, rest)
-    else if tag = 0x55 then (OrderReplaceMessage.decode rest).map fun (message, rest) => (.orderReplaceMessage message, rest)
-    else if tag = 0x50 then (NonCrossTradeMessage.decode rest).map fun (message, rest) => (.nonCrossTradeMessage message, rest)
-    else if tag = 0x51 then (CrossTradeMessage.decode rest).map fun (message, rest) => (.crossTradeMessage message, rest)
-    else if tag = 0x42 then (BrokenTradeMessage.decode rest).map fun (message, rest) => (.brokenTradeMessage message, rest)
-    else if tag = 0x49 then (NetOrderImbalanceIndicatorMessage.decode rest).map fun (message, rest) => (.netOrderImbalanceIndicatorMessage message, rest)
-    else if tag = 0x4E then (RetailPriceImprovementIndicatorMessage.decode rest).map fun (message, rest) => (.retailPriceImprovementIndicatorMessage message, rest)
-    else if tag = 0x4F then (DirectListingWithCapitalRaisePriceDiscoveryMessage.decode rest).map fun (message, rest) => (.directListingWithCapitalRaisePriceDiscoveryMessage message, rest)
-    else none
+def decodeBody (bytes : List UInt8) : Option (Message × List UInt8) := do
+  let (messageType, bytes) ← MessageType.decode bytes
+  let (payload, bytes) ← Payload.decode messageType bytes
+  pure ({ payload }, bytes)
+
+theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
+    decodeBody (encodeBody message ++ rest) = some (message, rest) := by
+  simp [decodeBody, encodeBody, List.append_assoc]
+
+/-- Every body fits the length prefix -/
+theorem encodeBody_length_lt (message : Message) : (encodeBody message).length + 0 < 65536 := by
+  cases h : message.payload with
+  | systemEventMessage inner =>
+    simp [encodeBody, h, Payload.encode, SystemEventMessage.encode]
+  | stockDirectoryMessage inner =>
+    simp [encodeBody, h, Payload.encode, StockDirectoryMessage.encode]
+  | stockTradingActionMessage inner =>
+    simp [encodeBody, h, Payload.encode, StockTradingActionMessage.encode]
+  | regShoShortSalePriceTestRestrictedIndicatorMessage inner =>
+    simp [encodeBody, h, Payload.encode, RegShoShortSalePriceTestRestrictedIndicatorMessage.encode]
+  | marketParticipantPositionMessage inner =>
+    simp [encodeBody, h, Payload.encode, MarketParticipantPositionMessage.encode]
+  | mwcbDeclineLevelMessage inner =>
+    simp [encodeBody, h, Payload.encode, MwcbDeclineLevelMessage.encode]
+  | mwcbStatusLevelMessage inner =>
+    simp [encodeBody, h, Payload.encode, MwcbStatusLevelMessage.encode]
+  | ipoQuotingPeriodUpdate inner =>
+    simp [encodeBody, h, Payload.encode, IpoQuotingPeriodUpdate.encode]
+  | luldAuctionCollarMessage inner =>
+    simp [encodeBody, h, Payload.encode, LuldAuctionCollarMessage.encode]
+  | operationalHaltMessage inner =>
+    simp [encodeBody, h, Payload.encode, OperationalHaltMessage.encode]
+  | addOrderNoMpidAttributionMessage inner =>
+    simp [encodeBody, h, Payload.encode, AddOrderNoMpidAttributionMessage.encode]
+  | addOrderWithMpidAttributionMessage inner =>
+    simp [encodeBody, h, Payload.encode, AddOrderWithMpidAttributionMessage.encode]
+  | orderExecutedMessage inner =>
+    simp [encodeBody, h, Payload.encode, OrderExecutedMessage.encode]
+  | orderExecutedWithPriceMessage inner =>
+    simp [encodeBody, h, Payload.encode, OrderExecutedWithPriceMessage.encode]
+  | orderCancelMessage inner =>
+    simp [encodeBody, h, Payload.encode, OrderCancelMessage.encode]
+  | orderDeleteMessage inner =>
+    simp [encodeBody, h, Payload.encode, OrderDeleteMessage.encode]
+  | orderReplaceMessage inner =>
+    simp [encodeBody, h, Payload.encode, OrderReplaceMessage.encode]
+  | nonCrossTradeMessage inner =>
+    simp [encodeBody, h, Payload.encode, NonCrossTradeMessage.encode]
+  | crossTradeMessage inner =>
+    simp [encodeBody, h, Payload.encode, CrossTradeMessage.encode]
+  | brokenTradeMessage inner =>
+    simp [encodeBody, h, Payload.encode, BrokenTradeMessage.encode]
+  | netOrderImbalanceIndicatorMessage inner =>
+    simp [encodeBody, h, Payload.encode, NetOrderImbalanceIndicatorMessage.encode]
+  | retailPriceImprovementIndicatorMessage inner =>
+    simp [encodeBody, h, Payload.encode, RetailPriceImprovementIndicatorMessage.encode]
+  | directListingWithCapitalRaisePriceDiscoveryMessage inner =>
+    simp [encodeBody, h, Payload.encode, DirectListingWithCapitalRaisePriceDiscoveryMessage.encode]
+
+/-- Size rule: Message Length counts the bytes after it, so it is written from the body -/
+def encode : Message → List UInt8 :=
+  encodeFramed 2 0 encodeBody
+
+def decode : List UInt8 → Option (Message × List UInt8) :=
+  decodeFramed 2 0 decodeBody
 
 @[simp] theorem decode_encode (message : Message) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  cases message <;> simp [decode, encode]
+    decode (encode message ++ rest) = some (message, rest) :=
+  decodeFramed_encodeFramed 2 0 encodeBody decodeBody decodeBody_encodeBody encodeBody_length_lt message rest
+
+theorem encode_length_pos (message : Message) : (encode message).length > 0 := by
+  unfold encode
+  rw [encodeFramed_length]
+  omega
 
 end Message
 
-namespace Message
-
-/-- Every message fits the length prefix -/
-theorem encode_length_lt (message : Message) : (encode message).length < 65536 := by
-  cases message <;> simp [encode]
-
-/-- Size rule: Message Length counts the bytes after it, so it is written from the encoded message -/
-def frame (message : Message) : List UInt8 :=
-  encodeUInt 2 (BitVec.ofNat 16 ((encode message).length)) ++ encode message
-
-def unframe (bytes : List UInt8) : Option (Message × List UInt8) := do
-  let (length, bytes) ← decodeUInt 2 bytes
-  let (body, rest) ← take? (length.toNat) bytes
-  let (message, tail) ← decode body
-  guard tail.isEmpty
-  pure (message, rest)
-
-@[simp] theorem frame_length (message : Message) : (frame message).length = 2 + (encode message).length := by
-  simp [frame]
-
-@[simp] theorem unframe_frame (message : Message) (rest : List UInt8) :
-    unframe (frame message ++ rest) = some (message, rest) := by
-  have fits := encode_length_lt message
-  have whole := decode_encode message []
-  rw [List.append_nil] at whole
-  simp [unframe, frame, guard, List.append_assoc, BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits, take?_append rfl, whole]
-
-end Message
-
-/-- Packet: header fields and the messages Message Count counts -/
+/-- Packet -/
 structure Packet where
   session : Alpha 10
   sequenceNumber : BitVec 64
-  messages : List Message
+  message : Bounded 2 Message
   deriving DecidableEq, Repr
 
 namespace Packet
 
-def encode (packet : Packet) : List UInt8 :=
-  Alpha.encode packet.session
-    ++ encodeUInt 8 packet.sequenceNumber
-    ++ encodeUInt 2 (BitVec.ofNat 16 packet.messages.length)
-    ++ encodeMany Message.frame packet.messages
+def encode (message : Packet) : List UInt8 :=
+  Alpha.encode message.session
+    ++ encodeUInt 8 message.sequenceNumber
+    ++ encodeUInt 2 (BitVec.ofNat 16 message.message.val.length)
+    ++ encodeMany Message.encode message.message.val
 
 def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (session, bytes) ← Alpha.decode 10 bytes
   let (sequenceNumber, bytes) ← decodeUInt 8 bytes
   let (messageCount, bytes) ← decodeUInt 2 bytes
-  let (messages, bytes) ← decodeMany Message.unframe messageCount.toNat bytes
-  pure ({ session, sequenceNumber, messages }, bytes)
+  let (message_, bytes) ← decodeMany Message.decode messageCount.toNat bytes
+  if fits_message : message_.length < 65536 then
+    pure ({ session, sequenceNumber, message := ⟨message_, fits_message⟩ }, bytes)
+  else none
 
-/-- A packet decodes back to what was encoded, as long as its messages fit the count -/
-theorem decode_encode (packet : Packet) (rest : List UInt8) (fits : packet.messages.length < 65536) :
-    decode (encode packet ++ rest) = some (packet, rest) := by
-  simp [decode, encode, List.append_assoc, BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits,
-        decodeMany_encodeMany Message.frame Message.unframe Message.unframe_frame]
+@[simp] theorem decode_encode (message : Packet) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  have fits_message : message.message.val.length < 65536 := by simpa using message.message.length_lt
+  simp [decode, encode, List.append_assoc, Nat.mod_eq_of_lt fits_message, fits_message, decodeMany_encodeMany Message.encode Message.decode Message.decode_encode]
 
 end Packet
 

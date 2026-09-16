@@ -4,5 +4,5 @@ defaultTargets = ["Omi"]
 
 [[lean_lib]]
 name = "Omi"
-roots = ["Omi", "iex", "nasdaq", "tests"]
-globs = ["Omi.+", "iex.+", "nasdaq.+", "tests.+"]
+roots = ["Omi", "cme", "iex", "nasdaq", "tests"]
+globs = ["Omi.+", "cme.+", "iex.+", "nasdaq.+", "tests.+"]

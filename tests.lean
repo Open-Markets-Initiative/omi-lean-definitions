@@ -1,3 +1,6 @@
+import tests.cme_globex_mdp3_v1_5_udp
+import tests.cme_globex_mdp3_v1_8_udp
+import tests.cme_globex_mdp3_v1_9_udp
 import tests.iexequities_deep_v1_06
 import tests.iexequities_deepplus_v1_01
 import tests.iexequities_tops_v1_56

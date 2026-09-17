@@ -566,13 +566,13 @@ theorem encode_length_pos (message : Heartbeat) : (encode message).length > 0 :=
 
 end Heartbeat
 
-/-- Instrument State Change: 20 bytes -/
+/-- Instrument State Change: 24 bytes -/
 structure InstrumentStateChange where
   securityId : BitVec 64
   securityStatus : BitVec 8
   securityTradingStatus : BitVec 8
   fastMarketIndicator : BitVec 8
-  pad1 : Alpha 1
+  pad5 : Alpha 5
   transactTime : BitVec 64
   deriving DecidableEq, Repr
 
@@ -583,7 +583,7 @@ def encode (message : InstrumentStateChange) : List UInt8 :=
     ++ encodeUInt 1 message.securityStatus
     ++ encodeUInt 1 message.securityTradingStatus
     ++ encodeUInt 1 message.fastMarketIndicator
-    ++ Alpha.encode message.pad1
+    ++ Alpha.encode message.pad5
     ++ encodeUIntLE 8 message.transactTime
 
 def decode (bytes : List UInt8) : Option (InstrumentStateChange × List UInt8) := do
@@ -591,11 +591,11 @@ def decode (bytes : List UInt8) : Option (InstrumentStateChange × List UInt8) :
   let (securityStatus, bytes) ← decodeUInt 1 bytes
   let (securityTradingStatus, bytes) ← decodeUInt 1 bytes
   let (fastMarketIndicator, bytes) ← decodeUInt 1 bytes
-  let (pad1, bytes) ← Alpha.decode 1 bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
   let (transactTime, bytes) ← decodeUIntLE 8 bytes
-  pure ({ securityId, securityStatus, securityTradingStatus, fastMarketIndicator, pad1, transactTime }, bytes)
+  pure ({ securityId, securityStatus, securityTradingStatus, fastMarketIndicator, pad5, transactTime }, bytes)
 
-@[simp] theorem encode_length (message : InstrumentStateChange) : (encode message).length = 20 := by
+@[simp] theorem encode_length (message : InstrumentStateChange) : (encode message).length = 24 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
 

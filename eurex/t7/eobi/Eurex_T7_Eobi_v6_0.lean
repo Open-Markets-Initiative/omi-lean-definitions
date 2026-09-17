@@ -509,12 +509,12 @@ theorem encode_length_pos (message : ExecutionSummary) : (encode message).length
 
 end ExecutionSummary
 
-/-- Full Order Execution: 44 bytes -/
+/-- Full Order Execution: 48 bytes -/
 structure FullOrderExecution where
   side : BitVec 8
   ordType : BitVec 8
   algorithmicTradeIndicator : BitVec 8
-  pad1 : Alpha 1
+  pad5 : Alpha 5
   price : BitVec 64
   trdRegTsTimePriority : BitVec 64
   securityId : BitVec 64
@@ -529,7 +529,7 @@ def encode (message : FullOrderExecution) : List UInt8 :=
   encodeUInt 1 message.side
     ++ encodeUInt 1 message.ordType
     ++ encodeUInt 1 message.algorithmicTradeIndicator
-    ++ Alpha.encode message.pad1
+    ++ Alpha.encode message.pad5
     ++ encodeUIntLE 8 message.price
     ++ encodeUIntLE 8 message.trdRegTsTimePriority
     ++ encodeUIntLE 8 message.securityId
@@ -541,16 +541,16 @@ def decode (bytes : List UInt8) : Option (FullOrderExecution × List UInt8) := d
   let (side, bytes) ← decodeUInt 1 bytes
   let (ordType, bytes) ← decodeUInt 1 bytes
   let (algorithmicTradeIndicator, bytes) ← decodeUInt 1 bytes
-  let (pad1, bytes) ← Alpha.decode 1 bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
   let (price, bytes) ← decodeUIntLE 8 bytes
   let (trdRegTsTimePriority, bytes) ← decodeUIntLE 8 bytes
   let (securityId, bytes) ← decodeUIntLE 8 bytes
   let (trdMatchId, bytes) ← decodeUIntLE 4 bytes
   let (lastQty, bytes) ← decodeUIntLE 4 bytes
   let (lastPx, bytes) ← decodeUIntLE 8 bytes
-  pure ({ side, ordType, algorithmicTradeIndicator, pad1, price, trdRegTsTimePriority, securityId, trdMatchId, lastQty, lastPx }, bytes)
+  pure ({ side, ordType, algorithmicTradeIndicator, pad5, price, trdRegTsTimePriority, securityId, trdMatchId, lastQty, lastPx }, bytes)
 
-@[simp] theorem encode_length (message : FullOrderExecution) : (encode message).length = 44 := by
+@[simp] theorem encode_length (message : FullOrderExecution) : (encode message).length = 48 := by
   unfold encode
   simp only [List.length_append, encodeUInt_length, Alpha.encode_length, encodeUIntLE_length]
 
@@ -1122,12 +1122,12 @@ theorem encode_length_pos (message : OrderModifySamePrio) : (encode message).len
 
 end OrderModifySamePrio
 
-/-- Partial Order Execution: 44 bytes -/
+/-- Partial Order Execution: 48 bytes -/
 structure PartialOrderExecution where
   side : BitVec 8
   ordType : BitVec 8
   algorithmicTradeIndicator : BitVec 8
-  pad1 : Alpha 1
+  pad5 : Alpha 5
   price : BitVec 64
   trdRegTsTimePriority : BitVec 64
   securityId : BitVec 64
@@ -1142,7 +1142,7 @@ def encode (message : PartialOrderExecution) : List UInt8 :=
   encodeUInt 1 message.side
     ++ encodeUInt 1 message.ordType
     ++ encodeUInt 1 message.algorithmicTradeIndicator
-    ++ Alpha.encode message.pad1
+    ++ Alpha.encode message.pad5
     ++ encodeUIntLE 8 message.price
     ++ encodeUIntLE 8 message.trdRegTsTimePriority
     ++ encodeUIntLE 8 message.securityId
@@ -1154,16 +1154,16 @@ def decode (bytes : List UInt8) : Option (PartialOrderExecution × List UInt8) :
   let (side, bytes) ← decodeUInt 1 bytes
   let (ordType, bytes) ← decodeUInt 1 bytes
   let (algorithmicTradeIndicator, bytes) ← decodeUInt 1 bytes
-  let (pad1, bytes) ← Alpha.decode 1 bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
   let (price, bytes) ← decodeUIntLE 8 bytes
   let (trdRegTsTimePriority, bytes) ← decodeUIntLE 8 bytes
   let (securityId, bytes) ← decodeUIntLE 8 bytes
   let (trdMatchId, bytes) ← decodeUIntLE 4 bytes
   let (lastQty, bytes) ← decodeUIntLE 4 bytes
   let (lastPx, bytes) ← decodeUIntLE 8 bytes
-  pure ({ side, ordType, algorithmicTradeIndicator, pad1, price, trdRegTsTimePriority, securityId, trdMatchId, lastQty, lastPx }, bytes)
+  pure ({ side, ordType, algorithmicTradeIndicator, pad5, price, trdRegTsTimePriority, securityId, trdMatchId, lastQty, lastPx }, bytes)
 
-@[simp] theorem encode_length (message : PartialOrderExecution) : (encode message).length = 44 := by
+@[simp] theorem encode_length (message : PartialOrderExecution) : (encode message).length = 48 := by
   unfold encode
   simp only [List.length_append, encodeUInt_length, Alpha.encode_length, encodeUIntLE_length]
 

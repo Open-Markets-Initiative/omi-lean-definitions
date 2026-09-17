@@ -468,7 +468,7 @@ theorem encode_length_pos (message : AddScaledSimpleInstrument) : (encode messag
 
 end AddScaledSimpleInstrument
 
-/-- Auction Bbo: 52 bytes -/
+/-- Auction Bbo: 56 bytes -/
 structure AuctionBbo where
   transactTime : BitVec 64
   securityId : BitVec 64
@@ -479,7 +479,7 @@ structure AuctionBbo where
   potentialSecurityTradingEvent : BitVec 8
   bidOrdType : BitVec 8
   offerOrdType : BitVec 8
-  pad1 : Alpha 1
+  pad5 : Alpha 5
   deriving DecidableEq, Repr
 
 namespace AuctionBbo
@@ -494,7 +494,7 @@ def encode (message : AuctionBbo) : List UInt8 :=
     ++ encodeUInt 1 message.potentialSecurityTradingEvent
     ++ encodeUInt 1 message.bidOrdType
     ++ encodeUInt 1 message.offerOrdType
-    ++ Alpha.encode message.pad1
+    ++ Alpha.encode message.pad5
 
 def decode (bytes : List UInt8) : Option (AuctionBbo × List UInt8) := do
   let (transactTime, bytes) ← decodeUIntLE 8 bytes
@@ -506,10 +506,10 @@ def decode (bytes : List UInt8) : Option (AuctionBbo × List UInt8) := do
   let (potentialSecurityTradingEvent, bytes) ← decodeUInt 1 bytes
   let (bidOrdType, bytes) ← decodeUInt 1 bytes
   let (offerOrdType, bytes) ← decodeUInt 1 bytes
-  let (pad1, bytes) ← Alpha.decode 1 bytes
-  pure ({ transactTime, securityId, bidPx, offerPx, bidSize, offerSize, potentialSecurityTradingEvent, bidOrdType, offerOrdType, pad1 }, bytes)
+  let (pad5, bytes) ← Alpha.decode 5 bytes
+  pure ({ transactTime, securityId, bidPx, offerPx, bidSize, offerSize, potentialSecurityTradingEvent, bidOrdType, offerOrdType, pad5 }, bytes)
 
-@[simp] theorem encode_length (message : AuctionBbo) : (encode message).length = 52 := by
+@[simp] theorem encode_length (message : AuctionBbo) : (encode message).length = 56 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
 
@@ -610,7 +610,7 @@ theorem encode_length_pos (message : AuctionClearingPrice) : (encode message).le
 
 end AuctionClearingPrice
 
-/-- Cross Request: 36 bytes -/
+/-- Cross Request: 40 bytes -/
 structure CrossRequest where
   securityId : BitVec 64
   lastPx : BitVec 64
@@ -618,7 +618,7 @@ structure CrossRequest where
   side : BitVec 8
   crossRequestType : BitVec 8
   inputSource : BitVec 8
-  pad1 : Alpha 1
+  pad5 : Alpha 5
   transactTime : BitVec 64
   deriving DecidableEq, Repr
 
@@ -631,7 +631,7 @@ def encode (message : CrossRequest) : List UInt8 :=
     ++ encodeUInt 1 message.side
     ++ encodeUInt 1 message.crossRequestType
     ++ encodeUInt 1 message.inputSource
-    ++ Alpha.encode message.pad1
+    ++ Alpha.encode message.pad5
     ++ encodeUIntLE 8 message.transactTime
 
 def decode (bytes : List UInt8) : Option (CrossRequest × List UInt8) := do
@@ -641,11 +641,11 @@ def decode (bytes : List UInt8) : Option (CrossRequest × List UInt8) := do
   let (side, bytes) ← decodeUInt 1 bytes
   let (crossRequestType, bytes) ← decodeUInt 1 bytes
   let (inputSource, bytes) ← decodeUInt 1 bytes
-  let (pad1, bytes) ← Alpha.decode 1 bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
   let (transactTime, bytes) ← decodeUIntLE 8 bytes
-  pure ({ securityId, lastPx, lastQty, side, crossRequestType, inputSource, pad1, transactTime }, bytes)
+  pure ({ securityId, lastPx, lastQty, side, crossRequestType, inputSource, pad5, transactTime }, bytes)
 
-@[simp] theorem encode_length (message : CrossRequest) : (encode message).length = 36 := by
+@[simp] theorem encode_length (message : CrossRequest) : (encode message).length = 40 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
 
@@ -1103,7 +1103,7 @@ structure InstrumentSummary where
   lowPx : BitVec 64
   productComplex : BitVec 8
   tesSecurityStatus : BitVec 8
-  pad1 : Alpha 1
+  pad5 : Alpha 5
   mdInstrumentEntryGrpComp : Bounded 1 MdInstrumentEntryGrpComp
   deriving DecidableEq, Repr
 
@@ -1125,7 +1125,7 @@ def encode (message : InstrumentSummary) : List UInt8 :=
     ++ encodeUInt 1 message.productComplex
     ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.mdInstrumentEntryGrpComp.val.length)
     ++ encodeUInt 1 message.tesSecurityStatus
-    ++ Alpha.encode message.pad1
+    ++ Alpha.encode message.pad5
     ++ encodeMany MdInstrumentEntryGrpComp.encode message.mdInstrumentEntryGrpComp.val
 
 def decode (bytes : List UInt8) : Option (InstrumentSummary × List UInt8) := do
@@ -1144,10 +1144,10 @@ def decode (bytes : List UInt8) : Option (InstrumentSummary × List UInt8) := do
   let (productComplex, bytes) ← decodeUInt 1 bytes
   let (noMdEntries, bytes) ← decodeUInt 1 bytes
   let (tesSecurityStatus, bytes) ← decodeUInt 1 bytes
-  let (pad1, bytes) ← Alpha.decode 1 bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
   let (mdInstrumentEntryGrpComp_, bytes) ← decodeMany MdInstrumentEntryGrpComp.decode noMdEntries.toNat bytes
   if fits_mdInstrumentEntryGrpComp : mdInstrumentEntryGrpComp_.length < 256 ^ 1 then
-    pure ({ securityId, lastUpdateTime, trdRegTsExecutionTime, totNoOrders, securityStatus, securityTradingStatus, marketCondition, fastMarketIndicator, securityTradingEvent, soldOutIndicator, highPx, lowPx, productComplex, tesSecurityStatus, pad1, mdInstrumentEntryGrpComp := ⟨mdInstrumentEntryGrpComp_, fits_mdInstrumentEntryGrpComp⟩ }, bytes)
+    pure ({ securityId, lastUpdateTime, trdRegTsExecutionTime, totNoOrders, securityStatus, securityTradingStatus, marketCondition, fastMarketIndicator, securityTradingEvent, soldOutIndicator, highPx, lowPx, productComplex, tesSecurityStatus, pad5, mdInstrumentEntryGrpComp := ⟨mdInstrumentEntryGrpComp_, fits_mdInstrumentEntryGrpComp⟩ }, bytes)
   else none
 
 theorem encode_length_pos (message : InstrumentSummary) : (encode message).length > 0 := by
@@ -1156,7 +1156,7 @@ theorem encode_length_pos (message : InstrumentSummary) : (encode message).lengt
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : InstrumentSummary) : (encode message).length ≤ 8212 := by
+theorem encode_length_le (message : InstrumentSummary) : (encode message).length ≤ 8216 := by
   have bound_mdInstrumentEntryGrpComp := message.mdInstrumentEntryGrpComp.length_lt
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length, encodeMany_length_const MdInstrumentEntryGrpComp.encode 32 MdInstrumentEntryGrpComp.encode_length]
@@ -1379,14 +1379,14 @@ theorem encode_length_le (message : MassInstrumentStateChange) : (encode message
 
 end MassInstrumentStateChange
 
-/-- Order Details Comp: 28 bytes -/
+/-- Order Details Comp: 32 bytes -/
 structure OrderDetailsComp where
   trdRegTsTimePriority : BitVec 64
   displayQty : BitVec 64
   side : BitVec 8
   ordType : BitVec 8
   hhiIndicator : BitVec 8
-  pad1 : Alpha 1
+  pad5 : Alpha 5
   price : BitVec 64
   deriving DecidableEq, Repr
 
@@ -1398,7 +1398,7 @@ def encode (message : OrderDetailsComp) : List UInt8 :=
     ++ encodeUInt 1 message.side
     ++ encodeUInt 1 message.ordType
     ++ encodeUInt 1 message.hhiIndicator
-    ++ Alpha.encode message.pad1
+    ++ Alpha.encode message.pad5
     ++ encodeUIntLE 8 message.price
 
 def decode (bytes : List UInt8) : Option (OrderDetailsComp × List UInt8) := do
@@ -1407,11 +1407,11 @@ def decode (bytes : List UInt8) : Option (OrderDetailsComp × List UInt8) := do
   let (side, bytes) ← decodeUInt 1 bytes
   let (ordType, bytes) ← decodeUInt 1 bytes
   let (hhiIndicator, bytes) ← decodeUInt 1 bytes
-  let (pad1, bytes) ← Alpha.decode 1 bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
   let (price, bytes) ← decodeUIntLE 8 bytes
-  pure ({ trdRegTsTimePriority, displayQty, side, ordType, hhiIndicator, pad1, price }, bytes)
+  pure ({ trdRegTsTimePriority, displayQty, side, ordType, hhiIndicator, pad5, price }, bytes)
 
-@[simp] theorem encode_length (message : OrderDetailsComp) : (encode message).length = 28 := by
+@[simp] theorem encode_length (message : OrderDetailsComp) : (encode message).length = 32 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
 
@@ -1440,7 +1440,7 @@ theorem encode_length_pos (message : OrderDetailsComp) : (encode message).length
 
 end OrderDetailsComp
 
-/-- Order Add: 44 bytes -/
+/-- Order Add: 48 bytes -/
 structure OrderAdd where
   requestTime : BitVec 64
   securityId : BitVec 64
@@ -1460,7 +1460,7 @@ def decode (bytes : List UInt8) : Option (OrderAdd × List UInt8) := do
   let (orderDetailsComp, bytes) ← OrderDetailsComp.decode bytes
   pure ({ requestTime, securityId, orderDetailsComp }, bytes)
 
-@[simp] theorem encode_length (message : OrderAdd) : (encode message).length = 44 := by
+@[simp] theorem encode_length (message : OrderAdd) : (encode message).length = 48 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, OrderDetailsComp.encode_length]
 
@@ -1481,7 +1481,7 @@ theorem encode_length_pos (message : OrderAdd) : (encode message).length > 0 := 
 
 end OrderAdd
 
-/-- Order Delete: 52 bytes -/
+/-- Order Delete: 56 bytes -/
 structure OrderDelete where
   requestTime : BitVec 64
   transactTime : BitVec 64
@@ -1504,7 +1504,7 @@ def decode (bytes : List UInt8) : Option (OrderDelete × List UInt8) := do
   let (orderDetailsComp, bytes) ← OrderDetailsComp.decode bytes
   pure ({ requestTime, transactTime, securityId, orderDetailsComp }, bytes)
 
-@[simp] theorem encode_length (message : OrderDelete) : (encode message).length = 52 := by
+@[simp] theorem encode_length (message : OrderDelete) : (encode message).length = 56 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, OrderDetailsComp.encode_length]
 
@@ -1563,7 +1563,7 @@ theorem encode_length_pos (message : OrderMassDelete) : (encode message).length 
 
 end OrderMassDelete
 
-/-- Order Modify: 76 bytes -/
+/-- Order Modify: 80 bytes -/
 structure OrderModify where
   requestTime : BitVec 64
   trdRegTsPrevTimePriority : BitVec 64
@@ -1598,7 +1598,7 @@ def decode (bytes : List UInt8) : Option (OrderModify × List UInt8) := do
   let (pad7, bytes) ← Alpha.decode 7 bytes
   pure ({ requestTime, trdRegTsPrevTimePriority, prevPrice, prevDisplayQty, securityId, orderDetailsComp, prevPriceHhiIndicator, pad7 }, bytes)
 
-@[simp] theorem encode_length (message : OrderModify) : (encode message).length = 76 := by
+@[simp] theorem encode_length (message : OrderModify) : (encode message).length = 80 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, OrderDetailsComp.encode_length, encodeUInt_length, Alpha.encode_length]
 
@@ -1629,7 +1629,7 @@ theorem encode_length_pos (message : OrderModify) : (encode message).length > 0 
 
 end OrderModify
 
-/-- Order Modify Same Prio: 60 bytes -/
+/-- Order Modify Same Prio: 64 bytes -/
 structure OrderModifySamePrio where
   requestTime : BitVec 64
   transactTime : BitVec 64
@@ -1655,7 +1655,7 @@ def decode (bytes : List UInt8) : Option (OrderModifySamePrio × List UInt8) := 
   let (orderDetailsComp, bytes) ← OrderDetailsComp.decode bytes
   pure ({ requestTime, transactTime, prevDisplayQty, securityId, orderDetailsComp }, bytes)
 
-@[simp] theorem encode_length (message : OrderModifySamePrio) : (encode message).length = 60 := by
+@[simp] theorem encode_length (message : OrderModifySamePrio) : (encode message).length = 64 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, OrderDetailsComp.encode_length]
 
@@ -1939,7 +1939,7 @@ theorem encode_length_pos (message : QuoteRequest) : (encode message).length > 0
 
 end QuoteRequest
 
-/-- Snapshot Order: 28 bytes -/
+/-- Snapshot Order: 32 bytes -/
 structure SnapshotOrder where
   orderDetailsComp : OrderDetailsComp
   deriving DecidableEq, Repr
@@ -1953,7 +1953,7 @@ def decode (bytes : List UInt8) : Option (SnapshotOrder × List UInt8) := do
   let (orderDetailsComp, bytes) ← OrderDetailsComp.decode bytes
   pure ({ orderDetailsComp }, bytes)
 
-@[simp] theorem encode_length (message : SnapshotOrder) : (encode message).length = 28 := by
+@[simp] theorem encode_length (message : SnapshotOrder) : (encode message).length = 32 := by
   unfold encode
   simp only [OrderDetailsComp.encode_length]
 

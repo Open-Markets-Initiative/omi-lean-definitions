@@ -382,7 +382,7 @@ theorem encode_length_pos (message : AuctionClearingPrice) : (encode message).le
 
 end AuctionClearingPrice
 
-/-- Cross Request: 36 bytes -/
+/-- Cross Request: 40 bytes -/
 structure CrossRequest where
   securityId : BitVec 64
   lastPx : BitVec 64
@@ -390,7 +390,7 @@ structure CrossRequest where
   side : BitVec 8
   crossRequestType : BitVec 8
   inputSource : BitVec 8
-  pad1 : Alpha 1
+  pad5 : Alpha 5
   transactTime : BitVec 64
   deriving DecidableEq, Repr
 
@@ -403,7 +403,7 @@ def encode (message : CrossRequest) : List UInt8 :=
     ++ encodeUInt 1 message.side
     ++ encodeUInt 1 message.crossRequestType
     ++ encodeUInt 1 message.inputSource
-    ++ Alpha.encode message.pad1
+    ++ Alpha.encode message.pad5
     ++ encodeUIntLE 8 message.transactTime
 
 def decode (bytes : List UInt8) : Option (CrossRequest × List UInt8) := do
@@ -413,11 +413,11 @@ def decode (bytes : List UInt8) : Option (CrossRequest × List UInt8) := do
   let (side, bytes) ← decodeUInt 1 bytes
   let (crossRequestType, bytes) ← decodeUInt 1 bytes
   let (inputSource, bytes) ← decodeUInt 1 bytes
-  let (pad1, bytes) ← Alpha.decode 1 bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
   let (transactTime, bytes) ← decodeUIntLE 8 bytes
-  pure ({ securityId, lastPx, lastQty, side, crossRequestType, inputSource, pad1, transactTime }, bytes)
+  pure ({ securityId, lastPx, lastQty, side, crossRequestType, inputSource, pad5, transactTime }, bytes)
 
-@[simp] theorem encode_length (message : CrossRequest) : (encode message).length = 36 := by
+@[simp] theorem encode_length (message : CrossRequest) : (encode message).length = 40 := by
   unfold encode
   simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
 

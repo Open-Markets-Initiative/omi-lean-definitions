@@ -1,4 +1,4 @@
-import iex.deepplus.IexEquities_DeepPlus_v1_04
+import iex.iexequities.deepplus.IexEquities_DeepPlus_v1_04
 
 /-!
 # Investors Exchange DeepPlus tests

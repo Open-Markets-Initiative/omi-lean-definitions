@@ -1,5 +1,5 @@
-import cme.mdp3.Cme_Globex_Mdp3_v1_12_ClientTcp
-import cme.mdp3.Cme_Globex_Mdp3_v1_12_ServerTcp
+import cme.globex.mdp3.Cme_Globex_Mdp3_v1_12_ClientTcp
+import cme.globex.mdp3.Cme_Globex_Mdp3_v1_12_ServerTcp
 
 /-!
 # CME Group Market Data Platform 3 tests

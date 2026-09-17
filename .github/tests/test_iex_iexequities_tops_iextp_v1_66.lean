@@ -1,4 +1,4 @@
-import iex.tops.IexEquities_Tops_v1_66
+import iex.iexequities.tops.IexEquities_Tops_v1_66
 
 /-!
 # Investors Exchange Top Of Book tests

@@ -1,4 +1,4 @@
-import eurex.xti.Eurex_T7_Xti_v10_0_Server
+import eurex.t7.xti.Eurex_T7_Xti_v10_0_Server
 
 /-!
 # Eurex Exchange Cash Enhanced Trading Interface tests

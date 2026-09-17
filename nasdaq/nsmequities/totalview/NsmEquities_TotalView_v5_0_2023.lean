@@ -1602,12 +1602,12 @@ theorem encode_length_pos (message : SystemEventMessage) : (encode message).leng
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [EventCode.decode_encode, Option.bind_some]
   rfl
 
@@ -1687,38 +1687,38 @@ theorem encode_length_pos (message : StockDirectoryMessage) : (encode message).l
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [MarketCategory.decode_encode]
-  simp only [Option.bind_some]
-  rw [FinancialStatusIndicator.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [RoundLotsOnly.decode_encode]
-  simp only [Option.bind_some]
-  rw [IssueClassification.decode_encode]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [Authenticity.decode_encode]
-  simp only [Option.bind_some]
-  rw [ShortSaleThresholdIndicator.decode_encode]
-  simp only [Option.bind_some]
-  rw [IpoFlag.decode_encode]
-  simp only [Option.bind_some]
-  rw [LuldReferencePriceTier.decode_encode]
-  simp only [Option.bind_some]
-  rw [EtpFlag.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [MarketCategory.decode_encode, Option.bind_some]
+  dsimp only
+  rw [FinancialStatusIndicator.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [RoundLotsOnly.decode_encode, Option.bind_some]
+  dsimp only
+  rw [IssueClassification.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Authenticity.decode_encode, Option.bind_some]
+  dsimp only
+  rw [ShortSaleThresholdIndicator.decode_encode, Option.bind_some]
+  dsimp only
+  rw [IpoFlag.decode_encode, Option.bind_some]
+  dsimp only
+  rw [LuldReferencePriceTier.decode_encode, Option.bind_some]
+  dsimp only
+  rw [EtpFlag.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [InverseIndicator.decode_encode, Option.bind_some]
   rfl
 
@@ -1768,18 +1768,18 @@ theorem encode_length_pos (message : StockTradingActionMessage) : (encode messag
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [TradingState.decode_encode]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [TradingState.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
   rw [Alpha.decode_encode, Option.bind_some]
   rfl
 
@@ -1823,14 +1823,14 @@ theorem encode_length_pos (message : RegShoShortSalePriceTestRestrictedIndicator
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
   rw [RegShoAction.decode_encode, Option.bind_some]
   rfl
 
@@ -1883,20 +1883,20 @@ theorem encode_length_pos (message : MarketParticipantPositionMessage) : (encode
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [PrimaryMarketMaker.decode_encode]
-  simp only [Option.bind_some]
-  rw [MarketMakerMode.decode_encode]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [PrimaryMarketMaker.decode_encode, Option.bind_some]
+  dsimp only
+  rw [MarketMakerMode.decode_encode, Option.bind_some]
+  dsimp only
   rw [MarketParticipantState.decode_encode, Option.bind_some]
   rfl
 
@@ -1943,16 +1943,16 @@ theorem encode_length_pos (message : MwcbDeclineLevelMessage) : (encode message)
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -1993,12 +1993,12 @@ theorem encode_length_pos (message : MwcbStatusLevelMessage) : (encode message).
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [BreachedLevel.decode_encode, Option.bind_some]
   rfl
 
@@ -2048,18 +2048,18 @@ theorem encode_length_pos (message : IpoQuotingPeriodUpdate) : (encode message).
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [IpoQuotationReleaseQualifier.decode_encode]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [IpoQuotationReleaseQualifier.decode_encode, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -2112,20 +2112,20 @@ theorem encode_length_pos (message : LuldAuctionCollarMessage) : (encode message
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -2172,16 +2172,16 @@ theorem encode_length_pos (message : OperationalHaltMessage) : (encode message).
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [MarketCode.decode_encode]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [MarketCode.decode_encode, Option.bind_some]
+  dsimp only
   rw [OperationalHaltAction.decode_encode, Option.bind_some]
   rfl
 
@@ -2234,20 +2234,20 @@ theorem encode_length_pos (message : AddOrderNoMpidAttributionMessage) : (encode
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [BuySellIndicator.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [BuySellIndicator.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -2303,22 +2303,22 @@ theorem encode_length_pos (message : AddOrderWithMpidAttributionMessage) : (enco
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [BuySellIndicator.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [BuySellIndicator.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [Alpha.decode_encode, Option.bind_some]
   rfl
 
@@ -2365,16 +2365,16 @@ theorem encode_length_pos (message : OrderExecutedMessage) : (encode message).le
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -2427,20 +2427,20 @@ theorem encode_length_pos (message : OrderExecutedWithPriceMessage) : (encode me
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Printable.decode_encode]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Printable.decode_encode, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -2484,14 +2484,14 @@ theorem encode_length_pos (message : OrderCancelMessage) : (encode message).leng
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -2532,12 +2532,12 @@ theorem encode_length_pos (message : OrderDeleteMessage) : (encode message).leng
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -2587,18 +2587,18 @@ theorem encode_length_pos (message : OrderReplaceMessage) : (encode message).len
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -2654,22 +2654,22 @@ theorem encode_length_pos (message : NonCrossTradeMessage) : (encode message).le
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [BuySellIndicator.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [BuySellIndicator.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -2722,20 +2722,20 @@ theorem encode_length_pos (message : CrossTradeMessage) : (encode message).lengt
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [CrossType.decode_encode, Option.bind_some]
   rfl
 
@@ -2776,12 +2776,12 @@ theorem encode_length_pos (message : BrokenTradeMessage) : (encode message).leng
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -2846,28 +2846,28 @@ theorem encode_length_pos (message : NetOrderImbalanceIndicatorMessage) : (encod
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [ImbalanceDirection.decode_encode]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [CrossType.decode_encode]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [ImbalanceDirection.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [CrossType.decode_encode, Option.bind_some]
+  dsimp only
   rw [PriceVariationIndicator.decode_encode, Option.bind_some]
   rfl
 
@@ -2911,14 +2911,14 @@ theorem encode_length_pos (message : RetailPriceImprovementIndicatorMessage) : (
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
   rw [InterestFlag.decode_encode, Option.bind_some]
   rfl
 
@@ -2980,26 +2980,26 @@ theorem encode_length_pos (message : DirectListingWithCapitalRaisePriceDiscovery
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [OpenEligibilityStatus.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [OpenEligibilityStatus.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [decodeUInt_encodeUInt, Option.bind_some]
   rfl
 
@@ -3137,8 +3137,8 @@ theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
     decodeBody (encodeBody message ++ rest) = some (message, rest) := by
   unfold decodeBody encodeBody
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
   rw [Payload.decode_encode, Option.bind_some]
   rfl
 
@@ -3267,14 +3267,14 @@ theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [Alpha.decode_encode]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeUInt_encodeUInt]
-  simp only [Option.bind_some]
-  rw [decodeMany_bounded 2 Message.encode Message.decode Message.decode_encode]
-  simp only [Option.bind_some]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 2 Message.encode Message.decode Message.decode_encode, Option.bind_some]
+  dsimp only
   simp only [message.message.length_lt, ↓reduceDIte]
   rfl
 

@@ -1,4 +1,4 @@
-import jpx.osederivatives.geniuminet.Jpx_OseDerivatives_GeniumInet_v5_0_6
+import jpx.osederivatives.geniuminet.OseDerivatives_GeniumInet_v5_0_6
 
 /-!
 # Japan Exchange Group Genium Inet tests

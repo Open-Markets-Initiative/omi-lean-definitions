@@ -1,5 +1,5 @@
-import eurex.eti.Eurex_T7_Eti_v6_1_Client
-import eurex.eti.Eurex_T7_Eti_v6_1_Server
+import eurex.t7.eti.Eurex_T7_Eti_v6_1_Client
+import eurex.t7.eti.Eurex_T7_Eti_v6_1_Server
 
 /-!
 # Eurex Exchange Enhanced Trading Interface tests

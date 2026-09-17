@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 194 | 1088597 |
+| 194 | 1089831 |
 
 ## Testing
 
@@ -43,7 +43,7 @@ Other generated code can be found at [Omi Projects](https://github.com/Open-Mark
 
 ## Exchanges
 
-> [IexEquities][IexEquities.Exchange] · [NsmEquities][NsmEquities.Exchange] · [NtxEquities][NtxEquities.Exchange] · [PsxEquities][PsxEquities.Exchange]
+> [FseEquities][FseEquities.Exchange] · [IexEquities][IexEquities.Exchange] · [NseEquities][NseEquities.Exchange] · [NsmEquities][NsmEquities.Exchange] · [NtxEquities][NtxEquities.Exchange] · [OseDerivatives][OseDerivatives.Exchange] · [PsxEquities][PsxEquities.Exchange] · [SseEquities][SseEquities.Exchange] · [TseEquities][TseEquities.Exchange]
 
 ## Platforms
 
@@ -112,12 +112,17 @@ Enjoy.
 [Jpx.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/jpx "Japan Exchange Group"
 [Nasdaq.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq "National Association of Securities Dealers Automated Quotations (Nasdaq)"
 
-[Globex.Platform]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/cme "CME Globex"
-[IexEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/iex "IEX Equities"
+[FseEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/jpx/fseequities "Fukuoka Stock Exchange Equities"
+[Globex.Platform]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/cme/globex "CME Globex"
+[IexEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/iex/iexequities "IEX Equities"
+[NseEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/jpx/nseequities "Nagoya Stock Exchange Equities"
 [NsmEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/nsmequities "Nasdaq Stock Market"
 [NtxEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/ntxequities "Nasdaq Texas"
+[OseDerivatives.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/jpx/osederivatives "Osaka Securities Exchange"
 [PsxEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/psxequities "Nasdaq PSX"
-[T7.Platform]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/eurex "T7"
+[SseEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/jpx/sseequities "Sapporo Securities Exchange Equities"
+[T7.Platform]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/eurex/t7 "T7"
+[TseEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/jpx/tseequities "Tokyo Stock Exchange Equities"
 
 [Kaitai.Definitions.Repository]: https://github.com/Open-Markets-Initiative/omi-kaitai-struct-definitions "Omi Kaitai Struct Definitions"
 [Dfdl.Definitions.Repository]: https://github.com/Open-Markets-Initiative/omi-dfdl-definitions "Omi DFDL Definitions"

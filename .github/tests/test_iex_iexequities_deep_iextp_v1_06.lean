@@ -1,4 +1,4 @@
-import iex.deep.IexEquities_Deep_v1_06
+import iex.iexequities.deep.IexEquities_Deep_v1_06
 
 /-!
 # Investors Exchange Depth Of Book tests

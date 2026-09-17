@@ -1,4 +1,4 @@
-import cme.mdp3.Cme_Globex_Mdp3_v1_8_Udp
+import cme.globex.mdp3.Cme_Globex_Mdp3_v1_8_Udp
 
 /-!
 # CME Group Market Data Platform 3 tests

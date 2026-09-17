@@ -1,4 +1,4 @@
-import eurex.eobi.Eurex_T7_Eobi_v13_0
+import eurex.t7.eobi.Eurex_T7_Eobi_v13_0
 
 /-!
 # Eurex Exchange Enhanced Order Book Interface tests

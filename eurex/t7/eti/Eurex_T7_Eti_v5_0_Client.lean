@@ -1,0 +1,4753 @@
+import Omi.Wire
+
+/-!
+# Eurex Exchange Enhanced Trading Interface v5.0
+
+Generated from the binary model, with the proofs the model's rules call for: every record
+decodes back to what was encoded; a message dispatch selects the message its type names;
+a count is written from the list it counts; a length prefix is written from the bytes it frames;
+and a packet read to the end of its data decodes to the messages that were written.
+
+Note: Add Complex Instrument Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Add Flexible Instrument Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Approve Tes Trade Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Cross Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Delete All Order Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Delete All Quote Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Delete Order Complex Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Delete Order Single Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Delete Tes Trade Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Enter Tes Trade Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Gateway Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Heartbeat is not framed: its length Body Len is not the integer that leads it.
+
+Note: Inquire Enrichment Rule Id List Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Inquire Mm Parameter Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Inquire Session List Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Inquire User Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Logon Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Logout Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Mm Parameter Definition Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Mass Quote Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Modify Order Complex Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Modify Order Single Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Modify Order Single Short Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Modify Tes Trade Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: New Order Complex Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: New Order Single Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: New Order Single Short Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Quote Activation Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Rfq Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Retransmit Me Message Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Retransmit Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Subscribe Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Unsubscribe Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: Upload Tes Trade Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: User Login Request is not framed: its length Body Len is not the integer that leads it.
+
+Note: User Logout Request is not framed: its length Body Len is not the integer that leads it.
+
+Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
+Prices with implied decimals are proven as the integers on the wire.
+-/
+
+namespace Omi.EurexT7EtiFbeV50Client
+
+/-- Settl Method: one byte code -/
+def SettlMethod.codes : List UInt8 :=
+  [0x43, 0x50]
+
+inductive SettlMethod where
+  | cashSettlement -- Cash Settlement
+  | physicalSettlement -- Physical Settlement
+  | unlisted (byte : { byte : UInt8 // byte ∉ SettlMethod.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace SettlMethod
+
+def toByte : SettlMethod → UInt8
+  | .cashSettlement => 0x43
+  | .physicalSettlement => 0x50
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : SettlMethod :=
+  if byte = 0x43 then .cashSettlement
+  else .physicalSettlement
+
+def ofByte (byte : UInt8) : SettlMethod :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : SettlMethod) : ofByte value.toByte = value := by
+  cases value with
+  | cashSettlement => decide
+  | physicalSettlement => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : SettlMethod) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (SettlMethod × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : SettlMethod) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : SettlMethod) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end SettlMethod
+
+/-- Position Effect: one byte code -/
+def PositionEffect.codes : List UInt8 :=
+  [0x43, 0x4F]
+
+inductive PositionEffect where
+  | close -- Close
+  | open_ -- Open
+  | unlisted (byte : { byte : UInt8 // byte ∉ PositionEffect.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace PositionEffect
+
+def toByte : PositionEffect → UInt8
+  | .close => 0x43
+  | .open_ => 0x4F
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : PositionEffect :=
+  if byte = 0x43 then .close
+  else .open_
+
+def ofByte (byte : UInt8) : PositionEffect :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : PositionEffect) : ofByte value.toByte = value := by
+  cases value with
+  | close => decide
+  | open_ => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : PositionEffect) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (PositionEffect × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : PositionEffect) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : PositionEffect) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end PositionEffect
+
+/-- Appl Usage Orders: one byte code -/
+def ApplUsageOrders.codes : List UInt8 :=
+  [0x41, 0x4D, 0x42, 0x4E]
+
+inductive ApplUsageOrders where
+  | automated -- Automated
+  | manual -- Manual
+  | autoSelect -- Auto Select
+  | none_ -- None
+  | unlisted (byte : { byte : UInt8 // byte ∉ ApplUsageOrders.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace ApplUsageOrders
+
+def toByte : ApplUsageOrders → UInt8
+  | .automated => 0x41
+  | .manual => 0x4D
+  | .autoSelect => 0x42
+  | .none_ => 0x4E
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : ApplUsageOrders :=
+  if byte = 0x41 then .automated
+  else if byte = 0x4D then .manual
+  else if byte = 0x42 then .autoSelect
+  else .none_
+
+def ofByte (byte : UInt8) : ApplUsageOrders :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : ApplUsageOrders) : ofByte value.toByte = value := by
+  cases value with
+  | automated => decide
+  | manual => decide
+  | autoSelect => decide
+  | none_ => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : ApplUsageOrders) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (ApplUsageOrders × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : ApplUsageOrders) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : ApplUsageOrders) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end ApplUsageOrders
+
+/-- Appl Usage Quotes: one byte code -/
+def ApplUsageQuotes.codes : List UInt8 :=
+  [0x41, 0x4D, 0x42, 0x4E]
+
+inductive ApplUsageQuotes where
+  | automated -- Automated
+  | manual -- Manual
+  | autoSelect -- Auto Select
+  | none_ -- None
+  | unlisted (byte : { byte : UInt8 // byte ∉ ApplUsageQuotes.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace ApplUsageQuotes
+
+def toByte : ApplUsageQuotes → UInt8
+  | .automated => 0x41
+  | .manual => 0x4D
+  | .autoSelect => 0x42
+  | .none_ => 0x4E
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : ApplUsageQuotes :=
+  if byte = 0x41 then .automated
+  else if byte = 0x4D then .manual
+  else if byte = 0x42 then .autoSelect
+  else .none_
+
+def ofByte (byte : UInt8) : ApplUsageQuotes :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : ApplUsageQuotes) : ofByte value.toByte = value := by
+  cases value with
+  | automated => decide
+  | manual => decide
+  | autoSelect => decide
+  | none_ => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : ApplUsageQuotes) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (ApplUsageQuotes × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : ApplUsageQuotes) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : ApplUsageQuotes) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end ApplUsageQuotes
+
+/-- Order Routing Indicator: one byte code -/
+def OrderRoutingIndicator.codes : List UInt8 :=
+  [0x59, 0x4E]
+
+inductive OrderRoutingIndicator where
+  | yes -- Yes
+  | no -- No
+  | unlisted (byte : { byte : UInt8 // byte ∉ OrderRoutingIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace OrderRoutingIndicator
+
+def toByte : OrderRoutingIndicator → UInt8
+  | .yes => 0x59
+  | .no => 0x4E
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : OrderRoutingIndicator :=
+  if byte = 0x59 then .yes
+  else .no
+
+def ofByte (byte : UInt8) : OrderRoutingIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : OrderRoutingIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | yes => decide
+  | no => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : OrderRoutingIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (OrderRoutingIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : OrderRoutingIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : OrderRoutingIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end OrderRoutingIndicator
+
+/-- Leg Position Effect: one byte code -/
+def LegPositionEffect.codes : List UInt8 :=
+  [0x43, 0x4F]
+
+inductive LegPositionEffect where
+  | close -- Close
+  | open_ -- Open
+  | unlisted (byte : { byte : UInt8 // byte ∉ LegPositionEffect.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace LegPositionEffect
+
+def toByte : LegPositionEffect → UInt8
+  | .close => 0x43
+  | .open_ => 0x4F
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : LegPositionEffect :=
+  if byte = 0x43 then .close
+  else .open_
+
+def ofByte (byte : UInt8) : LegPositionEffect :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : LegPositionEffect) : ofByte value.toByte = value := by
+  cases value with
+  | close => decide
+  | open_ => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : LegPositionEffect) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (LegPositionEffect × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : LegPositionEffect) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : LegPositionEffect) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end LegPositionEffect
+
+/-- Request Header Comp: 8 bytes -/
+structure RequestHeaderComp where
+  msgSeqNum : BitVec 32
+  senderSubId : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace RequestHeaderComp
+
+def encode (message : RequestHeaderComp) : List UInt8 :=
+  encodeUIntLE 4 message.msgSeqNum
+    ++ encodeUIntLE 4 message.senderSubId
+
+def decode (bytes : List UInt8) : Option (RequestHeaderComp × List UInt8) := do
+  let (msgSeqNum, bytes) ← decodeUIntLE 4 bytes
+  let (senderSubId, bytes) ← decodeUIntLE 4 bytes
+  pure ({ msgSeqNum, senderSubId }, bytes)
+
+@[simp] theorem encode_length (message : RequestHeaderComp) : (encode message).length = 8 := by
+  unfold encode
+  simp only [List.length_append, encodeUIntLE_length]
+
+theorem encode_length_pos (message : RequestHeaderComp) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : RequestHeaderComp) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rfl
+
+end RequestHeaderComp
+
+/-- Instrmt Leg Grp Comp: 32 bytes -/
+structure InstrmtLegGrpComp where
+  legSecurityId : BitVec 64
+  legPrice : BitVec 64
+  legSymbol : BitVec 32
+  legRatioQty : BitVec 32
+  legSide : BitVec 8
+  legSecurityType : BitVec 8
+  pad6 : Alpha 6
+  deriving DecidableEq, Repr
+
+namespace InstrmtLegGrpComp
+
+def encode (message : InstrmtLegGrpComp) : List UInt8 :=
+  encodeUIntLE 8 message.legSecurityId
+    ++ encodeUIntLE 8 message.legPrice
+    ++ encodeUIntLE 4 message.legSymbol
+    ++ encodeUIntLE 4 message.legRatioQty
+    ++ encodeUInt 1 message.legSide
+    ++ encodeUInt 1 message.legSecurityType
+    ++ Alpha.encode message.pad6
+
+def decode (bytes : List UInt8) : Option (InstrmtLegGrpComp × List UInt8) := do
+  let (legSecurityId, bytes) ← decodeUIntLE 8 bytes
+  let (legPrice, bytes) ← decodeUIntLE 8 bytes
+  let (legSymbol, bytes) ← decodeUIntLE 4 bytes
+  let (legRatioQty, bytes) ← decodeUIntLE 4 bytes
+  let (legSide, bytes) ← decodeUInt 1 bytes
+  let (legSecurityType, bytes) ← decodeUInt 1 bytes
+  let (pad6, bytes) ← Alpha.decode 6 bytes
+  pure ({ legSecurityId, legPrice, legSymbol, legRatioQty, legSide, legSecurityType, pad6 }, bytes)
+
+@[simp] theorem encode_length (message : InstrmtLegGrpComp) : (encode message).length = 32 := by
+  unfold encode
+  simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : InstrmtLegGrpComp) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : InstrmtLegGrpComp) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end InstrmtLegGrpComp
+
+/-- Add Complex Instrument Request -/
+structure AddComplexInstrumentRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  securitySubType : BitVec 32
+  productComplex : BitVec 8
+  complianceText : Alpha 20
+  pad2v2 : Alpha 2
+  instrmtLegGrpComp : Bounded 1 InstrmtLegGrpComp
+  deriving DecidableEq, Repr
+
+namespace AddComplexInstrumentRequest
+
+def encode (message : AddComplexInstrumentRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.securitySubType
+    ++ encodeUInt 1 message.productComplex
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.instrmtLegGrpComp.val.length)
+    ++ Alpha.encode message.complianceText
+    ++ Alpha.encode message.pad2v2
+    ++ encodeMany InstrmtLegGrpComp.encode message.instrmtLegGrpComp.val
+
+def decode (bytes : List UInt8) : Option (AddComplexInstrumentRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (securitySubType, bytes) ← decodeUIntLE 4 bytes
+  let (productComplex, bytes) ← decodeUInt 1 bytes
+  let (noLegs, bytes) ← decodeUInt 1 bytes
+  let (complianceText, bytes) ← Alpha.decode 20 bytes
+  let (pad2v2, bytes) ← Alpha.decode 2 bytes
+  let (instrmtLegGrpComp_, bytes) ← decodeMany InstrmtLegGrpComp.decode noLegs.toNat bytes
+  if fits_instrmtLegGrpComp : instrmtLegGrpComp_.length < 256 ^ 1 then
+    pure ({ networkMsgId, pad2, requestHeaderComp, complianceId, marketSegmentId, securitySubType, productComplex, complianceText, pad2v2, instrmtLegGrpComp := ⟨instrmtLegGrpComp_, fits_instrmtLegGrpComp⟩ }, bytes)
+  else none
+
+theorem encode_length_pos (message : AddComplexInstrumentRequest) : (encode message).length > 0 := by
+  unfold encode
+  simp only [Alpha.encode_length, List.length_append]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : AddComplexInstrumentRequest) : (encode message).length ≤ 8218 := by
+  have bound_instrmtLegGrpComp := message.instrmtLegGrpComp.length_lt
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const InstrmtLegGrpComp.encode 32 InstrmtLegGrpComp.encode_length]
+  omega
+
+@[simp] theorem decode_encode (message : AddComplexInstrumentRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 InstrmtLegGrpComp.encode InstrmtLegGrpComp.decode InstrmtLegGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  simp only [message.instrmtLegGrpComp.length_lt, ↓reduceDIte]
+  rfl
+
+end AddComplexInstrumentRequest
+
+/-- Add Flexible Instrument Request: 66 bytes -/
+structure AddFlexibleInstrumentRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  complianceId : BitVec 64
+  strikePrice : BitVec 64
+  marketSegmentId : BitVec 32
+  maturityDate : BitVec 32
+  settlMethod : SettlMethod
+  optAttribute : BitVec 8
+  putOrCall : BitVec 8
+  exerciseStyle : BitVec 8
+  complianceText : Alpha 20
+  deriving DecidableEq, Repr
+
+namespace AddFlexibleInstrumentRequest
+
+def encode (message : AddFlexibleInstrumentRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 8 message.strikePrice
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.maturityDate
+    ++ SettlMethod.encode message.settlMethod
+    ++ encodeUInt 1 message.optAttribute
+    ++ encodeUInt 1 message.putOrCall
+    ++ encodeUInt 1 message.exerciseStyle
+    ++ Alpha.encode message.complianceText
+
+def decode (bytes : List UInt8) : Option (AddFlexibleInstrumentRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (strikePrice, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (maturityDate, bytes) ← decodeUIntLE 4 bytes
+  let (settlMethod, bytes) ← SettlMethod.decode bytes
+  let (optAttribute, bytes) ← decodeUInt 1 bytes
+  let (putOrCall, bytes) ← decodeUInt 1 bytes
+  let (exerciseStyle, bytes) ← decodeUInt 1 bytes
+  let (complianceText, bytes) ← Alpha.decode 20 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, complianceId, strikePrice, marketSegmentId, maturityDate, settlMethod, optAttribute, putOrCall, exerciseStyle, complianceText }, bytes)
+
+@[simp] theorem encode_length (message : AddFlexibleInstrumentRequest) : (encode message).length = 66 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, SettlMethod.encode_length, encodeUInt_length]
+
+theorem encode_length_pos (message : AddFlexibleInstrumentRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : AddFlexibleInstrumentRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [SettlMethod.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end AddFlexibleInstrumentRequest
+
+/-- Approve Tes Trade Request: 202 bytes -/
+structure ApproveTesTradeRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  complianceId : BitVec 64
+  packageId : BitVec 32
+  allocId : BitVec 32
+  allocQty : BitVec 32
+  tesExecId : BitVec 32
+  marketSegmentId : BitVec 32
+  relatedMarketSegmentId : BitVec 32
+  trdType : BitVec 16
+  tradingCapacity : BitVec 8
+  tradeReportType : BitVec 8
+  side : BitVec 8
+  tradeReportId : Alpha 20
+  positionEffect : PositionEffect
+  partyExecutingFirm : Alpha 5
+  partyExecutingTrader : Alpha 6
+  account : Alpha 2
+  freeText1 : Alpha 12
+  freeText2 : Alpha 12
+  freeText3 : Alpha 12
+  partyIdTakeUpTradingFirm : Alpha 5
+  partyIdPositionAccount : Alpha 32
+  partyIdOrderOriginationFirm : Alpha 7
+  partyIdBeneficiary : Alpha 9
+  partyIdLocationId : Alpha 2
+  custOrderHandlingInst : Alpha 1
+  complianceText : Alpha 20
+  pad1 : Alpha 1
+  deriving DecidableEq, Repr
+
+namespace ApproveTesTradeRequest
+
+def encode (message : ApproveTesTradeRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.packageId
+    ++ encodeUIntLE 4 message.allocId
+    ++ encodeUIntLE 4 message.allocQty
+    ++ encodeUIntLE 4 message.tesExecId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.relatedMarketSegmentId
+    ++ encodeUIntLE 2 message.trdType
+    ++ encodeUInt 1 message.tradingCapacity
+    ++ encodeUInt 1 message.tradeReportType
+    ++ encodeUInt 1 message.side
+    ++ Alpha.encode message.tradeReportId
+    ++ PositionEffect.encode message.positionEffect
+    ++ Alpha.encode message.partyExecutingFirm
+    ++ Alpha.encode message.partyExecutingTrader
+    ++ Alpha.encode message.account
+    ++ Alpha.encode message.freeText1
+    ++ Alpha.encode message.freeText2
+    ++ Alpha.encode message.freeText3
+    ++ Alpha.encode message.partyIdTakeUpTradingFirm
+    ++ Alpha.encode message.partyIdPositionAccount
+    ++ Alpha.encode message.partyIdOrderOriginationFirm
+    ++ Alpha.encode message.partyIdBeneficiary
+    ++ Alpha.encode message.partyIdLocationId
+    ++ Alpha.encode message.custOrderHandlingInst
+    ++ Alpha.encode message.complianceText
+    ++ Alpha.encode message.pad1
+
+-- a long run of fields nests deeper than the elaborator's default limit
+set_option maxRecDepth 4096 in
+def decode (bytes : List UInt8) : Option (ApproveTesTradeRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (packageId, bytes) ← decodeUIntLE 4 bytes
+  let (allocId, bytes) ← decodeUIntLE 4 bytes
+  let (allocQty, bytes) ← decodeUIntLE 4 bytes
+  let (tesExecId, bytes) ← decodeUIntLE 4 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (relatedMarketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (trdType, bytes) ← decodeUIntLE 2 bytes
+  let (tradingCapacity, bytes) ← decodeUInt 1 bytes
+  let (tradeReportType, bytes) ← decodeUInt 1 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (tradeReportId, bytes) ← Alpha.decode 20 bytes
+  let (positionEffect, bytes) ← PositionEffect.decode bytes
+  let (partyExecutingFirm, bytes) ← Alpha.decode 5 bytes
+  let (partyExecutingTrader, bytes) ← Alpha.decode 6 bytes
+  let (account, bytes) ← Alpha.decode 2 bytes
+  let (freeText1, bytes) ← Alpha.decode 12 bytes
+  let (freeText2, bytes) ← Alpha.decode 12 bytes
+  let (freeText3, bytes) ← Alpha.decode 12 bytes
+  let (partyIdTakeUpTradingFirm, bytes) ← Alpha.decode 5 bytes
+  let (partyIdPositionAccount, bytes) ← Alpha.decode 32 bytes
+  let (partyIdOrderOriginationFirm, bytes) ← Alpha.decode 7 bytes
+  let (partyIdBeneficiary, bytes) ← Alpha.decode 9 bytes
+  let (partyIdLocationId, bytes) ← Alpha.decode 2 bytes
+  let (custOrderHandlingInst, bytes) ← Alpha.decode 1 bytes
+  let (complianceText, bytes) ← Alpha.decode 20 bytes
+  let (pad1, bytes) ← Alpha.decode 1 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, complianceId, packageId, allocId, allocQty, tesExecId, marketSegmentId, relatedMarketSegmentId, trdType, tradingCapacity, tradeReportType, side, tradeReportId, positionEffect, partyExecutingFirm, partyExecutingTrader, account, freeText1, freeText2, freeText3, partyIdTakeUpTradingFirm, partyIdPositionAccount, partyIdOrderOriginationFirm, partyIdBeneficiary, partyIdLocationId, custOrderHandlingInst, complianceText, pad1 }, bytes)
+
+@[simp] theorem encode_length (message : ApproveTesTradeRequest) : (encode message).length = 202 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length, PositionEffect.encode_length]
+
+theorem encode_length_pos (message : ApproveTesTradeRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+set_option maxRecDepth 4096 in
+@[simp] theorem decode_encode (message : ApproveTesTradeRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [PositionEffect.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end ApproveTesTradeRequest
+
+/-- Cross Request: 66 bytes -/
+structure CrossRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  securityId : BitVec 64
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  orderQty : BitVec 32
+  complianceText : Alpha 20
+  pad4 : Alpha 4
+  deriving DecidableEq, Repr
+
+namespace CrossRequest
+
+def encode (message : CrossRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.securityId
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.orderQty
+    ++ Alpha.encode message.complianceText
+    ++ Alpha.encode message.pad4
+
+def decode (bytes : List UInt8) : Option (CrossRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (securityId, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (orderQty, bytes) ← decodeUIntLE 4 bytes
+  let (complianceText, bytes) ← Alpha.decode 20 bytes
+  let (pad4, bytes) ← Alpha.decode 4 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, securityId, complianceId, marketSegmentId, orderQty, complianceText, pad4 }, bytes)
+
+@[simp] theorem encode_length (message : CrossRequest) : (encode message).length = 66 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length]
+
+theorem encode_length_pos (message : CrossRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : CrossRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end CrossRequest
+
+/-- Delete All Order Request: 58 bytes -/
+structure DeleteAllOrderRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  securityId : BitVec 64
+  price : BitVec 64
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  targetPartyIdSessionId : BitVec 32
+  targetPartyIdExecutingTrader : BitVec 32
+  side : BitVec 8
+  pad3 : Alpha 3
+  deriving DecidableEq, Repr
+
+namespace DeleteAllOrderRequest
+
+def encode (message : DeleteAllOrderRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.securityId
+    ++ encodeUIntLE 8 message.price
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.targetPartyIdSessionId
+    ++ encodeUIntLE 4 message.targetPartyIdExecutingTrader
+    ++ encodeUInt 1 message.side
+    ++ Alpha.encode message.pad3
+
+def decode (bytes : List UInt8) : Option (DeleteAllOrderRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (securityId, bytes) ← decodeUIntLE 8 bytes
+  let (price, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (targetPartyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  let (targetPartyIdExecutingTrader, bytes) ← decodeUIntLE 4 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (pad3, bytes) ← Alpha.decode 3 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, securityId, price, complianceId, marketSegmentId, targetPartyIdSessionId, targetPartyIdExecutingTrader, side, pad3 }, bytes)
+
+@[simp] theorem encode_length (message : DeleteAllOrderRequest) : (encode message).length = 58 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length]
+
+theorem encode_length_pos (message : DeleteAllOrderRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : DeleteAllOrderRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end DeleteAllOrderRequest
+
+/-- Delete All Quote Request: 34 bytes -/
+structure DeleteAllQuoteRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  targetPartyIdSessionId : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace DeleteAllQuoteRequest
+
+def encode (message : DeleteAllQuoteRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.targetPartyIdSessionId
+
+def decode (bytes : List UInt8) : Option (DeleteAllQuoteRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (targetPartyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, complianceId, marketSegmentId, targetPartyIdSessionId }, bytes)
+
+@[simp] theorem encode_length (message : DeleteAllQuoteRequest) : (encode message).length = 34 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length]
+
+theorem encode_length_pos (message : DeleteAllQuoteRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : DeleteAllQuoteRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rfl
+
+end DeleteAllQuoteRequest
+
+/-- Delete Order Complex Request: 66 bytes -/
+structure DeleteOrderComplexRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  orderId : BitVec 64
+  clOrdId : BitVec 64
+  origClOrdId : BitVec 64
+  securityId : BitVec 64
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  targetPartyIdSessionId : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace DeleteOrderComplexRequest
+
+def encode (message : DeleteOrderComplexRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.orderId
+    ++ encodeUIntLE 8 message.clOrdId
+    ++ encodeUIntLE 8 message.origClOrdId
+    ++ encodeUIntLE 8 message.securityId
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.targetPartyIdSessionId
+
+def decode (bytes : List UInt8) : Option (DeleteOrderComplexRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (orderId, bytes) ← decodeUIntLE 8 bytes
+  let (clOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (origClOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (securityId, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (targetPartyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, orderId, clOrdId, origClOrdId, securityId, complianceId, marketSegmentId, targetPartyIdSessionId }, bytes)
+
+@[simp] theorem encode_length (message : DeleteOrderComplexRequest) : (encode message).length = 66 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length]
+
+theorem encode_length_pos (message : DeleteOrderComplexRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : DeleteOrderComplexRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rfl
+
+end DeleteOrderComplexRequest
+
+/-- Delete Order Single Request: 66 bytes -/
+structure DeleteOrderSingleRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  orderId : BitVec 64
+  clOrdId : BitVec 64
+  origClOrdId : BitVec 64
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  simpleSecurityId : BitVec 32
+  targetPartyIdSessionId : BitVec 32
+  pad4 : Alpha 4
+  deriving DecidableEq, Repr
+
+namespace DeleteOrderSingleRequest
+
+def encode (message : DeleteOrderSingleRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.orderId
+    ++ encodeUIntLE 8 message.clOrdId
+    ++ encodeUIntLE 8 message.origClOrdId
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.simpleSecurityId
+    ++ encodeUIntLE 4 message.targetPartyIdSessionId
+    ++ Alpha.encode message.pad4
+
+def decode (bytes : List UInt8) : Option (DeleteOrderSingleRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (orderId, bytes) ← decodeUIntLE 8 bytes
+  let (clOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (origClOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (simpleSecurityId, bytes) ← decodeUIntLE 4 bytes
+  let (targetPartyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  let (pad4, bytes) ← Alpha.decode 4 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, orderId, clOrdId, origClOrdId, complianceId, marketSegmentId, simpleSecurityId, targetPartyIdSessionId, pad4 }, bytes)
+
+@[simp] theorem encode_length (message : DeleteOrderSingleRequest) : (encode message).length = 66 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length]
+
+theorem encode_length_pos (message : DeleteOrderSingleRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : DeleteOrderSingleRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end DeleteOrderSingleRequest
+
+/-- Delete Tes Trade Request: 58 bytes -/
+structure DeleteTesTradeRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  packageId : BitVec 32
+  marketSegmentId : BitVec 32
+  tesExecId : BitVec 32
+  relatedMarketSegmentId : BitVec 32
+  trdType : BitVec 16
+  tradeReportType : BitVec 8
+  tradeReportId : Alpha 20
+  pad1 : Alpha 1
+  deriving DecidableEq, Repr
+
+namespace DeleteTesTradeRequest
+
+def encode (message : DeleteTesTradeRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 4 message.packageId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.tesExecId
+    ++ encodeUIntLE 4 message.relatedMarketSegmentId
+    ++ encodeUIntLE 2 message.trdType
+    ++ encodeUInt 1 message.tradeReportType
+    ++ Alpha.encode message.tradeReportId
+    ++ Alpha.encode message.pad1
+
+def decode (bytes : List UInt8) : Option (DeleteTesTradeRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (packageId, bytes) ← decodeUIntLE 4 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (tesExecId, bytes) ← decodeUIntLE 4 bytes
+  let (relatedMarketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (trdType, bytes) ← decodeUIntLE 2 bytes
+  let (tradeReportType, bytes) ← decodeUInt 1 bytes
+  let (tradeReportId, bytes) ← Alpha.decode 20 bytes
+  let (pad1, bytes) ← Alpha.decode 1 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, packageId, marketSegmentId, tesExecId, relatedMarketSegmentId, trdType, tradeReportType, tradeReportId, pad1 }, bytes)
+
+@[simp] theorem encode_length (message : DeleteTesTradeRequest) : (encode message).length = 58 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length]
+
+theorem encode_length_pos (message : DeleteTesTradeRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : DeleteTesTradeRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end DeleteTesTradeRequest
+
+/-- Side Alloc Grp Comp: 24 bytes -/
+structure SideAllocGrpComp where
+  individualAllocId : BitVec 32
+  allocQty : BitVec 32
+  side : BitVec 8
+  partyExecutingFirm : Alpha 5
+  partyExecutingTrader : Alpha 6
+  pad4 : Alpha 4
+  deriving DecidableEq, Repr
+
+namespace SideAllocGrpComp
+
+def encode (message : SideAllocGrpComp) : List UInt8 :=
+  encodeUIntLE 4 message.individualAllocId
+    ++ encodeUIntLE 4 message.allocQty
+    ++ encodeUInt 1 message.side
+    ++ Alpha.encode message.partyExecutingFirm
+    ++ Alpha.encode message.partyExecutingTrader
+    ++ Alpha.encode message.pad4
+
+def decode (bytes : List UInt8) : Option (SideAllocGrpComp × List UInt8) := do
+  let (individualAllocId, bytes) ← decodeUIntLE 4 bytes
+  let (allocQty, bytes) ← decodeUIntLE 4 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (partyExecutingFirm, bytes) ← Alpha.decode 5 bytes
+  let (partyExecutingTrader, bytes) ← Alpha.decode 6 bytes
+  let (pad4, bytes) ← Alpha.decode 4 bytes
+  pure ({ individualAllocId, allocQty, side, partyExecutingFirm, partyExecutingTrader, pad4 }, bytes)
+
+@[simp] theorem encode_length (message : SideAllocGrpComp) : (encode message).length = 24 := by
+  unfold encode
+  simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : SideAllocGrpComp) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : SideAllocGrpComp) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end SideAllocGrpComp
+
+/-- Instrument Event Grp Comp: 8 bytes -/
+structure InstrumentEventGrpComp where
+  eventDate : BitVec 32
+  eventType : BitVec 8
+  pad3 : Alpha 3
+  deriving DecidableEq, Repr
+
+namespace InstrumentEventGrpComp
+
+def encode (message : InstrumentEventGrpComp) : List UInt8 :=
+  encodeUIntLE 4 message.eventDate
+    ++ encodeUInt 1 message.eventType
+    ++ Alpha.encode message.pad3
+
+def decode (bytes : List UInt8) : Option (InstrumentEventGrpComp × List UInt8) := do
+  let (eventDate, bytes) ← decodeUIntLE 4 bytes
+  let (eventType, bytes) ← decodeUInt 1 bytes
+  let (pad3, bytes) ← Alpha.decode 3 bytes
+  pure ({ eventDate, eventType, pad3 }, bytes)
+
+@[simp] theorem encode_length (message : InstrumentEventGrpComp) : (encode message).length = 8 := by
+  unfold encode
+  simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : InstrumentEventGrpComp) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : InstrumentEventGrpComp) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end InstrumentEventGrpComp
+
+/-- Instrument Attribute Grp Comp: 40 bytes -/
+structure InstrumentAttributeGrpComp where
+  instrAttribType : BitVec 8
+  instrAttribValue : Alpha 32
+  pad7 : Alpha 7
+  deriving DecidableEq, Repr
+
+namespace InstrumentAttributeGrpComp
+
+def encode (message : InstrumentAttributeGrpComp) : List UInt8 :=
+  encodeUInt 1 message.instrAttribType
+    ++ Alpha.encode message.instrAttribValue
+    ++ Alpha.encode message.pad7
+
+def decode (bytes : List UInt8) : Option (InstrumentAttributeGrpComp × List UInt8) := do
+  let (instrAttribType, bytes) ← decodeUInt 1 bytes
+  let (instrAttribValue, bytes) ← Alpha.decode 32 bytes
+  let (pad7, bytes) ← Alpha.decode 7 bytes
+  pure ({ instrAttribType, instrAttribValue, pad7 }, bytes)
+
+@[simp] theorem encode_length (message : InstrumentAttributeGrpComp) : (encode message).length = 40 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : InstrumentAttributeGrpComp) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : InstrumentAttributeGrpComp) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end InstrumentAttributeGrpComp
+
+/-- Underlying Stip Grp Comp: 40 bytes -/
+structure UnderlyingStipGrpComp where
+  underlyingStipValue : Alpha 32
+  underlyingStipType : Alpha 7
+  pad1 : Alpha 1
+  deriving DecidableEq, Repr
+
+namespace UnderlyingStipGrpComp
+
+def encode (message : UnderlyingStipGrpComp) : List UInt8 :=
+  Alpha.encode message.underlyingStipValue
+    ++ Alpha.encode message.underlyingStipType
+    ++ Alpha.encode message.pad1
+
+def decode (bytes : List UInt8) : Option (UnderlyingStipGrpComp × List UInt8) := do
+  let (underlyingStipValue, bytes) ← Alpha.decode 32 bytes
+  let (underlyingStipType, bytes) ← Alpha.decode 7 bytes
+  let (pad1, bytes) ← Alpha.decode 1 bytes
+  pure ({ underlyingStipValue, underlyingStipType, pad1 }, bytes)
+
+@[simp] theorem encode_length (message : UnderlyingStipGrpComp) : (encode message).length = 40 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length]
+
+theorem encode_length_pos (message : UnderlyingStipGrpComp) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : UnderlyingStipGrpComp) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end UnderlyingStipGrpComp
+
+/-- Enter Tes Trade Request -/
+structure EnterTesTradeRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  securityId : BitVec 64
+  lastPx : BitVec 64
+  transBkdTime : BitVec 64
+  underlyingPx : BitVec 64
+  underlyingQty : BitVec 64
+  relatedClosePrice : BitVec 64
+  marketSegmentId : BitVec 32
+  underlyingSettlementDate : BitVec 32
+  underlyingMaturityDate : BitVec 32
+  relatedTradeId : BitVec 32
+  relatedMarketSegmentId : BitVec 32
+  relatedTradeQuantity : BitVec 32
+  trdType : BitVec 16
+  productComplex : BitVec 8
+  tradeReportType : BitVec 8
+  tradePublishIndicator : BitVec 8
+  partyIdSettlementLocation : BitVec 8
+  hedgeType : BitVec 8
+  tradeReportText : Alpha 20
+  tradeReportId : Alpha 20
+  underlyingSecurityId : Alpha 12
+  underlyingSecurityDesc : Alpha 30
+  underlyingCurrency : Alpha 3
+  underlyingIssuer : Alpha 30
+  pad2v2 : Alpha 2
+  sideAllocGrpComp : Bounded 1 SideAllocGrpComp
+  instrumentEventGrpComp : Bounded 1 InstrumentEventGrpComp
+  instrumentAttributeGrpComp : Bounded 1 InstrumentAttributeGrpComp
+  underlyingStipGrpComp : Bounded 1 UnderlyingStipGrpComp
+  deriving DecidableEq, Repr
+
+namespace EnterTesTradeRequest
+
+def encode (message : EnterTesTradeRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.securityId
+    ++ encodeUIntLE 8 message.lastPx
+    ++ encodeUIntLE 8 message.transBkdTime
+    ++ encodeUIntLE 8 message.underlyingPx
+    ++ encodeUIntLE 8 message.underlyingQty
+    ++ encodeUIntLE 8 message.relatedClosePrice
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.underlyingSettlementDate
+    ++ encodeUIntLE 4 message.underlyingMaturityDate
+    ++ encodeUIntLE 4 message.relatedTradeId
+    ++ encodeUIntLE 4 message.relatedMarketSegmentId
+    ++ encodeUIntLE 4 message.relatedTradeQuantity
+    ++ encodeUIntLE 2 message.trdType
+    ++ encodeUInt 1 message.productComplex
+    ++ encodeUInt 1 message.tradeReportType
+    ++ encodeUInt 1 message.tradePublishIndicator
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.sideAllocGrpComp.val.length)
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.instrumentEventGrpComp.val.length)
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.instrumentAttributeGrpComp.val.length)
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.underlyingStipGrpComp.val.length)
+    ++ encodeUInt 1 message.partyIdSettlementLocation
+    ++ encodeUInt 1 message.hedgeType
+    ++ Alpha.encode message.tradeReportText
+    ++ Alpha.encode message.tradeReportId
+    ++ Alpha.encode message.underlyingSecurityId
+    ++ Alpha.encode message.underlyingSecurityDesc
+    ++ Alpha.encode message.underlyingCurrency
+    ++ Alpha.encode message.underlyingIssuer
+    ++ Alpha.encode message.pad2v2
+    ++ encodeMany SideAllocGrpComp.encode message.sideAllocGrpComp.val
+    ++ encodeMany InstrumentEventGrpComp.encode message.instrumentEventGrpComp.val
+    ++ encodeMany InstrumentAttributeGrpComp.encode message.instrumentAttributeGrpComp.val
+    ++ encodeMany UnderlyingStipGrpComp.encode message.underlyingStipGrpComp.val
+
+-- a long run of fields nests deeper than the elaborator's default limit
+set_option maxRecDepth 4096 in
+def decode (bytes : List UInt8) : Option (EnterTesTradeRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (securityId, bytes) ← decodeUIntLE 8 bytes
+  let (lastPx, bytes) ← decodeUIntLE 8 bytes
+  let (transBkdTime, bytes) ← decodeUIntLE 8 bytes
+  let (underlyingPx, bytes) ← decodeUIntLE 8 bytes
+  let (underlyingQty, bytes) ← decodeUIntLE 8 bytes
+  let (relatedClosePrice, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (underlyingSettlementDate, bytes) ← decodeUIntLE 4 bytes
+  let (underlyingMaturityDate, bytes) ← decodeUIntLE 4 bytes
+  let (relatedTradeId, bytes) ← decodeUIntLE 4 bytes
+  let (relatedMarketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (relatedTradeQuantity, bytes) ← decodeUIntLE 4 bytes
+  let (trdType, bytes) ← decodeUIntLE 2 bytes
+  let (productComplex, bytes) ← decodeUInt 1 bytes
+  let (tradeReportType, bytes) ← decodeUInt 1 bytes
+  let (tradePublishIndicator, bytes) ← decodeUInt 1 bytes
+  let (noSideAllocs, bytes) ← decodeUInt 1 bytes
+  let (noEvents, bytes) ← decodeUInt 1 bytes
+  let (noInstrAttrib, bytes) ← decodeUInt 1 bytes
+  let (noUnderlyingStips, bytes) ← decodeUInt 1 bytes
+  let (partyIdSettlementLocation, bytes) ← decodeUInt 1 bytes
+  let (hedgeType, bytes) ← decodeUInt 1 bytes
+  let (tradeReportText, bytes) ← Alpha.decode 20 bytes
+  let (tradeReportId, bytes) ← Alpha.decode 20 bytes
+  let (underlyingSecurityId, bytes) ← Alpha.decode 12 bytes
+  let (underlyingSecurityDesc, bytes) ← Alpha.decode 30 bytes
+  let (underlyingCurrency, bytes) ← Alpha.decode 3 bytes
+  let (underlyingIssuer, bytes) ← Alpha.decode 30 bytes
+  let (pad2v2, bytes) ← Alpha.decode 2 bytes
+  let (sideAllocGrpComp_, bytes) ← decodeMany SideAllocGrpComp.decode noSideAllocs.toNat bytes
+  let (instrumentEventGrpComp_, bytes) ← decodeMany InstrumentEventGrpComp.decode noEvents.toNat bytes
+  let (instrumentAttributeGrpComp_, bytes) ← decodeMany InstrumentAttributeGrpComp.decode noInstrAttrib.toNat bytes
+  let (underlyingStipGrpComp_, bytes) ← decodeMany UnderlyingStipGrpComp.decode noUnderlyingStips.toNat bytes
+  if fits_sideAllocGrpComp : sideAllocGrpComp_.length < 256 ^ 1 then
+    if fits_instrumentEventGrpComp : instrumentEventGrpComp_.length < 256 ^ 1 then
+      if fits_instrumentAttributeGrpComp : instrumentAttributeGrpComp_.length < 256 ^ 1 then
+        if fits_underlyingStipGrpComp : underlyingStipGrpComp_.length < 256 ^ 1 then
+          pure ({ networkMsgId, pad2, requestHeaderComp, securityId, lastPx, transBkdTime, underlyingPx, underlyingQty, relatedClosePrice, marketSegmentId, underlyingSettlementDate, underlyingMaturityDate, relatedTradeId, relatedMarketSegmentId, relatedTradeQuantity, trdType, productComplex, tradeReportType, tradePublishIndicator, partyIdSettlementLocation, hedgeType, tradeReportText, tradeReportId, underlyingSecurityId, underlyingSecurityDesc, underlyingCurrency, underlyingIssuer, pad2v2, sideAllocGrpComp := ⟨sideAllocGrpComp_, fits_sideAllocGrpComp⟩, instrumentEventGrpComp := ⟨instrumentEventGrpComp_, fits_instrumentEventGrpComp⟩, instrumentAttributeGrpComp := ⟨instrumentAttributeGrpComp_, fits_instrumentAttributeGrpComp⟩, underlyingStipGrpComp := ⟨underlyingStipGrpComp_, fits_underlyingStipGrpComp⟩ }, bytes)
+        else none
+      else none
+    else none
+  else none
+
+theorem encode_length_pos (message : EnterTesTradeRequest) : (encode message).length > 0 := by
+  unfold encode
+  simp only [Alpha.encode_length, List.length_append]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : EnterTesTradeRequest) : (encode message).length ≤ 28778 := by
+  have bound_sideAllocGrpComp := message.sideAllocGrpComp.length_lt
+  have bound_instrumentEventGrpComp := message.instrumentEventGrpComp.length_lt
+  have bound_instrumentAttributeGrpComp := message.instrumentAttributeGrpComp.length_lt
+  have bound_underlyingStipGrpComp := message.underlyingStipGrpComp.length_lt
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const SideAllocGrpComp.encode 24 SideAllocGrpComp.encode_length, encodeMany_length_const InstrumentEventGrpComp.encode 8 InstrumentEventGrpComp.encode_length, encodeMany_length_const InstrumentAttributeGrpComp.encode 40 InstrumentAttributeGrpComp.encode_length, encodeMany_length_const UnderlyingStipGrpComp.encode 40 UnderlyingStipGrpComp.encode_length]
+  omega
+
+set_option maxRecDepth 4096 in
+@[simp] theorem decode_encode (message : EnterTesTradeRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 SideAllocGrpComp.encode SideAllocGrpComp.decode SideAllocGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 InstrumentEventGrpComp.encode InstrumentEventGrpComp.decode InstrumentEventGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 InstrumentAttributeGrpComp.encode InstrumentAttributeGrpComp.decode InstrumentAttributeGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 UnderlyingStipGrpComp.encode UnderlyingStipGrpComp.decode UnderlyingStipGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  simp only [message.sideAllocGrpComp.length_lt, message.instrumentEventGrpComp.length_lt, message.instrumentAttributeGrpComp.length_lt, message.underlyingStipGrpComp.length_lt, ↓reduceDIte]
+  rfl
+
+end EnterTesTradeRequest
+
+/-- Gateway Request: 90 bytes -/
+structure GatewayRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  partyIdSessionId : BitVec 32
+  defaultCstmApplVerId : Alpha 30
+  password : Alpha 32
+  pad6 : Alpha 6
+  deriving DecidableEq, Repr
+
+namespace GatewayRequest
+
+def encode (message : GatewayRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 4 message.partyIdSessionId
+    ++ Alpha.encode message.defaultCstmApplVerId
+    ++ Alpha.encode message.password
+    ++ Alpha.encode message.pad6
+
+def decode (bytes : List UInt8) : Option (GatewayRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (partyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  let (defaultCstmApplVerId, bytes) ← Alpha.decode 30 bytes
+  let (password, bytes) ← Alpha.decode 32 bytes
+  let (pad6, bytes) ← Alpha.decode 6 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, partyIdSessionId, defaultCstmApplVerId, password, pad6 }, bytes)
+
+@[simp] theorem encode_length (message : GatewayRequest) : (encode message).length = 90 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length]
+
+theorem encode_length_pos (message : GatewayRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : GatewayRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end GatewayRequest
+
+/-- Heartbeat: 10 bytes -/
+structure Heartbeat where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  deriving DecidableEq, Repr
+
+namespace Heartbeat
+
+def encode (message : Heartbeat) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+
+def decode (bytes : List UInt8) : Option (Heartbeat × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  pure ({ networkMsgId, pad2 }, bytes)
+
+@[simp] theorem encode_length (message : Heartbeat) : (encode message).length = 10 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length]
+
+theorem encode_length_pos (message : Heartbeat) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : Heartbeat) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end Heartbeat
+
+/-- Inquire Enrichment Rule Id List Request: 34 bytes -/
+structure InquireEnrichmentRuleIdListRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  lastEntityProcessed : Alpha 16
+  deriving DecidableEq, Repr
+
+namespace InquireEnrichmentRuleIdListRequest
+
+def encode (message : InquireEnrichmentRuleIdListRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ Alpha.encode message.lastEntityProcessed
+
+def decode (bytes : List UInt8) : Option (InquireEnrichmentRuleIdListRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (lastEntityProcessed, bytes) ← Alpha.decode 16 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, lastEntityProcessed }, bytes)
+
+@[simp] theorem encode_length (message : InquireEnrichmentRuleIdListRequest) : (encode message).length = 34 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length]
+
+theorem encode_length_pos (message : InquireEnrichmentRuleIdListRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : InquireEnrichmentRuleIdListRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end InquireEnrichmentRuleIdListRequest
+
+/-- Inquire Mm Parameter Request: 26 bytes -/
+structure InquireMmParameterRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  marketSegmentId : BitVec 32
+  targetPartyIdSessionId : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace InquireMmParameterRequest
+
+def encode (message : InquireMmParameterRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.targetPartyIdSessionId
+
+def decode (bytes : List UInt8) : Option (InquireMmParameterRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (targetPartyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, marketSegmentId, targetPartyIdSessionId }, bytes)
+
+@[simp] theorem encode_length (message : InquireMmParameterRequest) : (encode message).length = 26 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length]
+
+theorem encode_length_pos (message : InquireMmParameterRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : InquireMmParameterRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rfl
+
+end InquireMmParameterRequest
+
+/-- Inquire Session List Request: 18 bytes -/
+structure InquireSessionListRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  deriving DecidableEq, Repr
+
+namespace InquireSessionListRequest
+
+def encode (message : InquireSessionListRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+
+def decode (bytes : List UInt8) : Option (InquireSessionListRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp }, bytes)
+
+@[simp] theorem encode_length (message : InquireSessionListRequest) : (encode message).length = 18 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length]
+
+theorem encode_length_pos (message : InquireSessionListRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : InquireSessionListRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  rfl
+
+end InquireSessionListRequest
+
+/-- Inquire User Request: 34 bytes -/
+structure InquireUserRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  lastEntityProcessed : Alpha 16
+  deriving DecidableEq, Repr
+
+namespace InquireUserRequest
+
+def encode (message : InquireUserRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ Alpha.encode message.lastEntityProcessed
+
+def decode (bytes : List UInt8) : Option (InquireUserRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (lastEntityProcessed, bytes) ← Alpha.decode 16 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, lastEntityProcessed }, bytes)
+
+@[simp] theorem encode_length (message : InquireUserRequest) : (encode message).length = 34 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length]
+
+theorem encode_length_pos (message : InquireUserRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : InquireUserRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end InquireUserRequest
+
+/-- Logon Request: 274 bytes -/
+structure LogonRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  heartBtInt : BitVec 32
+  partyIdSessionId : BitVec 32
+  defaultCstmApplVerId : Alpha 30
+  password : Alpha 32
+  applUsageOrders : ApplUsageOrders
+  applUsageQuotes : ApplUsageQuotes
+  orderRoutingIndicator : OrderRoutingIndicator
+  fixEngineName : Alpha 30
+  fixEngineVersion : Alpha 30
+  fixEngineVendor : Alpha 30
+  applicationSystemName : Alpha 30
+  applicationSystemVersion : Alpha 30
+  applicationSystemVendor : Alpha 30
+  pad3 : Alpha 3
+  deriving DecidableEq, Repr
+
+namespace LogonRequest
+
+def encode (message : LogonRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 4 message.heartBtInt
+    ++ encodeUIntLE 4 message.partyIdSessionId
+    ++ Alpha.encode message.defaultCstmApplVerId
+    ++ Alpha.encode message.password
+    ++ ApplUsageOrders.encode message.applUsageOrders
+    ++ ApplUsageQuotes.encode message.applUsageQuotes
+    ++ OrderRoutingIndicator.encode message.orderRoutingIndicator
+    ++ Alpha.encode message.fixEngineName
+    ++ Alpha.encode message.fixEngineVersion
+    ++ Alpha.encode message.fixEngineVendor
+    ++ Alpha.encode message.applicationSystemName
+    ++ Alpha.encode message.applicationSystemVersion
+    ++ Alpha.encode message.applicationSystemVendor
+    ++ Alpha.encode message.pad3
+
+def decode (bytes : List UInt8) : Option (LogonRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (heartBtInt, bytes) ← decodeUIntLE 4 bytes
+  let (partyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  let (defaultCstmApplVerId, bytes) ← Alpha.decode 30 bytes
+  let (password, bytes) ← Alpha.decode 32 bytes
+  let (applUsageOrders, bytes) ← ApplUsageOrders.decode bytes
+  let (applUsageQuotes, bytes) ← ApplUsageQuotes.decode bytes
+  let (orderRoutingIndicator, bytes) ← OrderRoutingIndicator.decode bytes
+  let (fixEngineName, bytes) ← Alpha.decode 30 bytes
+  let (fixEngineVersion, bytes) ← Alpha.decode 30 bytes
+  let (fixEngineVendor, bytes) ← Alpha.decode 30 bytes
+  let (applicationSystemName, bytes) ← Alpha.decode 30 bytes
+  let (applicationSystemVersion, bytes) ← Alpha.decode 30 bytes
+  let (applicationSystemVendor, bytes) ← Alpha.decode 30 bytes
+  let (pad3, bytes) ← Alpha.decode 3 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, heartBtInt, partyIdSessionId, defaultCstmApplVerId, password, applUsageOrders, applUsageQuotes, orderRoutingIndicator, fixEngineName, fixEngineVersion, fixEngineVendor, applicationSystemName, applicationSystemVersion, applicationSystemVendor, pad3 }, bytes)
+
+@[simp] theorem encode_length (message : LogonRequest) : (encode message).length = 274 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, ApplUsageOrders.encode_length, ApplUsageQuotes.encode_length, OrderRoutingIndicator.encode_length]
+
+theorem encode_length_pos (message : LogonRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : LogonRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [ApplUsageOrders.decode_encode, Option.bind_some]
+  dsimp only
+  rw [ApplUsageQuotes.decode_encode, Option.bind_some]
+  dsimp only
+  rw [OrderRoutingIndicator.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end LogonRequest
+
+/-- Logout Request: 18 bytes -/
+structure LogoutRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  deriving DecidableEq, Repr
+
+namespace LogoutRequest
+
+def encode (message : LogoutRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+
+def decode (bytes : List UInt8) : Option (LogoutRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp }, bytes)
+
+@[simp] theorem encode_length (message : LogoutRequest) : (encode message).length = 18 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length]
+
+theorem encode_length_pos (message : LogoutRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : LogoutRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  rfl
+
+end LogoutRequest
+
+/-- Mm Parameter Definition Request: 58 bytes -/
+structure MmParameterDefinitionRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  exposureDuration : BitVec 64
+  marketSegmentId : BitVec 32
+  targetPartyIdSessionId : BitVec 32
+  cumQty : BitVec 32
+  pctCount : BitVec 32
+  delta : BitVec 32
+  vega : BitVec 32
+  productComplex : BitVec 8
+  pad7 : Alpha 7
+  deriving DecidableEq, Repr
+
+namespace MmParameterDefinitionRequest
+
+def encode (message : MmParameterDefinitionRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.exposureDuration
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.targetPartyIdSessionId
+    ++ encodeUIntLE 4 message.cumQty
+    ++ encodeUIntLE 4 message.pctCount
+    ++ encodeUIntLE 4 message.delta
+    ++ encodeUIntLE 4 message.vega
+    ++ encodeUInt 1 message.productComplex
+    ++ Alpha.encode message.pad7
+
+def decode (bytes : List UInt8) : Option (MmParameterDefinitionRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (exposureDuration, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (targetPartyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  let (cumQty, bytes) ← decodeUIntLE 4 bytes
+  let (pctCount, bytes) ← decodeUIntLE 4 bytes
+  let (delta, bytes) ← decodeUIntLE 4 bytes
+  let (vega, bytes) ← decodeUIntLE 4 bytes
+  let (productComplex, bytes) ← decodeUInt 1 bytes
+  let (pad7, bytes) ← Alpha.decode 7 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, exposureDuration, marketSegmentId, targetPartyIdSessionId, cumQty, pctCount, delta, vega, productComplex, pad7 }, bytes)
+
+@[simp] theorem encode_length (message : MmParameterDefinitionRequest) : (encode message).length = 58 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length]
+
+theorem encode_length_pos (message : MmParameterDefinitionRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : MmParameterDefinitionRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end MmParameterDefinitionRequest
+
+/-- Quote Entry Grp Comp: 32 bytes -/
+structure QuoteEntryGrpComp where
+  securityId : BitVec 64
+  bidPx : BitVec 64
+  offerPx : BitVec 64
+  bidSize : BitVec 32
+  offerSize : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace QuoteEntryGrpComp
+
+def encode (message : QuoteEntryGrpComp) : List UInt8 :=
+  encodeUIntLE 8 message.securityId
+    ++ encodeUIntLE 8 message.bidPx
+    ++ encodeUIntLE 8 message.offerPx
+    ++ encodeUIntLE 4 message.bidSize
+    ++ encodeUIntLE 4 message.offerSize
+
+def decode (bytes : List UInt8) : Option (QuoteEntryGrpComp × List UInt8) := do
+  let (securityId, bytes) ← decodeUIntLE 8 bytes
+  let (bidPx, bytes) ← decodeUIntLE 8 bytes
+  let (offerPx, bytes) ← decodeUIntLE 8 bytes
+  let (bidSize, bytes) ← decodeUIntLE 4 bytes
+  let (offerSize, bytes) ← decodeUIntLE 4 bytes
+  pure ({ securityId, bidPx, offerPx, bidSize, offerSize }, bytes)
+
+@[simp] theorem encode_length (message : QuoteEntryGrpComp) : (encode message).length = 32 := by
+  unfold encode
+  simp only [List.length_append, encodeUIntLE_length]
+
+theorem encode_length_pos (message : QuoteEntryGrpComp) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : QuoteEntryGrpComp) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rfl
+
+end QuoteEntryGrpComp
+
+/-- Mass Quote Request -/
+structure MassQuoteRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  quoteId : BitVec 64
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  matchInstCrossId : BitVec 32
+  enrichmentRuleId : BitVec 16
+  priceValidityCheckType : BitVec 8
+  quoteSizeType : BitVec 8
+  pad3 : Alpha 3
+  quoteEntryGrpComp : Bounded 1 QuoteEntryGrpComp
+  deriving DecidableEq, Repr
+
+namespace MassQuoteRequest
+
+def encode (message : MassQuoteRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.quoteId
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.matchInstCrossId
+    ++ encodeUIntLE 2 message.enrichmentRuleId
+    ++ encodeUInt 1 message.priceValidityCheckType
+    ++ encodeUInt 1 message.quoteSizeType
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.quoteEntryGrpComp.val.length)
+    ++ Alpha.encode message.pad3
+    ++ encodeMany QuoteEntryGrpComp.encode message.quoteEntryGrpComp.val
+
+def decode (bytes : List UInt8) : Option (MassQuoteRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (quoteId, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (matchInstCrossId, bytes) ← decodeUIntLE 4 bytes
+  let (enrichmentRuleId, bytes) ← decodeUIntLE 2 bytes
+  let (priceValidityCheckType, bytes) ← decodeUInt 1 bytes
+  let (quoteSizeType, bytes) ← decodeUInt 1 bytes
+  let (noQuoteEntries, bytes) ← decodeUInt 1 bytes
+  let (pad3, bytes) ← Alpha.decode 3 bytes
+  let (quoteEntryGrpComp_, bytes) ← decodeMany QuoteEntryGrpComp.decode noQuoteEntries.toNat bytes
+  if fits_quoteEntryGrpComp : quoteEntryGrpComp_.length < 256 ^ 1 then
+    pure ({ networkMsgId, pad2, requestHeaderComp, quoteId, complianceId, marketSegmentId, matchInstCrossId, enrichmentRuleId, priceValidityCheckType, quoteSizeType, pad3, quoteEntryGrpComp := ⟨quoteEntryGrpComp_, fits_quoteEntryGrpComp⟩ }, bytes)
+  else none
+
+theorem encode_length_pos (message : MassQuoteRequest) : (encode message).length > 0 := by
+  unfold encode
+  simp only [Alpha.encode_length, List.length_append]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : MassQuoteRequest) : (encode message).length ≤ 8210 := by
+  have bound_quoteEntryGrpComp := message.quoteEntryGrpComp.length_lt
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const QuoteEntryGrpComp.encode 32 QuoteEntryGrpComp.encode_length]
+  omega
+
+@[simp] theorem decode_encode (message : MassQuoteRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 QuoteEntryGrpComp.encode QuoteEntryGrpComp.decode QuoteEntryGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  simp only [message.quoteEntryGrpComp.length_lt, ↓reduceDIte]
+  rfl
+
+end MassQuoteRequest
+
+/-- Leg Ord Grp Comp: 8 bytes -/
+structure LegOrdGrpComp where
+  legAccount : Alpha 2
+  legPositionEffect : LegPositionEffect
+  pad5 : Alpha 5
+  deriving DecidableEq, Repr
+
+namespace LegOrdGrpComp
+
+def encode (message : LegOrdGrpComp) : List UInt8 :=
+  Alpha.encode message.legAccount
+    ++ LegPositionEffect.encode message.legPositionEffect
+    ++ Alpha.encode message.pad5
+
+def decode (bytes : List UInt8) : Option (LegOrdGrpComp × List UInt8) := do
+  let (legAccount, bytes) ← Alpha.decode 2 bytes
+  let (legPositionEffect, bytes) ← LegPositionEffect.decode bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
+  pure ({ legAccount, legPositionEffect, pad5 }, bytes)
+
+@[simp] theorem encode_length (message : LegOrdGrpComp) : (encode message).length = 8 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, LegPositionEffect.encode_length]
+
+theorem encode_length_pos (message : LegOrdGrpComp) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : LegOrdGrpComp) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [LegPositionEffect.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end LegOrdGrpComp
+
+/-- Modify Order Complex Request -/
+structure ModifyOrderComplexRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  orderId : BitVec 64
+  clOrdId : BitVec 64
+  origClOrdId : BitVec 64
+  securityId : BitVec 64
+  price : BitVec 64
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  orderQty : BitVec 32
+  expireDate : BitVec 32
+  matchInstCrossId : BitVec 32
+  targetPartyIdSessionId : BitVec 32
+  partyIdTakeUpTradingFirm : Alpha 5
+  partyIdOrderOriginationFirm : Alpha 7
+  partyIdBeneficiary : Alpha 9
+  applSeqIndicator : BitVec 8
+  productComplex : BitVec 8
+  side : BitVec 8
+  ordType : BitVec 8
+  priceValidityCheckType : BitVec 8
+  execInst : BitVec 8
+  timeInForce : BitVec 8
+  tradingCapacity : BitVec 8
+  ownershipIndicator : BitVec 8
+  partyIdLocationId : Alpha 2
+  custOrderHandlingInst : Alpha 1
+  complianceText : Alpha 20
+  partyIdPositionAccount : Alpha 32
+  freeText1 : Alpha 12
+  freeText2 : Alpha 12
+  freeText3 : Alpha 12
+  pad2v2 : Alpha 2
+  legOrdGrpComp : Bounded 1 LegOrdGrpComp
+  deriving DecidableEq, Repr
+
+namespace ModifyOrderComplexRequest
+
+def encode (message : ModifyOrderComplexRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.orderId
+    ++ encodeUIntLE 8 message.clOrdId
+    ++ encodeUIntLE 8 message.origClOrdId
+    ++ encodeUIntLE 8 message.securityId
+    ++ encodeUIntLE 8 message.price
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.orderQty
+    ++ encodeUIntLE 4 message.expireDate
+    ++ encodeUIntLE 4 message.matchInstCrossId
+    ++ encodeUIntLE 4 message.targetPartyIdSessionId
+    ++ Alpha.encode message.partyIdTakeUpTradingFirm
+    ++ Alpha.encode message.partyIdOrderOriginationFirm
+    ++ Alpha.encode message.partyIdBeneficiary
+    ++ encodeUInt 1 message.applSeqIndicator
+    ++ encodeUInt 1 message.productComplex
+    ++ encodeUInt 1 message.side
+    ++ encodeUInt 1 message.ordType
+    ++ encodeUInt 1 message.priceValidityCheckType
+    ++ encodeUInt 1 message.execInst
+    ++ encodeUInt 1 message.timeInForce
+    ++ encodeUInt 1 message.tradingCapacity
+    ++ encodeUInt 1 message.ownershipIndicator
+    ++ Alpha.encode message.partyIdLocationId
+    ++ Alpha.encode message.custOrderHandlingInst
+    ++ Alpha.encode message.complianceText
+    ++ Alpha.encode message.partyIdPositionAccount
+    ++ Alpha.encode message.freeText1
+    ++ Alpha.encode message.freeText2
+    ++ Alpha.encode message.freeText3
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.legOrdGrpComp.val.length)
+    ++ Alpha.encode message.pad2v2
+    ++ encodeMany LegOrdGrpComp.encode message.legOrdGrpComp.val
+
+-- a long run of fields nests deeper than the elaborator's default limit
+set_option maxRecDepth 4096 in
+def decode (bytes : List UInt8) : Option (ModifyOrderComplexRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (orderId, bytes) ← decodeUIntLE 8 bytes
+  let (clOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (origClOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (securityId, bytes) ← decodeUIntLE 8 bytes
+  let (price, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (orderQty, bytes) ← decodeUIntLE 4 bytes
+  let (expireDate, bytes) ← decodeUIntLE 4 bytes
+  let (matchInstCrossId, bytes) ← decodeUIntLE 4 bytes
+  let (targetPartyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  let (partyIdTakeUpTradingFirm, bytes) ← Alpha.decode 5 bytes
+  let (partyIdOrderOriginationFirm, bytes) ← Alpha.decode 7 bytes
+  let (partyIdBeneficiary, bytes) ← Alpha.decode 9 bytes
+  let (applSeqIndicator, bytes) ← decodeUInt 1 bytes
+  let (productComplex, bytes) ← decodeUInt 1 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (ordType, bytes) ← decodeUInt 1 bytes
+  let (priceValidityCheckType, bytes) ← decodeUInt 1 bytes
+  let (execInst, bytes) ← decodeUInt 1 bytes
+  let (timeInForce, bytes) ← decodeUInt 1 bytes
+  let (tradingCapacity, bytes) ← decodeUInt 1 bytes
+  let (ownershipIndicator, bytes) ← decodeUInt 1 bytes
+  let (partyIdLocationId, bytes) ← Alpha.decode 2 bytes
+  let (custOrderHandlingInst, bytes) ← Alpha.decode 1 bytes
+  let (complianceText, bytes) ← Alpha.decode 20 bytes
+  let (partyIdPositionAccount, bytes) ← Alpha.decode 32 bytes
+  let (freeText1, bytes) ← Alpha.decode 12 bytes
+  let (freeText2, bytes) ← Alpha.decode 12 bytes
+  let (freeText3, bytes) ← Alpha.decode 12 bytes
+  let (noLegs, bytes) ← decodeUInt 1 bytes
+  let (pad2v2, bytes) ← Alpha.decode 2 bytes
+  let (legOrdGrpComp_, bytes) ← decodeMany LegOrdGrpComp.decode noLegs.toNat bytes
+  if fits_legOrdGrpComp : legOrdGrpComp_.length < 256 ^ 1 then
+    pure ({ networkMsgId, pad2, requestHeaderComp, orderId, clOrdId, origClOrdId, securityId, price, complianceId, marketSegmentId, orderQty, expireDate, matchInstCrossId, targetPartyIdSessionId, partyIdTakeUpTradingFirm, partyIdOrderOriginationFirm, partyIdBeneficiary, applSeqIndicator, productComplex, side, ordType, priceValidityCheckType, execInst, timeInForce, tradingCapacity, ownershipIndicator, partyIdLocationId, custOrderHandlingInst, complianceText, partyIdPositionAccount, freeText1, freeText2, freeText3, pad2v2, legOrdGrpComp := ⟨legOrdGrpComp_, fits_legOrdGrpComp⟩ }, bytes)
+  else none
+
+theorem encode_length_pos (message : ModifyOrderComplexRequest) : (encode message).length > 0 := by
+  unfold encode
+  simp only [Alpha.encode_length, List.length_append]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : ModifyOrderComplexRequest) : (encode message).length ≤ 2250 := by
+  have bound_legOrdGrpComp := message.legOrdGrpComp.length_lt
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const LegOrdGrpComp.encode 8 LegOrdGrpComp.encode_length]
+  omega
+
+set_option maxRecDepth 4096 in
+@[simp] theorem decode_encode (message : ModifyOrderComplexRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 LegOrdGrpComp.encode LegOrdGrpComp.decode LegOrdGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  simp only [message.legOrdGrpComp.length_lt, ↓reduceDIte]
+  rfl
+
+end ModifyOrderComplexRequest
+
+/-- Modify Order Single Request: 218 bytes -/
+structure ModifyOrderSingleRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  orderId : BitVec 64
+  clOrdId : BitVec 64
+  origClOrdId : BitVec 64
+  price : BitVec 64
+  stopPx : BitVec 64
+  complianceId : BitVec 64
+  orderQty : BitVec 32
+  expireDate : BitVec 32
+  marketSegmentId : BitVec 32
+  simpleSecurityId : BitVec 32
+  matchInstCrossId : BitVec 32
+  targetPartyIdSessionId : BitVec 32
+  partyIdTakeUpTradingFirm : Alpha 5
+  partyIdOrderOriginationFirm : Alpha 7
+  partyIdBeneficiary : Alpha 9
+  applSeqIndicator : BitVec 8
+  side : BitVec 8
+  ordType : BitVec 8
+  priceValidityCheckType : BitVec 8
+  timeInForce : BitVec 8
+  execInst : BitVec 8
+  tradingSessionSubId : BitVec 8
+  tradingCapacity : BitVec 8
+  account : Alpha 2
+  partyIdPositionAccount : Alpha 32
+  positionEffect : PositionEffect
+  ownershipIndicator : BitVec 8
+  partyIdLocationId : Alpha 2
+  custOrderHandlingInst : Alpha 1
+  complianceText : Alpha 20
+  freeText1 : Alpha 12
+  freeText2 : Alpha 12
+  freeText3 : Alpha 12
+  pad4 : Alpha 4
+  deriving DecidableEq, Repr
+
+namespace ModifyOrderSingleRequest
+
+def encode (message : ModifyOrderSingleRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.orderId
+    ++ encodeUIntLE 8 message.clOrdId
+    ++ encodeUIntLE 8 message.origClOrdId
+    ++ encodeUIntLE 8 message.price
+    ++ encodeUIntLE 8 message.stopPx
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.orderQty
+    ++ encodeUIntLE 4 message.expireDate
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.simpleSecurityId
+    ++ encodeUIntLE 4 message.matchInstCrossId
+    ++ encodeUIntLE 4 message.targetPartyIdSessionId
+    ++ Alpha.encode message.partyIdTakeUpTradingFirm
+    ++ Alpha.encode message.partyIdOrderOriginationFirm
+    ++ Alpha.encode message.partyIdBeneficiary
+    ++ encodeUInt 1 message.applSeqIndicator
+    ++ encodeUInt 1 message.side
+    ++ encodeUInt 1 message.ordType
+    ++ encodeUInt 1 message.priceValidityCheckType
+    ++ encodeUInt 1 message.timeInForce
+    ++ encodeUInt 1 message.execInst
+    ++ encodeUInt 1 message.tradingSessionSubId
+    ++ encodeUInt 1 message.tradingCapacity
+    ++ Alpha.encode message.account
+    ++ Alpha.encode message.partyIdPositionAccount
+    ++ PositionEffect.encode message.positionEffect
+    ++ encodeUInt 1 message.ownershipIndicator
+    ++ Alpha.encode message.partyIdLocationId
+    ++ Alpha.encode message.custOrderHandlingInst
+    ++ Alpha.encode message.complianceText
+    ++ Alpha.encode message.freeText1
+    ++ Alpha.encode message.freeText2
+    ++ Alpha.encode message.freeText3
+    ++ Alpha.encode message.pad4
+
+-- a long run of fields nests deeper than the elaborator's default limit
+set_option maxRecDepth 4096 in
+def decode (bytes : List UInt8) : Option (ModifyOrderSingleRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (orderId, bytes) ← decodeUIntLE 8 bytes
+  let (clOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (origClOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (price, bytes) ← decodeUIntLE 8 bytes
+  let (stopPx, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (orderQty, bytes) ← decodeUIntLE 4 bytes
+  let (expireDate, bytes) ← decodeUIntLE 4 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (simpleSecurityId, bytes) ← decodeUIntLE 4 bytes
+  let (matchInstCrossId, bytes) ← decodeUIntLE 4 bytes
+  let (targetPartyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  let (partyIdTakeUpTradingFirm, bytes) ← Alpha.decode 5 bytes
+  let (partyIdOrderOriginationFirm, bytes) ← Alpha.decode 7 bytes
+  let (partyIdBeneficiary, bytes) ← Alpha.decode 9 bytes
+  let (applSeqIndicator, bytes) ← decodeUInt 1 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (ordType, bytes) ← decodeUInt 1 bytes
+  let (priceValidityCheckType, bytes) ← decodeUInt 1 bytes
+  let (timeInForce, bytes) ← decodeUInt 1 bytes
+  let (execInst, bytes) ← decodeUInt 1 bytes
+  let (tradingSessionSubId, bytes) ← decodeUInt 1 bytes
+  let (tradingCapacity, bytes) ← decodeUInt 1 bytes
+  let (account, bytes) ← Alpha.decode 2 bytes
+  let (partyIdPositionAccount, bytes) ← Alpha.decode 32 bytes
+  let (positionEffect, bytes) ← PositionEffect.decode bytes
+  let (ownershipIndicator, bytes) ← decodeUInt 1 bytes
+  let (partyIdLocationId, bytes) ← Alpha.decode 2 bytes
+  let (custOrderHandlingInst, bytes) ← Alpha.decode 1 bytes
+  let (complianceText, bytes) ← Alpha.decode 20 bytes
+  let (freeText1, bytes) ← Alpha.decode 12 bytes
+  let (freeText2, bytes) ← Alpha.decode 12 bytes
+  let (freeText3, bytes) ← Alpha.decode 12 bytes
+  let (pad4, bytes) ← Alpha.decode 4 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, orderId, clOrdId, origClOrdId, price, stopPx, complianceId, orderQty, expireDate, marketSegmentId, simpleSecurityId, matchInstCrossId, targetPartyIdSessionId, partyIdTakeUpTradingFirm, partyIdOrderOriginationFirm, partyIdBeneficiary, applSeqIndicator, side, ordType, priceValidityCheckType, timeInForce, execInst, tradingSessionSubId, tradingCapacity, account, partyIdPositionAccount, positionEffect, ownershipIndicator, partyIdLocationId, custOrderHandlingInst, complianceText, freeText1, freeText2, freeText3, pad4 }, bytes)
+
+@[simp] theorem encode_length (message : ModifyOrderSingleRequest) : (encode message).length = 218 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length, PositionEffect.encode_length]
+
+theorem encode_length_pos (message : ModifyOrderSingleRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+set_option maxRecDepth 4096 in
+@[simp] theorem decode_encode (message : ModifyOrderSingleRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [PositionEffect.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end ModifyOrderSingleRequest
+
+/-- Modify Order Single Short Request: 74 bytes -/
+structure ModifyOrderSingleShortRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  clOrdId : BitVec 64
+  origClOrdId : BitVec 64
+  price : BitVec 64
+  complianceId : BitVec 64
+  orderQty : BitVec 32
+  simpleSecurityId : BitVec 32
+  matchInstCrossId : BitVec 32
+  enrichmentRuleId : BitVec 16
+  side : BitVec 8
+  priceValidityCheckType : BitVec 8
+  timeInForce : BitVec 8
+  execInst : BitVec 8
+  tradingCapacity : BitVec 8
+  pad5 : Alpha 5
+  deriving DecidableEq, Repr
+
+namespace ModifyOrderSingleShortRequest
+
+def encode (message : ModifyOrderSingleShortRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.clOrdId
+    ++ encodeUIntLE 8 message.origClOrdId
+    ++ encodeUIntLE 8 message.price
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.orderQty
+    ++ encodeUIntLE 4 message.simpleSecurityId
+    ++ encodeUIntLE 4 message.matchInstCrossId
+    ++ encodeUIntLE 2 message.enrichmentRuleId
+    ++ encodeUInt 1 message.side
+    ++ encodeUInt 1 message.priceValidityCheckType
+    ++ encodeUInt 1 message.timeInForce
+    ++ encodeUInt 1 message.execInst
+    ++ encodeUInt 1 message.tradingCapacity
+    ++ Alpha.encode message.pad5
+
+def decode (bytes : List UInt8) : Option (ModifyOrderSingleShortRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (clOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (origClOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (price, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (orderQty, bytes) ← decodeUIntLE 4 bytes
+  let (simpleSecurityId, bytes) ← decodeUIntLE 4 bytes
+  let (matchInstCrossId, bytes) ← decodeUIntLE 4 bytes
+  let (enrichmentRuleId, bytes) ← decodeUIntLE 2 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (priceValidityCheckType, bytes) ← decodeUInt 1 bytes
+  let (timeInForce, bytes) ← decodeUInt 1 bytes
+  let (execInst, bytes) ← decodeUInt 1 bytes
+  let (tradingCapacity, bytes) ← decodeUInt 1 bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, clOrdId, origClOrdId, price, complianceId, orderQty, simpleSecurityId, matchInstCrossId, enrichmentRuleId, side, priceValidityCheckType, timeInForce, execInst, tradingCapacity, pad5 }, bytes)
+
+@[simp] theorem encode_length (message : ModifyOrderSingleShortRequest) : (encode message).length = 74 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length]
+
+theorem encode_length_pos (message : ModifyOrderSingleShortRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : ModifyOrderSingleShortRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end ModifyOrderSingleShortRequest
+
+/-- Modify Tes Trade Request -/
+structure ModifyTesTradeRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  lastPx : BitVec 64
+  transBkdTime : BitVec 64
+  marketSegmentId : BitVec 32
+  packageId : BitVec 32
+  tesExecId : BitVec 32
+  relatedMarketSegmentId : BitVec 32
+  trdType : BitVec 16
+  tradeReportType : BitVec 8
+  tradePublishIndicator : BitVec 8
+  tradeReportText : Alpha 20
+  tradeReportId : Alpha 20
+  pad3 : Alpha 3
+  sideAllocGrpComp : Bounded 1 SideAllocGrpComp
+  deriving DecidableEq, Repr
+
+namespace ModifyTesTradeRequest
+
+def encode (message : ModifyTesTradeRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.lastPx
+    ++ encodeUIntLE 8 message.transBkdTime
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.packageId
+    ++ encodeUIntLE 4 message.tesExecId
+    ++ encodeUIntLE 4 message.relatedMarketSegmentId
+    ++ encodeUIntLE 2 message.trdType
+    ++ encodeUInt 1 message.tradeReportType
+    ++ encodeUInt 1 message.tradePublishIndicator
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.sideAllocGrpComp.val.length)
+    ++ Alpha.encode message.tradeReportText
+    ++ Alpha.encode message.tradeReportId
+    ++ Alpha.encode message.pad3
+    ++ encodeMany SideAllocGrpComp.encode message.sideAllocGrpComp.val
+
+def decode (bytes : List UInt8) : Option (ModifyTesTradeRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (lastPx, bytes) ← decodeUIntLE 8 bytes
+  let (transBkdTime, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (packageId, bytes) ← decodeUIntLE 4 bytes
+  let (tesExecId, bytes) ← decodeUIntLE 4 bytes
+  let (relatedMarketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (trdType, bytes) ← decodeUIntLE 2 bytes
+  let (tradeReportType, bytes) ← decodeUInt 1 bytes
+  let (tradePublishIndicator, bytes) ← decodeUInt 1 bytes
+  let (noSideAllocs, bytes) ← decodeUInt 1 bytes
+  let (tradeReportText, bytes) ← Alpha.decode 20 bytes
+  let (tradeReportId, bytes) ← Alpha.decode 20 bytes
+  let (pad3, bytes) ← Alpha.decode 3 bytes
+  let (sideAllocGrpComp_, bytes) ← decodeMany SideAllocGrpComp.decode noSideAllocs.toNat bytes
+  if fits_sideAllocGrpComp : sideAllocGrpComp_.length < 256 ^ 1 then
+    pure ({ networkMsgId, pad2, requestHeaderComp, lastPx, transBkdTime, marketSegmentId, packageId, tesExecId, relatedMarketSegmentId, trdType, tradeReportType, tradePublishIndicator, tradeReportText, tradeReportId, pad3, sideAllocGrpComp := ⟨sideAllocGrpComp_, fits_sideAllocGrpComp⟩ }, bytes)
+  else none
+
+theorem encode_length_pos (message : ModifyTesTradeRequest) : (encode message).length > 0 := by
+  unfold encode
+  simp only [Alpha.encode_length, List.length_append]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : ModifyTesTradeRequest) : (encode message).length ≤ 6218 := by
+  have bound_sideAllocGrpComp := message.sideAllocGrpComp.length_lt
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const SideAllocGrpComp.encode 24 SideAllocGrpComp.encode_length]
+  omega
+
+@[simp] theorem decode_encode (message : ModifyTesTradeRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 SideAllocGrpComp.encode SideAllocGrpComp.decode SideAllocGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  simp only [message.sideAllocGrpComp.length_lt, ↓reduceDIte]
+  rfl
+
+end ModifyTesTradeRequest
+
+/-- New Order Complex Request -/
+structure NewOrderComplexRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  clOrdId : BitVec 64
+  securityId : BitVec 64
+  price : BitVec 64
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  orderQty : BitVec 32
+  expireDate : BitVec 32
+  matchInstCrossId : BitVec 32
+  partyIdTakeUpTradingFirm : Alpha 5
+  partyIdOrderOriginationFirm : Alpha 7
+  partyIdBeneficiary : Alpha 9
+  applSeqIndicator : BitVec 8
+  productComplex : BitVec 8
+  side : BitVec 8
+  ordType : BitVec 8
+  priceValidityCheckType : BitVec 8
+  execInst : BitVec 8
+  timeInForce : BitVec 8
+  tradingCapacity : BitVec 8
+  partyIdLocationId : Alpha 2
+  complianceText : Alpha 20
+  custOrderHandlingInst : Alpha 1
+  partyIdPositionAccount : Alpha 32
+  freeText1 : Alpha 12
+  freeText2 : Alpha 12
+  freeText3 : Alpha 12
+  pad7 : Alpha 7
+  legOrdGrpComp : Bounded 1 LegOrdGrpComp
+  deriving DecidableEq, Repr
+
+namespace NewOrderComplexRequest
+
+def encode (message : NewOrderComplexRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.clOrdId
+    ++ encodeUIntLE 8 message.securityId
+    ++ encodeUIntLE 8 message.price
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.orderQty
+    ++ encodeUIntLE 4 message.expireDate
+    ++ encodeUIntLE 4 message.matchInstCrossId
+    ++ Alpha.encode message.partyIdTakeUpTradingFirm
+    ++ Alpha.encode message.partyIdOrderOriginationFirm
+    ++ Alpha.encode message.partyIdBeneficiary
+    ++ encodeUInt 1 message.applSeqIndicator
+    ++ encodeUInt 1 message.productComplex
+    ++ encodeUInt 1 message.side
+    ++ encodeUInt 1 message.ordType
+    ++ encodeUInt 1 message.priceValidityCheckType
+    ++ encodeUInt 1 message.execInst
+    ++ encodeUInt 1 message.timeInForce
+    ++ encodeUInt 1 message.tradingCapacity
+    ++ Alpha.encode message.partyIdLocationId
+    ++ Alpha.encode message.complianceText
+    ++ Alpha.encode message.custOrderHandlingInst
+    ++ Alpha.encode message.partyIdPositionAccount
+    ++ Alpha.encode message.freeText1
+    ++ Alpha.encode message.freeText2
+    ++ Alpha.encode message.freeText3
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.legOrdGrpComp.val.length)
+    ++ Alpha.encode message.pad7
+    ++ encodeMany LegOrdGrpComp.encode message.legOrdGrpComp.val
+
+-- a long run of fields nests deeper than the elaborator's default limit
+set_option maxRecDepth 4096 in
+def decode (bytes : List UInt8) : Option (NewOrderComplexRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (clOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (securityId, bytes) ← decodeUIntLE 8 bytes
+  let (price, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (orderQty, bytes) ← decodeUIntLE 4 bytes
+  let (expireDate, bytes) ← decodeUIntLE 4 bytes
+  let (matchInstCrossId, bytes) ← decodeUIntLE 4 bytes
+  let (partyIdTakeUpTradingFirm, bytes) ← Alpha.decode 5 bytes
+  let (partyIdOrderOriginationFirm, bytes) ← Alpha.decode 7 bytes
+  let (partyIdBeneficiary, bytes) ← Alpha.decode 9 bytes
+  let (applSeqIndicator, bytes) ← decodeUInt 1 bytes
+  let (productComplex, bytes) ← decodeUInt 1 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (ordType, bytes) ← decodeUInt 1 bytes
+  let (priceValidityCheckType, bytes) ← decodeUInt 1 bytes
+  let (execInst, bytes) ← decodeUInt 1 bytes
+  let (timeInForce, bytes) ← decodeUInt 1 bytes
+  let (tradingCapacity, bytes) ← decodeUInt 1 bytes
+  let (partyIdLocationId, bytes) ← Alpha.decode 2 bytes
+  let (complianceText, bytes) ← Alpha.decode 20 bytes
+  let (custOrderHandlingInst, bytes) ← Alpha.decode 1 bytes
+  let (partyIdPositionAccount, bytes) ← Alpha.decode 32 bytes
+  let (freeText1, bytes) ← Alpha.decode 12 bytes
+  let (freeText2, bytes) ← Alpha.decode 12 bytes
+  let (freeText3, bytes) ← Alpha.decode 12 bytes
+  let (noLegs, bytes) ← decodeUInt 1 bytes
+  let (pad7, bytes) ← Alpha.decode 7 bytes
+  let (legOrdGrpComp_, bytes) ← decodeMany LegOrdGrpComp.decode noLegs.toNat bytes
+  if fits_legOrdGrpComp : legOrdGrpComp_.length < 256 ^ 1 then
+    pure ({ networkMsgId, pad2, requestHeaderComp, clOrdId, securityId, price, complianceId, marketSegmentId, orderQty, expireDate, matchInstCrossId, partyIdTakeUpTradingFirm, partyIdOrderOriginationFirm, partyIdBeneficiary, applSeqIndicator, productComplex, side, ordType, priceValidityCheckType, execInst, timeInForce, tradingCapacity, partyIdLocationId, complianceText, custOrderHandlingInst, partyIdPositionAccount, freeText1, freeText2, freeText3, pad7, legOrdGrpComp := ⟨legOrdGrpComp_, fits_legOrdGrpComp⟩ }, bytes)
+  else none
+
+theorem encode_length_pos (message : NewOrderComplexRequest) : (encode message).length > 0 := by
+  unfold encode
+  simp only [Alpha.encode_length, List.length_append]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : NewOrderComplexRequest) : (encode message).length ≤ 2234 := by
+  have bound_legOrdGrpComp := message.legOrdGrpComp.length_lt
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const LegOrdGrpComp.encode 8 LegOrdGrpComp.encode_length]
+  omega
+
+set_option maxRecDepth 4096 in
+@[simp] theorem decode_encode (message : NewOrderComplexRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 LegOrdGrpComp.encode LegOrdGrpComp.decode LegOrdGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  simp only [message.legOrdGrpComp.length_lt, ↓reduceDIte]
+  rfl
+
+end NewOrderComplexRequest
+
+/-- New Order Single Request: 194 bytes -/
+structure NewOrderSingleRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  price : BitVec 64
+  stopPx : BitVec 64
+  clOrdId : BitVec 64
+  complianceId : BitVec 64
+  orderQty : BitVec 32
+  expireDate : BitVec 32
+  marketSegmentId : BitVec 32
+  simpleSecurityId : BitVec 32
+  matchInstCrossId : BitVec 32
+  partyIdTakeUpTradingFirm : Alpha 5
+  partyIdOrderOriginationFirm : Alpha 7
+  partyIdBeneficiary : Alpha 9
+  applSeqIndicator : BitVec 8
+  side : BitVec 8
+  ordType : BitVec 8
+  priceValidityCheckType : BitVec 8
+  timeInForce : BitVec 8
+  execInst : BitVec 8
+  tradingSessionSubId : BitVec 8
+  tradingCapacity : BitVec 8
+  account : Alpha 2
+  partyIdPositionAccount : Alpha 32
+  positionEffect : PositionEffect
+  partyIdLocationId : Alpha 2
+  custOrderHandlingInst : Alpha 1
+  complianceText : Alpha 20
+  freeText1 : Alpha 12
+  freeText2 : Alpha 12
+  freeText3 : Alpha 12
+  pad1 : Alpha 1
+  deriving DecidableEq, Repr
+
+namespace NewOrderSingleRequest
+
+def encode (message : NewOrderSingleRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.price
+    ++ encodeUIntLE 8 message.stopPx
+    ++ encodeUIntLE 8 message.clOrdId
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.orderQty
+    ++ encodeUIntLE 4 message.expireDate
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.simpleSecurityId
+    ++ encodeUIntLE 4 message.matchInstCrossId
+    ++ Alpha.encode message.partyIdTakeUpTradingFirm
+    ++ Alpha.encode message.partyIdOrderOriginationFirm
+    ++ Alpha.encode message.partyIdBeneficiary
+    ++ encodeUInt 1 message.applSeqIndicator
+    ++ encodeUInt 1 message.side
+    ++ encodeUInt 1 message.ordType
+    ++ encodeUInt 1 message.priceValidityCheckType
+    ++ encodeUInt 1 message.timeInForce
+    ++ encodeUInt 1 message.execInst
+    ++ encodeUInt 1 message.tradingSessionSubId
+    ++ encodeUInt 1 message.tradingCapacity
+    ++ Alpha.encode message.account
+    ++ Alpha.encode message.partyIdPositionAccount
+    ++ PositionEffect.encode message.positionEffect
+    ++ Alpha.encode message.partyIdLocationId
+    ++ Alpha.encode message.custOrderHandlingInst
+    ++ Alpha.encode message.complianceText
+    ++ Alpha.encode message.freeText1
+    ++ Alpha.encode message.freeText2
+    ++ Alpha.encode message.freeText3
+    ++ Alpha.encode message.pad1
+
+-- a long run of fields nests deeper than the elaborator's default limit
+set_option maxRecDepth 4096 in
+def decode (bytes : List UInt8) : Option (NewOrderSingleRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (price, bytes) ← decodeUIntLE 8 bytes
+  let (stopPx, bytes) ← decodeUIntLE 8 bytes
+  let (clOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (orderQty, bytes) ← decodeUIntLE 4 bytes
+  let (expireDate, bytes) ← decodeUIntLE 4 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (simpleSecurityId, bytes) ← decodeUIntLE 4 bytes
+  let (matchInstCrossId, bytes) ← decodeUIntLE 4 bytes
+  let (partyIdTakeUpTradingFirm, bytes) ← Alpha.decode 5 bytes
+  let (partyIdOrderOriginationFirm, bytes) ← Alpha.decode 7 bytes
+  let (partyIdBeneficiary, bytes) ← Alpha.decode 9 bytes
+  let (applSeqIndicator, bytes) ← decodeUInt 1 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (ordType, bytes) ← decodeUInt 1 bytes
+  let (priceValidityCheckType, bytes) ← decodeUInt 1 bytes
+  let (timeInForce, bytes) ← decodeUInt 1 bytes
+  let (execInst, bytes) ← decodeUInt 1 bytes
+  let (tradingSessionSubId, bytes) ← decodeUInt 1 bytes
+  let (tradingCapacity, bytes) ← decodeUInt 1 bytes
+  let (account, bytes) ← Alpha.decode 2 bytes
+  let (partyIdPositionAccount, bytes) ← Alpha.decode 32 bytes
+  let (positionEffect, bytes) ← PositionEffect.decode bytes
+  let (partyIdLocationId, bytes) ← Alpha.decode 2 bytes
+  let (custOrderHandlingInst, bytes) ← Alpha.decode 1 bytes
+  let (complianceText, bytes) ← Alpha.decode 20 bytes
+  let (freeText1, bytes) ← Alpha.decode 12 bytes
+  let (freeText2, bytes) ← Alpha.decode 12 bytes
+  let (freeText3, bytes) ← Alpha.decode 12 bytes
+  let (pad1, bytes) ← Alpha.decode 1 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, price, stopPx, clOrdId, complianceId, orderQty, expireDate, marketSegmentId, simpleSecurityId, matchInstCrossId, partyIdTakeUpTradingFirm, partyIdOrderOriginationFirm, partyIdBeneficiary, applSeqIndicator, side, ordType, priceValidityCheckType, timeInForce, execInst, tradingSessionSubId, tradingCapacity, account, partyIdPositionAccount, positionEffect, partyIdLocationId, custOrderHandlingInst, complianceText, freeText1, freeText2, freeText3, pad1 }, bytes)
+
+@[simp] theorem encode_length (message : NewOrderSingleRequest) : (encode message).length = 194 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length, PositionEffect.encode_length]
+
+theorem encode_length_pos (message : NewOrderSingleRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+set_option maxRecDepth 4096 in
+@[simp] theorem decode_encode (message : NewOrderSingleRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [PositionEffect.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end NewOrderSingleRequest
+
+/-- New Order Single Short Request: 66 bytes -/
+structure NewOrderSingleShortRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  price : BitVec 64
+  clOrdId : BitVec 64
+  complianceId : BitVec 64
+  orderQty : BitVec 32
+  simpleSecurityId : BitVec 32
+  matchInstCrossId : BitVec 32
+  enrichmentRuleId : BitVec 16
+  side : BitVec 8
+  priceValidityCheckType : BitVec 8
+  timeInForce : BitVec 8
+  execInst : BitVec 8
+  tradingCapacity : BitVec 8
+  pad5 : Alpha 5
+  deriving DecidableEq, Repr
+
+namespace NewOrderSingleShortRequest
+
+def encode (message : NewOrderSingleShortRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.price
+    ++ encodeUIntLE 8 message.clOrdId
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.orderQty
+    ++ encodeUIntLE 4 message.simpleSecurityId
+    ++ encodeUIntLE 4 message.matchInstCrossId
+    ++ encodeUIntLE 2 message.enrichmentRuleId
+    ++ encodeUInt 1 message.side
+    ++ encodeUInt 1 message.priceValidityCheckType
+    ++ encodeUInt 1 message.timeInForce
+    ++ encodeUInt 1 message.execInst
+    ++ encodeUInt 1 message.tradingCapacity
+    ++ Alpha.encode message.pad5
+
+def decode (bytes : List UInt8) : Option (NewOrderSingleShortRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (price, bytes) ← decodeUIntLE 8 bytes
+  let (clOrdId, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (orderQty, bytes) ← decodeUIntLE 4 bytes
+  let (simpleSecurityId, bytes) ← decodeUIntLE 4 bytes
+  let (matchInstCrossId, bytes) ← decodeUIntLE 4 bytes
+  let (enrichmentRuleId, bytes) ← decodeUIntLE 2 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (priceValidityCheckType, bytes) ← decodeUInt 1 bytes
+  let (timeInForce, bytes) ← decodeUInt 1 bytes
+  let (execInst, bytes) ← decodeUInt 1 bytes
+  let (tradingCapacity, bytes) ← decodeUInt 1 bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, price, clOrdId, complianceId, orderQty, simpleSecurityId, matchInstCrossId, enrichmentRuleId, side, priceValidityCheckType, timeInForce, execInst, tradingCapacity, pad5 }, bytes)
+
+@[simp] theorem encode_length (message : NewOrderSingleShortRequest) : (encode message).length = 66 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length]
+
+theorem encode_length_pos (message : NewOrderSingleShortRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : NewOrderSingleShortRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end NewOrderSingleShortRequest
+
+/-- Quote Activation Request: 42 bytes -/
+structure QuoteActivationRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  targetPartyIdSessionId : BitVec 32
+  massActionType : BitVec 8
+  productComplex : BitVec 8
+  pad6 : Alpha 6
+  deriving DecidableEq, Repr
+
+namespace QuoteActivationRequest
+
+def encode (message : QuoteActivationRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.targetPartyIdSessionId
+    ++ encodeUInt 1 message.massActionType
+    ++ encodeUInt 1 message.productComplex
+    ++ Alpha.encode message.pad6
+
+def decode (bytes : List UInt8) : Option (QuoteActivationRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (targetPartyIdSessionId, bytes) ← decodeUIntLE 4 bytes
+  let (massActionType, bytes) ← decodeUInt 1 bytes
+  let (productComplex, bytes) ← decodeUInt 1 bytes
+  let (pad6, bytes) ← Alpha.decode 6 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, complianceId, marketSegmentId, targetPartyIdSessionId, massActionType, productComplex, pad6 }, bytes)
+
+@[simp] theorem encode_length (message : QuoteActivationRequest) : (encode message).length = 42 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length]
+
+theorem encode_length_pos (message : QuoteActivationRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : QuoteActivationRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end QuoteActivationRequest
+
+/-- Rfq Request: 66 bytes -/
+structure RfqRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  securityId : BitVec 64
+  complianceId : BitVec 64
+  marketSegmentId : BitVec 32
+  orderQty : BitVec 32
+  side : BitVec 8
+  complianceText : Alpha 20
+  pad3 : Alpha 3
+  deriving DecidableEq, Repr
+
+namespace RfqRequest
+
+def encode (message : RfqRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.securityId
+    ++ encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.orderQty
+    ++ encodeUInt 1 message.side
+    ++ Alpha.encode message.complianceText
+    ++ Alpha.encode message.pad3
+
+def decode (bytes : List UInt8) : Option (RfqRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (securityId, bytes) ← decodeUIntLE 8 bytes
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (orderQty, bytes) ← decodeUIntLE 4 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (complianceText, bytes) ← Alpha.decode 20 bytes
+  let (pad3, bytes) ← Alpha.decode 3 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, securityId, complianceId, marketSegmentId, orderQty, side, complianceText, pad3 }, bytes)
+
+@[simp] theorem encode_length (message : RfqRequest) : (encode message).length = 66 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length]
+
+theorem encode_length_pos (message : RfqRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : RfqRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end RfqRequest
+
+/-- Retransmit Me Message Request: 58 bytes -/
+structure RetransmitMeMessageRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  subscriptionScope : BitVec 32
+  partitionId : BitVec 16
+  refApplId : BitVec 8
+  applBegMsgId : Alpha 16
+  applEndMsgId : Alpha 16
+  pad1 : Alpha 1
+  deriving DecidableEq, Repr
+
+namespace RetransmitMeMessageRequest
+
+def encode (message : RetransmitMeMessageRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 4 message.subscriptionScope
+    ++ encodeUIntLE 2 message.partitionId
+    ++ encodeUInt 1 message.refApplId
+    ++ Alpha.encode message.applBegMsgId
+    ++ Alpha.encode message.applEndMsgId
+    ++ Alpha.encode message.pad1
+
+def decode (bytes : List UInt8) : Option (RetransmitMeMessageRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (subscriptionScope, bytes) ← decodeUIntLE 4 bytes
+  let (partitionId, bytes) ← decodeUIntLE 2 bytes
+  let (refApplId, bytes) ← decodeUInt 1 bytes
+  let (applBegMsgId, bytes) ← Alpha.decode 16 bytes
+  let (applEndMsgId, bytes) ← Alpha.decode 16 bytes
+  let (pad1, bytes) ← Alpha.decode 1 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, subscriptionScope, partitionId, refApplId, applBegMsgId, applEndMsgId, pad1 }, bytes)
+
+@[simp] theorem encode_length (message : RetransmitMeMessageRequest) : (encode message).length = 58 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length]
+
+theorem encode_length_pos (message : RetransmitMeMessageRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : RetransmitMeMessageRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end RetransmitMeMessageRequest
+
+/-- Retransmit Request: 42 bytes -/
+structure RetransmitRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  applBegSeqNum : BitVec 64
+  applEndSeqNum : BitVec 64
+  partitionId : BitVec 16
+  refApplId : BitVec 8
+  pad5 : Alpha 5
+  deriving DecidableEq, Repr
+
+namespace RetransmitRequest
+
+def encode (message : RetransmitRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.applBegSeqNum
+    ++ encodeUIntLE 8 message.applEndSeqNum
+    ++ encodeUIntLE 2 message.partitionId
+    ++ encodeUInt 1 message.refApplId
+    ++ Alpha.encode message.pad5
+
+def decode (bytes : List UInt8) : Option (RetransmitRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (applBegSeqNum, bytes) ← decodeUIntLE 8 bytes
+  let (applEndSeqNum, bytes) ← decodeUIntLE 8 bytes
+  let (partitionId, bytes) ← decodeUIntLE 2 bytes
+  let (refApplId, bytes) ← decodeUInt 1 bytes
+  let (pad5, bytes) ← Alpha.decode 5 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, applBegSeqNum, applEndSeqNum, partitionId, refApplId, pad5 }, bytes)
+
+@[simp] theorem encode_length (message : RetransmitRequest) : (encode message).length = 42 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length]
+
+theorem encode_length_pos (message : RetransmitRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : RetransmitRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end RetransmitRequest
+
+/-- Subscribe Request: 26 bytes -/
+structure SubscribeRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  subscriptionScope : BitVec 32
+  refApplId : BitVec 8
+  pad3 : Alpha 3
+  deriving DecidableEq, Repr
+
+namespace SubscribeRequest
+
+def encode (message : SubscribeRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 4 message.subscriptionScope
+    ++ encodeUInt 1 message.refApplId
+    ++ Alpha.encode message.pad3
+
+def decode (bytes : List UInt8) : Option (SubscribeRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (subscriptionScope, bytes) ← decodeUIntLE 4 bytes
+  let (refApplId, bytes) ← decodeUInt 1 bytes
+  let (pad3, bytes) ← Alpha.decode 3 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, subscriptionScope, refApplId, pad3 }, bytes)
+
+@[simp] theorem encode_length (message : SubscribeRequest) : (encode message).length = 26 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length]
+
+theorem encode_length_pos (message : SubscribeRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : SubscribeRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end SubscribeRequest
+
+/-- Unsubscribe Request: 26 bytes -/
+structure UnsubscribeRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  refApplSubId : BitVec 32
+  pad4 : Alpha 4
+  deriving DecidableEq, Repr
+
+namespace UnsubscribeRequest
+
+def encode (message : UnsubscribeRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 4 message.refApplSubId
+    ++ Alpha.encode message.pad4
+
+def decode (bytes : List UInt8) : Option (UnsubscribeRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (refApplSubId, bytes) ← decodeUIntLE 4 bytes
+  let (pad4, bytes) ← Alpha.decode 4 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, refApplSubId, pad4 }, bytes)
+
+@[simp] theorem encode_length (message : UnsubscribeRequest) : (encode message).length = 26 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length]
+
+theorem encode_length_pos (message : UnsubscribeRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : UnsubscribeRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end UnsubscribeRequest
+
+/-- Side Alloc Ext Grp Comp: 152 bytes -/
+structure SideAllocExtGrpComp where
+  complianceId : BitVec 64
+  individualAllocId : BitVec 32
+  allocQty : BitVec 32
+  partyExecutingFirm : Alpha 5
+  partyExecutingTrader : Alpha 6
+  side : BitVec 8
+  tradeAllocStatus : BitVec 8
+  tradingCapacity : BitVec 8
+  positionEffect : PositionEffect
+  account : Alpha 2
+  partyIdPositionAccount : Alpha 32
+  partyIdTakeUpTradingFirm : Alpha 5
+  freeText1 : Alpha 12
+  freeText2 : Alpha 12
+  freeText3 : Alpha 12
+  partyIdOrderOriginationFirm : Alpha 7
+  partyIdBeneficiary : Alpha 9
+  partyIdLocationId : Alpha 2
+  custOrderHandlingInst : Alpha 1
+  complianceText : Alpha 20
+  pad7 : Alpha 7
+  deriving DecidableEq, Repr
+
+namespace SideAllocExtGrpComp
+
+def encode (message : SideAllocExtGrpComp) : List UInt8 :=
+  encodeUIntLE 8 message.complianceId
+    ++ encodeUIntLE 4 message.individualAllocId
+    ++ encodeUIntLE 4 message.allocQty
+    ++ Alpha.encode message.partyExecutingFirm
+    ++ Alpha.encode message.partyExecutingTrader
+    ++ encodeUInt 1 message.side
+    ++ encodeUInt 1 message.tradeAllocStatus
+    ++ encodeUInt 1 message.tradingCapacity
+    ++ PositionEffect.encode message.positionEffect
+    ++ Alpha.encode message.account
+    ++ Alpha.encode message.partyIdPositionAccount
+    ++ Alpha.encode message.partyIdTakeUpTradingFirm
+    ++ Alpha.encode message.freeText1
+    ++ Alpha.encode message.freeText2
+    ++ Alpha.encode message.freeText3
+    ++ Alpha.encode message.partyIdOrderOriginationFirm
+    ++ Alpha.encode message.partyIdBeneficiary
+    ++ Alpha.encode message.partyIdLocationId
+    ++ Alpha.encode message.custOrderHandlingInst
+    ++ Alpha.encode message.complianceText
+    ++ Alpha.encode message.pad7
+
+def decode (bytes : List UInt8) : Option (SideAllocExtGrpComp × List UInt8) := do
+  let (complianceId, bytes) ← decodeUIntLE 8 bytes
+  let (individualAllocId, bytes) ← decodeUIntLE 4 bytes
+  let (allocQty, bytes) ← decodeUIntLE 4 bytes
+  let (partyExecutingFirm, bytes) ← Alpha.decode 5 bytes
+  let (partyExecutingTrader, bytes) ← Alpha.decode 6 bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  let (tradeAllocStatus, bytes) ← decodeUInt 1 bytes
+  let (tradingCapacity, bytes) ← decodeUInt 1 bytes
+  let (positionEffect, bytes) ← PositionEffect.decode bytes
+  let (account, bytes) ← Alpha.decode 2 bytes
+  let (partyIdPositionAccount, bytes) ← Alpha.decode 32 bytes
+  let (partyIdTakeUpTradingFirm, bytes) ← Alpha.decode 5 bytes
+  let (freeText1, bytes) ← Alpha.decode 12 bytes
+  let (freeText2, bytes) ← Alpha.decode 12 bytes
+  let (freeText3, bytes) ← Alpha.decode 12 bytes
+  let (partyIdOrderOriginationFirm, bytes) ← Alpha.decode 7 bytes
+  let (partyIdBeneficiary, bytes) ← Alpha.decode 9 bytes
+  let (partyIdLocationId, bytes) ← Alpha.decode 2 bytes
+  let (custOrderHandlingInst, bytes) ← Alpha.decode 1 bytes
+  let (complianceText, bytes) ← Alpha.decode 20 bytes
+  let (pad7, bytes) ← Alpha.decode 7 bytes
+  pure ({ complianceId, individualAllocId, allocQty, partyExecutingFirm, partyExecutingTrader, side, tradeAllocStatus, tradingCapacity, positionEffect, account, partyIdPositionAccount, partyIdTakeUpTradingFirm, freeText1, freeText2, freeText3, partyIdOrderOriginationFirm, partyIdBeneficiary, partyIdLocationId, custOrderHandlingInst, complianceText, pad7 }, bytes)
+
+@[simp] theorem encode_length (message : SideAllocExtGrpComp) : (encode message).length = 152 := by
+  unfold encode
+  simp only [List.length_append, encodeUIntLE_length, Alpha.encode_length, encodeUInt_length, PositionEffect.encode_length]
+
+theorem encode_length_pos (message : SideAllocExtGrpComp) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : SideAllocExtGrpComp) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [PositionEffect.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end SideAllocExtGrpComp
+
+/-- Upload Tes Trade Request -/
+structure UploadTesTradeRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  securityId : BitVec 64
+  lastPx : BitVec 64
+  transBkdTime : BitVec 64
+  underlyingPx : BitVec 64
+  underlyingQty : BitVec 64
+  relatedClosePrice : BitVec 64
+  marketSegmentId : BitVec 32
+  underlyingSettlementDate : BitVec 32
+  underlyingMaturityDate : BitVec 32
+  relatedTradeId : BitVec 32
+  relatedMarketSegmentId : BitVec 32
+  relatedTradeQuantity : BitVec 32
+  trdType : BitVec 16
+  productComplex : BitVec 8
+  tradeReportType : BitVec 8
+  tradePublishIndicator : BitVec 8
+  skipValidations : BitVec 8
+  hedgeType : BitVec 8
+  partyIdSettlementLocation : BitVec 8
+  tradeReportId : Alpha 20
+  tradeReportText : Alpha 20
+  underlyingSecurityId : Alpha 12
+  underlyingSecurityDesc : Alpha 30
+  underlyingCurrency : Alpha 3
+  underlyingIssuer : Alpha 30
+  pad1 : Alpha 1
+  sideAllocExtGrpComp : Bounded 1 SideAllocExtGrpComp
+  instrumentEventGrpComp : Bounded 1 InstrumentEventGrpComp
+  instrumentAttributeGrpComp : Bounded 1 InstrumentAttributeGrpComp
+  underlyingStipGrpComp : Bounded 1 UnderlyingStipGrpComp
+  deriving DecidableEq, Repr
+
+namespace UploadTesTradeRequest
+
+def encode (message : UploadTesTradeRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 8 message.securityId
+    ++ encodeUIntLE 8 message.lastPx
+    ++ encodeUIntLE 8 message.transBkdTime
+    ++ encodeUIntLE 8 message.underlyingPx
+    ++ encodeUIntLE 8 message.underlyingQty
+    ++ encodeUIntLE 8 message.relatedClosePrice
+    ++ encodeUIntLE 4 message.marketSegmentId
+    ++ encodeUIntLE 4 message.underlyingSettlementDate
+    ++ encodeUIntLE 4 message.underlyingMaturityDate
+    ++ encodeUIntLE 4 message.relatedTradeId
+    ++ encodeUIntLE 4 message.relatedMarketSegmentId
+    ++ encodeUIntLE 4 message.relatedTradeQuantity
+    ++ encodeUIntLE 2 message.trdType
+    ++ encodeUInt 1 message.productComplex
+    ++ encodeUInt 1 message.tradeReportType
+    ++ encodeUInt 1 message.tradePublishIndicator
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.sideAllocExtGrpComp.val.length)
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.instrumentEventGrpComp.val.length)
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.instrumentAttributeGrpComp.val.length)
+    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.underlyingStipGrpComp.val.length)
+    ++ encodeUInt 1 message.skipValidations
+    ++ encodeUInt 1 message.hedgeType
+    ++ encodeUInt 1 message.partyIdSettlementLocation
+    ++ Alpha.encode message.tradeReportId
+    ++ Alpha.encode message.tradeReportText
+    ++ Alpha.encode message.underlyingSecurityId
+    ++ Alpha.encode message.underlyingSecurityDesc
+    ++ Alpha.encode message.underlyingCurrency
+    ++ Alpha.encode message.underlyingIssuer
+    ++ Alpha.encode message.pad1
+    ++ encodeMany SideAllocExtGrpComp.encode message.sideAllocExtGrpComp.val
+    ++ encodeMany InstrumentEventGrpComp.encode message.instrumentEventGrpComp.val
+    ++ encodeMany InstrumentAttributeGrpComp.encode message.instrumentAttributeGrpComp.val
+    ++ encodeMany UnderlyingStipGrpComp.encode message.underlyingStipGrpComp.val
+
+-- a long run of fields nests deeper than the elaborator's default limit
+set_option maxRecDepth 4096 in
+def decode (bytes : List UInt8) : Option (UploadTesTradeRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (securityId, bytes) ← decodeUIntLE 8 bytes
+  let (lastPx, bytes) ← decodeUIntLE 8 bytes
+  let (transBkdTime, bytes) ← decodeUIntLE 8 bytes
+  let (underlyingPx, bytes) ← decodeUIntLE 8 bytes
+  let (underlyingQty, bytes) ← decodeUIntLE 8 bytes
+  let (relatedClosePrice, bytes) ← decodeUIntLE 8 bytes
+  let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (underlyingSettlementDate, bytes) ← decodeUIntLE 4 bytes
+  let (underlyingMaturityDate, bytes) ← decodeUIntLE 4 bytes
+  let (relatedTradeId, bytes) ← decodeUIntLE 4 bytes
+  let (relatedMarketSegmentId, bytes) ← decodeUIntLE 4 bytes
+  let (relatedTradeQuantity, bytes) ← decodeUIntLE 4 bytes
+  let (trdType, bytes) ← decodeUIntLE 2 bytes
+  let (productComplex, bytes) ← decodeUInt 1 bytes
+  let (tradeReportType, bytes) ← decodeUInt 1 bytes
+  let (tradePublishIndicator, bytes) ← decodeUInt 1 bytes
+  let (noSideAllocs, bytes) ← decodeUInt 1 bytes
+  let (noEvents, bytes) ← decodeUInt 1 bytes
+  let (noInstrAttrib, bytes) ← decodeUInt 1 bytes
+  let (noUnderlyingStips, bytes) ← decodeUInt 1 bytes
+  let (skipValidations, bytes) ← decodeUInt 1 bytes
+  let (hedgeType, bytes) ← decodeUInt 1 bytes
+  let (partyIdSettlementLocation, bytes) ← decodeUInt 1 bytes
+  let (tradeReportId, bytes) ← Alpha.decode 20 bytes
+  let (tradeReportText, bytes) ← Alpha.decode 20 bytes
+  let (underlyingSecurityId, bytes) ← Alpha.decode 12 bytes
+  let (underlyingSecurityDesc, bytes) ← Alpha.decode 30 bytes
+  let (underlyingCurrency, bytes) ← Alpha.decode 3 bytes
+  let (underlyingIssuer, bytes) ← Alpha.decode 30 bytes
+  let (pad1, bytes) ← Alpha.decode 1 bytes
+  let (sideAllocExtGrpComp_, bytes) ← decodeMany SideAllocExtGrpComp.decode noSideAllocs.toNat bytes
+  let (instrumentEventGrpComp_, bytes) ← decodeMany InstrumentEventGrpComp.decode noEvents.toNat bytes
+  let (instrumentAttributeGrpComp_, bytes) ← decodeMany InstrumentAttributeGrpComp.decode noInstrAttrib.toNat bytes
+  let (underlyingStipGrpComp_, bytes) ← decodeMany UnderlyingStipGrpComp.decode noUnderlyingStips.toNat bytes
+  if fits_sideAllocExtGrpComp : sideAllocExtGrpComp_.length < 256 ^ 1 then
+    if fits_instrumentEventGrpComp : instrumentEventGrpComp_.length < 256 ^ 1 then
+      if fits_instrumentAttributeGrpComp : instrumentAttributeGrpComp_.length < 256 ^ 1 then
+        if fits_underlyingStipGrpComp : underlyingStipGrpComp_.length < 256 ^ 1 then
+          pure ({ networkMsgId, pad2, requestHeaderComp, securityId, lastPx, transBkdTime, underlyingPx, underlyingQty, relatedClosePrice, marketSegmentId, underlyingSettlementDate, underlyingMaturityDate, relatedTradeId, relatedMarketSegmentId, relatedTradeQuantity, trdType, productComplex, tradeReportType, tradePublishIndicator, skipValidations, hedgeType, partyIdSettlementLocation, tradeReportId, tradeReportText, underlyingSecurityId, underlyingSecurityDesc, underlyingCurrency, underlyingIssuer, pad1, sideAllocExtGrpComp := ⟨sideAllocExtGrpComp_, fits_sideAllocExtGrpComp⟩, instrumentEventGrpComp := ⟨instrumentEventGrpComp_, fits_instrumentEventGrpComp⟩, instrumentAttributeGrpComp := ⟨instrumentAttributeGrpComp_, fits_instrumentAttributeGrpComp⟩, underlyingStipGrpComp := ⟨underlyingStipGrpComp_, fits_underlyingStipGrpComp⟩ }, bytes)
+        else none
+      else none
+    else none
+  else none
+
+theorem encode_length_pos (message : UploadTesTradeRequest) : (encode message).length > 0 := by
+  unfold encode
+  simp only [Alpha.encode_length, List.length_append]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : UploadTesTradeRequest) : (encode message).length ≤ 61418 := by
+  have bound_sideAllocExtGrpComp := message.sideAllocExtGrpComp.length_lt
+  have bound_instrumentEventGrpComp := message.instrumentEventGrpComp.length_lt
+  have bound_instrumentAttributeGrpComp := message.instrumentAttributeGrpComp.length_lt
+  have bound_underlyingStipGrpComp := message.underlyingStipGrpComp.length_lt
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const SideAllocExtGrpComp.encode 152 SideAllocExtGrpComp.encode_length, encodeMany_length_const InstrumentEventGrpComp.encode 8 InstrumentEventGrpComp.encode_length, encodeMany_length_const InstrumentAttributeGrpComp.encode 40 InstrumentAttributeGrpComp.encode_length, encodeMany_length_const UnderlyingStipGrpComp.encode 40 UnderlyingStipGrpComp.encode_length]
+  omega
+
+set_option maxRecDepth 4096 in
+@[simp] theorem decode_encode (message : UploadTesTradeRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [decodeUInt_encodeUInt, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 SideAllocExtGrpComp.encode SideAllocExtGrpComp.decode SideAllocExtGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 InstrumentEventGrpComp.encode InstrumentEventGrpComp.decode InstrumentEventGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 InstrumentAttributeGrpComp.encode InstrumentAttributeGrpComp.decode InstrumentAttributeGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeMany_bounded 1 UnderlyingStipGrpComp.encode UnderlyingStipGrpComp.decode UnderlyingStipGrpComp.decode_encode, Option.bind_some]
+  dsimp only
+  simp only [message.sideAllocExtGrpComp.length_lt, message.instrumentEventGrpComp.length_lt, message.instrumentAttributeGrpComp.length_lt, message.underlyingStipGrpComp.length_lt, ↓reduceDIte]
+  rfl
+
+end UploadTesTradeRequest
+
+/-- User Login Request: 58 bytes -/
+structure UserLoginRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  username : BitVec 32
+  password : Alpha 32
+  pad4 : Alpha 4
+  deriving DecidableEq, Repr
+
+namespace UserLoginRequest
+
+def encode (message : UserLoginRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 4 message.username
+    ++ Alpha.encode message.password
+    ++ Alpha.encode message.pad4
+
+def decode (bytes : List UInt8) : Option (UserLoginRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (username, bytes) ← decodeUIntLE 4 bytes
+  let (password, bytes) ← Alpha.decode 32 bytes
+  let (pad4, bytes) ← Alpha.decode 4 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, username, password, pad4 }, bytes)
+
+@[simp] theorem encode_length (message : UserLoginRequest) : (encode message).length = 58 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length]
+
+theorem encode_length_pos (message : UserLoginRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : UserLoginRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end UserLoginRequest
+
+/-- User Logout Request: 26 bytes -/
+structure UserLogoutRequest where
+  networkMsgId : Alpha 8
+  pad2 : Alpha 2
+  requestHeaderComp : RequestHeaderComp
+  username : BitVec 32
+  pad4 : Alpha 4
+  deriving DecidableEq, Repr
+
+namespace UserLogoutRequest
+
+def encode (message : UserLogoutRequest) : List UInt8 :=
+  Alpha.encode message.networkMsgId
+    ++ Alpha.encode message.pad2
+    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ encodeUIntLE 4 message.username
+    ++ Alpha.encode message.pad4
+
+def decode (bytes : List UInt8) : Option (UserLogoutRequest × List UInt8) := do
+  let (networkMsgId, bytes) ← Alpha.decode 8 bytes
+  let (pad2, bytes) ← Alpha.decode 2 bytes
+  let (requestHeaderComp, bytes) ← RequestHeaderComp.decode bytes
+  let (username, bytes) ← decodeUIntLE 4 bytes
+  let (pad4, bytes) ← Alpha.decode 4 bytes
+  pure ({ networkMsgId, pad2, requestHeaderComp, username, pad4 }, bytes)
+
+@[simp] theorem encode_length (message : UserLogoutRequest) : (encode message).length = 26 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, RequestHeaderComp.encode_length, encodeUIntLE_length]
+
+theorem encode_length_pos (message : UserLogoutRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : UserLogoutRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  dsimp only
+  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [Alpha.decode_encode, Option.bind_some]
+  rfl
+
+end UserLogoutRequest
+
+/-- Any Client Payload, selected by Template Id -/
+inductive ClientPayload where
+  | addComplexInstrumentRequest (message : AddComplexInstrumentRequest) -- 10301
+  | addFlexibleInstrumentRequest (message : AddFlexibleInstrumentRequest) -- 10309
+  | approveTesTradeRequest (message : ApproveTesTradeRequest) -- 10603
+  | crossRequest (message : CrossRequest) -- 10118
+  | deleteAllOrderRequest (message : DeleteAllOrderRequest) -- 10120
+  | deleteAllQuoteRequest (message : DeleteAllQuoteRequest) -- 10408
+  | deleteOrderComplexRequest (message : DeleteOrderComplexRequest) -- 10123
+  | deleteOrderSingleRequest (message : DeleteOrderSingleRequest) -- 10109
+  | deleteTesTradeRequest (message : DeleteTesTradeRequest) -- 10602
+  | enterTesTradeRequest (message : EnterTesTradeRequest) -- 10600
+  | gatewayRequest (message : GatewayRequest) -- 10020
+  | heartbeat (message : Heartbeat) -- 10011
+  | inquireEnrichmentRuleIdListRequest (message : InquireEnrichmentRuleIdListRequest) -- 10040
+  | inquireMmParameterRequest (message : InquireMmParameterRequest) -- 10305
+  | inquireSessionListRequest (message : InquireSessionListRequest) -- 10035
+  | inquireUserRequest (message : InquireUserRequest) -- 10038
+  | logonRequest (message : LogonRequest) -- 10000
+  | logoutRequest (message : LogoutRequest) -- 10002
+  | mmParameterDefinitionRequest (message : MmParameterDefinitionRequest) -- 10303
+  | massQuoteRequest (message : MassQuoteRequest) -- 10405
+  | modifyOrderComplexRequest (message : ModifyOrderComplexRequest) -- 10114
+  | modifyOrderSingleRequest (message : ModifyOrderSingleRequest) -- 10106
+  | modifyOrderSingleShortRequest (message : ModifyOrderSingleShortRequest) -- 10126
+  | modifyTesTradeRequest (message : ModifyTesTradeRequest) -- 10601
+  | newOrderComplexRequest (message : NewOrderComplexRequest) -- 10113
+  | newOrderSingleRequest (message : NewOrderSingleRequest) -- 10100
+  | newOrderSingleShortRequest (message : NewOrderSingleShortRequest) -- 10125
+  | quoteActivationRequest (message : QuoteActivationRequest) -- 10403
+  | rfqRequest (message : RfqRequest) -- 10401
+  | retransmitMeMessageRequest (message : RetransmitMeMessageRequest) -- 10026
+  | retransmitRequest (message : RetransmitRequest) -- 10008
+  | subscribeRequest (message : SubscribeRequest) -- 10025
+  | unsubscribeRequest (message : UnsubscribeRequest) -- 10006
+  | uploadTesTradeRequest (message : UploadTesTradeRequest) -- 10612
+  | userLoginRequest (message : UserLoginRequest) -- 10018
+  | userLogoutRequest (message : UserLogoutRequest) -- 10029
+  deriving DecidableEq, Repr
+
+namespace ClientPayload
+
+/-- The Template Id each message is sent under -/
+def tag : ClientPayload → BitVec 16
+  | .addComplexInstrumentRequest _ => 10301
+  | .addFlexibleInstrumentRequest _ => 10309
+  | .approveTesTradeRequest _ => 10603
+  | .crossRequest _ => 10118
+  | .deleteAllOrderRequest _ => 10120
+  | .deleteAllQuoteRequest _ => 10408
+  | .deleteOrderComplexRequest _ => 10123
+  | .deleteOrderSingleRequest _ => 10109
+  | .deleteTesTradeRequest _ => 10602
+  | .enterTesTradeRequest _ => 10600
+  | .gatewayRequest _ => 10020
+  | .heartbeat _ => 10011
+  | .inquireEnrichmentRuleIdListRequest _ => 10040
+  | .inquireMmParameterRequest _ => 10305
+  | .inquireSessionListRequest _ => 10035
+  | .inquireUserRequest _ => 10038
+  | .logonRequest _ => 10000
+  | .logoutRequest _ => 10002
+  | .mmParameterDefinitionRequest _ => 10303
+  | .massQuoteRequest _ => 10405
+  | .modifyOrderComplexRequest _ => 10114
+  | .modifyOrderSingleRequest _ => 10106
+  | .modifyOrderSingleShortRequest _ => 10126
+  | .modifyTesTradeRequest _ => 10601
+  | .newOrderComplexRequest _ => 10113
+  | .newOrderSingleRequest _ => 10100
+  | .newOrderSingleShortRequest _ => 10125
+  | .quoteActivationRequest _ => 10403
+  | .rfqRequest _ => 10401
+  | .retransmitMeMessageRequest _ => 10026
+  | .retransmitRequest _ => 10008
+  | .subscribeRequest _ => 10025
+  | .unsubscribeRequest _ => 10006
+  | .uploadTesTradeRequest _ => 10612
+  | .userLoginRequest _ => 10018
+  | .userLogoutRequest _ => 10029
+
+def encode : ClientPayload → List UInt8
+  | .addComplexInstrumentRequest message => AddComplexInstrumentRequest.encode message
+  | .addFlexibleInstrumentRequest message => AddFlexibleInstrumentRequest.encode message
+  | .approveTesTradeRequest message => ApproveTesTradeRequest.encode message
+  | .crossRequest message => CrossRequest.encode message
+  | .deleteAllOrderRequest message => DeleteAllOrderRequest.encode message
+  | .deleteAllQuoteRequest message => DeleteAllQuoteRequest.encode message
+  | .deleteOrderComplexRequest message => DeleteOrderComplexRequest.encode message
+  | .deleteOrderSingleRequest message => DeleteOrderSingleRequest.encode message
+  | .deleteTesTradeRequest message => DeleteTesTradeRequest.encode message
+  | .enterTesTradeRequest message => EnterTesTradeRequest.encode message
+  | .gatewayRequest message => GatewayRequest.encode message
+  | .heartbeat message => Heartbeat.encode message
+  | .inquireEnrichmentRuleIdListRequest message => InquireEnrichmentRuleIdListRequest.encode message
+  | .inquireMmParameterRequest message => InquireMmParameterRequest.encode message
+  | .inquireSessionListRequest message => InquireSessionListRequest.encode message
+  | .inquireUserRequest message => InquireUserRequest.encode message
+  | .logonRequest message => LogonRequest.encode message
+  | .logoutRequest message => LogoutRequest.encode message
+  | .mmParameterDefinitionRequest message => MmParameterDefinitionRequest.encode message
+  | .massQuoteRequest message => MassQuoteRequest.encode message
+  | .modifyOrderComplexRequest message => ModifyOrderComplexRequest.encode message
+  | .modifyOrderSingleRequest message => ModifyOrderSingleRequest.encode message
+  | .modifyOrderSingleShortRequest message => ModifyOrderSingleShortRequest.encode message
+  | .modifyTesTradeRequest message => ModifyTesTradeRequest.encode message
+  | .newOrderComplexRequest message => NewOrderComplexRequest.encode message
+  | .newOrderSingleRequest message => NewOrderSingleRequest.encode message
+  | .newOrderSingleShortRequest message => NewOrderSingleShortRequest.encode message
+  | .quoteActivationRequest message => QuoteActivationRequest.encode message
+  | .rfqRequest message => RfqRequest.encode message
+  | .retransmitMeMessageRequest message => RetransmitMeMessageRequest.encode message
+  | .retransmitRequest message => RetransmitRequest.encode message
+  | .subscribeRequest message => SubscribeRequest.encode message
+  | .unsubscribeRequest message => UnsubscribeRequest.encode message
+  | .uploadTesTradeRequest message => UploadTesTradeRequest.encode message
+  | .userLoginRequest message => UserLoginRequest.encode message
+  | .userLogoutRequest message => UserLogoutRequest.encode message
+
+def decode (tag : BitVec 16) (bytes : List UInt8) : Option (ClientPayload × List UInt8) :=
+  if tag = 10301 then (AddComplexInstrumentRequest.decode bytes).map fun (message, rest) => (.addComplexInstrumentRequest message, rest)
+  else if tag = 10309 then (AddFlexibleInstrumentRequest.decode bytes).map fun (message, rest) => (.addFlexibleInstrumentRequest message, rest)
+  else if tag = 10603 then (ApproveTesTradeRequest.decode bytes).map fun (message, rest) => (.approveTesTradeRequest message, rest)
+  else if tag = 10118 then (CrossRequest.decode bytes).map fun (message, rest) => (.crossRequest message, rest)
+  else if tag = 10120 then (DeleteAllOrderRequest.decode bytes).map fun (message, rest) => (.deleteAllOrderRequest message, rest)
+  else if tag = 10408 then (DeleteAllQuoteRequest.decode bytes).map fun (message, rest) => (.deleteAllQuoteRequest message, rest)
+  else if tag = 10123 then (DeleteOrderComplexRequest.decode bytes).map fun (message, rest) => (.deleteOrderComplexRequest message, rest)
+  else if tag = 10109 then (DeleteOrderSingleRequest.decode bytes).map fun (message, rest) => (.deleteOrderSingleRequest message, rest)
+  else if tag = 10602 then (DeleteTesTradeRequest.decode bytes).map fun (message, rest) => (.deleteTesTradeRequest message, rest)
+  else if tag = 10600 then (EnterTesTradeRequest.decode bytes).map fun (message, rest) => (.enterTesTradeRequest message, rest)
+  else if tag = 10020 then (GatewayRequest.decode bytes).map fun (message, rest) => (.gatewayRequest message, rest)
+  else if tag = 10011 then (Heartbeat.decode bytes).map fun (message, rest) => (.heartbeat message, rest)
+  else if tag = 10040 then (InquireEnrichmentRuleIdListRequest.decode bytes).map fun (message, rest) => (.inquireEnrichmentRuleIdListRequest message, rest)
+  else if tag = 10305 then (InquireMmParameterRequest.decode bytes).map fun (message, rest) => (.inquireMmParameterRequest message, rest)
+  else if tag = 10035 then (InquireSessionListRequest.decode bytes).map fun (message, rest) => (.inquireSessionListRequest message, rest)
+  else if tag = 10038 then (InquireUserRequest.decode bytes).map fun (message, rest) => (.inquireUserRequest message, rest)
+  else if tag = 10000 then (LogonRequest.decode bytes).map fun (message, rest) => (.logonRequest message, rest)
+  else if tag = 10002 then (LogoutRequest.decode bytes).map fun (message, rest) => (.logoutRequest message, rest)
+  else if tag = 10303 then (MmParameterDefinitionRequest.decode bytes).map fun (message, rest) => (.mmParameterDefinitionRequest message, rest)
+  else if tag = 10405 then (MassQuoteRequest.decode bytes).map fun (message, rest) => (.massQuoteRequest message, rest)
+  else if tag = 10114 then (ModifyOrderComplexRequest.decode bytes).map fun (message, rest) => (.modifyOrderComplexRequest message, rest)
+  else if tag = 10106 then (ModifyOrderSingleRequest.decode bytes).map fun (message, rest) => (.modifyOrderSingleRequest message, rest)
+  else if tag = 10126 then (ModifyOrderSingleShortRequest.decode bytes).map fun (message, rest) => (.modifyOrderSingleShortRequest message, rest)
+  else if tag = 10601 then (ModifyTesTradeRequest.decode bytes).map fun (message, rest) => (.modifyTesTradeRequest message, rest)
+  else if tag = 10113 then (NewOrderComplexRequest.decode bytes).map fun (message, rest) => (.newOrderComplexRequest message, rest)
+  else if tag = 10100 then (NewOrderSingleRequest.decode bytes).map fun (message, rest) => (.newOrderSingleRequest message, rest)
+  else if tag = 10125 then (NewOrderSingleShortRequest.decode bytes).map fun (message, rest) => (.newOrderSingleShortRequest message, rest)
+  else if tag = 10403 then (QuoteActivationRequest.decode bytes).map fun (message, rest) => (.quoteActivationRequest message, rest)
+  else if tag = 10401 then (RfqRequest.decode bytes).map fun (message, rest) => (.rfqRequest message, rest)
+  else if tag = 10026 then (RetransmitMeMessageRequest.decode bytes).map fun (message, rest) => (.retransmitMeMessageRequest message, rest)
+  else if tag = 10008 then (RetransmitRequest.decode bytes).map fun (message, rest) => (.retransmitRequest message, rest)
+  else if tag = 10025 then (SubscribeRequest.decode bytes).map fun (message, rest) => (.subscribeRequest message, rest)
+  else if tag = 10006 then (UnsubscribeRequest.decode bytes).map fun (message, rest) => (.unsubscribeRequest message, rest)
+  else if tag = 10612 then (UploadTesTradeRequest.decode bytes).map fun (message, rest) => (.uploadTesTradeRequest message, rest)
+  else if tag = 10018 then (UserLoginRequest.decode bytes).map fun (message, rest) => (.userLoginRequest message, rest)
+  else if tag = 10029 then (UserLogoutRequest.decode bytes).map fun (message, rest) => (.userLogoutRequest message, rest)
+  else none
+
+@[simp] theorem decode_encode (message : ClientPayload) (rest : List UInt8) :
+    decode (tag message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, tag]
+
+end ClientPayload
+
+/-- Client Message -/
+structure ClientMessage where
+  clientPayload : ClientPayload
+  deriving DecidableEq, Repr
+
+namespace ClientMessage
+
+def encodeBody (message : ClientMessage) : List UInt8 :=
+  encodeUIntLE 2 (ClientPayload.tag message.clientPayload)
+    ++ ClientPayload.encode message.clientPayload
+
+def decodeBody (bytes : List UInt8) : Option (ClientMessage × List UInt8) := do
+  let (templateId, bytes) ← decodeUIntLE 2 bytes
+  let (clientPayload, bytes) ← ClientPayload.decode templateId bytes
+  pure ({ clientPayload }, bytes)
+
+theorem decodeBody_encodeBody (message : ClientMessage) (rest : List UInt8) :
+    decodeBody (encodeBody message ++ rest) = some (message, rest) := by
+  unfold decodeBody encodeBody
+  simp only [List.append_assoc, Option.bind_eq_bind]
+  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  dsimp only
+  rw [ClientPayload.decode_encode, Option.bind_some]
+  rfl
+
+/-- Every body fits the length prefix -/
+theorem encodeBody_length_lt (message : ClientMessage) : (encodeBody message).length + 4 < 256 ^ 4 := by
+  unfold encodeBody
+  cases message.clientPayload with
+  | addComplexInstrumentRequest inner =>
+    have bound_inner := AddComplexInstrumentRequest.encode_length_le inner
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length]
+    omega
+  | addFlexibleInstrumentRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, AddFlexibleInstrumentRequest.encode_length]
+    omega
+  | approveTesTradeRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, ApproveTesTradeRequest.encode_length]
+    omega
+  | crossRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, CrossRequest.encode_length]
+    omega
+  | deleteAllOrderRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, DeleteAllOrderRequest.encode_length]
+    omega
+  | deleteAllQuoteRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, DeleteAllQuoteRequest.encode_length]
+    omega
+  | deleteOrderComplexRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, DeleteOrderComplexRequest.encode_length]
+    omega
+  | deleteOrderSingleRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, DeleteOrderSingleRequest.encode_length]
+    omega
+  | deleteTesTradeRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, DeleteTesTradeRequest.encode_length]
+    omega
+  | enterTesTradeRequest inner =>
+    have bound_inner := EnterTesTradeRequest.encode_length_le inner
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length]
+    omega
+  | gatewayRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, GatewayRequest.encode_length]
+    omega
+  | heartbeat inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, Heartbeat.encode_length]
+    omega
+  | inquireEnrichmentRuleIdListRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, InquireEnrichmentRuleIdListRequest.encode_length]
+    omega
+  | inquireMmParameterRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, InquireMmParameterRequest.encode_length]
+    omega
+  | inquireSessionListRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, InquireSessionListRequest.encode_length]
+    omega
+  | inquireUserRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, InquireUserRequest.encode_length]
+    omega
+  | logonRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, LogonRequest.encode_length]
+    omega
+  | logoutRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, LogoutRequest.encode_length]
+    omega
+  | mmParameterDefinitionRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, MmParameterDefinitionRequest.encode_length]
+    omega
+  | massQuoteRequest inner =>
+    have bound_inner := MassQuoteRequest.encode_length_le inner
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length]
+    omega
+  | modifyOrderComplexRequest inner =>
+    have bound_inner := ModifyOrderComplexRequest.encode_length_le inner
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length]
+    omega
+  | modifyOrderSingleRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, ModifyOrderSingleRequest.encode_length]
+    omega
+  | modifyOrderSingleShortRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, ModifyOrderSingleShortRequest.encode_length]
+    omega
+  | modifyTesTradeRequest inner =>
+    have bound_inner := ModifyTesTradeRequest.encode_length_le inner
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length]
+    omega
+  | newOrderComplexRequest inner =>
+    have bound_inner := NewOrderComplexRequest.encode_length_le inner
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length]
+    omega
+  | newOrderSingleRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, NewOrderSingleRequest.encode_length]
+    omega
+  | newOrderSingleShortRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, NewOrderSingleShortRequest.encode_length]
+    omega
+  | quoteActivationRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, QuoteActivationRequest.encode_length]
+    omega
+  | rfqRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, RfqRequest.encode_length]
+    omega
+  | retransmitMeMessageRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, RetransmitMeMessageRequest.encode_length]
+    omega
+  | retransmitRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, RetransmitRequest.encode_length]
+    omega
+  | subscribeRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, SubscribeRequest.encode_length]
+    omega
+  | unsubscribeRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, UnsubscribeRequest.encode_length]
+    omega
+  | uploadTesTradeRequest inner =>
+    have bound_inner := UploadTesTradeRequest.encode_length_le inner
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length]
+    omega
+  | userLoginRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, UserLoginRequest.encode_length]
+    omega
+  | userLogoutRequest inner =>
+    simp only [ClientPayload.encode, List.length_append, encodeUIntLE_length, UserLogoutRequest.encode_length]
+    omega
+
+/-- Size rule: Body Len counts the bytes after it plus 4, so it is written from the body and checked on decode -/
+def encode : ClientMessage → List UInt8 :=
+  encodeFramedLE 4 4 encodeBody
+
+def decode : List UInt8 → Option (ClientMessage × List UInt8) :=
+  decodeFramedLE 4 4 decodeBody
+
+@[simp] theorem decode_encode (message : ClientMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) :=
+  decodeFramedLE_encodeFramedLE 4 4 encodeBody decodeBody decodeBody_encodeBody encodeBody_length_lt message rest
+
+theorem encode_length_pos (message : ClientMessage) : (encode message).length > 0 := by
+  unfold encode
+  rw [encodeFramedLE_length]
+  omega
+
+end ClientMessage
+
+/-- Client Packet -/
+structure ClientPacket where
+  clientMessage : List ClientMessage
+  deriving DecidableEq, Repr
+
+namespace ClientPacket
+
+def encode (message : ClientPacket) : List UInt8 :=
+  encodeMany ClientMessage.encode message.clientMessage
+
+def decode (bytes : List UInt8) : Option ClientPacket := do
+  let clientMessage ← decodeAll ClientMessage.decode bytes.length bytes
+  pure { clientMessage }
+
+theorem decode_encode (message : ClientPacket) : decode (encode message) = some message := by
+  unfold decode encode
+  simp only [Option.bind_eq_bind]
+  rw [decodeAll_encodeMany ClientMessage.encode ClientMessage.decode ClientMessage.decode_encode ClientMessage.encode_length_pos message.clientMessage _ (encodeMany_length_ge ClientMessage.encode ClientMessage.encode_length_pos message.clientMessage), Option.bind_some]
+  rfl
+
+end ClientPacket
+
+end Omi.EurexT7EtiFbeV50Client

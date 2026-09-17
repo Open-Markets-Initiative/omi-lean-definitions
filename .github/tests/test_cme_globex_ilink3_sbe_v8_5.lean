@@ -1,5 +1,5 @@
-import cme.ilink3.Cme_Globex_iLink3_v8_5_Client
-import cme.ilink3.Cme_Globex_iLink3_v8_5_Server
+import cme.globex.ilink3.Cme_Globex_iLink3_v8_5_Client
+import cme.globex.ilink3.Cme_Globex_iLink3_v8_5_Server
 
 /-!
 # CME Group iLink 3 tests

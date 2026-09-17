@@ -94,10 +94,10 @@ namespace LoginRequestMessage
 
 def encode (message : LoginRequestMessage) : List UInt8 :=
   Alpha.encode message.userId
-    ++ encodeUInt 1 message.multicastGroupNumber
-    ++ encodeUInt 1 message.numberOfSystemReboots
-    ++ encodeUInt 4 message.sequenceNumber
-    ++ encodeUInt 3 message.requestedMessageCount
+    ++ (encodeUInt 1 message.multicastGroupNumber
+    ++ (encodeUInt 1 message.numberOfSystemReboots
+    ++ (encodeUInt 4 message.sequenceNumber
+    ++ (encodeUInt 3 message.requestedMessageCount))))
 
 def decode (bytes : List UInt8) : Option (LoginRequestMessage × List UInt8) := do
   let (userId, bytes) ← Alpha.decode 6 bytes
@@ -118,23 +118,20 @@ theorem encode_length_pos (message : LoginRequestMessage) : (encode message).len
 @[simp] theorem decode_encode (message : LoginRequestMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 /-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : LoginRequestMessage) : decode (encode message) = some (message, []) := by
-  have trailing := decode_encode message []
-  rw [List.append_nil] at trailing
-  exact trailing
+theorem decode_encode_nil (message : LoginRequestMessage) : decode (encode message) = some (message, []) :=
+  List.append_nil (encode message) ▸ decode_encode message []
 
 end LoginRequestMessage
 
@@ -148,7 +145,7 @@ namespace LoginResultMessage
 
 def encode (message : LoginResultMessage) : List UInt8 :=
   encodeUInt 1 message.multicastGroupNumber
-    ++ ResultCode.encode message.resultCode
+    ++ (ResultCode.encode message.resultCode)
 
 def decode (bytes : List UInt8) : Option (LoginResultMessage × List UInt8) := do
   let (multicastGroupNumber, bytes) ← decodeUInt 1 bytes
@@ -166,17 +163,14 @@ theorem encode_length_pos (message : LoginResultMessage) : (encode message).leng
 @[simp] theorem decode_encode (message : LoginResultMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [ResultCode.decode_encode, Option.bind_some]
+  rw [ResultCode.decode_encode, some_bind]
   rfl
 
 /-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : LoginResultMessage) : decode (encode message) = some (message, []) := by
-  have trailing := decode_encode message []
-  rw [List.append_nil] at trailing
-  exact trailing
+theorem decode_encode_nil (message : LoginResultMessage) : decode (encode message) = some (message, []) :=
+  List.append_nil (encode message) ▸ decode_encode message []
 
 end LoginResultMessage
 
@@ -204,7 +198,7 @@ theorem encode_length_le (message : MessageResponseMessage) : (encode message).l
 
 theorem decode_encode (message : MessageResponseMessage) : decode (encode message) = some message := by
   unfold decode encode
-  simp only [message.data.length_le, ↓reduceDIte]
+  rw [dite_eq_left message.data.length_le]
   rfl
 
 end MessageResponseMessage
@@ -220,8 +214,8 @@ namespace EndOfMessageMessage
 
 def encode (message : EndOfMessageMessage) : List UInt8 :=
   encodeUInt 1 message.multicastGroupNumber
-    ++ encodeUInt 1 message.numberOfSystemReboots
-    ++ encodeUInt 4 message.nextSequenceNumber
+    ++ (encodeUInt 1 message.numberOfSystemReboots
+    ++ (encodeUInt 4 message.nextSequenceNumber))
 
 def decode (bytes : List UInt8) : Option (EndOfMessageMessage × List UInt8) := do
   let (multicastGroupNumber, bytes) ← decodeUInt 1 bytes
@@ -240,19 +234,16 @@ theorem encode_length_pos (message : EndOfMessageMessage) : (encode message).len
 @[simp] theorem decode_encode (message : EndOfMessageMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 /-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : EndOfMessageMessage) : decode (encode message) = some (message, []) := by
-  have trailing := decode_encode message []
-  rw [List.append_nil] at trailing
-  exact trailing
+theorem decode_encode_nil (message : EndOfMessageMessage) : decode (encode message) = some (message, []) :=
+  List.append_nil (encode message) ▸ decode_encode message []
 
 end EndOfMessageMessage
 
@@ -306,7 +297,7 @@ namespace TcpPacket
 
 def encodeBody (message : TcpPacket) : List UInt8 :=
   encodeUInt 1 (TcpPayload.tag message.tcpPayload)
-    ++ TcpPayload.encode message.tcpPayload
+    ++ (TcpPayload.encode message.tcpPayload)
 
 def decodeBody (bytes : List UInt8) : Option TcpPacket := do
   let (packetType, bytes) ← decodeUInt 1 bytes
@@ -315,10 +306,9 @@ def decodeBody (bytes : List UInt8) : Option TcpPacket := do
 
 theorem decodeBody_encodeBody (message : TcpPacket) : decodeBody (encodeBody message) = some message := by
   unfold decodeBody encodeBody
-  simp only [Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [TcpPayload.decode_encode, Option.bind_some]
+  rw [TcpPayload.decode_encode, some_bind]
   rfl
 
 /-- Every body fits the length prefix -/

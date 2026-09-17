@@ -214,6 +214,11 @@ theorem Bounded.length_lt (bounded : Bounded n α) : bounded.val.length < 256 ^ 
     (⟨bounded.val, fits⟩ : Bounded n α) = bounded :=
   rfl
 
+/-- Binding a known value feeds it straight on: the one step a decoder's round trip takes per field.
+    Stated on the monadic bind the do notation produces, so no pass over the decoder is needed first -/
+theorem some_bind (a : α) (f : α → Option β) : (some a >>= f) = f a :=
+  rfl
+
 /-- Bytes to the end of a frame, at most `most` of them, so the frame's length prefix always fits -/
 abbrev Capped (most : Nat) := { bytes : List UInt8 // bytes.length ≤ most }
 

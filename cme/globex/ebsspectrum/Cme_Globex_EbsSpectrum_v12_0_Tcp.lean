@@ -161,8 +161,8 @@ namespace TechnicalHeader
 
 def encode (message : TechnicalHeader) : List UInt8 :=
   encodeUIntLE 2 message.encodingType
-    ++ encodeUIntLE 4 message.messageSequenceNumber
-    ++ encodeUIntLE 8 message.tcpSendingTime
+    ++ (encodeUIntLE 4 message.messageSequenceNumber
+    ++ (encodeUIntLE 8 message.tcpSendingTime))
 
 def decode (bytes : List UInt8) : Option (TechnicalHeader × List UInt8) := do
   let (encodingType, bytes) ← decodeUIntLE 2 bytes
@@ -181,12 +181,11 @@ theorem encode_length_pos (message : TechnicalHeader) : (encode message).length 
 @[simp] theorem decode_encode (message : TechnicalHeader) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [decodeUIntLE_encodeUIntLE, some_bind]
   rfl
 
 end TechnicalHeader
@@ -228,13 +227,13 @@ namespace IncrementalRefreshSpectrumGroup
 
 def encode (message : IncrementalRefreshSpectrumGroup) : List UInt8 :=
   MdEntryTypeSpectrumEntryType.encode message.mdEntryTypeSpectrumEntryType
-    ++ Alpha.encode message.financialInstrumentFullName
-    ++ Alpha.encode message.symbol
-    ++ encodeUIntLE 8 message.instrumentGuid
-    ++ encodeUIntLE 4 message.securityId
-    ++ encodeUIntLE 8 message.mdEntryPx
-    ++ encodeUIntLE 8 message.mdEntrySize
-    ++ encodeUIntLE 8 message.mdEntryTime
+    ++ (Alpha.encode message.financialInstrumentFullName
+    ++ (Alpha.encode message.symbol
+    ++ (encodeUIntLE 8 message.instrumentGuid
+    ++ (encodeUIntLE 4 message.securityId
+    ++ (encodeUIntLE 8 message.mdEntryPx
+    ++ (encodeUIntLE 8 message.mdEntrySize
+    ++ (encodeUIntLE 8 message.mdEntryTime)))))))
 
 def decode (bytes : List UInt8) : Option (IncrementalRefreshSpectrumGroup × List UInt8) := do
   let (mdEntryTypeSpectrumEntryType, bytes) ← MdEntryTypeSpectrumEntryType.decode bytes
@@ -258,22 +257,21 @@ theorem encode_length_pos (message : IncrementalRefreshSpectrumGroup) : (encode 
 @[simp] theorem decode_encode (message : IncrementalRefreshSpectrumGroup) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [MdEntryTypeSpectrumEntryType.decode_encode, Option.bind_some]
+  rw [List.append_assoc, MdEntryTypeSpectrumEntryType.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [decodeUIntLE_encodeUIntLE, some_bind]
   rfl
 
 end IncrementalRefreshSpectrumGroup
@@ -288,8 +286,8 @@ namespace IncrementalRefreshSpectrumGroups
 
 def encode (message : IncrementalRefreshSpectrumGroups) : List UInt8 :=
   encodeUIntLE 2 message.blockLength
-    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.incrementalRefreshSpectrumGroup.val.length)
-    ++ encodeMany IncrementalRefreshSpectrumGroup.encode message.incrementalRefreshSpectrumGroup.val
+    ++ (encodeUInt 1 (BitVec.ofNat (8 * 1) message.incrementalRefreshSpectrumGroup.val.length)
+    ++ (encodeMany IncrementalRefreshSpectrumGroup.encode message.incrementalRefreshSpectrumGroup.val))
 
 def decode (bytes : List UInt8) : Option (IncrementalRefreshSpectrumGroups × List UInt8) := do
   let (blockLength, bytes) ← decodeUIntLE 2 bytes
@@ -301,27 +299,26 @@ def decode (bytes : List UInt8) : Option (IncrementalRefreshSpectrumGroups × Li
 
 theorem encode_length_pos (message : IncrementalRefreshSpectrumGroups) : (encode message).length > 0 := by
   unfold encode
-  simp only [encodeUIntLE_length, List.length_append]
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
 theorem encode_length_le (message : IncrementalRefreshSpectrumGroups) : (encode message).length ≤ 23463 := by
   have bound_incrementalRefreshSpectrumGroup := message.incrementalRefreshSpectrumGroup.length_lt
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const IncrementalRefreshSpectrumGroup.encode 92 IncrementalRefreshSpectrumGroup.encode_length]
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const IncrementalRefreshSpectrumGroup.encode 92 IncrementalRefreshSpectrumGroup.encode_length]
   omega
 
 @[simp] theorem decode_encode (message : IncrementalRefreshSpectrumGroups) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeMany_bounded 1 IncrementalRefreshSpectrumGroup.encode IncrementalRefreshSpectrumGroup.decode IncrementalRefreshSpectrumGroup.decode_encode, Option.bind_some]
+  rw [decodeMany_bounded 1 IncrementalRefreshSpectrumGroup.encode IncrementalRefreshSpectrumGroup.decode IncrementalRefreshSpectrumGroup.decode_encode, some_bind]
   dsimp only
-  simp only [message.incrementalRefreshSpectrumGroup.length_lt, ↓reduceDIte]
+  rw [dite_eq_left message.incrementalRefreshSpectrumGroup.length_lt]
   rfl
 
 end IncrementalRefreshSpectrumGroups
@@ -337,8 +334,8 @@ namespace MdIncrementalRefreshSpectrum
 
 def encode (message : MdIncrementalRefreshSpectrum) : List UInt8 :=
   encodeUIntLE 8 message.transactTime
-    ++ encodeUIntLE 1 message.matchEventIndicator
-    ++ IncrementalRefreshSpectrumGroups.encode message.incrementalRefreshSpectrumGroups
+    ++ (encodeUIntLE 1 message.matchEventIndicator
+    ++ (IncrementalRefreshSpectrumGroups.encode message.incrementalRefreshSpectrumGroups))
 
 def decode (bytes : List UInt8) : Option (MdIncrementalRefreshSpectrum × List UInt8) := do
   let (transactTime, bytes) ← decodeUIntLE 8 bytes
@@ -348,25 +345,24 @@ def decode (bytes : List UInt8) : Option (MdIncrementalRefreshSpectrum × List U
 
 theorem encode_length_pos (message : MdIncrementalRefreshSpectrum) : (encode message).length > 0 := by
   unfold encode
-  simp only [encodeUIntLE_length, List.length_append]
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
 theorem encode_length_le (message : MdIncrementalRefreshSpectrum) : (encode message).length ≤ 23472 := by
   have bound_incrementalRefreshSpectrumGroups := IncrementalRefreshSpectrumGroups.encode_length_le message.incrementalRefreshSpectrumGroups
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length]
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
   omega
 
 @[simp] theorem decode_encode (message : MdIncrementalRefreshSpectrum) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [IncrementalRefreshSpectrumGroups.decode_encode, Option.bind_some]
+  rw [IncrementalRefreshSpectrumGroups.decode_encode, some_bind]
   rfl
 
 end MdIncrementalRefreshSpectrum
@@ -390,16 +386,16 @@ namespace IncrementalRefreshTickerGroup
 
 def encode (message : IncrementalRefreshTickerGroup) : List UInt8 :=
   MdEntryTypeTickerEntryType.encode message.mdEntryTypeTickerEntryType
-    ++ encodeUIntLE 4 message.securityId
-    ++ Alpha.encode message.symbol
-    ++ encodeUIntLE 8 message.instrumentGuid
-    ++ Alpha.encode message.financialInstrumentFullName
-    ++ encodeUIntLE 8 message.mdEntryPx
-    ++ encodeUIntLE 8 message.mdEntrySize
-    ++ encodeUIntLE 8 message.mdEntryTime
-    ++ encodeUInt 1 message.openCloseSettlFlag
-    ++ encodeUInt 1 message.tradingSessionId
-    ++ encodeUInt 1 message.aggressorSide
+    ++ (encodeUIntLE 4 message.securityId
+    ++ (Alpha.encode message.symbol
+    ++ (encodeUIntLE 8 message.instrumentGuid
+    ++ (Alpha.encode message.financialInstrumentFullName
+    ++ (encodeUIntLE 8 message.mdEntryPx
+    ++ (encodeUIntLE 8 message.mdEntrySize
+    ++ (encodeUIntLE 8 message.mdEntryTime
+    ++ (encodeUInt 1 message.openCloseSettlFlag
+    ++ (encodeUInt 1 message.tradingSessionId
+    ++ (encodeUInt 1 message.aggressorSide))))))))))
 
 def decode (bytes : List UInt8) : Option (IncrementalRefreshTickerGroup × List UInt8) := do
   let (mdEntryTypeTickerEntryType, bytes) ← MdEntryTypeTickerEntryType.decode bytes
@@ -426,28 +422,27 @@ theorem encode_length_pos (message : IncrementalRefreshTickerGroup) : (encode me
 @[simp] theorem decode_encode (message : IncrementalRefreshTickerGroup) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [MdEntryTypeTickerEntryType.decode_encode, Option.bind_some]
+  rw [List.append_assoc, MdEntryTypeTickerEntryType.decode_encode, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end IncrementalRefreshTickerGroup
@@ -462,8 +457,8 @@ namespace IncrementalRefreshTickerGroups
 
 def encode (message : IncrementalRefreshTickerGroups) : List UInt8 :=
   encodeUIntLE 2 message.blockLength
-    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.incrementalRefreshTickerGroup.val.length)
-    ++ encodeMany IncrementalRefreshTickerGroup.encode message.incrementalRefreshTickerGroup.val
+    ++ (encodeUInt 1 (BitVec.ofNat (8 * 1) message.incrementalRefreshTickerGroup.val.length)
+    ++ (encodeMany IncrementalRefreshTickerGroup.encode message.incrementalRefreshTickerGroup.val))
 
 def decode (bytes : List UInt8) : Option (IncrementalRefreshTickerGroups × List UInt8) := do
   let (blockLength, bytes) ← decodeUIntLE 2 bytes
@@ -475,27 +470,26 @@ def decode (bytes : List UInt8) : Option (IncrementalRefreshTickerGroups × List
 
 theorem encode_length_pos (message : IncrementalRefreshTickerGroups) : (encode message).length > 0 := by
   unfold encode
-  simp only [encodeUIntLE_length, List.length_append]
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
 theorem encode_length_le (message : IncrementalRefreshTickerGroups) : (encode message).length ≤ 24228 := by
   have bound_incrementalRefreshTickerGroup := message.incrementalRefreshTickerGroup.length_lt
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const IncrementalRefreshTickerGroup.encode 95 IncrementalRefreshTickerGroup.encode_length]
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const IncrementalRefreshTickerGroup.encode 95 IncrementalRefreshTickerGroup.encode_length]
   omega
 
 @[simp] theorem decode_encode (message : IncrementalRefreshTickerGroups) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeMany_bounded 1 IncrementalRefreshTickerGroup.encode IncrementalRefreshTickerGroup.decode IncrementalRefreshTickerGroup.decode_encode, Option.bind_some]
+  rw [decodeMany_bounded 1 IncrementalRefreshTickerGroup.encode IncrementalRefreshTickerGroup.decode IncrementalRefreshTickerGroup.decode_encode, some_bind]
   dsimp only
-  simp only [message.incrementalRefreshTickerGroup.length_lt, ↓reduceDIte]
+  rw [dite_eq_left message.incrementalRefreshTickerGroup.length_lt]
   rfl
 
 end IncrementalRefreshTickerGroups
@@ -511,8 +505,8 @@ namespace MdIncrementalRefreshTicker
 
 def encode (message : MdIncrementalRefreshTicker) : List UInt8 :=
   encodeUIntLE 8 message.transactTime
-    ++ encodeUIntLE 1 message.matchEventIndicator
-    ++ IncrementalRefreshTickerGroups.encode message.incrementalRefreshTickerGroups
+    ++ (encodeUIntLE 1 message.matchEventIndicator
+    ++ (IncrementalRefreshTickerGroups.encode message.incrementalRefreshTickerGroups))
 
 def decode (bytes : List UInt8) : Option (MdIncrementalRefreshTicker × List UInt8) := do
   let (transactTime, bytes) ← decodeUIntLE 8 bytes
@@ -522,25 +516,24 @@ def decode (bytes : List UInt8) : Option (MdIncrementalRefreshTicker × List UIn
 
 theorem encode_length_pos (message : MdIncrementalRefreshTicker) : (encode message).length > 0 := by
   unfold encode
-  simp only [encodeUIntLE_length, List.length_append]
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
 theorem encode_length_le (message : MdIncrementalRefreshTicker) : (encode message).length ≤ 24237 := by
   have bound_incrementalRefreshTickerGroups := IncrementalRefreshTickerGroups.encode_length_le message.incrementalRefreshTickerGroups
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length]
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
   omega
 
 @[simp] theorem decode_encode (message : MdIncrementalRefreshTicker) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [IncrementalRefreshTickerGroups.decode_encode, Option.bind_some]
+  rw [IncrementalRefreshTickerGroups.decode_encode, some_bind]
   rfl
 
 end MdIncrementalRefreshTicker
@@ -557,9 +550,9 @@ namespace SnapshotRefreshSpectrumGroup
 
 def encode (message : SnapshotRefreshSpectrumGroup) : List UInt8 :=
   MdEntryTypeSpectrumEntryType.encode message.mdEntryTypeSpectrumEntryType
-    ++ encodeUIntLE 8 message.mdEntryPx
-    ++ encodeUIntLE 8 message.mdEntrySize
-    ++ encodeUIntLE 8 message.mdEntryTime
+    ++ (encodeUIntLE 8 message.mdEntryPx
+    ++ (encodeUIntLE 8 message.mdEntrySize
+    ++ (encodeUIntLE 8 message.mdEntryTime)))
 
 def decode (bytes : List UInt8) : Option (SnapshotRefreshSpectrumGroup × List UInt8) := do
   let (mdEntryTypeSpectrumEntryType, bytes) ← MdEntryTypeSpectrumEntryType.decode bytes
@@ -579,14 +572,13 @@ theorem encode_length_pos (message : SnapshotRefreshSpectrumGroup) : (encode mes
 @[simp] theorem decode_encode (message : SnapshotRefreshSpectrumGroup) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [MdEntryTypeSpectrumEntryType.decode_encode, Option.bind_some]
+  rw [List.append_assoc, MdEntryTypeSpectrumEntryType.decode_encode, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [decodeUIntLE_encodeUIntLE, some_bind]
   rfl
 
 end SnapshotRefreshSpectrumGroup
@@ -601,8 +593,8 @@ namespace SnapshotRefreshSpectrumGroups
 
 def encode (message : SnapshotRefreshSpectrumGroups) : List UInt8 :=
   encodeUIntLE 2 message.blockLength
-    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.snapshotRefreshSpectrumGroup.val.length)
-    ++ encodeMany SnapshotRefreshSpectrumGroup.encode message.snapshotRefreshSpectrumGroup.val
+    ++ (encodeUInt 1 (BitVec.ofNat (8 * 1) message.snapshotRefreshSpectrumGroup.val.length)
+    ++ (encodeMany SnapshotRefreshSpectrumGroup.encode message.snapshotRefreshSpectrumGroup.val))
 
 def decode (bytes : List UInt8) : Option (SnapshotRefreshSpectrumGroups × List UInt8) := do
   let (blockLength, bytes) ← decodeUIntLE 2 bytes
@@ -614,27 +606,26 @@ def decode (bytes : List UInt8) : Option (SnapshotRefreshSpectrumGroups × List 
 
 theorem encode_length_pos (message : SnapshotRefreshSpectrumGroups) : (encode message).length > 0 := by
   unfold encode
-  simp only [encodeUIntLE_length, List.length_append]
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
 theorem encode_length_le (message : SnapshotRefreshSpectrumGroups) : (encode message).length ≤ 6378 := by
   have bound_snapshotRefreshSpectrumGroup := message.snapshotRefreshSpectrumGroup.length_lt
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const SnapshotRefreshSpectrumGroup.encode 25 SnapshotRefreshSpectrumGroup.encode_length]
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const SnapshotRefreshSpectrumGroup.encode 25 SnapshotRefreshSpectrumGroup.encode_length]
   omega
 
 @[simp] theorem decode_encode (message : SnapshotRefreshSpectrumGroups) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeMany_bounded 1 SnapshotRefreshSpectrumGroup.encode SnapshotRefreshSpectrumGroup.decode SnapshotRefreshSpectrumGroup.decode_encode, Option.bind_some]
+  rw [decodeMany_bounded 1 SnapshotRefreshSpectrumGroup.encode SnapshotRefreshSpectrumGroup.decode SnapshotRefreshSpectrumGroup.decode_encode, some_bind]
   dsimp only
-  simp only [message.snapshotRefreshSpectrumGroup.length_lt, ↓reduceDIte]
+  rw [dite_eq_left message.snapshotRefreshSpectrumGroup.length_lt]
   rfl
 
 end SnapshotRefreshSpectrumGroups
@@ -654,12 +645,12 @@ namespace MdSnapshotRefreshSpectrum
 
 def encode (message : MdSnapshotRefreshSpectrum) : List UInt8 :=
   encodeUIntLE 8 message.transactTime
-    ++ encodeUIntLE 1 message.matchEventIndicator
-    ++ Alpha.encode message.financialInstrumentFullName
-    ++ Alpha.encode message.symbol
-    ++ encodeUIntLE 8 message.instrumentGuid
-    ++ encodeUIntLE 4 message.securityId
-    ++ SnapshotRefreshSpectrumGroups.encode message.snapshotRefreshSpectrumGroups
+    ++ (encodeUIntLE 1 message.matchEventIndicator
+    ++ (Alpha.encode message.financialInstrumentFullName
+    ++ (Alpha.encode message.symbol
+    ++ (encodeUIntLE 8 message.instrumentGuid
+    ++ (encodeUIntLE 4 message.securityId
+    ++ (SnapshotRefreshSpectrumGroups.encode message.snapshotRefreshSpectrumGroups))))))
 
 def decode (bytes : List UInt8) : Option (MdSnapshotRefreshSpectrum × List UInt8) := do
   let (transactTime, bytes) ← decodeUIntLE 8 bytes
@@ -673,33 +664,32 @@ def decode (bytes : List UInt8) : Option (MdSnapshotRefreshSpectrum × List UInt
 
 theorem encode_length_pos (message : MdSnapshotRefreshSpectrum) : (encode message).length > 0 := by
   unfold encode
-  simp only [encodeUIntLE_length, List.length_append]
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
 theorem encode_length_le (message : MdSnapshotRefreshSpectrum) : (encode message).length ≤ 6454 := by
   have bound_snapshotRefreshSpectrumGroups := SnapshotRefreshSpectrumGroups.encode_length_le message.snapshotRefreshSpectrumGroups
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length, Alpha.encode_length]
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, Alpha.encode_length]
   omega
 
 @[simp] theorem decode_encode (message : MdSnapshotRefreshSpectrum) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [SnapshotRefreshSpectrumGroups.decode_encode, Option.bind_some]
+  rw [SnapshotRefreshSpectrumGroups.decode_encode, some_bind]
   rfl
 
 end MdSnapshotRefreshSpectrum
@@ -719,12 +709,12 @@ namespace SnapshotRefreshTickerGroup
 
 def encode (message : SnapshotRefreshTickerGroup) : List UInt8 :=
   MdEntryTypeTickerEntryType.encode message.mdEntryTypeTickerEntryType
-    ++ encodeUIntLE 8 message.mdEntryPx
-    ++ encodeUIntLE 8 message.mdEntrySize
-    ++ encodeUIntLE 8 message.mdEntryTime
-    ++ encodeUInt 1 message.openCloseSettlFlag
-    ++ encodeUInt 1 message.tradingSessionId
-    ++ encodeUInt 1 message.aggressorSide
+    ++ (encodeUIntLE 8 message.mdEntryPx
+    ++ (encodeUIntLE 8 message.mdEntrySize
+    ++ (encodeUIntLE 8 message.mdEntryTime
+    ++ (encodeUInt 1 message.openCloseSettlFlag
+    ++ (encodeUInt 1 message.tradingSessionId
+    ++ (encodeUInt 1 message.aggressorSide))))))
 
 def decode (bytes : List UInt8) : Option (SnapshotRefreshTickerGroup × List UInt8) := do
   let (mdEntryTypeTickerEntryType, bytes) ← MdEntryTypeTickerEntryType.decode bytes
@@ -747,20 +737,19 @@ theorem encode_length_pos (message : SnapshotRefreshTickerGroup) : (encode messa
 @[simp] theorem decode_encode (message : SnapshotRefreshTickerGroup) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [MdEntryTypeTickerEntryType.decode_encode, Option.bind_some]
+  rw [List.append_assoc, MdEntryTypeTickerEntryType.decode_encode, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end SnapshotRefreshTickerGroup
@@ -775,8 +764,8 @@ namespace SnapshotRefreshTickerGroups
 
 def encode (message : SnapshotRefreshTickerGroups) : List UInt8 :=
   encodeUIntLE 2 message.blockLength
-    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.snapshotRefreshTickerGroup.val.length)
-    ++ encodeMany SnapshotRefreshTickerGroup.encode message.snapshotRefreshTickerGroup.val
+    ++ (encodeUInt 1 (BitVec.ofNat (8 * 1) message.snapshotRefreshTickerGroup.val.length)
+    ++ (encodeMany SnapshotRefreshTickerGroup.encode message.snapshotRefreshTickerGroup.val))
 
 def decode (bytes : List UInt8) : Option (SnapshotRefreshTickerGroups × List UInt8) := do
   let (blockLength, bytes) ← decodeUIntLE 2 bytes
@@ -788,27 +777,26 @@ def decode (bytes : List UInt8) : Option (SnapshotRefreshTickerGroups × List UI
 
 theorem encode_length_pos (message : SnapshotRefreshTickerGroups) : (encode message).length > 0 := by
   unfold encode
-  simp only [encodeUIntLE_length, List.length_append]
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
 theorem encode_length_le (message : SnapshotRefreshTickerGroups) : (encode message).length ≤ 7143 := by
   have bound_snapshotRefreshTickerGroup := message.snapshotRefreshTickerGroup.length_lt
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const SnapshotRefreshTickerGroup.encode 28 SnapshotRefreshTickerGroup.encode_length]
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, encodeMany_length_const SnapshotRefreshTickerGroup.encode 28 SnapshotRefreshTickerGroup.encode_length]
   omega
 
 @[simp] theorem decode_encode (message : SnapshotRefreshTickerGroups) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeMany_bounded 1 SnapshotRefreshTickerGroup.encode SnapshotRefreshTickerGroup.decode SnapshotRefreshTickerGroup.decode_encode, Option.bind_some]
+  rw [decodeMany_bounded 1 SnapshotRefreshTickerGroup.encode SnapshotRefreshTickerGroup.decode SnapshotRefreshTickerGroup.decode_encode, some_bind]
   dsimp only
-  simp only [message.snapshotRefreshTickerGroup.length_lt, ↓reduceDIte]
+  rw [dite_eq_left message.snapshotRefreshTickerGroup.length_lt]
   rfl
 
 end SnapshotRefreshTickerGroups
@@ -828,12 +816,12 @@ namespace MdSnapshotRefreshTicker
 
 def encode (message : MdSnapshotRefreshTicker) : List UInt8 :=
   encodeUIntLE 8 message.transactTime
-    ++ encodeUIntLE 1 message.matchEventIndicator
-    ++ Alpha.encode message.financialInstrumentFullName
-    ++ Alpha.encode message.symbol
-    ++ encodeUIntLE 8 message.instrumentGuid
-    ++ encodeUIntLE 4 message.securityId
-    ++ SnapshotRefreshTickerGroups.encode message.snapshotRefreshTickerGroups
+    ++ (encodeUIntLE 1 message.matchEventIndicator
+    ++ (Alpha.encode message.financialInstrumentFullName
+    ++ (Alpha.encode message.symbol
+    ++ (encodeUIntLE 8 message.instrumentGuid
+    ++ (encodeUIntLE 4 message.securityId
+    ++ (SnapshotRefreshTickerGroups.encode message.snapshotRefreshTickerGroups))))))
 
 def decode (bytes : List UInt8) : Option (MdSnapshotRefreshTicker × List UInt8) := do
   let (transactTime, bytes) ← decodeUIntLE 8 bytes
@@ -847,33 +835,32 @@ def decode (bytes : List UInt8) : Option (MdSnapshotRefreshTicker × List UInt8)
 
 theorem encode_length_pos (message : MdSnapshotRefreshTicker) : (encode message).length > 0 := by
   unfold encode
-  simp only [encodeUIntLE_length, List.length_append]
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
 theorem encode_length_le (message : MdSnapshotRefreshTicker) : (encode message).length ≤ 7219 := by
   have bound_snapshotRefreshTickerGroups := SnapshotRefreshTickerGroups.encode_length_le message.snapshotRefreshTickerGroups
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length, Alpha.encode_length]
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, Alpha.encode_length]
   omega
 
 @[simp] theorem decode_encode (message : MdSnapshotRefreshTicker) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [SnapshotRefreshTickerGroups.decode_encode, Option.bind_some]
+  rw [SnapshotRefreshTickerGroups.decode_encode, some_bind]
   rfl
 
 end MdSnapshotRefreshTicker
@@ -888,7 +875,7 @@ namespace GlobalDayRoll
 
 def encode (message : GlobalDayRoll) : List UInt8 :=
   encodeUIntLE 8 message.transactTime
-    ++ encodeUInt 1 message.securityTradingEvent
+    ++ (encodeUInt 1 message.securityTradingEvent)
 
 def decode (bytes : List UInt8) : Option (GlobalDayRoll × List UInt8) := do
   let (transactTime, bytes) ← decodeUIntLE 8 bytes
@@ -906,10 +893,9 @@ theorem encode_length_pos (message : GlobalDayRoll) : (encode message).length > 
 @[simp] theorem decode_encode (message : GlobalDayRoll) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end GlobalDayRoll
@@ -970,10 +956,10 @@ namespace TcpMessage
 
 def encodeBody (message : TcpMessage) : List UInt8 :=
   encodeUIntLE 2 message.blockLength
-    ++ encodeUIntLE 2 (Payload.tag message.payload)
-    ++ encodeUIntLE 2 message.schemaId
-    ++ encodeUIntLE 2 message.version
-    ++ Payload.encode message.payload
+    ++ (encodeUIntLE 2 (Payload.tag message.payload)
+    ++ (encodeUIntLE 2 message.schemaId
+    ++ (encodeUIntLE 2 message.version
+    ++ (Payload.encode message.payload))))
 
 def decodeBody (bytes : List UInt8) : Option (TcpMessage × List UInt8) := do
   let (blockLength, bytes) ← decodeUIntLE 2 bytes
@@ -986,16 +972,15 @@ def decodeBody (bytes : List UInt8) : Option (TcpMessage × List UInt8) := do
 theorem decodeBody_encodeBody (message : TcpMessage) (rest : List UInt8) :
     decodeBody (encodeBody message ++ rest) = some (message, rest) := by
   unfold decodeBody encodeBody
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [Payload.decode_encode, Option.bind_some]
+  rw [Payload.decode_encode, some_bind]
   rfl
 
 /-- Every body fits the length prefix -/
@@ -1003,26 +988,26 @@ theorem encodeBody_length_lt (message : TcpMessage) : (encodeBody message).lengt
   unfold encodeBody
   cases message.payload with
   | adminHeartbeat inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, AdminHeartbeat.encode_length]
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, AdminHeartbeat.encode_length]
     omega
   | mdIncrementalRefreshSpectrum inner =>
     have bound_inner := MdIncrementalRefreshSpectrum.encode_length_le inner
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length]
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
     omega
   | mdIncrementalRefreshTicker inner =>
     have bound_inner := MdIncrementalRefreshTicker.encode_length_le inner
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length]
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
     omega
   | mdSnapshotRefreshSpectrum inner =>
     have bound_inner := MdSnapshotRefreshSpectrum.encode_length_le inner
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length]
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
     omega
   | mdSnapshotRefreshTicker inner =>
     have bound_inner := MdSnapshotRefreshTicker.encode_length_le inner
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length]
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
     omega
   | globalDayRoll inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, GlobalDayRoll.encode_length]
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, GlobalDayRoll.encode_length]
     omega
 
 /-- Size rule: Tcp Message Size counts the bytes after it plus 2, so it is written from the body and checked on decode -/
@@ -1053,7 +1038,7 @@ namespace TcpPacket
 
 def encode (message : TcpPacket) : List UInt8 :=
   TechnicalHeader.encode message.technicalHeader
-    ++ encodeMany TcpMessage.encode message.tcpMessage
+    ++ (encodeMany TcpMessage.encode message.tcpMessage)
 
 def decode (bytes : List UInt8) : Option TcpPacket := do
   let (technicalHeader, bytes) ← TechnicalHeader.decode bytes
@@ -1067,10 +1052,9 @@ theorem encode_length_pos (message : TcpPacket) : (encode message).length > 0 :=
 
 theorem decode_encode (message : TcpPacket) : decode (encode message) = some message := by
   unfold decode encode
-  simp only [Option.bind_eq_bind]
-  rw [TechnicalHeader.decode_encode, Option.bind_some]
+  rw [TechnicalHeader.decode_encode, some_bind]
   dsimp only
-  rw [decodeAll_encodeMany TcpMessage.encode TcpMessage.decode TcpMessage.decode_encode TcpMessage.encode_length_pos message.tcpMessage _ (encodeMany_length_ge TcpMessage.encode TcpMessage.encode_length_pos message.tcpMessage), Option.bind_some]
+  rw [decodeAll_encodeMany TcpMessage.encode TcpMessage.decode TcpMessage.decode_encode TcpMessage.encode_length_pos message.tcpMessage _ (encodeMany_length_ge TcpMessage.encode TcpMessage.encode_length_pos message.tcpMessage), some_bind]
   rfl
 
 end TcpPacket

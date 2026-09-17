@@ -45,8 +45,7 @@ theorem encode_length_pos (message : Heartbeat) : (encode message).length > 0 :=
 @[simp] theorem decode_encode (message : Heartbeat) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [Option.bind_eq_bind]
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [Alpha.decode_encode, some_bind]
   rfl
 
 end Heartbeat
@@ -61,7 +60,7 @@ namespace RequestHeaderComp
 
 def encode (message : RequestHeaderComp) : List UInt8 :=
   encodeUIntLE 4 message.msgSeqNum
-    ++ Alpha.encode message.pad4
+    ++ (Alpha.encode message.pad4)
 
 def decode (bytes : List UInt8) : Option (RequestHeaderComp × List UInt8) := do
   let (msgSeqNum, bytes) ← decodeUIntLE 4 bytes
@@ -79,10 +78,9 @@ theorem encode_length_pos (message : RequestHeaderComp) : (encode message).lengt
 @[simp] theorem decode_encode (message : RequestHeaderComp) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [Alpha.decode_encode, some_bind]
   rfl
 
 end RequestHeaderComp
@@ -102,12 +100,12 @@ namespace LogonRequest
 
 def encode (message : LogonRequest) : List UInt8 :=
   Alpha.encode message.pad2
-    ++ RequestHeaderComp.encode message.requestHeaderComp
-    ++ encodeUIntLE 4 message.heartBtInt
-    ++ encodeUIntLE 4 message.partyIdSessionId
-    ++ Alpha.encode message.defaultCstmApplVerId
-    ++ Alpha.encode message.password
-    ++ Alpha.encode message.pad2v2
+    ++ (RequestHeaderComp.encode message.requestHeaderComp
+    ++ (encodeUIntLE 4 message.heartBtInt
+    ++ (encodeUIntLE 4 message.partyIdSessionId
+    ++ (Alpha.encode message.defaultCstmApplVerId
+    ++ (Alpha.encode message.password
+    ++ (Alpha.encode message.pad2v2))))))
 
 def decode (bytes : List UInt8) : Option (LogonRequest × List UInt8) := do
   let (pad2, bytes) ← Alpha.decode 2 bytes
@@ -130,20 +128,19 @@ theorem encode_length_pos (message : LogonRequest) : (encode message).length > 0
 @[simp] theorem decode_encode (message : LogonRequest) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  rw [List.append_assoc, RequestHeaderComp.decode_encode, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [Alpha.decode_encode, some_bind]
   rfl
 
 end LogonRequest
@@ -158,7 +155,7 @@ namespace LogoutRequest
 
 def encode (message : LogoutRequest) : List UInt8 :=
   Alpha.encode message.pad2
-    ++ RequestHeaderComp.encode message.requestHeaderComp
+    ++ (RequestHeaderComp.encode message.requestHeaderComp)
 
 def decode (bytes : List UInt8) : Option (LogoutRequest × List UInt8) := do
   let (pad2, bytes) ← Alpha.decode 2 bytes
@@ -176,10 +173,9 @@ theorem encode_length_pos (message : LogoutRequest) : (encode message).length > 
 @[simp] theorem decode_encode (message : LogoutRequest) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [RequestHeaderComp.decode_encode, Option.bind_some]
+  rw [RequestHeaderComp.decode_encode, some_bind]
   rfl
 
 end LogoutRequest
@@ -225,7 +221,7 @@ namespace ClientMessage
 
 def encodeBody (message : ClientMessage) : List UInt8 :=
   encodeUIntLE 2 (ClientPayload.tag message.clientPayload)
-    ++ ClientPayload.encode message.clientPayload
+    ++ (ClientPayload.encode message.clientPayload)
 
 def decodeBody (bytes : List UInt8) : Option (ClientMessage × List UInt8) := do
   let (templateId, bytes) ← decodeUIntLE 2 bytes
@@ -235,10 +231,9 @@ def decodeBody (bytes : List UInt8) : Option (ClientMessage × List UInt8) := do
 theorem decodeBody_encodeBody (message : ClientMessage) (rest : List UInt8) :
     decodeBody (encodeBody message ++ rest) = some (message, rest) := by
   unfold decodeBody encodeBody
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUIntLE_encodeUIntLE, Option.bind_some]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [ClientPayload.decode_encode, Option.bind_some]
+  rw [ClientPayload.decode_encode, some_bind]
   rfl
 
 /-- Every body fits the length prefix -/
@@ -289,8 +284,7 @@ def decode (bytes : List UInt8) : Option ClientPacket := do
 
 theorem decode_encode (message : ClientPacket) : decode (encode message) = some message := by
   unfold decode encode
-  simp only [Option.bind_eq_bind]
-  rw [decodeAll_encodeMany ClientMessage.encode ClientMessage.decode ClientMessage.decode_encode ClientMessage.encode_length_pos message.clientMessage _ (encodeMany_length_ge ClientMessage.encode ClientMessage.encode_length_pos message.clientMessage), Option.bind_some]
+  rw [decodeAll_encodeMany ClientMessage.encode ClientMessage.decode ClientMessage.decode_encode ClientMessage.encode_length_pos message.clientMessage _ (encodeMany_length_ge ClientMessage.encode ClientMessage.encode_length_pos message.clientMessage), some_bind]
   rfl
 
 end ClientPacket

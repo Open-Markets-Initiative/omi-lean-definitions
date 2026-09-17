@@ -137,8 +137,7 @@ theorem encode_length_pos (message : SecondsTimestampMessage) : (encode message)
 @[simp] theorem decode_encode (message : SecondsTimestampMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end SecondsTimestampMessage
@@ -157,11 +156,11 @@ namespace TradingStatusMessage
 
 def encode (message : TradingStatusMessage) : List UInt8 :=
   encodeUInt 4 message.timeMicroseconds
-    ++ encodeUInt 1 message.marketStatus
-    ++ Alpha.encode message.statusFlag
-    ++ encodeUInt 1 message.shortSellingStatus
-    ++ encodeUInt 1 message.pricingMethod
-    ++ encodeUInt 8 message.bookCenterPrice
+    ++ (encodeUInt 1 message.marketStatus
+    ++ (Alpha.encode message.statusFlag
+    ++ (encodeUInt 1 message.shortSellingStatus
+    ++ (encodeUInt 1 message.pricingMethod
+    ++ (encodeUInt 8 message.bookCenterPrice)))))
 
 def decode (bytes : List UInt8) : Option (TradingStatusMessage × List UInt8) := do
   let (timeMicroseconds, bytes) ← decodeUInt 4 bytes
@@ -183,18 +182,17 @@ theorem encode_length_pos (message : TradingStatusMessage) : (encode message).le
 @[simp] theorem decode_encode (message : TradingStatusMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end TradingStatusMessage
@@ -215,13 +213,13 @@ namespace ExecutionSummaryMessage
 
 def encode (message : ExecutionSummaryMessage) : List UInt8 :=
   encodeUInt 4 message.timeMicroseconds
-    ++ TriggeredSide.encode message.triggeredSide
-    ++ encodeUInt 6 message.totalVolume
-    ++ encodeUInt 6 message.totalInvalidation
-    ++ encodeUInt 8 message.lastPrice
-    ++ encodeUInt 4 message.matchId
-    ++ encodeUInt 8 message.bestOffer
-    ++ encodeUInt 8 message.bestBid
+    ++ (TriggeredSide.encode message.triggeredSide
+    ++ (encodeUInt 6 message.totalVolume
+    ++ (encodeUInt 6 message.totalInvalidation
+    ++ (encodeUInt 8 message.lastPrice
+    ++ (encodeUInt 4 message.matchId
+    ++ (encodeUInt 8 message.bestOffer
+    ++ (encodeUInt 8 message.bestBid)))))))
 
 def decode (bytes : List UInt8) : Option (ExecutionSummaryMessage × List UInt8) := do
   let (timeMicroseconds, bytes) ← decodeUInt 4 bytes
@@ -245,22 +243,21 @@ theorem encode_length_pos (message : ExecutionSummaryMessage) : (encode message)
 @[simp] theorem decode_encode (message : ExecutionSummaryMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [TriggeredSide.decode_encode, Option.bind_some]
+  rw [List.append_assoc, TriggeredSide.decode_encode, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end ExecutionSummaryMessage
@@ -280,12 +277,12 @@ namespace AddOrderMessage
 
 def encode (message : AddOrderMessage) : List UInt8 :=
   encodeUInt 4 message.timeMicroseconds
-    ++ encodeUInt 4 message.orderId
-    ++ Side.encode message.side
-    ++ encodeUInt 6 message.quantity
-    ++ encodeUInt 8 message.price
-    ++ encodeUInt 1 message.orderCondition
-    ++ encodeUInt 1 message.modificationFlag
+    ++ (encodeUInt 4 message.orderId
+    ++ (Side.encode message.side
+    ++ (encodeUInt 6 message.quantity
+    ++ (encodeUInt 8 message.price
+    ++ (encodeUInt 1 message.orderCondition
+    ++ (encodeUInt 1 message.modificationFlag))))))
 
 def decode (bytes : List UInt8) : Option (AddOrderMessage × List UInt8) := do
   let (timeMicroseconds, bytes) ← decodeUInt 4 bytes
@@ -308,20 +305,19 @@ theorem encode_length_pos (message : AddOrderMessage) : (encode message).length 
 @[simp] theorem decode_encode (message : AddOrderMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [Side.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Side.decode_encode, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end AddOrderMessage
@@ -339,10 +335,10 @@ namespace OrderExecutedMessage
 
 def encode (message : OrderExecutedMessage) : List UInt8 :=
   encodeUInt 4 message.timeMicroseconds
-    ++ encodeUInt 4 message.orderId
-    ++ Side.encode message.side
-    ++ encodeUInt 6 message.volume
-    ++ encodeUInt 4 message.matchId
+    ++ (encodeUInt 4 message.orderId
+    ++ (Side.encode message.side
+    ++ (encodeUInt 6 message.volume
+    ++ (encodeUInt 4 message.matchId))))
 
 def decode (bytes : List UInt8) : Option (OrderExecutedMessage × List UInt8) := do
   let (timeMicroseconds, bytes) ← decodeUInt 4 bytes
@@ -363,16 +359,15 @@ theorem encode_length_pos (message : OrderExecutedMessage) : (encode message).le
 @[simp] theorem decode_encode (message : OrderExecutedMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [Side.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Side.decode_encode, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end OrderExecutedMessage
@@ -392,12 +387,12 @@ namespace OrderExecutedWithPriceMessage
 
 def encode (message : OrderExecutedWithPriceMessage) : List UInt8 :=
   encodeUInt 4 message.timeMicroseconds
-    ++ encodeUInt 4 message.orderId
-    ++ Side.encode message.side
-    ++ encodeUInt 6 message.volume
-    ++ encodeUInt 4 message.matchId
-    ++ encodeUInt 8 message.executionPrice
-    ++ encodeUInt 1 message.adoptedPricingMethod
+    ++ (encodeUInt 4 message.orderId
+    ++ (Side.encode message.side
+    ++ (encodeUInt 6 message.volume
+    ++ (encodeUInt 4 message.matchId
+    ++ (encodeUInt 8 message.executionPrice
+    ++ (encodeUInt 1 message.adoptedPricingMethod))))))
 
 def decode (bytes : List UInt8) : Option (OrderExecutedWithPriceMessage × List UInt8) := do
   let (timeMicroseconds, bytes) ← decodeUInt 4 bytes
@@ -420,20 +415,19 @@ theorem encode_length_pos (message : OrderExecutedWithPriceMessage) : (encode me
 @[simp] theorem decode_encode (message : OrderExecutedWithPriceMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [Side.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Side.decode_encode, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end OrderExecutedWithPriceMessage
@@ -450,9 +444,9 @@ namespace OrderDeleteMessage
 
 def encode (message : OrderDeleteMessage) : List UInt8 :=
   encodeUInt 4 message.timeMicroseconds
-    ++ encodeUInt 4 message.orderId
-    ++ Side.encode message.side
-    ++ encodeUInt 1 message.modificationFlag
+    ++ (encodeUInt 4 message.orderId
+    ++ (Side.encode message.side
+    ++ (encodeUInt 1 message.modificationFlag)))
 
 def decode (bytes : List UInt8) : Option (OrderDeleteMessage × List UInt8) := do
   let (timeMicroseconds, bytes) ← decodeUInt 4 bytes
@@ -472,14 +466,13 @@ theorem encode_length_pos (message : OrderDeleteMessage) : (encode message).leng
 @[simp] theorem decode_encode (message : OrderDeleteMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [Side.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Side.decode_encode, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end OrderDeleteMessage
@@ -509,8 +502,7 @@ theorem encode_length_pos (message : ResetMessage) : (encode message).length > 0
 @[simp] theorem decode_encode (message : ResetMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end ResetMessage
@@ -525,7 +517,7 @@ namespace CommunicationControlMessage
 
 def encode (message : CommunicationControlMessage) : List UInt8 :=
   encodeUInt 1 message.testModeFlag
-    ++ encodeUInt 1 message.communicationStartEndFlag
+    ++ (encodeUInt 1 message.communicationStartEndFlag)
 
 def decode (bytes : List UInt8) : Option (CommunicationControlMessage × List UInt8) := do
   let (testModeFlag, bytes) ← decodeUInt 1 bytes
@@ -543,10 +535,9 @@ theorem encode_length_pos (message : CommunicationControlMessage) : (encode mess
 @[simp] theorem decode_encode (message : CommunicationControlMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end CommunicationControlMessage
@@ -616,7 +607,7 @@ namespace Message
 
 def encodeBody (message : Message) : List UInt8 :=
   encodeUInt 1 (Payload.tag message.payload)
-    ++ Payload.encode message.payload
+    ++ (Payload.encode message.payload)
 
 def decodeBody (bytes : List UInt8) : Option (Message × List UInt8) := do
   let (messageType, bytes) ← decodeUInt 1 bytes
@@ -626,10 +617,9 @@ def decodeBody (bytes : List UInt8) : Option (Message × List UInt8) := do
 theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
     decodeBody (encodeBody message ++ rest) = some (message, rest) := by
   unfold decodeBody encodeBody
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [Payload.decode_encode, Option.bind_some]
+  rw [Payload.decode_encode, some_bind]
   rfl
 
 /-- Every body fits the length prefix -/
@@ -699,15 +689,15 @@ namespace UdpPacket
 
 def encode (message : UdpPacket) : List UInt8 :=
   encodeUInt 1 message.multicastGroupNumber
-    ++ encodeUInt 1 message.numberOfSystemReboots
-    ++ encodeUInt 4 message.sequenceNumber
-    ++ Alpha.encode message.issueCode
-    ++ encodeUInt 4 message.updateNumber
-    ++ encodeUInt 1 message.packetNumber
-    ++ encodeUInt 1 message.totalNumberOfPackets
-    ++ encodeUInt 1 message.utilityFlag
-    ++ encodeUInt 1 (BitVec.ofNat (8 * 1) message.message.val.length)
-    ++ encodeMany Message.encode message.message.val
+    ++ (encodeUInt 1 message.numberOfSystemReboots
+    ++ (encodeUInt 4 message.sequenceNumber
+    ++ (Alpha.encode message.issueCode
+    ++ (encodeUInt 4 message.updateNumber
+    ++ (encodeUInt 1 message.packetNumber
+    ++ (encodeUInt 1 message.totalNumberOfPackets
+    ++ (encodeUInt 1 message.utilityFlag
+    ++ (encodeUInt 1 (BitVec.ofNat (8 * 1) message.message.val.length)
+    ++ (encodeMany Message.encode message.message.val)))))))))
 
 def decode (bytes : List UInt8) : Option (UdpPacket × List UInt8) := do
   let (multicastGroupNumber, bytes) ← decodeUInt 1 bytes
@@ -726,34 +716,33 @@ def decode (bytes : List UInt8) : Option (UdpPacket × List UInt8) := do
 
 theorem encode_length_pos (message : UdpPacket) : (encode message).length > 0 := by
   unfold encode
-  simp only [encodeUInt_length, List.length_append]
+  simp only [encodeUInt_length, List.length_append, ← Nat.add_assoc]
   omega
 
 @[simp] theorem decode_encode (message : UdpPacket) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  simp only [List.append_assoc, Option.bind_eq_bind]
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, Option.bind_some]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, Option.bind_some]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeMany_bounded 1 Message.encode Message.decode Message.decode_encode, Option.bind_some]
+  rw [decodeMany_bounded 1 Message.encode Message.decode Message.decode_encode, some_bind]
   dsimp only
-  simp only [message.message.length_lt, ↓reduceDIte]
+  rw [dite_eq_left message.message.length_lt]
   rfl
 
 end UdpPacket

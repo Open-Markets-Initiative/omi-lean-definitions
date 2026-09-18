@@ -83,7 +83,7 @@ end EventCode
 
 /-- Market Category: one byte code -/
 def MarketCategory.codes : List UInt8 :=
-  [0x51, 0x47, 0x53, 0x4E, 0x41, 0x50, 0x4D, 0x5A, 0x56, 0x20]
+  [0x51, 0x47, 0x53, 0x4E, 0x41, 0x50, 0x5A, 0x56, 0x20]
 
 inductive MarketCategory where
   | nasdaqGlobalSelectMarket -- Nasdaq Global Select Market
@@ -92,7 +92,6 @@ inductive MarketCategory where
   | nyse -- Nyse
   | nyseAmerican -- Nyse American
   | nyseArca -- Nyse Arca
-  | nyseTexas -- Nyse Texas
   | batsZ -- Bats Z
   | investorsExchange -- Investors Exchange
   | notAvailable -- Not Available
@@ -108,7 +107,6 @@ def toByte : MarketCategory → UInt8
   | .nyse => 0x4E
   | .nyseAmerican => 0x41
   | .nyseArca => 0x50
-  | .nyseTexas => 0x4D
   | .batsZ => 0x5A
   | .investorsExchange => 0x56
   | .notAvailable => 0x20
@@ -122,7 +120,6 @@ def listed (byte : UInt8) : MarketCategory :=
   else if byte = 0x4E then .nyse
   else if byte = 0x41 then .nyseAmerican
   else if byte = 0x50 then .nyseArca
-  else if byte = 0x4D then .nyseTexas
   else if byte = 0x5A then .batsZ
   else if byte = 0x56 then .investorsExchange
   else .notAvailable
@@ -138,7 +135,6 @@ theorem ofByte_toByte (value : MarketCategory) : ofByte value.toByte = value := 
   | nyse => decide
   | nyseAmerican => decide
   | nyseArca => decide
-  | nyseTexas => decide
   | batsZ => decide
   | investorsExchange => decide
   | notAvailable => decide
@@ -493,12 +489,11 @@ end ShortSaleThresholdIndicator
 
 /-- Ipo Flag: one byte code -/
 def IpoFlag.codes : List UInt8 :=
-  [0x59, 0x4E, 0x5A, 0x20]
+  [0x59, 0x4E, 0x20]
 
 inductive IpoFlag where
   | setUpForIpoRelease -- Set Up For Ipo Release
   | notSetUpForIpoRelease -- Not Set Up For Ipo Release
-  | nonIpoNewListedSecurity -- Non Ipo New Listed Security
   | notAvailable -- Not Available
   | unlisted (byte : { byte : UInt8 // byte ∉ IpoFlag.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
@@ -508,7 +503,6 @@ namespace IpoFlag
 def toByte : IpoFlag → UInt8
   | .setUpForIpoRelease => 0x59
   | .notSetUpForIpoRelease => 0x4E
-  | .nonIpoNewListedSecurity => 0x5A
   | .notAvailable => 0x20
   | .unlisted byte => byte.val
 
@@ -516,7 +510,6 @@ def toByte : IpoFlag → UInt8
 def listed (byte : UInt8) : IpoFlag :=
   if byte = 0x59 then .setUpForIpoRelease
   else if byte = 0x4E then .notSetUpForIpoRelease
-  else if byte = 0x5A then .nonIpoNewListedSecurity
   else .notAvailable
 
 def ofByte (byte : UInt8) : IpoFlag :=
@@ -526,7 +519,6 @@ theorem ofByte_toByte (value : IpoFlag) : ofByte value.toByte = value := by
   cases value with
   | setUpForIpoRelease => decide
   | notSetUpForIpoRelease => decide
-  | nonIpoNewListedSecurity => decide
   | notAvailable => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
@@ -1070,7 +1062,7 @@ def MarketCode.codes : List UInt8 :=
 
 inductive MarketCode where
   | nasdaq -- Nasdaq
-  | nasdaqTexas -- Nasdaq Texas
+  | bx -- Bx
   | psx -- Psx
   | unlisted (byte : { byte : UInt8 // byte ∉ MarketCode.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
@@ -1079,14 +1071,14 @@ namespace MarketCode
 
 def toByte : MarketCode → UInt8
   | .nasdaq => 0x51
-  | .nasdaqTexas => 0x42
+  | .bx => 0x42
   | .psx => 0x58
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : MarketCode :=
   if byte = 0x51 then .nasdaq
-  else if byte = 0x42 then .nasdaqTexas
+  else if byte = 0x42 then .bx
   else .psx
 
 def ofByte (byte : UInt8) : MarketCode :=
@@ -1095,7 +1087,7 @@ def ofByte (byte : UInt8) : MarketCode :=
 theorem ofByte_toByte (value : MarketCode) : ofByte value.toByte = value := by
   cases value with
   | nasdaq => decide
-  | nasdaqTexas => decide
+  | bx => decide
   | psx => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 

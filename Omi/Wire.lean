@@ -214,6 +214,27 @@ theorem Bounded.length_lt (bounded : Bounded n α) : bounded.val.length < 256 ^ 
     (⟨bounded.val, fits⟩ : Bounded n α) = bounded :=
   rfl
 
+/-- A list of exactly `n` items: a group the protocol repeats a fixed number of times -/
+abbrev Exact (n : Nat) (α : Type) := { items : List α // items.length = n }
+
+instance [DecidableEq α] : DecidableEq (Exact n α) :=
+  inferInstanceAs (DecidableEq { items : List α // items.length = n })
+
+instance [Repr α] : Repr (Exact n α) where
+  reprPrec exact precedence := reprPrec exact.val precedence
+
+theorem Exact.length_eq (exact : Exact n α) : exact.val.length = n :=
+  exact.property
+
+/-- A fixed count reads an exact list back: the decoder reads as many items as the list holds -/
+theorem decodeMany_exact (n : Nat) (encode : α → List UInt8) (decode : List UInt8 → Option (α × List UInt8))
+    (roundtrip : ∀ item rest, decode (encode item ++ rest) = some (item, rest))
+    (items : Exact n α) (rest : List UInt8) :
+    decodeMany decode n (encodeMany encode items.val ++ rest) = some (items.val, rest) := by
+  have counted := decodeMany_encodeMany encode decode roundtrip items.val rest
+  rw [items.length_eq] at counted
+  exact counted
+
 /-- Binding a known value feeds it straight on: the one step a decoder's round trip takes per field.
     Stated on the monadic bind the do notation produces, so no pass over the decoder is needed first -/
 theorem some_bind (a : α) (f : α → Option β) : (some a >>= f) = f a :=
@@ -276,7 +297,10 @@ theorem decodeAll_encodeMany (encode : α → List UInt8) (decode : List UInt8 �
 
 /-! ## Framing -/
 
-/-- A length prefix of `n` big endian bytes holding the body's length plus `offset`, then the body -/
+/-- A length prefix of `n` big endian bytes holding the body's length plus `offset`, then the body.
+    The round trip lemmas take their facts at the one message framed, so a body decoder handed the
+    fields read ahead of the prefix (a protocol id, flags) qualifies: it need only read back that
+    message, not every message -/
 def encodeFramed (n offset : Nat) (encode : α → List UInt8) (item : α) : List UInt8 :=
   encodeUInt n (BitVec.ofNat (8 * n) ((encode item).length + offset)) ++ encode item
 
@@ -291,14 +315,15 @@ def decodeFramed (n offset : Nat) (decode : List UInt8 → Option (α × List UI
 
 theorem decodeFramed_encodeFramed (n offset : Nat) (encode : α → List UInt8)
     (decode : List UInt8 → Option (α × List UInt8))
-    (roundtrip : ∀ item rest, decode (encode item ++ rest) = some (item, rest))
-    (fits : ∀ item, (encode item).length + offset < 256 ^ n)
-    (item : α) (rest : List UInt8) :
+    (item : α)
+    (roundtrip : ∀ rest, decode (encode item ++ rest) = some (item, rest))
+    (fits : (encode item).length + offset < 256 ^ n)
+    (rest : List UInt8) :
     decodeFramed n offset decode (encodeFramed n offset encode item ++ rest) = some (item, rest) := by
   have bound : (encode item).length + offset < 2 ^ (8 * n) := by
     rw [Nat.pow_mul]
-    exact fits item
-  have whole := roundtrip item []
+    exact fits
+  have whole := roundtrip []
   rw [List.append_nil] at whole
   unfold decodeFramed encodeFramed
   rw [List.append_assoc, decodeUInt_encodeUInt]
@@ -324,14 +349,15 @@ def decodeFramedLE (n offset : Nat) (decode : List UInt8 → Option (α × List 
 
 theorem decodeFramedLE_encodeFramedLE (n offset : Nat) (encode : α → List UInt8)
     (decode : List UInt8 → Option (α × List UInt8))
-    (roundtrip : ∀ item rest, decode (encode item ++ rest) = some (item, rest))
-    (fits : ∀ item, (encode item).length + offset < 256 ^ n)
-    (item : α) (rest : List UInt8) :
+    (item : α)
+    (roundtrip : ∀ rest, decode (encode item ++ rest) = some (item, rest))
+    (fits : (encode item).length + offset < 256 ^ n)
+    (rest : List UInt8) :
     decodeFramedLE n offset decode (encodeFramedLE n offset encode item ++ rest) = some (item, rest) := by
   have bound : (encode item).length + offset < 2 ^ (8 * n) := by
     rw [Nat.pow_mul]
-    exact fits item
-  have whole := roundtrip item []
+    exact fits
+  have whole := roundtrip []
   rw [List.append_nil] at whole
   unfold decodeFramedLE encodeFramedLE
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE]
@@ -353,13 +379,14 @@ def decodeFramedAll (n offset : Nat) (decode : List UInt8 → Option α) (bytes 
 
 theorem decodeFramedAll_encodeFramed (n offset : Nat) (encode : α → List UInt8)
     (decode : List UInt8 → Option α)
-    (whole : ∀ item, decode (encode item) = some item)
-    (fits : ∀ item, (encode item).length + offset < 256 ^ n)
-    (item : α) (rest : List UInt8) :
+    (item : α)
+    (whole : decode (encode item) = some item)
+    (fits : (encode item).length + offset < 256 ^ n)
+    (rest : List UInt8) :
     decodeFramedAll n offset decode (encodeFramed n offset encode item ++ rest) = some (item, rest) := by
   have bound : (encode item).length + offset < 2 ^ (8 * n) := by
     rw [Nat.pow_mul]
-    exact fits item
+    exact fits
   unfold decodeFramedAll encodeFramed
   rw [List.append_assoc, decodeUInt_encodeUInt]
   simp only [Bind.bind, Option.bind_some, BitVec.toNat_ofNat]
@@ -375,17 +402,105 @@ def decodeFramedAllLE (n offset : Nat) (decode : List UInt8 → Option α) (byte
 
 theorem decodeFramedAllLE_encodeFramedLE (n offset : Nat) (encode : α → List UInt8)
     (decode : List UInt8 → Option α)
-    (whole : ∀ item, decode (encode item) = some item)
-    (fits : ∀ item, (encode item).length + offset < 256 ^ n)
-    (item : α) (rest : List UInt8) :
+    (item : α)
+    (whole : decode (encode item) = some item)
+    (fits : (encode item).length + offset < 256 ^ n)
+    (rest : List UInt8) :
     decodeFramedAllLE n offset decode (encodeFramedLE n offset encode item ++ rest) = some (item, rest) := by
   have bound : (encode item).length + offset < 2 ^ (8 * n) := by
     rw [Nat.pow_mul]
-    exact fits item
+    exact fits
   unfold decodeFramedAllLE encodeFramedLE
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE]
   simp only [Bind.bind, Option.bind_some, BitVec.toNat_ofNat]
   rw [Nat.mod_eq_of_lt bound, Nat.add_sub_cancel, take?_append rfl]
   simp [whole]
+
+/-! ## Fitting bodies -/
+
+/-- A body with the proof its encoding fits its frame's length prefix. Where no bound of the fields
+    fits the prefix (groups counted in two bytes under a two byte length), every message carries the
+    fit instead, and the frame proof uses that -/
+abbrev Fitting (encode : α → List UInt8) (offset limit : Nat) := { item : α // (encode item).length + offset < limit }
+
+instance [DecidableEq α] {encode : α → List UInt8} : DecidableEq (Fitting encode offset limit) :=
+  inferInstanceAs (DecidableEq { item : α // (encode item).length + offset < limit })
+
+instance [Repr α] {encode : α → List UInt8} : Repr (Fitting encode offset limit) where
+  reprPrec fitting precedence := reprPrec fitting.val precedence
+
+theorem Fitting.fits {encode : α → List UInt8} (fitting : Fitting encode offset limit) :
+    (encode fitting.val).length + offset < limit :=
+  fitting.property
+
+/-- Read the frame and its body, and keep the body with the fit the prefix showed -/
+def decodeFitting (n offset : Nat) (encode : α → List UInt8) (decode : List UInt8 → Option (α × List UInt8))
+    (bytes : List UInt8) : Option (Fitting encode offset (256 ^ n) × List UInt8) := do
+  let (item, rest) ← decodeFramed n offset decode bytes
+  if fits : (encode item).length + offset < 256 ^ n then pure (⟨item, fits⟩, rest) else none
+
+theorem decodeFitting_encodeFramed (n offset : Nat) (encode : α → List UInt8)
+    (decode : List UInt8 → Option (α × List UInt8))
+    (item : Fitting encode offset (256 ^ n))
+    (roundtrip : ∀ rest, decode (encode item.val ++ rest) = some (item.val, rest))
+    (rest : List UInt8) :
+    decodeFitting n offset encode decode (encodeFramed n offset encode item.val ++ rest) = some (item, rest) := by
+  unfold decodeFitting
+  rw [decodeFramed_encodeFramed n offset encode decode item.val roundtrip item.fits, some_bind]
+  dsimp only
+  rw [dite_eq_left item.fits]
+  rfl
+
+def decodeFittingLE (n offset : Nat) (encode : α → List UInt8) (decode : List UInt8 → Option (α × List UInt8))
+    (bytes : List UInt8) : Option (Fitting encode offset (256 ^ n) × List UInt8) := do
+  let (item, rest) ← decodeFramedLE n offset decode bytes
+  if fits : (encode item).length + offset < 256 ^ n then pure (⟨item, fits⟩, rest) else none
+
+theorem decodeFittingLE_encodeFramedLE (n offset : Nat) (encode : α → List UInt8)
+    (decode : List UInt8 → Option (α × List UInt8))
+    (item : Fitting encode offset (256 ^ n))
+    (roundtrip : ∀ rest, decode (encode item.val ++ rest) = some (item.val, rest))
+    (rest : List UInt8) :
+    decodeFittingLE n offset encode decode (encodeFramedLE n offset encode item.val ++ rest) = some (item, rest) := by
+  unfold decodeFittingLE
+  rw [decodeFramedLE_encodeFramedLE n offset encode decode item.val roundtrip item.fits, some_bind]
+  dsimp only
+  rw [dite_eq_left item.fits]
+  rfl
+
+/-- The same for a body that runs to the end of its frame -/
+def decodeFittingAll (n offset : Nat) (encode : α → List UInt8) (decode : List UInt8 → Option α)
+    (bytes : List UInt8) : Option (Fitting encode offset (256 ^ n) × List UInt8) := do
+  let (item, rest) ← decodeFramedAll n offset decode bytes
+  if fits : (encode item).length + offset < 256 ^ n then pure (⟨item, fits⟩, rest) else none
+
+theorem decodeFittingAll_encodeFramed (n offset : Nat) (encode : α → List UInt8)
+    (decode : List UInt8 → Option α)
+    (item : Fitting encode offset (256 ^ n))
+    (whole : decode (encode item.val) = some item.val)
+    (rest : List UInt8) :
+    decodeFittingAll n offset encode decode (encodeFramed n offset encode item.val ++ rest) = some (item, rest) := by
+  unfold decodeFittingAll
+  rw [decodeFramedAll_encodeFramed n offset encode decode item.val whole item.fits, some_bind]
+  dsimp only
+  rw [dite_eq_left item.fits]
+  rfl
+
+def decodeFittingAllLE (n offset : Nat) (encode : α → List UInt8) (decode : List UInt8 → Option α)
+    (bytes : List UInt8) : Option (Fitting encode offset (256 ^ n) × List UInt8) := do
+  let (item, rest) ← decodeFramedAllLE n offset decode bytes
+  if fits : (encode item).length + offset < 256 ^ n then pure (⟨item, fits⟩, rest) else none
+
+theorem decodeFittingAllLE_encodeFramedLE (n offset : Nat) (encode : α → List UInt8)
+    (decode : List UInt8 → Option α)
+    (item : Fitting encode offset (256 ^ n))
+    (whole : decode (encode item.val) = some item.val)
+    (rest : List UInt8) :
+    decodeFittingAllLE n offset encode decode (encodeFramedLE n offset encode item.val ++ rest) = some (item, rest) := by
+  unfold decodeFittingAllLE
+  rw [decodeFramedAllLE_encodeFramedLE n offset encode decode item.val whole item.fits, some_bind]
+  dsimp only
+  rw [dite_eq_left item.fits]
+  rfl
 
 end Omi

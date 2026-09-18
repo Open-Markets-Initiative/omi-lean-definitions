@@ -8,77 +8,77 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Add Complex Instrument Request is not framed: its length Body Len is not the integer that leads it.
+Note: Add Complex Instrument Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Add Flexible Instrument Request is not framed: its length Body Len is not the integer that leads it.
+Note: Add Flexible Instrument Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Approve Tes Trade Request is not framed: its length Body Len is not the integer that leads it.
+Note: Approve Tes Trade Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Cross Request is not framed: its length Body Len is not the integer that leads it.
+Note: Cross Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete All Order Request is not framed: its length Body Len is not the integer that leads it.
+Note: Delete All Order Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete All Quote Request is not framed: its length Body Len is not the integer that leads it.
+Note: Delete All Quote Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete Order Complex Request is not framed: its length Body Len is not the integer that leads it.
+Note: Delete Order Complex Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete Order Single Request is not framed: its length Body Len is not the integer that leads it.
+Note: Delete Order Single Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete Tes Trade Request is not framed: its length Body Len is not the integer that leads it.
+Note: Delete Tes Trade Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Enter Tes Trade Request is not framed: its length Body Len is not the integer that leads it.
+Note: Enter Tes Trade Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Gateway Request is not framed: its length Body Len is not the integer that leads it.
+Note: Gateway Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Heartbeat is not framed: its length Body Len is not the integer that leads it.
+Note: Heartbeat is not framed: its length Body Len is not an integer it reads.
 
-Note: Inquire Enrichment Rule Id List Request is not framed: its length Body Len is not the integer that leads it.
+Note: Inquire Enrichment Rule Id List Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Inquire Mm Parameter Request is not framed: its length Body Len is not the integer that leads it.
+Note: Inquire Mm Parameter Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Inquire Session List Request is not framed: its length Body Len is not the integer that leads it.
+Note: Inquire Session List Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Inquire User Request is not framed: its length Body Len is not the integer that leads it.
+Note: Inquire User Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Logon Request is not framed: its length Body Len is not the integer that leads it.
+Note: Logon Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Logout Request is not framed: its length Body Len is not the integer that leads it.
+Note: Logout Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Mm Parameter Definition Request is not framed: its length Body Len is not the integer that leads it.
+Note: Mm Parameter Definition Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Mass Quote Request is not framed: its length Body Len is not the integer that leads it.
+Note: Mass Quote Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Modify Order Complex Request is not framed: its length Body Len is not the integer that leads it.
+Note: Modify Order Complex Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Modify Order Single Request is not framed: its length Body Len is not the integer that leads it.
+Note: Modify Order Single Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Modify Order Single Short Request is not framed: its length Body Len is not the integer that leads it.
+Note: Modify Order Single Short Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Modify Tes Trade Request is not framed: its length Body Len is not the integer that leads it.
+Note: Modify Tes Trade Request is not framed: its length Body Len is not an integer it reads.
 
-Note: New Order Complex Request is not framed: its length Body Len is not the integer that leads it.
+Note: New Order Complex Request is not framed: its length Body Len is not an integer it reads.
 
-Note: New Order Single Request is not framed: its length Body Len is not the integer that leads it.
+Note: New Order Single Request is not framed: its length Body Len is not an integer it reads.
 
-Note: New Order Single Short Request is not framed: its length Body Len is not the integer that leads it.
+Note: New Order Single Short Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Quote Activation Request is not framed: its length Body Len is not the integer that leads it.
+Note: Quote Activation Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Rfq Request is not framed: its length Body Len is not the integer that leads it.
+Note: Rfq Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Retransmit Me Message Request is not framed: its length Body Len is not the integer that leads it.
+Note: Retransmit Me Message Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Retransmit Request is not framed: its length Body Len is not the integer that leads it.
+Note: Retransmit Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Subscribe Request is not framed: its length Body Len is not the integer that leads it.
+Note: Subscribe Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Unsubscribe Request is not framed: its length Body Len is not the integer that leads it.
+Note: Unsubscribe Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Upload Tes Trade Request is not framed: its length Body Len is not the integer that leads it.
+Note: Upload Tes Trade Request is not framed: its length Body Len is not an integer it reads.
 
-Note: User Login Request is not framed: its length Body Len is not the integer that leads it.
+Note: User Login Request is not framed: its length Body Len is not an integer it reads.
 
-Note: User Logout Request is not framed: its length Body Len is not the integer that leads it.
+Note: User Logout Request is not framed: its length Body Len is not an integer it reads.
 
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
@@ -4673,7 +4673,7 @@ def decode : List UInt8 → Option (ClientMessage × List UInt8) :=
 
 @[simp] theorem decode_encode (message : ClientMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) :=
-  decodeFramedLE_encodeFramedLE 4 4 encodeBody decodeBody decodeBody_encodeBody encodeBody_length_lt message rest
+  decodeFramedLE_encodeFramedLE 4 4 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
 
 theorem encode_length_pos (message : ClientMessage) : (encode message).length > 0 := by
   unfold encode

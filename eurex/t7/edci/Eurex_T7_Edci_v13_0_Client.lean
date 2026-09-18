@@ -8,11 +8,11 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Heartbeat is not framed: its length Body Len is not the integer that leads it.
+Note: Heartbeat is not framed: its length Body Len is not an integer it reads.
 
-Note: Logon Request is not framed: its length Body Len is not the integer that leads it.
+Note: Logon Request is not framed: its length Body Len is not an integer it reads.
 
-Note: Logout Request is not framed: its length Body Len is not the integer that leads it.
+Note: Logout Request is not framed: its length Body Len is not an integer it reads.
 
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
@@ -259,7 +259,7 @@ def decode : List UInt8 → Option (ClientMessage × List UInt8) :=
 
 @[simp] theorem decode_encode (message : ClientMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) :=
-  decodeFramedLE_encodeFramedLE 4 4 encodeBody decodeBody decodeBody_encodeBody encodeBody_length_lt message rest
+  decodeFramedLE_encodeFramedLE 4 4 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
 
 theorem encode_length_pos (message : ClientMessage) : (encode message).length > 0 := by
   unfold encode

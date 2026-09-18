@@ -3047,8 +3047,7 @@ theorem decodeBody_encodeBody (message : ClientSimpleOpenFrame) (rest : List UIn
 
 /-- Size rule: Message Length counts the bytes after it plus 2, so it is written from the body; the body has no bound the prefix must fit, so it is read by its content and the prefix is not checked -/
 def encode (message : ClientSimpleOpenFrame) : List UInt8 :=
-  encodeUIntLE 2 (BitVec.ofNat (8 * 2) ((encodeBody message).length + 2))
-    ++ encodeBody message
+  encodeUIntLE 2 (BitVec.ofNat (8 * 2) ((encodeBody message).length + 2)) ++ encodeBody message
 
 def decode (bytes : List UInt8) : Option (ClientSimpleOpenFrame × List UInt8) := do
   let (_, bytes) ← decodeUIntLE 2 bytes

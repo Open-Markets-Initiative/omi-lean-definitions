@@ -338,7 +338,7 @@ def decode : List UInt8 → Option (TcpPacket × List UInt8) :=
 
 @[simp] theorem decode_encode (message : TcpPacket) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) :=
-  decodeFramedAll_encodeFramed 2 2 encodeBody decodeBody decodeBody_encodeBody encodeBody_length_lt message rest
+  decodeFramedAll_encodeFramed 2 2 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
 
 theorem encode_length_pos (message : TcpPacket) : (encode message).length > 0 := by
   unfold encode

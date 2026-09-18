@@ -8,151 +8,163 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Best Quote Execution Report is not framed: its length Body Len is not the integer that leads it.
+Note: Best Quote Execution Report is not framed: its length Body Len is not an integer it reads.
 
-Note: Best Quote Response is not framed: its length Body Len is not the integer that leads it.
+Note: Best Quote Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Broadcast Error Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
 
-Note: Cross Request Response is not framed: its length Body Len is not the integer that leads it.
+Note: Broadcast Error Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete All Order Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Cross Request Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete All Order Nr Response is not framed: its length Body Len is not the integer that leads it.
+Note: Delete All Order Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete All Order Quote Event Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Delete All Order Nr Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete All Order Response is not framed: its length Body Len is not the integer that leads it.
+Note: Delete All Order Quote Event Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete All Quote Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Delete All Order Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete All Quote Response is not framed: its length Body Len is not the integer that leads it.
+Note: Delete All Quote Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete Order Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Delete All Quote Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete Order Nr Response is not framed: its length Body Len is not the integer that leads it.
+Note: Delete Order Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete Order Response is not framed: its length Body Len is not the integer that leads it.
+Note: Delete Order Nr Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Extended Deletion Report is not framed: its length Body Len is not the integer that leads it.
+Note: Delete Order Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Forced Logout Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Extended Deletion Report is not framed: its length Body Len is not an integer it reads.
 
-Note: Forced User Logout Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
 
-Note: Heartbeat Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Forced Logout Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Inquire Enrichment Rule Id List Response is not framed: its length Body Len is not the integer that leads it.
+Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
 
-Note: Inquire Session List Response is not framed: its length Body Len is not the integer that leads it.
+Note: Forced User Logout Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Inquire User Response is not framed: its length Body Len is not the integer that leads it.
+Note: Heartbeat Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Issuer Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Inquire Enrichment Rule Id List Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Issuer Security State Change Response is not framed: its length Body Len is not the integer that leads it.
+Note: Inquire Session List Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Legal Notification Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Inquire User Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Logon Response is not framed: its length Body Len is not the integer that leads it.
+Note: Issuer Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Logout Response is not framed: its length Body Len is not the integer that leads it.
+Note: Issuer Security State Change Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Mass Quote Response is not framed: its length Body Len is not the integer that leads it.
+Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
 
-Note: Modify Order Nr Response is not framed: its length Body Len is not the integer that leads it.
+Note: Legal Notification Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Modify Order Response is not framed: its length Body Len is not the integer that leads it.
+Note: Logon Response is not framed: its length Body Len is not an integer it reads.
 
-Note: New Order Nr Response is not framed: its length Body Len is not the integer that leads it.
+Note: Logout Response is not framed: its length Body Len is not an integer it reads.
 
-Note: New Order Response is not framed: its length Body Len is not the integer that leads it.
+Note: Mass Quote Response is not framed: its length Body Len is not an integer it reads.
 
-Note: News Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Modify Order Nr Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Order Exec Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Modify Order Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Order Exec Report Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: New Order Nr Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Order Exec Response is not framed: its length Body Len is not the integer that leads it.
+Note: New Order Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Party Action Report is not framed: its length Body Len is not the integer that leads it.
+Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
 
-Note: Party Entitlements Update Report is not framed: its length Body Len is not the integer that leads it.
+Note: News Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Quote Activation Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Order Exec Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Quote Activation Response is not framed: its length Body Len is not the integer that leads it.
+Note: Order Exec Report Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Quote Execution Report is not framed: its length Body Len is not the integer that leads it.
+Note: Order Exec Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Rfq Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Party Action Report is not framed: its length Body Len is not an integer it reads.
 
-Note: Rfq Response is not framed: its length Body Len is not the integer that leads it.
+Note: Party Entitlements Update Report is not framed: its length Body Len is not an integer it reads.
 
-Note: Reject is not framed: its length Body Len is not the integer that leads it.
+Note: Quote Activation Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Retransmit Me Message Response is not framed: its length Body Len is not the integer that leads it.
+Note: Quote Activation Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Retransmit Response is not framed: its length Body Len is not the integer that leads it.
+Note: Quote Execution Report is not framed: its length Body Len is not an integer it reads.
 
-Note: Service Availability Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Rfq Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Service Availability Market Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Rfq Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Subscribe Response is not framed: its length Body Len is not the integer that leads it.
+Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
 
-Note: Tes Approve Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Reject is not framed: its length Body Len is not an integer it reads.
 
-Note: Tes Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Retransmit Me Message Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Tes Delete Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Retransmit Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Tes Execution Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Service Availability Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Tes Response is not framed: its length Body Len is not the integer that leads it.
+Note: Service Availability Market Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Tes Trade Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Subscribe Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Tes Trading Session Status Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Tes Approve Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Tm Trading Session Status Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Tes Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Throttle Update Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Tes Delete Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Trade Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Tes Execution Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Trading Session Status Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Tes Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Trailing Stop Update Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Tes Trade Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Unsubscribe Response is not framed: its length Body Len is not the integer that leads it.
+Note: Tes Trading Session Status Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: User Login Response is not framed: its length Body Len is not the integer that leads it.
+Note: Tm Trading Session Status Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: User Logout Response is not framed: its length Body Len is not the integer that leads it.
+Note: Throttle Update Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Create Deal Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Trade Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Deal Response is not framed: its length Body Len is not the integer that leads it.
+Note: Trading Session Status Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Negotiation Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Trailing Stop Update Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Negotiation Requester Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Unsubscribe Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Negotiation Status Notification is not framed: its length Body Len is not the integer that leads it.
+Note: User Login Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Open Negotiation Notification is not framed: its length Body Len is not the integer that leads it.
+Note: User Logout Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Open Negotiation Requester Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Xetra En Light Create Deal Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Quote Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Xetra En Light Deal Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Quote Requester Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Xetra En Light Negotiation Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Quote Response is not framed: its length Body Len is not the integer that leads it.
+Note: Xetra En Light Negotiation Requester Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Xetra En Light Status Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Xetra En Light Negotiation Status Notification is not framed: its length Body Len is not an integer it reads.
+
+Note: Xetra En Light Open Negotiation Notification is not framed: its length Body Len is not an integer it reads.
+
+Note: Xetra En Light Open Negotiation Requester Notification is not framed: its length Body Len is not an integer it reads.
+
+Note: Xetra En Light Quote Notification is not framed: its length Body Len is not an integer it reads.
+
+Note: Xetra En Light Quote Requester Notification is not framed: its length Body Len is not an integer it reads.
+
+Note: Xetra En Light Quote Response is not framed: its length Body Len is not an integer it reads.
+
+Note: Xetra En Light Status Broadcast is not framed: its length Body Len is not an integer it reads.
 
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
@@ -796,7 +808,7 @@ structure BroadcastErrorNotification where
   sessionStatus : BitVec 8
   pad4 : Alpha 4
   varText : Bounded 2 UInt8
-  alignmentPadding : Capped 4291821559
+  alignmentPadding : Capped 7
   deriving DecidableEq, Repr
 
 namespace BroadcastErrorNotification
@@ -825,7 +837,7 @@ def decode (bytes : List UInt8) : Option BroadcastErrorNotification := do
   let (varText_, bytes) ← decodeMany Byte.decode varTextLen.toNat bytes
   let alignmentPadding_ := bytes
   if fits_varText : varText_.length < 256 ^ 2 then
-    if fits_alignmentPadding : alignmentPadding_.length ≤ 4291821559 then
+    if fits_alignmentPadding : alignmentPadding_.length ≤ 7 then
       pure { pad2, notifHeaderComp, applIdStatus, refApplSubId, refApplId, sessionStatus, pad4, varText := ⟨varText_, fits_varText⟩, alignmentPadding := ⟨alignmentPadding_, fits_alignmentPadding⟩ }
     else none
   else none
@@ -836,7 +848,7 @@ theorem encode_length_pos (message : BroadcastErrorNotification) : (encode messa
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : BroadcastErrorNotification) : (encode message).length ≤ 4291887120 := by
+theorem encode_length_le (message : BroadcastErrorNotification) : (encode message).length ≤ 65568 := by
   have bound_varText := message.varText.length_lt
   have bound_alignmentPadding := message.alignmentPadding.length_le
   unfold encode
@@ -2237,7 +2249,7 @@ structure ForcedLogoutNotification where
   notifHeaderComp : NotifHeaderComp
   pad6 : Alpha 6
   varText : Bounded 2 UInt8
-  alignmentPadding : Capped 4291821559
+  alignmentPadding : Capped 7
   deriving DecidableEq, Repr
 
 namespace ForcedLogoutNotification
@@ -2258,7 +2270,7 @@ def decode (bytes : List UInt8) : Option ForcedLogoutNotification := do
   let (varText_, bytes) ← decodeMany Byte.decode varTextLen.toNat bytes
   let alignmentPadding_ := bytes
   if fits_varText : varText_.length < 256 ^ 2 then
-    if fits_alignmentPadding : alignmentPadding_.length ≤ 4291821559 then
+    if fits_alignmentPadding : alignmentPadding_.length ≤ 7 then
       pure { pad2, notifHeaderComp, pad6, varText := ⟨varText_, fits_varText⟩, alignmentPadding := ⟨alignmentPadding_, fits_alignmentPadding⟩ }
     else none
   else none
@@ -2269,7 +2281,7 @@ theorem encode_length_pos (message : ForcedLogoutNotification) : (encode message
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : ForcedLogoutNotification) : (encode message).length ≤ 4291887112 := by
+theorem encode_length_le (message : ForcedLogoutNotification) : (encode message).length ≤ 65560 := by
   have bound_varText := message.varText.length_lt
   have bound_alignmentPadding := message.alignmentPadding.length_le
   unfold encode
@@ -2302,7 +2314,7 @@ structure ForcedUserLogoutNotification where
   username : BitVec 32
   pad6 : Alpha 6
   varText : Bounded 2 UInt8
-  alignmentPadding : Capped 4291821559
+  alignmentPadding : Capped 7
   deriving DecidableEq, Repr
 
 namespace ForcedUserLogoutNotification
@@ -2329,7 +2341,7 @@ def decode (bytes : List UInt8) : Option ForcedUserLogoutNotification := do
   let (varText_, bytes) ← decodeMany Byte.decode varTextLen.toNat bytes
   let alignmentPadding_ := bytes
   if fits_varText : varText_.length < 256 ^ 2 then
-    if fits_alignmentPadding : alignmentPadding_.length ≤ 4291821559 then
+    if fits_alignmentPadding : alignmentPadding_.length ≤ 7 then
       pure { pad2, notifHeaderComp, userStatus, pad3, username, pad6, varText := ⟨varText_, fits_varText⟩, alignmentPadding := ⟨alignmentPadding_, fits_alignmentPadding⟩ }
     else none
   else none
@@ -2340,7 +2352,7 @@ theorem encode_length_pos (message : ForcedUserLogoutNotification) : (encode mes
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : ForcedUserLogoutNotification) : (encode message).length ≤ 4291887120 := by
+theorem encode_length_le (message : ForcedUserLogoutNotification) : (encode message).length ≤ 65568 := by
   have bound_varText := message.varText.length_lt
   have bound_alignmentPadding := message.alignmentPadding.length_le
   unfold encode
@@ -3003,7 +3015,7 @@ structure LegalNotificationBroadcast where
   userStatus : BitVec 8
   pad5 : Alpha 5
   varText : Bounded 2 UInt8
-  alignmentPadding : Capped 4291821559
+  alignmentPadding : Capped 7
   deriving DecidableEq, Repr
 
 namespace LegalNotificationBroadcast
@@ -3028,7 +3040,7 @@ def decode (bytes : List UInt8) : Option LegalNotificationBroadcast := do
   let (varText_, bytes) ← decodeMany Byte.decode varTextLen.toNat bytes
   let alignmentPadding_ := bytes
   if fits_varText : varText_.length < 256 ^ 2 then
-    if fits_alignmentPadding : alignmentPadding_.length ≤ 4291821559 then
+    if fits_alignmentPadding : alignmentPadding_.length ≤ 7 then
       pure { pad2, rbcHeaderComp, transactTime, userStatus, pad5, varText := ⟨varText_, fits_varText⟩, alignmentPadding := ⟨alignmentPadding_, fits_alignmentPadding⟩ }
     else none
   else none
@@ -3039,7 +3051,7 @@ theorem encode_length_pos (message : LegalNotificationBroadcast) : (encode messa
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : LegalNotificationBroadcast) : (encode message).length ≤ 4291887144 := by
+theorem encode_length_le (message : LegalNotificationBroadcast) : (encode message).length ≤ 65592 := by
   have bound_varText := message.varText.length_lt
   have bound_alignmentPadding := message.alignmentPadding.length_le
   unfold encode
@@ -3805,7 +3817,7 @@ structure NewsBroadcast where
   headline : Alpha 256
   pad6 : Alpha 6
   varText : Bounded 2 UInt8
-  alignmentPadding : Capped 4291821559
+  alignmentPadding : Capped 7
   deriving DecidableEq, Repr
 
 namespace NewsBroadcast
@@ -3830,7 +3842,7 @@ def decode (bytes : List UInt8) : Option NewsBroadcast := do
   let (varText_, bytes) ← decodeMany Byte.decode varTextLen.toNat bytes
   let alignmentPadding_ := bytes
   if fits_varText : varText_.length < 256 ^ 2 then
-    if fits_alignmentPadding : alignmentPadding_.length ≤ 4291821559 then
+    if fits_alignmentPadding : alignmentPadding_.length ≤ 7 then
       pure { pad2, rbcHeaderComp, origTime, headline, pad6, varText := ⟨varText_, fits_varText⟩, alignmentPadding := ⟨alignmentPadding_, fits_alignmentPadding⟩ }
     else none
   else none
@@ -3841,7 +3853,7 @@ theorem encode_length_pos (message : NewsBroadcast) : (encode message).length > 
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : NewsBroadcast) : (encode message).length ≤ 4291887400 := by
+theorem encode_length_le (message : NewsBroadcast) : (encode message).length ≤ 65848 := by
   have bound_varText := message.varText.length_lt
   have bound_alignmentPadding := message.alignmentPadding.length_le
   unfold encode
@@ -5150,7 +5162,7 @@ structure Reject where
   sessionStatus : BitVec 8
   pad1 : Alpha 1
   varText : Bounded 2 UInt8
-  alignmentPadding : Capped 4291821559
+  alignmentPadding : Capped 7
   deriving DecidableEq, Repr
 
 namespace Reject
@@ -5175,7 +5187,7 @@ def decode (bytes : List UInt8) : Option Reject := do
   let (varText_, bytes) ← decodeMany Byte.decode varTextLen.toNat bytes
   let alignmentPadding_ := bytes
   if fits_varText : varText_.length < 256 ^ 2 then
-    if fits_alignmentPadding : alignmentPadding_.length ≤ 4291821559 then
+    if fits_alignmentPadding : alignmentPadding_.length ≤ 7 then
       pure { pad2, nrResponseHeaderMeComp, sessionRejectReason, sessionStatus, pad1, varText := ⟨varText_, fits_varText⟩, alignmentPadding := ⟨alignmentPadding_, fits_alignmentPadding⟩ }
     else none
   else none
@@ -5186,7 +5198,7 @@ theorem encode_length_pos (message : Reject) : (encode message).length > 0 := by
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : Reject) : (encode message).length ≤ 4291887152 := by
+theorem encode_length_le (message : Reject) : (encode message).length ≤ 65600 := by
   have bound_varText := message.varText.length_lt
   have bound_alignmentPadding := message.alignmentPadding.length_le
   unfold encode
@@ -9540,7 +9552,7 @@ def decode : List UInt8 → Option (ServerMessage × List UInt8) :=
 
 @[simp] theorem decode_encode (message : ServerMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) :=
-  decodeFramedAllLE_encodeFramedLE 4 4 encodeBody decodeBody decodeBody_encodeBody encodeBody_length_lt message rest
+  decodeFramedAllLE_encodeFramedLE 4 4 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
 
 theorem encode_length_pos (message : ServerMessage) : (encode message).length > 0 := by
   unfold encode

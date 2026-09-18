@@ -8,53 +8,59 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Cross Request Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Cross Request Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Delete Order Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Delete Order Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Enter Clip Request Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Enter Clip Request Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Forced Logout Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
 
-Note: Heartbeat Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Forced Logout Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Legal Notification Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Heartbeat Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Logon Response is not framed: its length Body Len is not the integer that leads it.
+Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
 
-Note: Logout Response is not framed: its length Body Len is not the integer that leads it.
+Note: Legal Notification Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Order Exec Report Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Logon Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Order Reject Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Logout Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Partition List Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Order Exec Report Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Party Action Report is not framed: its length Body Len is not the integer that leads it.
+Note: Order Reject Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Party Entitlements Update Report is not framed: its length Body Len is not the integer that leads it.
+Note: Partition List Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Reject is not framed: its length Body Len is not the integer that leads it.
+Note: Party Action Report is not framed: its length Body Len is not an integer it reads.
 
-Note: Retransmit Response is not framed: its length Body Len is not the integer that leads it.
+Note: Party Entitlements Update Report is not framed: its length Body Len is not an integer it reads.
 
-Note: Rfq Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
 
-Note: Risk Notification Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Reject is not framed: its length Body Len is not an integer it reads.
 
-Note: Service Availability Market Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Retransmit Response is not framed: its length Body Len is not an integer it reads.
 
-Note: Session List Notification is not framed: its length Body Len is not the integer that leads it.
+Note: Rfq Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: Session Status Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Risk Notification Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Status Broadcast is not framed: its length Body Len is not the integer that leads it.
+Note: Service Availability Market Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: Trading Action Response is not framed: its length Body Len is not the integer that leads it.
+Note: Session List Notification is not framed: its length Body Len is not an integer it reads.
 
-Note: User Login Response is not framed: its length Body Len is not the integer that leads it.
+Note: Session Status Broadcast is not framed: its length Body Len is not an integer it reads.
 
-Note: User Logout Response is not framed: its length Body Len is not the integer that leads it.
+Note: Status Broadcast is not framed: its length Body Len is not an integer it reads.
+
+Note: Trading Action Response is not framed: its length Body Len is not an integer it reads.
+
+Note: User Login Response is not framed: its length Body Len is not an integer it reads.
+
+Note: User Logout Response is not framed: its length Body Len is not an integer it reads.
 
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
@@ -872,7 +878,7 @@ structure ForcedLogoutNotification where
   pad2 : Alpha 2
   notifHeaderComp : NotifHeaderComp
   varText : Bounded 2 UInt8
-  alignmentPadding : Capped 4289200159
+  alignmentPadding : Capped 7
   deriving DecidableEq, Repr
 
 namespace ForcedLogoutNotification
@@ -891,7 +897,7 @@ def decode (bytes : List UInt8) : Option ForcedLogoutNotification := do
   let (varText_, bytes) ← decodeMany Byte.decode varTextLen.toNat bytes
   let alignmentPadding_ := bytes
   if fits_varText : varText_.length < 256 ^ 2 then
-    if fits_alignmentPadding : alignmentPadding_.length ≤ 4289200159 then
+    if fits_alignmentPadding : alignmentPadding_.length ≤ 7 then
       pure { pad2, notifHeaderComp, varText := ⟨varText_, fits_varText⟩, alignmentPadding := ⟨alignmentPadding_, fits_alignmentPadding⟩ }
     else none
   else none
@@ -902,7 +908,7 @@ theorem encode_length_pos (message : ForcedLogoutNotification) : (encode message
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : ForcedLogoutNotification) : (encode message).length ≤ 4289265706 := by
+theorem encode_length_le (message : ForcedLogoutNotification) : (encode message).length ≤ 65554 := by
   have bound_varText := message.varText.length_lt
   have bound_alignmentPadding := message.alignmentPadding.length_le
   unfold encode
@@ -970,7 +976,7 @@ structure LegalNotificationBroadcast where
   transactTime : BitVec 64
   userStatus : BitVec 8
   varText : Bounded 2 UInt8
-  alignmentPadding : Capped 4289200159
+  alignmentPadding : Capped 7
   deriving DecidableEq, Repr
 
 namespace LegalNotificationBroadcast
@@ -993,7 +999,7 @@ def decode (bytes : List UInt8) : Option LegalNotificationBroadcast := do
   let (varText_, bytes) ← decodeMany Byte.decode varTextLen.toNat bytes
   let alignmentPadding_ := bytes
   if fits_varText : varText_.length < 256 ^ 2 then
-    if fits_alignmentPadding : alignmentPadding_.length ≤ 4289200159 then
+    if fits_alignmentPadding : alignmentPadding_.length ≤ 7 then
       pure { pad2, rbcHeaderComp, transactTime, userStatus, varText := ⟨varText_, fits_varText⟩, alignmentPadding := ⟨alignmentPadding_, fits_alignmentPadding⟩ }
     else none
   else none
@@ -1004,7 +1010,7 @@ theorem encode_length_pos (message : LegalNotificationBroadcast) : (encode messa
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : LegalNotificationBroadcast) : (encode message).length ≤ 4289265739 := by
+theorem encode_length_le (message : LegalNotificationBroadcast) : (encode message).length ≤ 65587 := by
   have bound_varText := message.varText.length_lt
   have bound_alignmentPadding := message.alignmentPadding.length_le
   unfold encode
@@ -1872,7 +1878,7 @@ structure Reject where
   sessionRejectReason : BitVec 32
   sessionStatus : BitVec 8
   varText : Bounded 2 UInt8
-  alignmentPadding : Capped 4289200159
+  alignmentPadding : Capped 7
   deriving DecidableEq, Repr
 
 namespace Reject
@@ -1895,7 +1901,7 @@ def decode (bytes : List UInt8) : Option Reject := do
   let (varText_, bytes) ← decodeMany Byte.decode varTextLen.toNat bytes
   let alignmentPadding_ := bytes
   if fits_varText : varText_.length < 256 ^ 2 then
-    if fits_alignmentPadding : alignmentPadding_.length ≤ 4289200159 then
+    if fits_alignmentPadding : alignmentPadding_.length ≤ 7 then
       pure { pad2, responseHeaderComp, sessionRejectReason, sessionStatus, varText := ⟨varText_, fits_varText⟩, alignmentPadding := ⟨alignmentPadding_, fits_alignmentPadding⟩ }
     else none
   else none
@@ -1906,7 +1912,7 @@ theorem encode_length_pos (message : Reject) : (encode message).length > 0 := by
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : Reject) : (encode message).length ≤ 4289265727 := by
+theorem encode_length_le (message : Reject) : (encode message).length ≤ 65575 := by
   have bound_varText := message.varText.length_lt
   have bound_alignmentPadding := message.alignmentPadding.length_le
   unfold encode
@@ -2895,7 +2901,7 @@ def decode : List UInt8 → Option (ServerMessage × List UInt8) :=
 
 @[simp] theorem decode_encode (message : ServerMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) :=
-  decodeFramedAllLE_encodeFramedLE 4 4 encodeBody decodeBody decodeBody_encodeBody encodeBody_length_lt message rest
+  decodeFramedAllLE_encodeFramedLE 4 4 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
 
 theorem encode_length_pos (message : ServerMessage) : (encode message).length > 0 := by
   unfold encode

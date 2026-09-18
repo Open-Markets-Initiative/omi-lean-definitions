@@ -1,0 +1,1437 @@
+import Omi.Wire
+
+/-!
+# Borsa İstanbul A.Ş. Genium Inet v21.12
+
+Generated from the binary model, with the proofs the model's rules call for: every record
+decodes back to what was encoded; a message dispatch selects the message its type names;
+a count is written from the list it counts; a length prefix is written from the bytes it frames;
+and a packet read to the end of its data decodes to the messages that were written.
+
+Note: a Message Count of 0 marks Heartbeat and carries no messages; the decoder reads it as a count and the encoder never writes it.
+
+Note: a Message Count of 65535 marks End Of Session and carries no messages; the decoder reads it as a count and the encoder never writes it.
+
+Note: Order Attributes is a bit field set, proven as its 2 byte integer rather than bit by bit.
+
+Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
+Prices with implied decimals are proven as the integers on the wire.
+-/
+
+namespace Omi.BistBorsaistanbulGeniuminetItchV2112
+
+/-- Leg Side: one byte code -/
+def LegSide.codes : List UInt8 :=
+  [0x42, 0x43]
+
+inductive LegSide where
+  | asDefined -- As Defined
+  | opposite -- Opposite
+  | unlisted (byte : { byte : UInt8 // byte ∉ LegSide.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace LegSide
+
+def toByte : LegSide → UInt8
+  | .asDefined => 0x42
+  | .opposite => 0x43
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : LegSide :=
+  if byte = 0x42 then .asDefined
+  else .opposite
+
+def ofByte (byte : UInt8) : LegSide :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : LegSide) : ofByte value.toByte = value := by
+  cases value with
+  | asDefined => decide
+  | opposite => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : LegSide) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (LegSide × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : LegSide) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : LegSide) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end LegSide
+
+/-- Event Code: one byte code -/
+def EventCode.codes : List UInt8 :=
+  [0x4F, 0x43]
+
+inductive EventCode where
+  | startOfMessages -- Start Of Messages
+  | endOfMessages -- End Of Messages
+  | unlisted (byte : { byte : UInt8 // byte ∉ EventCode.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace EventCode
+
+def toByte : EventCode → UInt8
+  | .startOfMessages => 0x4F
+  | .endOfMessages => 0x43
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : EventCode :=
+  if byte = 0x4F then .startOfMessages
+  else .endOfMessages
+
+def ofByte (byte : UInt8) : EventCode :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : EventCode) : ofByte value.toByte = value := by
+  cases value with
+  | startOfMessages => decide
+  | endOfMessages => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : EventCode) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (EventCode × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : EventCode) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : EventCode) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end EventCode
+
+/-- Side: one byte code -/
+def Side.codes : List UInt8 :=
+  [0x42, 0x53]
+
+inductive Side where
+  | buyOrder -- Buy Order
+  | sellOrder -- Sell Order
+  | unlisted (byte : { byte : UInt8 // byte ∉ Side.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace Side
+
+def toByte : Side → UInt8
+  | .buyOrder => 0x42
+  | .sellOrder => 0x53
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : Side :=
+  if byte = 0x42 then .buyOrder
+  else .sellOrder
+
+def ofByte (byte : UInt8) : Side :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : Side) : ofByte value.toByte = value := by
+  cases value with
+  | buyOrder => decide
+  | sellOrder => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : Side) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (Side × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : Side) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : Side) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end Side
+
+/-- Occurred At Cross: one byte code -/
+def OccurredAtCross.codes : List UInt8 :=
+  [0x4E, 0x59]
+
+inductive OccurredAtCross where
+  | no -- No
+  | yes -- Yes
+  | unlisted (byte : { byte : UInt8 // byte ∉ OccurredAtCross.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace OccurredAtCross
+
+def toByte : OccurredAtCross → UInt8
+  | .no => 0x4E
+  | .yes => 0x59
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : OccurredAtCross :=
+  if byte = 0x4E then .no
+  else .yes
+
+def ofByte (byte : UInt8) : OccurredAtCross :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : OccurredAtCross) : ofByte value.toByte = value := by
+  cases value with
+  | no => decide
+  | yes => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : OccurredAtCross) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (OccurredAtCross × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : OccurredAtCross) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : OccurredAtCross) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end OccurredAtCross
+
+/-- Printable: one byte code -/
+def Printable.codes : List UInt8 :=
+  [0x4E, 0x59]
+
+inductive Printable where
+  | nonPrintable -- Non Printable
+  | printable -- Printable
+  | unlisted (byte : { byte : UInt8 // byte ∉ Printable.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace Printable
+
+def toByte : Printable → UInt8
+  | .nonPrintable => 0x4E
+  | .printable => 0x59
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : Printable :=
+  if byte = 0x4E then .nonPrintable
+  else .printable
+
+def ofByte (byte : UInt8) : Printable :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : Printable) : ofByte value.toByte = value := by
+  cases value with
+  | nonPrintable => decide
+  | printable => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : Printable) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (Printable × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : Printable) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : Printable) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end Printable
+
+/-- Seconds Message: 4 bytes -/
+structure SecondsMessage where
+  second : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace SecondsMessage
+
+def encode (message : SecondsMessage) : List UInt8 :=
+  encodeUInt 4 message.second
+
+def decode (bytes : List UInt8) : Option (SecondsMessage × List UInt8) := do
+  let (second, bytes) ← decodeUInt 4 bytes
+  pure ({ second }, bytes)
+
+@[simp] theorem encode_length (message : SecondsMessage) : (encode message).length = 4 := by
+  unfold encode
+  simp only [encodeUInt_length]
+
+theorem encode_length_pos (message : SecondsMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : SecondsMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end SecondsMessage
+
+/-- Order Book Directory: 129 bytes -/
+structure OrderBookDirectory where
+  nanoseconds : BitVec 32
+  orderBookId : BitVec 32
+  symbol : Alpha 32
+  longName : Alpha 32
+  isin : Alpha 12
+  financialProduct : BitVec 8
+  tradingCurrency : Alpha 3
+  decimalsInPrice : BitVec 16
+  decimalsInNominalValue : BitVec 16
+  oddLotSize : BitVec 32
+  roundLotSize : BitVec 32
+  blockLotSize : BitVec 32
+  nominalValue : BitVec 64
+  numberOfLegs : BitVec 8
+  underlyingOrderBookId : BitVec 32
+  strikePrice : BitVec 32
+  expirationDate : BitVec 32
+  decimalsInStrikePrice : BitVec 16
+  putOrCall : BitVec 8
+  rankingType : BitVec 8
+  deriving DecidableEq, Repr
+
+namespace OrderBookDirectory
+
+def encode (message : OrderBookDirectory) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (Alpha.encode message.symbol
+    ++ (Alpha.encode message.longName
+    ++ (Alpha.encode message.isin
+    ++ (encodeUInt 1 message.financialProduct
+    ++ (Alpha.encode message.tradingCurrency
+    ++ (encodeUInt 2 message.decimalsInPrice
+    ++ (encodeUInt 2 message.decimalsInNominalValue
+    ++ (encodeUInt 4 message.oddLotSize
+    ++ (encodeUInt 4 message.roundLotSize
+    ++ (encodeUInt 4 message.blockLotSize
+    ++ (encodeUInt 8 message.nominalValue
+    ++ (encodeUInt 1 message.numberOfLegs
+    ++ (encodeUInt 4 message.underlyingOrderBookId
+    ++ (encodeUInt 4 message.strikePrice
+    ++ (encodeUInt 4 message.expirationDate
+    ++ (encodeUInt 2 message.decimalsInStrikePrice
+    ++ (encodeUInt 1 message.putOrCall
+    ++ (encodeUInt 1 message.rankingType)))))))))))))))))))
+
+def decode (bytes : List UInt8) : Option (OrderBookDirectory × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (symbol, bytes) ← Alpha.decode 32 bytes
+  let (longName, bytes) ← Alpha.decode 32 bytes
+  let (isin, bytes) ← Alpha.decode 12 bytes
+  let (financialProduct, bytes) ← decodeUInt 1 bytes
+  let (tradingCurrency, bytes) ← Alpha.decode 3 bytes
+  let (decimalsInPrice, bytes) ← decodeUInt 2 bytes
+  let (decimalsInNominalValue, bytes) ← decodeUInt 2 bytes
+  let (oddLotSize, bytes) ← decodeUInt 4 bytes
+  let (roundLotSize, bytes) ← decodeUInt 4 bytes
+  let (blockLotSize, bytes) ← decodeUInt 4 bytes
+  let (nominalValue, bytes) ← decodeUInt 8 bytes
+  let (numberOfLegs, bytes) ← decodeUInt 1 bytes
+  let (underlyingOrderBookId, bytes) ← decodeUInt 4 bytes
+  let (strikePrice, bytes) ← decodeUInt 4 bytes
+  let (expirationDate, bytes) ← decodeUInt 4 bytes
+  let (decimalsInStrikePrice, bytes) ← decodeUInt 2 bytes
+  let (putOrCall, bytes) ← decodeUInt 1 bytes
+  let (rankingType, bytes) ← decodeUInt 1 bytes
+  pure ({ nanoseconds, orderBookId, symbol, longName, isin, financialProduct, tradingCurrency, decimalsInPrice, decimalsInNominalValue, oddLotSize, roundLotSize, blockLotSize, nominalValue, numberOfLegs, underlyingOrderBookId, strikePrice, expirationDate, decimalsInStrikePrice, putOrCall, rankingType }, bytes)
+
+@[simp] theorem encode_length (message : OrderBookDirectory) : (encode message).length = 129 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : OrderBookDirectory) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : OrderBookDirectory) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end OrderBookDirectory
+
+/-- Combination Order Book Leg: 17 bytes -/
+structure CombinationOrderBookLeg where
+  nanoseconds : BitVec 32
+  combinationOrderBookId : BitVec 32
+  legOrderBookId : BitVec 32
+  legSide : LegSide
+  legRatio : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace CombinationOrderBookLeg
+
+def encode (message : CombinationOrderBookLeg) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 4 message.combinationOrderBookId
+    ++ (encodeUInt 4 message.legOrderBookId
+    ++ (LegSide.encode message.legSide
+    ++ (encodeUInt 4 message.legRatio))))
+
+def decode (bytes : List UInt8) : Option (CombinationOrderBookLeg × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (combinationOrderBookId, bytes) ← decodeUInt 4 bytes
+  let (legOrderBookId, bytes) ← decodeUInt 4 bytes
+  let (legSide, bytes) ← LegSide.decode bytes
+  let (legRatio, bytes) ← decodeUInt 4 bytes
+  pure ({ nanoseconds, combinationOrderBookId, legOrderBookId, legSide, legRatio }, bytes)
+
+@[simp] theorem encode_length (message : CombinationOrderBookLeg) : (encode message).length = 17 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, LegSide.encode_length]
+
+theorem encode_length_pos (message : CombinationOrderBookLeg) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : CombinationOrderBookLeg) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, LegSide.decode_encode, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end CombinationOrderBookLeg
+
+/-- Tick Size Table Entry: 24 bytes -/
+structure TickSizeTableEntry where
+  nanoseconds : BitVec 32
+  orderBookId : BitVec 32
+  tickSize : BitVec 64
+  priceFrom : BitVec 32
+  priceTo : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace TickSizeTableEntry
+
+def encode (message : TickSizeTableEntry) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (encodeUInt 8 message.tickSize
+    ++ (encodeUInt 4 message.priceFrom
+    ++ (encodeUInt 4 message.priceTo))))
+
+def decode (bytes : List UInt8) : Option (TickSizeTableEntry × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (tickSize, bytes) ← decodeUInt 8 bytes
+  let (priceFrom, bytes) ← decodeUInt 4 bytes
+  let (priceTo, bytes) ← decodeUInt 4 bytes
+  pure ({ nanoseconds, orderBookId, tickSize, priceFrom, priceTo }, bytes)
+
+@[simp] theorem encode_length (message : TickSizeTableEntry) : (encode message).length = 24 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length]
+
+theorem encode_length_pos (message : TickSizeTableEntry) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : TickSizeTableEntry) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end TickSizeTableEntry
+
+/-- Short Sell Status: 9 bytes -/
+structure ShortSellStatus where
+  nanoseconds : BitVec 32
+  orderBookId : BitVec 32
+  shortSaleRestriction : BitVec 8
+  deriving DecidableEq, Repr
+
+namespace ShortSellStatus
+
+def encode (message : ShortSellStatus) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (encodeUInt 1 message.shortSaleRestriction))
+
+def decode (bytes : List UInt8) : Option (ShortSellStatus × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (shortSaleRestriction, bytes) ← decodeUInt 1 bytes
+  pure ({ nanoseconds, orderBookId, shortSaleRestriction }, bytes)
+
+@[simp] theorem encode_length (message : ShortSellStatus) : (encode message).length = 9 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length]
+
+theorem encode_length_pos (message : ShortSellStatus) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : ShortSellStatus) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end ShortSellStatus
+
+/-- System Event Message: 5 bytes -/
+structure SystemEventMessage where
+  nanoseconds : BitVec 32
+  eventCode : EventCode
+  deriving DecidableEq, Repr
+
+namespace SystemEventMessage
+
+def encode (message : SystemEventMessage) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (EventCode.encode message.eventCode)
+
+def decode (bytes : List UInt8) : Option (SystemEventMessage × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (eventCode, bytes) ← EventCode.decode bytes
+  pure ({ nanoseconds, eventCode }, bytes)
+
+@[simp] theorem encode_length (message : SystemEventMessage) : (encode message).length = 5 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, EventCode.encode_length]
+
+theorem encode_length_pos (message : SystemEventMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : SystemEventMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [EventCode.decode_encode, some_bind]
+  rfl
+
+end SystemEventMessage
+
+/-- Order Book State Message: 28 bytes -/
+structure OrderBookStateMessage where
+  nanoseconds : BitVec 32
+  orderBookId : BitVec 32
+  stateName : Alpha 20
+  deriving DecidableEq, Repr
+
+namespace OrderBookStateMessage
+
+def encode (message : OrderBookStateMessage) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (Alpha.encode message.stateName))
+
+def decode (bytes : List UInt8) : Option (OrderBookStateMessage × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (stateName, bytes) ← Alpha.decode 20 bytes
+  pure ({ nanoseconds, orderBookId, stateName }, bytes)
+
+@[simp] theorem encode_length (message : OrderBookStateMessage) : (encode message).length = 28 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : OrderBookStateMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : OrderBookStateMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [Alpha.decode_encode, some_bind]
+  rfl
+
+end OrderBookStateMessage
+
+/-- Add Order No Mpid Attribution: 44 bytes -/
+structure AddOrderNoMpidAttribution where
+  nanoseconds : BitVec 32
+  orderId : BitVec 64
+  orderBookId : BitVec 32
+  side : Side
+  rankingSequenceNumber : BitVec 32
+  quantity : BitVec 64
+  price : BitVec 32
+  orderAttributes : BitVec 16
+  lotType : BitVec 8
+  rankingTime : BitVec 64
+  deriving DecidableEq, Repr
+
+namespace AddOrderNoMpidAttribution
+
+def encode (message : AddOrderNoMpidAttribution) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 8 message.orderId
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (Side.encode message.side
+    ++ (encodeUInt 4 message.rankingSequenceNumber
+    ++ (encodeUInt 8 message.quantity
+    ++ (encodeUInt 4 message.price
+    ++ (encodeUInt 2 message.orderAttributes
+    ++ (encodeUInt 1 message.lotType
+    ++ (encodeUInt 8 message.rankingTime)))))))))
+
+def decode (bytes : List UInt8) : Option (AddOrderNoMpidAttribution × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderId, bytes) ← decodeUInt 8 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (side, bytes) ← Side.decode bytes
+  let (rankingSequenceNumber, bytes) ← decodeUInt 4 bytes
+  let (quantity, bytes) ← decodeUInt 8 bytes
+  let (price, bytes) ← decodeUInt 4 bytes
+  let (orderAttributes, bytes) ← decodeUInt 2 bytes
+  let (lotType, bytes) ← decodeUInt 1 bytes
+  let (rankingTime, bytes) ← decodeUInt 8 bytes
+  pure ({ nanoseconds, orderId, orderBookId, side, rankingSequenceNumber, quantity, price, orderAttributes, lotType, rankingTime }, bytes)
+
+@[simp] theorem encode_length (message : AddOrderNoMpidAttribution) : (encode message).length = 44 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Side.encode_length]
+
+theorem encode_length_pos (message : AddOrderNoMpidAttribution) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : AddOrderNoMpidAttribution) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Side.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end AddOrderNoMpidAttribution
+
+/-- Add Order With Mpid Attribution: 43 bytes -/
+structure AddOrderWithMpidAttribution where
+  nanoseconds : BitVec 32
+  orderId : BitVec 64
+  orderBookId : BitVec 32
+  side : Side
+  reserved4 : Alpha 4
+  quantity : BitVec 64
+  price : BitVec 32
+  orderAttributes : BitVec 16
+  lotType : BitVec 8
+  participantId : Alpha 7
+  deriving DecidableEq, Repr
+
+namespace AddOrderWithMpidAttribution
+
+def encode (message : AddOrderWithMpidAttribution) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 8 message.orderId
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (Side.encode message.side
+    ++ (Alpha.encode message.reserved4
+    ++ (encodeUInt 8 message.quantity
+    ++ (encodeUInt 4 message.price
+    ++ (encodeUInt 2 message.orderAttributes
+    ++ (encodeUInt 1 message.lotType
+    ++ (Alpha.encode message.participantId)))))))))
+
+def decode (bytes : List UInt8) : Option (AddOrderWithMpidAttribution × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderId, bytes) ← decodeUInt 8 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (side, bytes) ← Side.decode bytes
+  let (reserved4, bytes) ← Alpha.decode 4 bytes
+  let (quantity, bytes) ← decodeUInt 8 bytes
+  let (price, bytes) ← decodeUInt 4 bytes
+  let (orderAttributes, bytes) ← decodeUInt 2 bytes
+  let (lotType, bytes) ← decodeUInt 1 bytes
+  let (participantId, bytes) ← Alpha.decode 7 bytes
+  pure ({ nanoseconds, orderId, orderBookId, side, reserved4, quantity, price, orderAttributes, lotType, participantId }, bytes)
+
+@[simp] theorem encode_length (message : AddOrderWithMpidAttribution) : (encode message).length = 43 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Side.encode_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : AddOrderWithMpidAttribution) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : AddOrderWithMpidAttribution) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Side.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [Alpha.decode_encode, some_bind]
+  rfl
+
+end AddOrderWithMpidAttribution
+
+/-- Order Executed Message: 51 bytes -/
+structure OrderExecutedMessage where
+  nanoseconds : BitVec 32
+  orderId : BitVec 64
+  orderBookId : BitVec 32
+  side : Side
+  executedQuantity : BitVec 64
+  matchId : BitVec 64
+  comboGroupId : BitVec 32
+  reserved14 : Alpha 14
+  deriving DecidableEq, Repr
+
+namespace OrderExecutedMessage
+
+def encode (message : OrderExecutedMessage) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 8 message.orderId
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (Side.encode message.side
+    ++ (encodeUInt 8 message.executedQuantity
+    ++ (encodeUInt 8 message.matchId
+    ++ (encodeUInt 4 message.comboGroupId
+    ++ (Alpha.encode message.reserved14)))))))
+
+def decode (bytes : List UInt8) : Option (OrderExecutedMessage × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderId, bytes) ← decodeUInt 8 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (side, bytes) ← Side.decode bytes
+  let (executedQuantity, bytes) ← decodeUInt 8 bytes
+  let (matchId, bytes) ← decodeUInt 8 bytes
+  let (comboGroupId, bytes) ← decodeUInt 4 bytes
+  let (reserved14, bytes) ← Alpha.decode 14 bytes
+  pure ({ nanoseconds, orderId, orderBookId, side, executedQuantity, matchId, comboGroupId, reserved14 }, bytes)
+
+@[simp] theorem encode_length (message : OrderExecutedMessage) : (encode message).length = 51 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Side.encode_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : OrderExecutedMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : OrderExecutedMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Side.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [Alpha.decode_encode, some_bind]
+  rfl
+
+end OrderExecutedMessage
+
+/-- Order Executed With Price Message: 57 bytes -/
+structure OrderExecutedWithPriceMessage where
+  nanoseconds : BitVec 32
+  orderId : BitVec 64
+  orderBookId : BitVec 32
+  side : Side
+  executedQuantity : BitVec 64
+  matchId : BitVec 64
+  comboGroupId : BitVec 32
+  reserved14 : Alpha 14
+  tradePrice : BitVec 32
+  occurredAtCross : OccurredAtCross
+  printable : Printable
+  deriving DecidableEq, Repr
+
+namespace OrderExecutedWithPriceMessage
+
+def encode (message : OrderExecutedWithPriceMessage) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 8 message.orderId
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (Side.encode message.side
+    ++ (encodeUInt 8 message.executedQuantity
+    ++ (encodeUInt 8 message.matchId
+    ++ (encodeUInt 4 message.comboGroupId
+    ++ (Alpha.encode message.reserved14
+    ++ (encodeUInt 4 message.tradePrice
+    ++ (OccurredAtCross.encode message.occurredAtCross
+    ++ (Printable.encode message.printable))))))))))
+
+def decode (bytes : List UInt8) : Option (OrderExecutedWithPriceMessage × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderId, bytes) ← decodeUInt 8 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (side, bytes) ← Side.decode bytes
+  let (executedQuantity, bytes) ← decodeUInt 8 bytes
+  let (matchId, bytes) ← decodeUInt 8 bytes
+  let (comboGroupId, bytes) ← decodeUInt 4 bytes
+  let (reserved14, bytes) ← Alpha.decode 14 bytes
+  let (tradePrice, bytes) ← decodeUInt 4 bytes
+  let (occurredAtCross, bytes) ← OccurredAtCross.decode bytes
+  let (printable_, bytes) ← Printable.decode bytes
+  pure ({ nanoseconds, orderId, orderBookId, side, executedQuantity, matchId, comboGroupId, reserved14, tradePrice, occurredAtCross, printable := printable_ }, bytes)
+
+@[simp] theorem encode_length (message : OrderExecutedWithPriceMessage) : (encode message).length = 57 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Side.encode_length, Alpha.encode_length, OccurredAtCross.encode_length, Printable.encode_length]
+
+theorem encode_length_pos (message : OrderExecutedWithPriceMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : OrderExecutedWithPriceMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Side.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, OccurredAtCross.decode_encode, some_bind]
+  dsimp only
+  rw [Printable.decode_encode, some_bind]
+  rfl
+
+end OrderExecutedWithPriceMessage
+
+/-- Order Replace Message: 35 bytes -/
+structure OrderReplaceMessage where
+  nanoseconds : BitVec 32
+  orderId : BitVec 64
+  orderBookId : BitVec 32
+  side : Side
+  newOrderBookPosition : BitVec 32
+  quantity : BitVec 64
+  price : BitVec 32
+  orderAttributes : BitVec 16
+  deriving DecidableEq, Repr
+
+namespace OrderReplaceMessage
+
+def encode (message : OrderReplaceMessage) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 8 message.orderId
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (Side.encode message.side
+    ++ (encodeUInt 4 message.newOrderBookPosition
+    ++ (encodeUInt 8 message.quantity
+    ++ (encodeUInt 4 message.price
+    ++ (encodeUInt 2 message.orderAttributes)))))))
+
+def decode (bytes : List UInt8) : Option (OrderReplaceMessage × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderId, bytes) ← decodeUInt 8 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (side, bytes) ← Side.decode bytes
+  let (newOrderBookPosition, bytes) ← decodeUInt 4 bytes
+  let (quantity, bytes) ← decodeUInt 8 bytes
+  let (price, bytes) ← decodeUInt 4 bytes
+  let (orderAttributes, bytes) ← decodeUInt 2 bytes
+  pure ({ nanoseconds, orderId, orderBookId, side, newOrderBookPosition, quantity, price, orderAttributes }, bytes)
+
+@[simp] theorem encode_length (message : OrderReplaceMessage) : (encode message).length = 35 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Side.encode_length]
+
+theorem encode_length_pos (message : OrderReplaceMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : OrderReplaceMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Side.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end OrderReplaceMessage
+
+/-- Order Delete Message: 17 bytes -/
+structure OrderDeleteMessage where
+  nanoseconds : BitVec 32
+  orderId : BitVec 64
+  orderBookId : BitVec 32
+  side : Side
+  deriving DecidableEq, Repr
+
+namespace OrderDeleteMessage
+
+def encode (message : OrderDeleteMessage) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 8 message.orderId
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (Side.encode message.side)))
+
+def decode (bytes : List UInt8) : Option (OrderDeleteMessage × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderId, bytes) ← decodeUInt 8 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (side, bytes) ← Side.decode bytes
+  pure ({ nanoseconds, orderId, orderBookId, side }, bytes)
+
+@[simp] theorem encode_length (message : OrderDeleteMessage) : (encode message).length = 17 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Side.encode_length]
+
+theorem encode_length_pos (message : OrderDeleteMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : OrderDeleteMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [Side.decode_encode, some_bind]
+  rfl
+
+end OrderDeleteMessage
+
+/-- Order Book Flush Message: 8 bytes -/
+structure OrderBookFlushMessage where
+  nanoseconds : BitVec 32
+  orderBookId : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace OrderBookFlushMessage
+
+def encode (message : OrderBookFlushMessage) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 4 message.orderBookId)
+
+def decode (bytes : List UInt8) : Option (OrderBookFlushMessage × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  pure ({ nanoseconds, orderBookId }, bytes)
+
+@[simp] theorem encode_length (message : OrderBookFlushMessage) : (encode message).length = 8 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length]
+
+theorem encode_length_pos (message : OrderBookFlushMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : OrderBookFlushMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end OrderBookFlushMessage
+
+/-- Trade Message: 49 bytes -/
+structure TradeMessage where
+  nanoseconds : BitVec 32
+  matchId : BitVec 64
+  comboGroupId : BitVec 32
+  side : Side
+  quantity : BitVec 64
+  orderBookId : BitVec 32
+  tradePrice : BitVec 32
+  reserved14 : Alpha 14
+  printable : Printable
+  occurredAtCross : OccurredAtCross
+  deriving DecidableEq, Repr
+
+namespace TradeMessage
+
+def encode (message : TradeMessage) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 8 message.matchId
+    ++ (encodeUInt 4 message.comboGroupId
+    ++ (Side.encode message.side
+    ++ (encodeUInt 8 message.quantity
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (encodeUInt 4 message.tradePrice
+    ++ (Alpha.encode message.reserved14
+    ++ (Printable.encode message.printable
+    ++ (OccurredAtCross.encode message.occurredAtCross)))))))))
+
+def decode (bytes : List UInt8) : Option (TradeMessage × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (matchId, bytes) ← decodeUInt 8 bytes
+  let (comboGroupId, bytes) ← decodeUInt 4 bytes
+  let (side, bytes) ← Side.decode bytes
+  let (quantity, bytes) ← decodeUInt 8 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (tradePrice, bytes) ← decodeUInt 4 bytes
+  let (reserved14, bytes) ← Alpha.decode 14 bytes
+  let (printable_, bytes) ← Printable.decode bytes
+  let (occurredAtCross, bytes) ← OccurredAtCross.decode bytes
+  pure ({ nanoseconds, matchId, comboGroupId, side, quantity, orderBookId, tradePrice, reserved14, printable := printable_, occurredAtCross }, bytes)
+
+@[simp] theorem encode_length (message : TradeMessage) : (encode message).length = 49 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Side.encode_length, Alpha.encode_length, Printable.encode_length, OccurredAtCross.encode_length]
+
+theorem encode_length_pos (message : TradeMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : TradeMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Side.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Printable.decode_encode, some_bind]
+  dsimp only
+  rw [OccurredAtCross.decode_encode, some_bind]
+  rfl
+
+end TradeMessage
+
+/-- Equilibrium Price Update: 52 bytes -/
+structure EquilibriumPriceUpdate where
+  nanoseconds : BitVec 32
+  orderBookId : BitVec 32
+  availableBidQuantityAtEquilibriumPrice : BitVec 64
+  availableAskQuantityAtEquilibriumPrice : BitVec 64
+  equilibriumPrice : BitVec 32
+  bestBidPrice : BitVec 32
+  bestAskPrice : BitVec 32
+  bestBidQuantity : BitVec 64
+  bestAskQuantity : BitVec 64
+  deriving DecidableEq, Repr
+
+namespace EquilibriumPriceUpdate
+
+def encode (message : EquilibriumPriceUpdate) : List UInt8 :=
+  encodeUInt 4 message.nanoseconds
+    ++ (encodeUInt 4 message.orderBookId
+    ++ (encodeUInt 8 message.availableBidQuantityAtEquilibriumPrice
+    ++ (encodeUInt 8 message.availableAskQuantityAtEquilibriumPrice
+    ++ (encodeUInt 4 message.equilibriumPrice
+    ++ (encodeUInt 4 message.bestBidPrice
+    ++ (encodeUInt 4 message.bestAskPrice
+    ++ (encodeUInt 8 message.bestBidQuantity
+    ++ (encodeUInt 8 message.bestAskQuantity))))))))
+
+def decode (bytes : List UInt8) : Option (EquilibriumPriceUpdate × List UInt8) := do
+  let (nanoseconds, bytes) ← decodeUInt 4 bytes
+  let (orderBookId, bytes) ← decodeUInt 4 bytes
+  let (availableBidQuantityAtEquilibriumPrice, bytes) ← decodeUInt 8 bytes
+  let (availableAskQuantityAtEquilibriumPrice, bytes) ← decodeUInt 8 bytes
+  let (equilibriumPrice, bytes) ← decodeUInt 4 bytes
+  let (bestBidPrice, bytes) ← decodeUInt 4 bytes
+  let (bestAskPrice, bytes) ← decodeUInt 4 bytes
+  let (bestBidQuantity, bytes) ← decodeUInt 8 bytes
+  let (bestAskQuantity, bytes) ← decodeUInt 8 bytes
+  pure ({ nanoseconds, orderBookId, availableBidQuantityAtEquilibriumPrice, availableAskQuantityAtEquilibriumPrice, equilibriumPrice, bestBidPrice, bestAskPrice, bestBidQuantity, bestAskQuantity }, bytes)
+
+@[simp] theorem encode_length (message : EquilibriumPriceUpdate) : (encode message).length = 52 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length]
+
+theorem encode_length_pos (message : EquilibriumPriceUpdate) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : EquilibriumPriceUpdate) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end EquilibriumPriceUpdate
+
+/-- Any Payload, selected by Message Type -/
+inductive Payload where
+  | secondsMessage (message : SecondsMessage) -- 'T' 0x54
+  | orderBookDirectory (message : OrderBookDirectory) -- 'R' 0x52
+  | combinationOrderBookLeg (message : CombinationOrderBookLeg) -- 'M' 0x4D
+  | tickSizeTableEntry (message : TickSizeTableEntry) -- 'L' 0x4C
+  | shortSellStatus (message : ShortSellStatus) -- 'V' 0x56
+  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
+  | orderBookStateMessage (message : OrderBookStateMessage) -- 'O' 0x4F
+  | addOrderNoMpidAttribution (message : AddOrderNoMpidAttribution) -- 'A' 0x41
+  | addOrderWithMpidAttribution (message : AddOrderWithMpidAttribution) -- 'F' 0x46
+  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
+  | orderReplaceMessage (message : OrderReplaceMessage) -- 'U' 0x55
+  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
+  | orderBookFlushMessage (message : OrderBookFlushMessage) -- 'Y' 0x59
+  | tradeMessage (message : TradeMessage) -- 'P' 0x50
+  | equilibriumPriceUpdate (message : EquilibriumPriceUpdate) -- 'Z' 0x5A
+  deriving DecidableEq, Repr
+
+namespace Payload
+
+/-- The Message Type each message is sent under -/
+def tag : Payload → BitVec 8
+  | .secondsMessage _ => 84
+  | .orderBookDirectory _ => 82
+  | .combinationOrderBookLeg _ => 77
+  | .tickSizeTableEntry _ => 76
+  | .shortSellStatus _ => 86
+  | .systemEventMessage _ => 83
+  | .orderBookStateMessage _ => 79
+  | .addOrderNoMpidAttribution _ => 65
+  | .addOrderWithMpidAttribution _ => 70
+  | .orderExecutedMessage _ => 69
+  | .orderExecutedWithPriceMessage _ => 67
+  | .orderReplaceMessage _ => 85
+  | .orderDeleteMessage _ => 68
+  | .orderBookFlushMessage _ => 89
+  | .tradeMessage _ => 80
+  | .equilibriumPriceUpdate _ => 90
+
+def encode : Payload → List UInt8
+  | .secondsMessage message => SecondsMessage.encode message
+  | .orderBookDirectory message => OrderBookDirectory.encode message
+  | .combinationOrderBookLeg message => CombinationOrderBookLeg.encode message
+  | .tickSizeTableEntry message => TickSizeTableEntry.encode message
+  | .shortSellStatus message => ShortSellStatus.encode message
+  | .systemEventMessage message => SystemEventMessage.encode message
+  | .orderBookStateMessage message => OrderBookStateMessage.encode message
+  | .addOrderNoMpidAttribution message => AddOrderNoMpidAttribution.encode message
+  | .addOrderWithMpidAttribution message => AddOrderWithMpidAttribution.encode message
+  | .orderExecutedMessage message => OrderExecutedMessage.encode message
+  | .orderExecutedWithPriceMessage message => OrderExecutedWithPriceMessage.encode message
+  | .orderReplaceMessage message => OrderReplaceMessage.encode message
+  | .orderDeleteMessage message => OrderDeleteMessage.encode message
+  | .orderBookFlushMessage message => OrderBookFlushMessage.encode message
+  | .tradeMessage message => TradeMessage.encode message
+  | .equilibriumPriceUpdate message => EquilibriumPriceUpdate.encode message
+
+def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
+  if tag = 84 then (SecondsMessage.decode bytes).map fun (message, rest) => (.secondsMessage message, rest)
+  else if tag = 82 then (OrderBookDirectory.decode bytes).map fun (message, rest) => (.orderBookDirectory message, rest)
+  else if tag = 77 then (CombinationOrderBookLeg.decode bytes).map fun (message, rest) => (.combinationOrderBookLeg message, rest)
+  else if tag = 76 then (TickSizeTableEntry.decode bytes).map fun (message, rest) => (.tickSizeTableEntry message, rest)
+  else if tag = 86 then (ShortSellStatus.decode bytes).map fun (message, rest) => (.shortSellStatus message, rest)
+  else if tag = 83 then (SystemEventMessage.decode bytes).map fun (message, rest) => (.systemEventMessage message, rest)
+  else if tag = 79 then (OrderBookStateMessage.decode bytes).map fun (message, rest) => (.orderBookStateMessage message, rest)
+  else if tag = 65 then (AddOrderNoMpidAttribution.decode bytes).map fun (message, rest) => (.addOrderNoMpidAttribution message, rest)
+  else if tag = 70 then (AddOrderWithMpidAttribution.decode bytes).map fun (message, rest) => (.addOrderWithMpidAttribution message, rest)
+  else if tag = 69 then (OrderExecutedMessage.decode bytes).map fun (message, rest) => (.orderExecutedMessage message, rest)
+  else if tag = 67 then (OrderExecutedWithPriceMessage.decode bytes).map fun (message, rest) => (.orderExecutedWithPriceMessage message, rest)
+  else if tag = 85 then (OrderReplaceMessage.decode bytes).map fun (message, rest) => (.orderReplaceMessage message, rest)
+  else if tag = 68 then (OrderDeleteMessage.decode bytes).map fun (message, rest) => (.orderDeleteMessage message, rest)
+  else if tag = 89 then (OrderBookFlushMessage.decode bytes).map fun (message, rest) => (.orderBookFlushMessage message, rest)
+  else if tag = 80 then (TradeMessage.decode bytes).map fun (message, rest) => (.tradeMessage message, rest)
+  else if tag = 90 then (EquilibriumPriceUpdate.decode bytes).map fun (message, rest) => (.equilibriumPriceUpdate message, rest)
+  else none
+
+@[simp] theorem decode_encode (message : Payload) (rest : List UInt8) :
+    decode (tag message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, tag]
+
+end Payload
+
+/-- Message -/
+structure Message where
+  payload : Payload
+  deriving DecidableEq, Repr
+
+namespace Message
+
+def encodeBody (message : Message) : List UInt8 :=
+  encodeUInt 1 (Payload.tag message.payload)
+    ++ (Payload.encode message.payload)
+
+def decodeBody (bytes : List UInt8) : Option (Message × List UInt8) := do
+  let (messageType, bytes) ← decodeUInt 1 bytes
+  let (payload, bytes) ← Payload.decode messageType bytes
+  pure ({ payload }, bytes)
+
+theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
+    decodeBody (encodeBody message ++ rest) = some (message, rest) := by
+  unfold decodeBody encodeBody
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [Payload.decode_encode, some_bind]
+  rfl
+
+/-- Every body fits the length prefix -/
+theorem encodeBody_length_lt (message : Message) : (encodeBody message).length + 0 < 256 ^ 2 := by
+  unfold encodeBody
+  cases message.payload with
+  | secondsMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, SecondsMessage.encode_length]
+    omega
+  | orderBookDirectory inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderBookDirectory.encode_length]
+    omega
+  | combinationOrderBookLeg inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, CombinationOrderBookLeg.encode_length]
+    omega
+  | tickSizeTableEntry inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, TickSizeTableEntry.encode_length]
+    omega
+  | shortSellStatus inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, ShortSellStatus.encode_length]
+    omega
+  | systemEventMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, SystemEventMessage.encode_length]
+    omega
+  | orderBookStateMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderBookStateMessage.encode_length]
+    omega
+  | addOrderNoMpidAttribution inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, AddOrderNoMpidAttribution.encode_length]
+    omega
+  | addOrderWithMpidAttribution inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, AddOrderWithMpidAttribution.encode_length]
+    omega
+  | orderExecutedMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderExecutedMessage.encode_length]
+    omega
+  | orderExecutedWithPriceMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderExecutedWithPriceMessage.encode_length]
+    omega
+  | orderReplaceMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderReplaceMessage.encode_length]
+    omega
+  | orderDeleteMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderDeleteMessage.encode_length]
+    omega
+  | orderBookFlushMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderBookFlushMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, TradeMessage.encode_length]
+    omega
+  | equilibriumPriceUpdate inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, EquilibriumPriceUpdate.encode_length]
+    omega
+
+/-- Size rule: Message Length counts the bytes after it, so it is written from the body and checked on decode -/
+def encode : Message → List UInt8 :=
+  encodeFramed 2 0 encodeBody
+
+def decode : List UInt8 → Option (Message × List UInt8) :=
+  decodeFramed 2 0 decodeBody
+
+@[simp] theorem decode_encode (message : Message) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) :=
+  decodeFramed_encodeFramed 2 0 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
+
+theorem encode_length_pos (message : Message) : (encode message).length > 0 := by
+  unfold encode
+  rw [encodeFramed_length]
+  omega
+
+end Message
+
+/-- Packet -/
+structure Packet where
+  session : Alpha 10
+  sequenceNumber : BitVec 64
+  message : Bounded 2 Message
+  deriving DecidableEq, Repr
+
+namespace Packet
+
+def encode (message : Packet) : List UInt8 :=
+  Alpha.encode message.session
+    ++ (encodeUInt 8 message.sequenceNumber
+    ++ (encodeUInt 2 (BitVec.ofNat (8 * 2) message.message.val.length)
+    ++ (encodeMany Message.encode message.message.val)))
+
+def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
+  let (session, bytes) ← Alpha.decode 10 bytes
+  let (sequenceNumber, bytes) ← decodeUInt 8 bytes
+  let (messageCount, bytes) ← decodeUInt 2 bytes
+  let (message_, bytes) ← decodeMany Message.decode messageCount.toNat bytes
+  if fits_message : message_.length < 256 ^ 2 then
+    pure ({ session, sequenceNumber, message := ⟨message_, fits_message⟩ }, bytes)
+  else none
+
+theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
+  unfold encode
+  simp only [Alpha.encode_length, List.length_append, ← Nat.add_assoc]
+  omega
+
+@[simp] theorem decode_encode (message : Packet) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [decodeMany_bounded 2 Message.encode Message.decode Message.decode_encode, some_bind]
+  dsimp only
+  rw [dite_eq_left message.message.length_lt]
+  rfl
+
+end Packet
+
+end Omi.BistBorsaistanbulGeniuminetItchV2112

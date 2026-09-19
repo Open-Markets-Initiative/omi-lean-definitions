@@ -747,6 +747,43 @@ def encode : Payload → List UInt8
   | .heartbeatMessage message => HeartbeatMessage.encode message
   | .tickDataRecoveryResponseMessage message => TickDataRecoveryResponseMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 36 := by
+  cases message with
+  | newOrderMessage inner =>
+    simp only [encode, NewOrderMessage.encode_length]
+    omega
+  | orderModificationMessage inner =>
+    simp only [encode, OrderModificationMessage.encode_length]
+    omega
+  | orderCancellationMessage inner =>
+    simp only [encode, OrderCancellationMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [encode, TradeMessage.encode_length]
+    omega
+  | newSpreadOrderMessage inner =>
+    simp only [encode, NewSpreadOrderMessage.encode_length]
+    omega
+  | spreadOrderModificationMessage inner =>
+    simp only [encode, SpreadOrderModificationMessage.encode_length]
+    omega
+  | spreadOrderCancellationMessage inner =>
+    simp only [encode, SpreadOrderCancellationMessage.encode_length]
+    omega
+  | spreadTradeMessage inner =>
+    simp only [encode, SpreadTradeMessage.encode_length]
+    omega
+  | tradeCancelMessage inner =>
+    simp only [encode, TradeCancelMessage.encode_length]
+    omega
+  | heartbeatMessage inner =>
+    simp only [encode, HeartbeatMessage.encode_length]
+    omega
+  | tickDataRecoveryResponseMessage inner =>
+    simp only [encode, TickDataRecoveryResponseMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 78 then (NewOrderMessage.decode bytes).map fun (message, rest) => (.newOrderMessage message, rest)
   else if tag = 77 then (OrderModificationMessage.decode bytes).map fun (message, rest) => (.orderModificationMessage message, rest)

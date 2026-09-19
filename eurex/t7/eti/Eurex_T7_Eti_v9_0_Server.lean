@@ -12645,6 +12645,303 @@ def encode : ServerPayload → List UInt8
   | .userLoginResponse message => UserLoginResponse.encode message
   | .userLogoutResponse message => UserLogoutResponse.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ServerPayload) : (encode message).length ≤ 4194290 := by
+  cases message with
+  | addComplexInstrumentResponse inner =>
+    have bound_inner := AddComplexInstrumentResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | addFlexibleInstrumentResponse inner =>
+    simp only [encode, AddFlexibleInstrumentResponse.encode_length]
+    omega
+  | basketApproveBroadcast inner =>
+    have bound_inner := BasketApproveBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | basketBroadcast inner =>
+    have bound_inner := BasketBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | basketDeleteBroadcast inner =>
+    simp only [encode, BasketDeleteBroadcast.encode_length]
+    omega
+  | basketExecutionBroadcast inner =>
+    have bound_inner := BasketExecutionBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | basketResponse inner =>
+    simp only [encode, BasketResponse.encode_length]
+    omega
+  | broadcastErrorNotification inner =>
+    have bound_inner := BroadcastErrorNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | clipDeletionNotification inner =>
+    simp only [encode, ClipDeletionNotification.encode_length]
+    omega
+  | clipExecutionNotification inner =>
+    have bound_inner := ClipExecutionNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | clipResponse inner =>
+    have bound_inner := ClipResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | crossRequestResponse inner =>
+    simp only [encode, CrossRequestResponse.encode_length]
+    omega
+  | deleteAllOrderBroadcast inner =>
+    have bound_inner := DeleteAllOrderBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | deleteAllOrderNrResponse inner =>
+    simp only [encode, DeleteAllOrderNrResponse.encode_length]
+    omega
+  | deleteAllOrderQuoteEventBroadcast inner =>
+    simp only [encode, DeleteAllOrderQuoteEventBroadcast.encode_length]
+    omega
+  | deleteAllOrderResponse inner =>
+    have bound_inner := DeleteAllOrderResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | deleteAllQuoteBroadcast inner =>
+    have bound_inner := DeleteAllQuoteBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | deleteAllQuoteResponse inner =>
+    have bound_inner := DeleteAllQuoteResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | deleteOrderBroadcast inner =>
+    simp only [encode, DeleteOrderBroadcast.encode_length]
+    omega
+  | deleteOrderNrResponse inner =>
+    simp only [encode, DeleteOrderNrResponse.encode_length]
+    omega
+  | deleteOrderResponse inner =>
+    simp only [encode, DeleteOrderResponse.encode_length]
+    omega
+  | forcedLogoutNotification inner =>
+    have bound_inner := ForcedLogoutNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | forcedUserLogoutNotification inner =>
+    have bound_inner := ForcedUserLogoutNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | heartbeatNotification inner =>
+    simp only [encode, HeartbeatNotification.encode_length]
+    omega
+  | inquireEnrichmentRuleIdListResponse inner =>
+    have bound_inner := InquireEnrichmentRuleIdListResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | inquireMmParameterResponse inner =>
+    have bound_inner := InquireMmParameterResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | inquireSessionListResponse inner =>
+    have bound_inner := InquireSessionListResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | inquireUserResponse inner =>
+    have bound_inner := InquireUserResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | legalNotificationBroadcast inner =>
+    have bound_inner := LegalNotificationBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | logonResponse inner =>
+    simp only [encode, LogonResponse.encode_length]
+    omega
+  | logoutResponse inner =>
+    simp only [encode, LogoutResponse.encode_length]
+    omega
+  | mmParameterDefinitionResponse inner =>
+    simp only [encode, MmParameterDefinitionResponse.encode_length]
+    omega
+  | massQuoteResponse inner =>
+    have bound_inner := MassQuoteResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | modifyOrderNrResponse inner =>
+    simp only [encode, ModifyOrderNrResponse.encode_length]
+    omega
+  | modifyOrderResponse inner =>
+    simp only [encode, ModifyOrderResponse.encode_length]
+    omega
+  | newOrderNrResponse inner =>
+    simp only [encode, NewOrderNrResponse.encode_length]
+    omega
+  | newOrderResponse inner =>
+    simp only [encode, NewOrderResponse.encode_length]
+    omega
+  | newsBroadcast inner =>
+    have bound_inner := NewsBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderExecNotification inner =>
+    have bound_inner := OrderExecNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderExecReportBroadcast inner =>
+    have bound_inner := OrderExecReportBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderExecResponse inner =>
+    have bound_inner := OrderExecResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | partyActionReport inner =>
+    simp only [encode, PartyActionReport.encode_length]
+    omega
+  | partyEntitlementsUpdateReport inner =>
+    simp only [encode, PartyEntitlementsUpdateReport.encode_length]
+    omega
+  | preTradeRiskLimitResponse inner =>
+    have bound_inner := PreTradeRiskLimitResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | quoteActivationNotification inner =>
+    have bound_inner := QuoteActivationNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | quoteActivationResponse inner =>
+    have bound_inner := QuoteActivationResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | quoteExecutionReport inner =>
+    have bound_inner := QuoteExecutionReport.encode_length_le inner
+    simp only [encode]
+    omega
+  | rfqResponse inner =>
+    simp only [encode, RfqResponse.encode_length]
+    omega
+  | reject inner =>
+    have bound_inner := Reject.encode_length_le inner
+    simp only [encode]
+    omega
+  | retransmitMeMessageResponse inner =>
+    simp only [encode, RetransmitMeMessageResponse.encode_length]
+    omega
+  | retransmitResponse inner =>
+    simp only [encode, RetransmitResponse.encode_length]
+    omega
+  | riskNotificationBroadcast inner =>
+    simp only [encode, RiskNotificationBroadcast.encode_length]
+    omega
+  | srqsCreateDealNotification inner =>
+    have bound_inner := SrqsCreateDealNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | srqsDealNotification inner =>
+    simp only [encode, SrqsDealNotification.encode_length]
+    omega
+  | srqsDealResponse inner =>
+    simp only [encode, SrqsDealResponse.encode_length]
+    omega
+  | srqsInquireSmartRespondentResponse inner =>
+    have bound_inner := SrqsInquireSmartRespondentResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | srqsNegotiationNotification inner =>
+    simp only [encode, SrqsNegotiationNotification.encode_length]
+    omega
+  | srqsNegotiationRequesterNotification inner =>
+    have bound_inner := SrqsNegotiationRequesterNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | srqsNegotiationStatusNotification inner =>
+    simp only [encode, SrqsNegotiationStatusNotification.encode_length]
+    omega
+  | srqsOpenNegotiationNotification inner =>
+    have bound_inner := SrqsOpenNegotiationNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | srqsOpenNegotiationRequesterNotification inner =>
+    have bound_inner := SrqsOpenNegotiationRequesterNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | srqsQuoteNotification inner =>
+    simp only [encode, SrqsQuoteNotification.encode_length]
+    omega
+  | srqsQuoteResponse inner =>
+    simp only [encode, SrqsQuoteResponse.encode_length]
+    omega
+  | srqsStatusBroadcast inner =>
+    simp only [encode, SrqsStatusBroadcast.encode_length]
+    omega
+  | serviceAvailabilityBroadcast inner =>
+    simp only [encode, ServiceAvailabilityBroadcast.encode_length]
+    omega
+  | serviceAvailabilityMarketBroadcast inner =>
+    simp only [encode, ServiceAvailabilityMarketBroadcast.encode_length]
+    omega
+  | subscribeResponse inner =>
+    simp only [encode, SubscribeResponse.encode_length]
+    omega
+  | tesApproveBroadcast inner =>
+    have bound_inner := TesApproveBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | tesBroadcast inner =>
+    have bound_inner := TesBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | tesCompressionRunStatusBroadcast inner =>
+    simp only [encode, TesCompressionRunStatusBroadcast.encode_length]
+    omega
+  | tesCompressionRunStatusResponse inner =>
+    simp only [encode, TesCompressionRunStatusResponse.encode_length]
+    omega
+  | tesDeleteBroadcast inner =>
+    simp only [encode, TesDeleteBroadcast.encode_length]
+    omega
+  | tesExecutionBroadcast inner =>
+    simp only [encode, TesExecutionBroadcast.encode_length]
+    omega
+  | tesResponse inner =>
+    simp only [encode, TesResponse.encode_length]
+    omega
+  | tesReversalBroadcast inner =>
+    have bound_inner := TesReversalBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | tesTradeBroadcast inner =>
+    have bound_inner := TesTradeBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | tesTradingSessionStatusBroadcast inner =>
+    simp only [encode, TesTradingSessionStatusBroadcast.encode_length]
+    omega
+  | tesUploadBroadcast inner =>
+    have bound_inner := TesUploadBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | tmTradingSessionStatusBroadcast inner =>
+    simp only [encode, TmTradingSessionStatusBroadcast.encode_length]
+    omega
+  | throttleUpdateNotification inner =>
+    simp only [encode, ThrottleUpdateNotification.encode_length]
+    omega
+  | tradeBroadcast inner =>
+    simp only [encode, TradeBroadcast.encode_length]
+    omega
+  | tradingSessionStatusBroadcast inner =>
+    simp only [encode, TradingSessionStatusBroadcast.encode_length]
+    omega
+  | unsubscribeResponse inner =>
+    simp only [encode, UnsubscribeResponse.encode_length]
+    omega
+  | userLoginResponse inner =>
+    simp only [encode, UserLoginResponse.encode_length]
+    omega
+  | userLogoutResponse inner =>
+    simp only [encode, UserLogoutResponse.encode_length]
+    omega
+
 /-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option ServerPayload :=
   if tag = 10302 then (AddComplexInstrumentResponse.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.addComplexInstrumentResponse message) else none

@@ -3910,6 +3910,107 @@ def encode : Payload → List UInt8
   | .tradeBust57Message message => TradeBust57Message.encode message
   | .snapshotFullRefreshOrdersMbO71Message message => SnapshotFullRefreshOrdersMbO71Message.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 196647 := by
+  cases message with
+  | sequenceResetMessage inner =>
+    simp only [encode, SequenceResetMessage.encode_length]
+    omega
+  | sequenceMessage inner =>
+    simp only [encode, SequenceMessage.encode_length]
+    omega
+  | emptyBookMessage inner =>
+    simp only [encode, EmptyBookMessage.encode_length]
+    omega
+  | channelReset11Message inner =>
+    simp only [encode, ChannelReset11Message.encode_length]
+    omega
+  | securityStatus3Message inner =>
+    simp only [encode, SecurityStatus3Message.encode_length]
+    omega
+  | securityGroupPhase10Message inner =>
+    simp only [encode, SecurityGroupPhase10Message.encode_length]
+    omega
+  | deprecatedSecurityDefinitionMessage inner =>
+    have bound_inner := DeprecatedSecurityDefinitionMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | securityDefinitionMessage inner =>
+    have bound_inner := SecurityDefinitionMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | news5Message inner =>
+    have bound_inner := News5Message.encode_length_le inner
+    simp only [encode]
+    omega
+  | openingPrice15Message inner =>
+    simp only [encode, OpeningPrice15Message.encode_length]
+    omega
+  | theoreticalOpeningPrice16Message inner =>
+    simp only [encode, TheoreticalOpeningPrice16Message.encode_length]
+    omega
+  | closingPrice17Message inner =>
+    simp only [encode, ClosingPrice17Message.encode_length]
+    omega
+  | auctionImbalance19Message inner =>
+    simp only [encode, AuctionImbalance19Message.encode_length]
+    omega
+  | priceBand20Message inner =>
+    simp only [encode, PriceBand20Message.encode_length]
+    omega
+  | quantityBand21Message inner =>
+    simp only [encode, QuantityBand21Message.encode_length]
+    omega
+  | priceBand22Message inner =>
+    simp only [encode, PriceBand22Message.encode_length]
+    omega
+  | highPrice24Message inner =>
+    simp only [encode, HighPrice24Message.encode_length]
+    omega
+  | lowPrice25Message inner =>
+    simp only [encode, LowPrice25Message.encode_length]
+    omega
+  | lastTradePrice27Message inner =>
+    simp only [encode, LastTradePrice27Message.encode_length]
+    omega
+  | settlementPrice28Message inner =>
+    simp only [encode, SettlementPrice28Message.encode_length]
+    omega
+  | openInterest29Message inner =>
+    simp only [encode, OpenInterest29Message.encode_length]
+    omega
+  | snapshotFullRefreshHeader30Message inner =>
+    simp only [encode, SnapshotFullRefreshHeader30Message.encode_length]
+    omega
+  | orderMbO50Message inner =>
+    simp only [encode, OrderMbO50Message.encode_length]
+    omega
+  | deleteOrderMbO51Message inner =>
+    simp only [encode, DeleteOrderMbO51Message.encode_length]
+    omega
+  | massDeleteOrdersMbO52Message inner =>
+    simp only [encode, MassDeleteOrdersMbO52Message.encode_length]
+    omega
+  | trade53Message inner =>
+    simp only [encode, Trade53Message.encode_length]
+    omega
+  | forwardTrade54Message inner =>
+    simp only [encode, ForwardTrade54Message.encode_length]
+    omega
+  | executionSummary55Message inner =>
+    simp only [encode, ExecutionSummary55Message.encode_length]
+    omega
+  | executionStatistics56Message inner =>
+    simp only [encode, ExecutionStatistics56Message.encode_length]
+    omega
+  | tradeBust57Message inner =>
+    simp only [encode, TradeBust57Message.encode_length]
+    omega
+  | snapshotFullRefreshOrdersMbO71Message inner =>
+    have bound_inner := SnapshotFullRefreshOrdersMbO71Message.encode_length_le inner
+    simp only [encode]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 1 then (SequenceResetMessage.decode bytes).map fun (message, rest) => (.sequenceResetMessage message, rest)
   else if tag = 2 then (SequenceMessage.decode bytes).map fun (message, rest) => (.sequenceMessage message, rest)

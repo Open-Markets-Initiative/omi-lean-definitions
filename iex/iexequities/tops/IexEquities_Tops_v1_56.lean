@@ -220,6 +220,19 @@ def encode : MessageData → List UInt8
   | .tradeReportMessage message => TradeReportMessage.encode message
   | .tradeBreakMessage message => TradeBreakMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : MessageData) : (encode message).length ≤ 41 := by
+  cases message with
+  | quoteUpdateMessage inner =>
+    simp only [encode, QuoteUpdateMessage.encode_length]
+    omega
+  | tradeReportMessage inner =>
+    simp only [encode, TradeReportMessage.encode_length]
+    omega
+  | tradeBreakMessage inner =>
+    simp only [encode, TradeBreakMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (MessageData × List UInt8) :=
   if tag = 81 then (QuoteUpdateMessage.decode bytes).map fun (message, rest) => (.quoteUpdateMessage message, rest)
   else if tag = 84 then (TradeReportMessage.decode bytes).map fun (message, rest) => (.tradeReportMessage message, rest)

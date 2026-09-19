@@ -188,6 +188,16 @@ def encode : Payload → List UInt8
   | .newOrderMessage message => NewOrderMessage.encode message
   | .newSpreadOrderMessage message => NewSpreadOrderMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 29 := by
+  cases message with
+  | newOrderMessage inner =>
+    simp only [encode, NewOrderMessage.encode_length]
+    omega
+  | newSpreadOrderMessage inner =>
+    simp only [encode, NewSpreadOrderMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 78 then (NewOrderMessage.decode bytes).map fun (message, rest) => (.newOrderMessage message, rest)
   else if tag = 71 then (NewSpreadOrderMessage.decode bytes).map fun (message, rest) => (.newSpreadOrderMessage message, rest)

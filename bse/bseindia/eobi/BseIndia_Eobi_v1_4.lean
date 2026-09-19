@@ -1500,6 +1500,73 @@ def encode : Payload → List UInt8
   | .instrumentStateChangeMessage message => InstrumentStateChangeMessage.encode message
   | .addComplexInstrumentMessage message => AddComplexInstrumentMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 416 := by
+  cases message with
+  | heartbeatMessage inner =>
+    simp only [encode, HeartbeatMessage.encode_length]
+    omega
+  | productSummaryMessage inner =>
+    simp only [encode, ProductSummaryMessage.encode_length]
+    omega
+  | snapshotOrderMessage inner =>
+    simp only [encode, SnapshotOrderMessage.encode_length]
+    omega
+  | instrumentSummaryMessage inner =>
+    simp only [encode, InstrumentSummaryMessage.encode_length]
+    omega
+  | auctionBestBidOfferMessage inner =>
+    simp only [encode, AuctionBestBidOfferMessage.encode_length]
+    omega
+  | auctionClearingPriceMessage inner =>
+    simp only [encode, AuctionClearingPriceMessage.encode_length]
+    omega
+  | topOfBookMessage inner =>
+    simp only [encode, TopOfBookMessage.encode_length]
+    omega
+  | orderAddMessage inner =>
+    simp only [encode, OrderAddMessage.encode_length]
+    omega
+  | orderModifyMessage inner =>
+    simp only [encode, OrderModifyMessage.encode_length]
+    omega
+  | orderModifySamePriorityMessage inner =>
+    simp only [encode, OrderModifySamePriorityMessage.encode_length]
+    omega
+  | orderDeleteMessage inner =>
+    simp only [encode, OrderDeleteMessage.encode_length]
+    omega
+  | orderMassDeleteMessage inner =>
+    simp only [encode, OrderMassDeleteMessage.encode_length]
+    omega
+  | partialOrderExecutionMessage inner =>
+    simp only [encode, PartialOrderExecutionMessage.encode_length]
+    omega
+  | fullOrderExecutionMessage inner =>
+    simp only [encode, FullOrderExecutionMessage.encode_length]
+    omega
+  | tradeReversalMessage inner =>
+    simp only [encode, TradeReversalMessage.encode_length]
+    omega
+  | executionSummaryMessage inner =>
+    simp only [encode, ExecutionSummaryMessage.encode_length]
+    omega
+  | instrumentInfoMessage inner =>
+    simp only [encode, InstrumentInfoMessage.encode_length]
+    omega
+  | lppRangeMessage inner =>
+    simp only [encode, LppRangeMessage.encode_length]
+    omega
+  | productStateChangeMessage inner =>
+    simp only [encode, ProductStateChangeMessage.encode_length]
+    omega
+  | instrumentStateChangeMessage inner =>
+    simp only [encode, InstrumentStateChangeMessage.encode_length]
+    omega
+  | addComplexInstrumentMessage inner =>
+    simp only [encode, AddComplexInstrumentMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 13001 then (HeartbeatMessage.decode bytes).map fun (message, rest) => (.heartbeatMessage message, rest)
   else if tag = 13600 then (ProductSummaryMessage.decode bytes).map fun (message, rest) => (.productSummaryMessage message, rest)

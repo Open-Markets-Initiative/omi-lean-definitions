@@ -426,6 +426,17 @@ def encode : Payload → List UInt8
   | .mdIncrementalRefreshBtec message => MdIncrementalRefreshBtec.encode message
   | .adminHeartbeat message => AdminHeartbeat.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 15823 := by
+  cases message with
+  | mdIncrementalRefreshBtec inner =>
+    have bound_inner := MdIncrementalRefreshBtec.encode_length_le inner
+    simp only [encode]
+    omega
+  | adminHeartbeat inner =>
+    simp only [encode, AdminHeartbeat.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 405 then (MdIncrementalRefreshBtec.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshBtec message, rest)
   else if tag = 411 then (AdminHeartbeat.decode bytes).map fun (message, rest) => (.adminHeartbeat message, rest)

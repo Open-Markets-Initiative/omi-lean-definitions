@@ -68,6 +68,13 @@ def tag : ClientPayload → BitVec 8
 def encode : ClientPayload → List UInt8
   | .tickDataRecoveryRequestMessage message => TickDataRecoveryRequestMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ClientPayload) : (encode message).length ≤ 10 := by
+  cases message with
+  | tickDataRecoveryRequestMessage inner =>
+    simp only [encode, TickDataRecoveryRequestMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (ClientPayload × List UInt8) :=
   if tag = 82 then (TickDataRecoveryRequestMessage.decode bytes).map fun (message, rest) => (.tickDataRecoveryRequestMessage message, rest)
   else none

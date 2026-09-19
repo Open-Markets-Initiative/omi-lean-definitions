@@ -2725,6 +2725,91 @@ def encode : ServerPayload → List UInt8
   | .userLoginResponse message => UserLoginResponse.encode message
   | .userLogoutResponse message => UserLogoutResponse.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ServerPayload) : (encode message).length ≤ 5767130 := by
+  cases message with
+  | crossRequestNotification inner =>
+    simp only [encode, CrossRequestNotification.encode_length]
+    omega
+  | deleteOrderBroadcast inner =>
+    have bound_inner := DeleteOrderBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | enterClipRequestNotification inner =>
+    have bound_inner := EnterClipRequestNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | forcedLogoutNotification inner =>
+    have bound_inner := ForcedLogoutNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | heartbeatNotification inner =>
+    simp only [encode, HeartbeatNotification.encode_length]
+    omega
+  | legalNotificationBroadcast inner =>
+    have bound_inner := LegalNotificationBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | logonResponse inner =>
+    simp only [encode, LogonResponse.encode_length]
+    omega
+  | logoutResponse inner =>
+    simp only [encode, LogoutResponse.encode_length]
+    omega
+  | orderExecReportBroadcast inner =>
+    have bound_inner := OrderExecReportBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderRejectNotification inner =>
+    simp only [encode, OrderRejectNotification.encode_length]
+    omega
+  | partitionListNotification inner =>
+    have bound_inner := PartitionListNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | partyActionReport inner =>
+    simp only [encode, PartyActionReport.encode_length]
+    omega
+  | partyEntitlementsUpdateReport inner =>
+    simp only [encode, PartyEntitlementsUpdateReport.encode_length]
+    omega
+  | reject inner =>
+    have bound_inner := Reject.encode_length_le inner
+    simp only [encode]
+    omega
+  | retransmitResponse inner =>
+    simp only [encode, RetransmitResponse.encode_length]
+    omega
+  | rfqNotification inner =>
+    simp only [encode, RfqNotification.encode_length]
+    omega
+  | riskNotificationBroadcast inner =>
+    simp only [encode, RiskNotificationBroadcast.encode_length]
+    omega
+  | serviceAvailabilityMarketBroadcast inner =>
+    simp only [encode, ServiceAvailabilityMarketBroadcast.encode_length]
+    omega
+  | sessionListNotification inner =>
+    have bound_inner := SessionListNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | sessionStatusBroadcast inner =>
+    simp only [encode, SessionStatusBroadcast.encode_length]
+    omega
+  | statusBroadcast inner =>
+    simp only [encode, StatusBroadcast.encode_length]
+    omega
+  | tradingActionResponse inner =>
+    have bound_inner := TradingActionResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | userLoginResponse inner =>
+    simp only [encode, UserLoginResponse.encode_length]
+    omega
+  | userLogoutResponse inner =>
+    simp only [encode, UserLogoutResponse.encode_length]
+    omega
+
 /-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option ServerPayload :=
   if tag = 10907 then (CrossRequestNotification.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.crossRequestNotification message) else none

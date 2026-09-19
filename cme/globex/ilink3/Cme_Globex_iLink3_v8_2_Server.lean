@@ -6850,6 +6850,119 @@ def encode : ServerPayload → List UInt8
   | .orderMassActionReport message => OrderMassActionReport.encode message
   | .securityDefinitionResponse message => SecurityDefinitionResponse.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ServerPayload) : (encode message).length ≤ 65569 := by
+  cases message with
+  | negotiationResponse inner =>
+    have bound_inner := NegotiationResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | negotiationReject inner =>
+    simp only [encode, NegotiationReject.encode_length]
+    omega
+  | establishmentAck inner =>
+    simp only [encode, EstablishmentAck.encode_length]
+    omega
+  | establishmentReject inner =>
+    simp only [encode, EstablishmentReject.encode_length]
+    omega
+  | sequence inner =>
+    simp only [encode, Sequence.encode_length]
+    omega
+  | terminate inner =>
+    simp only [encode, Terminate.encode_length]
+    omega
+  | retransmission inner =>
+    simp only [encode, Retransmission.encode_length]
+    omega
+  | retransmitReject inner =>
+    simp only [encode, RetransmitReject.encode_length]
+    omega
+  | notApplied inner =>
+    simp only [encode, NotApplied.encode_length]
+    omega
+  | partyDetailsDefinitionRequestAck inner =>
+    have bound_inner := PartyDetailsDefinitionRequestAck.encode_length_le inner
+    simp only [encode]
+    omega
+  | businessReject inner =>
+    simp only [encode, BusinessReject.encode_length]
+    omega
+  | executionReportNew inner =>
+    simp only [encode, ExecutionReportNew.encode_length]
+    omega
+  | executionReportReject inner =>
+    simp only [encode, ExecutionReportReject.encode_length]
+    omega
+  | executionReportElimination inner =>
+    simp only [encode, ExecutionReportElimination.encode_length]
+    omega
+  | executionReportTradeOutright inner =>
+    have bound_inner := ExecutionReportTradeOutright.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportTradeSpread inner =>
+    have bound_inner := ExecutionReportTradeSpread.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportTradeSpreadLeg inner =>
+    have bound_inner := ExecutionReportTradeSpreadLeg.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportModify inner =>
+    simp only [encode, ExecutionReportModify.encode_length]
+    omega
+  | executionReportStatus inner =>
+    simp only [encode, ExecutionReportStatus.encode_length]
+    omega
+  | executionReportCancel inner =>
+    simp only [encode, ExecutionReportCancel.encode_length]
+    omega
+  | orderCancelReject inner =>
+    simp only [encode, OrderCancelReject.encode_length]
+    omega
+  | orderCancelReplaceReject inner =>
+    simp only [encode, OrderCancelReplaceReject.encode_length]
+    omega
+  | partyDetailsListReport inner =>
+    have bound_inner := PartyDetailsListReport.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionAck inner =>
+    simp only [encode, ExecutionAck.encode_length]
+    omega
+  | massQuoteAck inner =>
+    have bound_inner := MassQuoteAck.encode_length_le inner
+    simp only [encode]
+    omega
+  | requestForQuoteAck inner =>
+    simp only [encode, RequestForQuoteAck.encode_length]
+    omega
+  | quoteCancelAck inner =>
+    have bound_inner := QuoteCancelAck.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportTradeAddendumOutright inner =>
+    have bound_inner := ExecutionReportTradeAddendumOutright.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportTradeAddendumSpread inner =>
+    have bound_inner := ExecutionReportTradeAddendumSpread.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportTradeAddendumSpreadLeg inner =>
+    have bound_inner := ExecutionReportTradeAddendumSpreadLeg.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderMassActionReport inner =>
+    have bound_inner := OrderMassActionReport.encode_length_le inner
+    simp only [encode]
+    omega
+  | securityDefinitionResponse inner =>
+    have bound_inner := SecurityDefinitionResponse.encode_length_le inner
+    simp only [encode]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (ServerPayload × List UInt8) :=
   if tag = 501 then (NegotiationResponse.decode bytes).map fun (message, rest) => (.negotiationResponse message, rest)
   else if tag = 502 then (NegotiationReject.decode bytes).map fun (message, rest) => (.negotiationReject message, rest)

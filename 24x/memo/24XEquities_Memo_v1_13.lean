@@ -2893,6 +2893,79 @@ def encode : Payload → List UInt8
   | .orderCancelRejectMessage message => OrderCancelRejectMessage.encode message
   | .massCancelRejectMessage message => MassCancelRejectMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 4729 := by
+  cases message with
+  | newOrderSingleMessage inner =>
+    have bound_inner := NewOrderSingleMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderCancelReplaceRequestMessage inner =>
+    simp only [encode, OrderCancelReplaceRequestMessage.encode_length]
+    omega
+  | orderCancelRequestMessage inner =>
+    simp only [encode, OrderCancelRequestMessage.encode_length]
+    omega
+  | massCancelRequestMessage inner =>
+    simp only [encode, MassCancelRequestMessage.encode_length]
+    omega
+  | executionReportPendingNewMessage inner =>
+    have bound_inner := ExecutionReportPendingNewMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportNewMessage inner =>
+    have bound_inner := ExecutionReportNewMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportRejectedMessage inner =>
+    have bound_inner := ExecutionReportRejectedMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportTradeMessage inner =>
+    have bound_inner := ExecutionReportTradeMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportPendingCancelMessage inner =>
+    have bound_inner := ExecutionReportPendingCancelMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | pendingMassCancelMessage inner =>
+    simp only [encode, PendingMassCancelMessage.encode_length]
+    omega
+  | executionReportCanceledMessage inner =>
+    have bound_inner := ExecutionReportCanceledMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | massCancelDoneMessage inner =>
+    simp only [encode, MassCancelDoneMessage.encode_length]
+    omega
+  | executionReportPendingReplaceMessage inner =>
+    have bound_inner := ExecutionReportPendingReplaceMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportReplacedMessage inner =>
+    have bound_inner := ExecutionReportReplacedMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportTradeCorrectionMessage inner =>
+    have bound_inner := ExecutionReportTradeCorrectionMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportTradeBreakMessage inner =>
+    have bound_inner := ExecutionReportTradeBreakMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | executionReportRestatementMessage inner =>
+    have bound_inner := ExecutionReportRestatementMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderCancelRejectMessage inner =>
+    simp only [encode, OrderCancelRejectMessage.encode_length]
+    omega
+  | massCancelRejectMessage inner =>
+    simp only [encode, MassCancelRejectMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 1 then (NewOrderSingleMessage.decode bytes).map fun (message, rest) => (.newOrderSingleMessage message, rest)
   else if tag = 2 then (OrderCancelReplaceRequestMessage.decode bytes).map fun (message, rest) => (.orderCancelReplaceRequestMessage message, rest)

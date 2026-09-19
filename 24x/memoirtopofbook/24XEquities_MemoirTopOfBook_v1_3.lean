@@ -708,6 +708,43 @@ def encode : Payload → List UInt8
   | .bestOfferShortMessage message => BestOfferShortMessage.encode message
   | .clearBookMessage message => ClearBookMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 35 := by
+  cases message with
+  | instrumentDirectoryMessage inner =>
+    simp only [encode, InstrumentDirectoryMessage.encode_length]
+    omega
+  | regShoRestrictionMessage inner =>
+    simp only [encode, RegShoRestrictionMessage.encode_length]
+    omega
+  | securityTradingStatusMessage inner =>
+    simp only [encode, SecurityTradingStatusMessage.encode_length]
+    omega
+  | snapshotCompleteMessage inner =>
+    simp only [encode, SnapshotCompleteMessage.encode_length]
+    omega
+  | tradingSessionStatusMessage inner =>
+    simp only [encode, TradingSessionStatusMessage.encode_length]
+    omega
+  | bestBidOfferMessage inner =>
+    simp only [encode, BestBidOfferMessage.encode_length]
+    omega
+  | bestBidMessage inner =>
+    simp only [encode, BestBidMessage.encode_length]
+    omega
+  | bestOfferMessage inner =>
+    simp only [encode, BestOfferMessage.encode_length]
+    omega
+  | bestBidShortMessage inner =>
+    simp only [encode, BestBidShortMessage.encode_length]
+    omega
+  | bestOfferShortMessage inner =>
+    simp only [encode, BestOfferShortMessage.encode_length]
+    omega
+  | clearBookMessage inner =>
+    simp only [encode, ClearBookMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 1 then (InstrumentDirectoryMessage.decode bytes).map fun (message, rest) => (.instrumentDirectoryMessage message, rest)
   else if tag = 2 then (RegShoRestrictionMessage.decode bytes).map fun (message, rest) => (.regShoRestrictionMessage message, rest)

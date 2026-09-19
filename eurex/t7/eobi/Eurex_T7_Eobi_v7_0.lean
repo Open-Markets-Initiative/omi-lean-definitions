@@ -1723,6 +1723,76 @@ def encode : Payload → List UInt8
   | .tradeReport message => TradeReport.encode message
   | .tradeReversal message => TradeReversal.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 504 := by
+  cases message with
+  | addComplexInstrument inner =>
+    simp only [encode, AddComplexInstrument.encode_length]
+    omega
+  | auctionBbo inner =>
+    simp only [encode, AuctionBbo.encode_length]
+    omega
+  | auctionClearingPrice inner =>
+    simp only [encode, AuctionClearingPrice.encode_length]
+    omega
+  | crossRequest inner =>
+    simp only [encode, CrossRequest.encode_length]
+    omega
+  | executionSummary inner =>
+    simp only [encode, ExecutionSummary.encode_length]
+    omega
+  | fullOrderExecution inner =>
+    simp only [encode, FullOrderExecution.encode_length]
+    omega
+  | heartbeat inner =>
+    simp only [encode, Heartbeat.encode_length]
+    omega
+  | instrumentStateChange inner =>
+    simp only [encode, InstrumentStateChange.encode_length]
+    omega
+  | instrumentSummary inner =>
+    simp only [encode, InstrumentSummary.encode_length]
+    omega
+  | orderAdd inner =>
+    simp only [encode, OrderAdd.encode_length]
+    omega
+  | orderDelete inner =>
+    simp only [encode, OrderDelete.encode_length]
+    omega
+  | orderMassDelete inner =>
+    simp only [encode, OrderMassDelete.encode_length]
+    omega
+  | orderModify inner =>
+    simp only [encode, OrderModify.encode_length]
+    omega
+  | orderModifySamePrio inner =>
+    simp only [encode, OrderModifySamePrio.encode_length]
+    omega
+  | partialOrderExecution inner =>
+    simp only [encode, PartialOrderExecution.encode_length]
+    omega
+  | productStateChange inner =>
+    simp only [encode, ProductStateChange.encode_length]
+    omega
+  | productSummary inner =>
+    simp only [encode, ProductSummary.encode_length]
+    omega
+  | quoteRequest inner =>
+    simp only [encode, QuoteRequest.encode_length]
+    omega
+  | snapshotOrder inner =>
+    simp only [encode, SnapshotOrder.encode_length]
+    omega
+  | topOfBook inner =>
+    simp only [encode, TopOfBook.encode_length]
+    omega
+  | tradeReport inner =>
+    simp only [encode, TradeReport.encode_length]
+    omega
+  | tradeReversal inner =>
+    simp only [encode, TradeReversal.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 13400 then (AddComplexInstrument.decode bytes).map fun (message, rest) => (.addComplexInstrument message, rest)
   else if tag = 13500 then (AuctionBbo.decode bytes).map fun (message, rest) => (.auctionBbo message, rest)

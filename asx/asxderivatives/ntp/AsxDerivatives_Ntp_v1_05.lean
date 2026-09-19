@@ -2603,6 +2603,88 @@ def encode : Payload → List UInt8
   | .anomalousOrderThresholdPublishMessage message => AnomalousOrderThresholdPublishMessage.encode message
   | .volumeAndOpenInterestMessage message => VolumeAndOpenInterestMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 459 := by
+  cases message with
+  | secondsMessage inner =>
+    simp only [encode, SecondsMessage.encode_length]
+    omega
+  | endOfBusinessTradeDateMessage inner =>
+    simp only [encode, EndOfBusinessTradeDateMessage.encode_length]
+    omega
+  | futureSymbolDirectoryMessage inner =>
+    simp only [encode, FutureSymbolDirectoryMessage.encode_length]
+    omega
+  | optionsSymbolDirectoryMessage inner =>
+    simp only [encode, OptionsSymbolDirectoryMessage.encode_length]
+    omega
+  | combinationSymbolDirectoryMessage inner =>
+    simp only [encode, CombinationSymbolDirectoryMessage.encode_length]
+    omega
+  | bundlesSymbolDirectory inner =>
+    simp only [encode, BundlesSymbolDirectory.encode_length]
+    omega
+  | orderBookStateMessage inner =>
+    simp only [encode, OrderBookStateMessage.encode_length]
+    omega
+  | addOrderMessage inner =>
+    simp only [encode, AddOrderMessage.encode_length]
+    omega
+  | orderVolumeCancelledMessage inner =>
+    simp only [encode, OrderVolumeCancelledMessage.encode_length]
+    omega
+  | orderDeletedMessage inner =>
+    simp only [encode, OrderDeletedMessage.encode_length]
+    omega
+  | orderExecutedMessage inner =>
+    simp only [encode, OrderExecutedMessage.encode_length]
+    omega
+  | auctionOrderExecutedMessage inner =>
+    simp only [encode, AuctionOrderExecutedMessage.encode_length]
+    omega
+  | combinationOrderExecutedMessage inner =>
+    simp only [encode, CombinationOrderExecutedMessage.encode_length]
+    omega
+  | impliedOrderAddedMessage inner =>
+    simp only [encode, ImpliedOrderAddedMessage.encode_length]
+    omega
+  | impliedOrderReplacedMessage inner =>
+    simp only [encode, ImpliedOrderReplacedMessage.encode_length]
+    omega
+  | impliedOrderDeletedMessage inner =>
+    simp only [encode, ImpliedOrderDeletedMessage.encode_length]
+    omega
+  | tradeExecutedMessage inner =>
+    simp only [encode, TradeExecutedMessage.encode_length]
+    omega
+  | combinationTradeExecutedMessage inner =>
+    simp only [encode, CombinationTradeExecutedMessage.encode_length]
+    omega
+  | tradeCancellationMessage inner =>
+    simp only [encode, TradeCancellationMessage.encode_length]
+    omega
+  | equilibriumPriceMessage inner =>
+    simp only [encode, EquilibriumPriceMessage.encode_length]
+    omega
+  | openHighLowLastTradeAdjustmentMessage inner =>
+    simp only [encode, OpenHighLowLastTradeAdjustmentMessage.encode_length]
+    omega
+  | marketSettlementMessage inner =>
+    simp only [encode, MarketSettlementMessage.encode_length]
+    omega
+  | textMessage inner =>
+    simp only [encode, TextMessage.encode_length]
+    omega
+  | requestForQuoteMessage inner =>
+    simp only [encode, RequestForQuoteMessage.encode_length]
+    omega
+  | anomalousOrderThresholdPublishMessage inner =>
+    simp only [encode, AnomalousOrderThresholdPublishMessage.encode_length]
+    omega
+  | volumeAndOpenInterestMessage inner =>
+    simp only [encode, VolumeAndOpenInterestMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 84 then (SecondsMessage.decode bytes).map fun (message, rest) => (.secondsMessage message, rest)
   else if tag = 83 then (EndOfBusinessTradeDateMessage.decode bytes).map fun (message, rest) => (.endOfBusinessTradeDateMessage message, rest)

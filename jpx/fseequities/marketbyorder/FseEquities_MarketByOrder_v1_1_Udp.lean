@@ -580,6 +580,37 @@ def encode : Payload → List UInt8
   | .resetMessage message => ResetMessage.encode message
   | .communicationControlMessage message => CommunicationControlMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 45 := by
+  cases message with
+  | secondsTimestampMessage inner =>
+    simp only [encode, SecondsTimestampMessage.encode_length]
+    omega
+  | tradingStatusMessage inner =>
+    simp only [encode, TradingStatusMessage.encode_length]
+    omega
+  | executionSummaryMessage inner =>
+    simp only [encode, ExecutionSummaryMessage.encode_length]
+    omega
+  | addOrderMessage inner =>
+    simp only [encode, AddOrderMessage.encode_length]
+    omega
+  | orderExecutedMessage inner =>
+    simp only [encode, OrderExecutedMessage.encode_length]
+    omega
+  | orderExecutedWithPriceMessage inner =>
+    simp only [encode, OrderExecutedWithPriceMessage.encode_length]
+    omega
+  | orderDeleteMessage inner =>
+    simp only [encode, OrderDeleteMessage.encode_length]
+    omega
+  | resetMessage inner =>
+    simp only [encode, ResetMessage.encode_length]
+    omega
+  | communicationControlMessage inner =>
+    simp only [encode, CommunicationControlMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 84 then (SecondsTimestampMessage.decode bytes).map fun (message, rest) => (.secondsTimestampMessage message, rest)
   else if tag = 79 then (TradingStatusMessage.decode bytes).map fun (message, rest) => (.tradingStatusMessage message, rest)

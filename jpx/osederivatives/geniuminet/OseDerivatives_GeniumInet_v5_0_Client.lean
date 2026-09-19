@@ -482,6 +482,28 @@ def encode : UnsequencedMessage → List UInt8
   | .cancelByOrderId message => CancelByOrderId.encode message
   | .massCancel message => MassCancel.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : UnsequencedMessage) : (encode message).length ≤ 104 := by
+  cases message with
+  | enterOrder inner =>
+    simp only [encode, EnterOrder.encode_length]
+    omega
+  | enterMmOrder inner =>
+    simp only [encode, EnterMmOrder.encode_length]
+    omega
+  | replaceOrder inner =>
+    simp only [encode, ReplaceOrder.encode_length]
+    omega
+  | cancelOrder inner =>
+    simp only [encode, CancelOrder.encode_length]
+    omega
+  | cancelByOrderId inner =>
+    simp only [encode, CancelByOrderId.encode_length]
+    omega
+  | massCancel inner =>
+    simp only [encode, MassCancel.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (UnsequencedMessage × List UInt8) :=
   if tag = 79 then (EnterOrder.decode bytes).map fun (message, rest) => (.enterOrder message, rest)
   else if tag = 80 then (EnterMmOrder.decode bytes).map fun (message, rest) => (.enterMmOrder message, rest)
@@ -618,6 +640,26 @@ def encode : ClientPayload → List UInt8
   | .unsequencedDataPacket message => UnsequencedDataPacket.encode message
   | .clientHeartbeat message => ClientHeartbeat.encode message
   | .logoutRequest message => LogoutRequest.encode message
+
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ClientPayload) : (encode message).length ≤ 105 := by
+  cases message with
+  | debugPacket inner =>
+    simp only [encode, DebugPacket.encode_length]
+    omega
+  | loginRequestPacket inner =>
+    simp only [encode, LoginRequestPacket.encode_length]
+    omega
+  | unsequencedDataPacket inner =>
+    have bound_inner := UnsequencedDataPacket.encode_length_le inner
+    simp only [encode]
+    omega
+  | clientHeartbeat inner =>
+    simp only [encode, ClientHeartbeat.encode_length]
+    omega
+  | logoutRequest inner =>
+    simp only [encode, LogoutRequest.encode_length]
+    omega
 
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (ClientPayload × List UInt8) :=
   if tag = 43 then (DebugPacket.decode bytes).map fun (message, rest) => (.debugPacket message, rest)

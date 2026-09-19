@@ -200,6 +200,19 @@ def encode : ClientPayload → List UInt8
   | .logonRequest message => LogonRequest.encode message
   | .logoutRequest message => LogoutRequest.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ClientPayload) : (encode message).length ≤ 82 := by
+  cases message with
+  | heartbeat inner =>
+    simp only [encode, Heartbeat.encode_length]
+    omega
+  | logonRequest inner =>
+    simp only [encode, LogonRequest.encode_length]
+    omega
+  | logoutRequest inner =>
+    simp only [encode, LogoutRequest.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (ClientPayload × List UInt8) :=
   if tag = 10011 then (Heartbeat.decode bytes).map fun (message, rest) => (.heartbeat message, rest)
   else if tag = 10000 then (LogonRequest.decode bytes).map fun (message, rest) => (.logonRequest message, rest)

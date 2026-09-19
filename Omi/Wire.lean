@@ -214,6 +214,19 @@ theorem Bounded.length_lt (bounded : Bounded n α) : bounded.val.length < 256 ^ 
     (⟨bounded.val, fits⟩ : Bounded n α) = bounded :=
   rfl
 
+/-- A list whose encodings together fit under an `n` byte length, so a length written from them
+    needs no side condition: entries filling the bytes a length field states -/
+abbrev Sized (n : Nat) (encode : α → List UInt8) := { items : List α // (encodeMany encode items).length < 256 ^ n }
+
+instance [DecidableEq α] {encode : α → List UInt8} : DecidableEq (Sized n encode) :=
+  inferInstanceAs (DecidableEq { items : List α // (encodeMany encode items).length < 256 ^ n })
+
+instance [Repr α] {encode : α → List UInt8} : Repr (Sized n encode) where
+  reprPrec sized precedence := reprPrec sized.val precedence
+
+theorem Sized.length_lt {encode : α → List UInt8} (sized : Sized n encode) : (encodeMany encode sized.val).length < 256 ^ n :=
+  sized.property
+
 /-- A list of exactly `n` items: a group the protocol repeats a fixed number of times -/
 abbrev Exact (n : Nat) (α : Type) := { items : List α // items.length = n }
 
@@ -294,6 +307,57 @@ theorem decodeAll_encodeMany (encode : α → List UInt8) (decode : List UInt8 �
       have more := ih fuel (by simpa using enough)
       simp only [encodeMany] at more
       simp [decodeAll, step, more]
+
+/-- Items read from the next `size` bytes, to the end of them, and what follows those bytes -/
+def decodeSized (item : List UInt8 → Option (α × List UInt8)) (size : Nat) (bytes : List UInt8) : Option (List α × List UInt8) :=
+  if size ≤ bytes.length then do
+    let items ← decodeAll item size (bytes.take size)
+    pure (items, bytes.drop size)
+  else none
+
+/-- Items written back to back under a length holding their bytes read back, with what followed -/
+theorem decodeSized_encodeMany (n : Nat) (encode : α → List UInt8) (decode : List UInt8 → Option (α × List UInt8))
+    (roundtrip : ∀ item rest, decode (encode item ++ rest) = some (item, rest))
+    (nonempty : ∀ item, (encode item).length > 0)
+    (items : Sized n encode) (rest : List UInt8) :
+    decodeSized decode (BitVec.ofNat (8 * n) (encodeMany encode items.val).length).toNat (encodeMany encode items.val ++ rest)
+      = some (items.val, rest) := by
+  have fits : (encodeMany encode items.val).length < 2 ^ (8 * n) := by
+    rw [Nat.pow_mul]
+    exact items.length_lt
+  rw [BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits]
+  unfold decodeSized
+  rw [List.take_left, List.drop_left,
+    decodeAll_encodeMany encode decode roundtrip nonempty items.val _ (encodeMany_length_ge encode nonempty items.val)]
+  simp [List.length_append]
+
+/-- What may close a message: written when there, nothing when not -/
+def encodeTail (encode : α → List UInt8) : Option α → List UInt8
+  | none => []
+  | some item => encode item
+
+/-- What may close a message: read when bytes remain and must take them all, absent when none do -/
+def decodeTail (read : List UInt8 → Option (α × List UInt8)) : List UInt8 → Option (Option α)
+  | [] => some none
+  | bytes => (read bytes).bind fun (item, rest) => if rest.isEmpty then some (some item) else none
+
+/-- A closing item written back, or nothing, reads back as it was -/
+theorem decodeTail_encodeTail (encode : α → List UInt8) (read : List UInt8 → Option (α × List UInt8))
+    (roundtrip : ∀ item rest, read (encode item ++ rest) = some (item, rest))
+    (nonempty : ∀ item, (encode item).length > 0)
+    (tail : Option α) :
+    decodeTail read (encodeTail encode tail) = some tail := by
+  cases tail with
+  | none => rfl
+  | some item =>
+    have long := nonempty item
+    obtain ⟨byte, rest, spelled⟩ : ∃ byte rest, encode item = byte :: rest := by
+      cases h : encode item with
+      | nil => rw [h] at long; simp at long
+      | cons byte rest => exact ⟨byte, rest, rfl⟩
+    have step := roundtrip item []
+    rw [List.append_nil, spelled] at step
+    simp [encodeTail, spelled, decodeTail, step]
 
 /-! ## Framing -/
 

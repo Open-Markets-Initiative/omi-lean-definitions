@@ -239,6 +239,22 @@ def encode : Payload → List UInt8
   | .bookEntryMessage message => BookEntryMessage.encode message
   | .maCBookEntryMessage message => MaCBookEntryMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 22 := by
+  cases message with
+  | snapshotStartMessage inner =>
+    simp only [encode, SnapshotStartMessage.encode_length]
+    omega
+  | bookStatusMessage inner =>
+    simp only [encode, BookStatusMessage.encode_length]
+    omega
+  | bookEntryMessage inner =>
+    simp only [encode, BookEntryMessage.encode_length]
+    omega
+  | maCBookEntryMessage inner =>
+    simp only [encode, MaCBookEntryMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 10 then (SnapshotStartMessage.decode bytes).map fun (message, rest) => (.snapshotStartMessage message, rest)
   else if tag = 11 then (BookStatusMessage.decode bytes).map fun (message, rest) => (.bookStatusMessage message, rest)

@@ -4425,6 +4425,130 @@ def encode : ClientPayload → List UInt8
   | .xetraEnLightQuotingStatusRequest message => XetraEnLightQuotingStatusRequest.encode message
   | .xetraEnLightUpdateNegotiationRequest message => XetraEnLightUpdateNegotiationRequest.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ClientPayload) : (encode message).length ≤ 10266 := by
+  cases message with
+  | approveTesTradeRequest inner =>
+    simp only [encode, ApproveTesTradeRequest.encode_length]
+    omega
+  | crossRequest inner =>
+    simp only [encode, CrossRequest.encode_length]
+    omega
+  | deleteAllOrderRequest inner =>
+    simp only [encode, DeleteAllOrderRequest.encode_length]
+    omega
+  | deleteAllQuoteRequest inner =>
+    simp only [encode, DeleteAllQuoteRequest.encode_length]
+    omega
+  | deleteOrderSingleRequest inner =>
+    simp only [encode, DeleteOrderSingleRequest.encode_length]
+    omega
+  | deleteTesTradeRequest inner =>
+    simp only [encode, DeleteTesTradeRequest.encode_length]
+    omega
+  | enterBestQuoteRequest inner =>
+    simp only [encode, EnterBestQuoteRequest.encode_length]
+    omega
+  | enterTesTradeRequest inner =>
+    have bound_inner := EnterTesTradeRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | heartbeat inner =>
+    simp only [encode, Heartbeat.encode_length]
+    omega
+  | inquireEnrichmentRuleIdListRequest inner =>
+    simp only [encode, InquireEnrichmentRuleIdListRequest.encode_length]
+    omega
+  | inquireSessionListRequest inner =>
+    simp only [encode, InquireSessionListRequest.encode_length]
+    omega
+  | inquireUserRequest inner =>
+    simp only [encode, InquireUserRequest.encode_length]
+    omega
+  | issuerSecurityStateChangeRequest inner =>
+    have bound_inner := IssuerSecurityStateChangeRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | logonRequest inner =>
+    simp only [encode, LogonRequest.encode_length]
+    omega
+  | logoutRequest inner =>
+    simp only [encode, LogoutRequest.encode_length]
+    omega
+  | massQuoteRequest inner =>
+    have bound_inner := MassQuoteRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | modifyOrderSingleRequest inner =>
+    simp only [encode, ModifyOrderSingleRequest.encode_length]
+    omega
+  | modifyOrderSingleShortRequest inner =>
+    simp only [encode, ModifyOrderSingleShortRequest.encode_length]
+    omega
+  | modifyTesTradeRequest inner =>
+    have bound_inner := ModifyTesTradeRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | newOrderSingleRequest inner =>
+    simp only [encode, NewOrderSingleRequest.encode_length]
+    omega
+  | newOrderSingleShortRequest inner =>
+    simp only [encode, NewOrderSingleShortRequest.encode_length]
+    omega
+  | quoteActivationRequest inner =>
+    simp only [encode, QuoteActivationRequest.encode_length]
+    omega
+  | rfqRequest inner =>
+    simp only [encode, RfqRequest.encode_length]
+    omega
+  | retransmitMeMessageRequest inner =>
+    simp only [encode, RetransmitMeMessageRequest.encode_length]
+    omega
+  | retransmitRequest inner =>
+    simp only [encode, RetransmitRequest.encode_length]
+    omega
+  | singleQuoteRequest inner =>
+    simp only [encode, SingleQuoteRequest.encode_length]
+    omega
+  | specialistRfqRejectRequest inner =>
+    simp only [encode, SpecialistRfqRejectRequest.encode_length]
+    omega
+  | specialistRfqReplyRequest inner =>
+    simp only [encode, SpecialistRfqReplyRequest.encode_length]
+    omega
+  | specialistSecurityStateChangeRequest inner =>
+    simp only [encode, SpecialistSecurityStateChangeRequest.encode_length]
+    omega
+  | subscribeRequest inner =>
+    simp only [encode, SubscribeRequest.encode_length]
+    omega
+  | unsubscribeRequest inner =>
+    simp only [encode, UnsubscribeRequest.encode_length]
+    omega
+  | userLoginRequest inner =>
+    simp only [encode, UserLoginRequest.encode_length]
+    omega
+  | userLogoutRequest inner =>
+    simp only [encode, UserLogoutRequest.encode_length]
+    omega
+  | xetraEnLightEnterQuoteRequest inner =>
+    simp only [encode, XetraEnLightEnterQuoteRequest.encode_length]
+    omega
+  | xetraEnLightHitQuoteRequest inner =>
+    simp only [encode, XetraEnLightHitQuoteRequest.encode_length]
+    omega
+  | xetraEnLightOpenNegotiationRequest inner =>
+    have bound_inner := XetraEnLightOpenNegotiationRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | xetraEnLightQuotingStatusRequest inner =>
+    simp only [encode, XetraEnLightQuotingStatusRequest.encode_length]
+    omega
+  | xetraEnLightUpdateNegotiationRequest inner =>
+    have bound_inner := XetraEnLightUpdateNegotiationRequest.encode_length_le inner
+    simp only [encode]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (ClientPayload × List UInt8) :=
   if tag = 10603 then (ApproveTesTradeRequest.decode bytes).map fun (message, rest) => (.approveTesTradeRequest message, rest)
   else if tag = 10118 then (CrossRequest.decode bytes).map fun (message, rest) => (.crossRequest message, rest)

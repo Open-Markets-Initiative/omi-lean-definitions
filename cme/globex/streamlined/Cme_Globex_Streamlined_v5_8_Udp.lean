@@ -5226,6 +5226,63 @@ def encode : Payload → List UInt8
   | .mdIncrementalRefreshOtc message => MdIncrementalRefreshOtc.encode message
   | .mdInstrumentDefinitionEris message => MdInstrumentDefinitionEris.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 16667326 := by
+  cases message with
+  | adminHeartbeat inner =>
+    simp only [encode, AdminHeartbeat.encode_length]
+    omega
+  | adminLogin inner =>
+    simp only [encode, AdminLogin.encode_length]
+    omega
+  | adminLogout inner =>
+    simp only [encode, AdminLogout.encode_length]
+    omega
+  | mdIncrementalRefreshErisReferenceDataAndDailyStatistics inner =>
+    have bound_inner := MdIncrementalRefreshErisReferenceDataAndDailyStatistics.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdNewsIndices inner =>
+    have bound_inner := MdNewsIndices.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshTradeBlocks340 inner =>
+    have bound_inner := MdIncrementalRefreshTradeBlocks340.encode_length_le inner
+    simp only [encode]
+    omega
+  | quoteRequest inner =>
+    have bound_inner := QuoteRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdInstrumentDefinitionIndices inner =>
+    have bound_inner := MdInstrumentDefinitionIndices.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshIndices inner =>
+    have bound_inner := MdIncrementalRefreshIndices.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshTradeBlocks349 inner =>
+    have bound_inner := MdIncrementalRefreshTradeBlocks349.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshEris351 inner =>
+    have bound_inner := MdIncrementalRefreshEris351.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshEris353 inner =>
+    have bound_inner := MdIncrementalRefreshEris353.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshOtc inner =>
+    have bound_inner := MdIncrementalRefreshOtc.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdInstrumentDefinitionEris inner =>
+    have bound_inner := MdInstrumentDefinitionEris.encode_length_le inner
+    simp only [encode]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 312 then (AdminHeartbeat.decode bytes).map fun (message, rest) => (.adminHeartbeat message, rest)
   else if tag = 315 then (AdminLogin.decode bytes).map fun (message, rest) => (.adminLogin message, rest)

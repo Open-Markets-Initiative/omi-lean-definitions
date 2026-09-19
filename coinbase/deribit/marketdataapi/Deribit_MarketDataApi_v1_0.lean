@@ -1180,6 +1180,68 @@ def encode : Payload → List UInt8
   | .retransmitRequestMessage message => RetransmitRequestMessage.encode message
   | .retransmitRejectMessage message => RetransmitRejectMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 1638643 := by
+  cases message with
+  | instrumentDefinitionMessage inner =>
+    have bound_inner := InstrumentDefinitionMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | indexDefinitionMessage inner =>
+    simp only [encode, IndexDefinitionMessage.encode_length]
+    omega
+  | instrumentInfoMessage inner =>
+    simp only [encode, InstrumentInfoMessage.encode_length]
+    omega
+  | instrumentRefMessage inner =>
+    simp only [encode, InstrumentRefMessage.encode_length]
+    omega
+  | instrumentStatusUpdateMessage inner =>
+    simp only [encode, InstrumentStatusUpdateMessage.encode_length]
+    omega
+  | bidPutMessage inner =>
+    simp only [encode, BidPutMessage.encode_length]
+    omega
+  | askPutMessage inner =>
+    simp only [encode, AskPutMessage.encode_length]
+    omega
+  | bidQtyReducedMessage inner =>
+    simp only [encode, BidQtyReducedMessage.encode_length]
+    omega
+  | askQtyReducedMessage inner =>
+    simp only [encode, AskQtyReducedMessage.encode_length]
+    omega
+  | bidDeleteMessage inner =>
+    simp only [encode, BidDeleteMessage.encode_length]
+    omega
+  | askDeleteMessage inner =>
+    simp only [encode, AskDeleteMessage.encode_length]
+    omega
+  | tradeSummaryMessage inner =>
+    simp only [encode, TradeSummaryMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [encode, TradeMessage.encode_length]
+    omega
+  | blockTradeMessage inner =>
+    simp only [encode, BlockTradeMessage.encode_length]
+    omega
+  | snapshotHeaderMessage inner =>
+    simp only [encode, SnapshotHeaderMessage.encode_length]
+    omega
+  | snapshotTrailerMessage inner =>
+    simp only [encode, SnapshotTrailerMessage.encode_length]
+    omega
+  | endOfCycleMessage inner =>
+    simp only [encode, EndOfCycleMessage.encode_length]
+    omega
+  | retransmitRequestMessage inner =>
+    simp only [encode, RetransmitRequestMessage.encode_length]
+    omega
+  | retransmitRejectMessage inner =>
+    simp only [encode, RetransmitRejectMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 10 then (InstrumentDefinitionMessage.decode bytes).map fun (message, rest) => (.instrumentDefinitionMessage message, rest)
   else if tag = 11 then (IndexDefinitionMessage.decode bytes).map fun (message, rest) => (.indexDefinitionMessage message, rest)

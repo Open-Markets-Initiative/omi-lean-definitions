@@ -354,6 +354,37 @@ def encode : Payload → List UInt8
   | .gapFillMessage message => GapFillMessage.encode message
   | .rejectMessage message => RejectMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 72 := by
+  cases message with
+  | logonMessage inner =>
+    simp only [encode, LogonMessage.encode_length]
+    omega
+  | logonConfMessage inner =>
+    simp only [encode, LogonConfMessage.encode_length]
+    omega
+  | logoutMessage inner =>
+    simp only [encode, LogoutMessage.encode_length]
+    omega
+  | loggedOutMessage inner =>
+    simp only [encode, LoggedOutMessage.encode_length]
+    omega
+  | heartbeatMessage inner =>
+    simp only [encode, HeartbeatMessage.encode_length]
+    omega
+  | testRequestMessage inner =>
+    simp only [encode, TestRequestMessage.encode_length]
+    omega
+  | resendRequestMessage inner =>
+    simp only [encode, ResendRequestMessage.encode_length]
+    omega
+  | gapFillMessage inner =>
+    simp only [encode, GapFillMessage.encode_length]
+    omega
+  | rejectMessage inner =>
+    simp only [encode, RejectMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 100 then (LogonMessage.decode bytes).map fun (message, rest) => (.logonMessage message, rest)
   else if tag = 200 then (LogonConfMessage.decode bytes).map fun (message, rest) => (.logonConfMessage message, rest)

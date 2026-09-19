@@ -134,6 +134,19 @@ def encode : Payload → List UInt8
   | .replayRequestMessage message => ReplayRequestMessage.encode message
   | .replayResponseMessage message => ReplayResponseMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 20 := by
+  cases message with
+  | loginMessage inner =>
+    simp only [encode, LoginMessage.encode_length]
+    omega
+  | replayRequestMessage inner =>
+    simp only [encode, ReplayRequestMessage.encode_length]
+    omega
+  | replayResponseMessage inner =>
+    simp only [encode, ReplayResponseMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 13 then (LoginMessage.decode bytes).map fun (message, rest) => (.loginMessage message, rest)
   else if tag = 14 then (ReplayRequestMessage.decode bytes).map fun (message, rest) => (.replayRequestMessage message, rest)

@@ -886,6 +886,49 @@ def encode : Payload → List UInt8
   | .clearBookMessage message => ClearBookMessage.encode message
   | .snapshotCompleteMessage message => SnapshotCompleteMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 42 := by
+  cases message with
+  | instrumentDirectoryMessage inner =>
+    simp only [encode, InstrumentDirectoryMessage.encode_length]
+    omega
+  | regShoRestrictionMessage inner =>
+    simp only [encode, RegShoRestrictionMessage.encode_length]
+    omega
+  | securityTradingStatusMessage inner =>
+    simp only [encode, SecurityTradingStatusMessage.encode_length]
+    omega
+  | tradingSessionStatusMessage inner =>
+    simp only [encode, TradingSessionStatusMessage.encode_length]
+    omega
+  | orderAddedMessage inner =>
+    simp only [encode, OrderAddedMessage.encode_length]
+    omega
+  | orderDeletedMessage inner =>
+    simp only [encode, OrderDeletedMessage.encode_length]
+    omega
+  | orderReducedMessage inner =>
+    simp only [encode, OrderReducedMessage.encode_length]
+    omega
+  | orderExecutedMessage inner =>
+    simp only [encode, OrderExecutedMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [encode, TradeMessage.encode_length]
+    omega
+  | brokenTradeMessage inner =>
+    simp only [encode, BrokenTradeMessage.encode_length]
+    omega
+  | correctedTradeMessage inner =>
+    simp only [encode, CorrectedTradeMessage.encode_length]
+    omega
+  | clearBookMessage inner =>
+    simp only [encode, ClearBookMessage.encode_length]
+    omega
+  | snapshotCompleteMessage inner =>
+    simp only [encode, SnapshotCompleteMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 1 then (InstrumentDirectoryMessage.decode bytes).map fun (message, rest) => (.instrumentDirectoryMessage message, rest)
   else if tag = 2 then (RegShoRestrictionMessage.decode bytes).map fun (message, rest) => (.regShoRestrictionMessage message, rest)

@@ -613,6 +613,40 @@ def encode : Payload → List UInt8
   | .aoDUpdateMessage message => AoDUpdateMessage.encode message
   | .maCUpdateMessage message => MaCUpdateMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 59 := by
+  cases message with
+  | orderAdd inner =>
+    simp only [encode, OrderAdd.encode_length]
+    omega
+  | orderCancel inner =>
+    simp only [encode, OrderCancel.encode_length]
+    omega
+  | orderModify inner =>
+    simp only [encode, OrderModify.encode_length]
+    omega
+  | trade inner =>
+    simp only [encode, Trade.encode_length]
+    omega
+  | tradeBustMessage inner =>
+    simp only [encode, TradeBustMessage.encode_length]
+    omega
+  | tickTableDataMessage inner =>
+    simp only [encode, TickTableDataMessage.encode_length]
+    omega
+  | securityDefinitionMessage inner =>
+    simp only [encode, SecurityDefinitionMessage.encode_length]
+    omega
+  | securityStatusMessage inner =>
+    simp only [encode, SecurityStatusMessage.encode_length]
+    omega
+  | aoDUpdateMessage inner =>
+    simp only [encode, AoDUpdateMessage.encode_length]
+    omega
+  | maCUpdateMessage inner =>
+    simp only [encode, MaCUpdateMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 2 then (OrderAdd.decode bytes).map fun (message, rest) => (.orderAdd message, rest)
   else if tag = 3 then (OrderCancel.decode bytes).map fun (message, rest) => (.orderCancel message, rest)

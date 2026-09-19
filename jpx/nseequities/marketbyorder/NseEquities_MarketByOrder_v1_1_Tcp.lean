@@ -270,6 +270,23 @@ def encode : TcpPayload → List UInt8
   | .messageResponseMessage message => MessageResponseMessage.encode message
   | .endOfMessageMessage message => EndOfMessageMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : TcpPayload) : (encode message).length ≤ 65517 := by
+  cases message with
+  | loginRequestMessage inner =>
+    simp only [encode, LoginRequestMessage.encode_length]
+    omega
+  | loginResultMessage inner =>
+    simp only [encode, LoginResultMessage.encode_length]
+    omega
+  | messageResponseMessage inner =>
+    have bound_inner := MessageResponseMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | endOfMessageMessage inner =>
+    simp only [encode, EndOfMessageMessage.encode_length]
+    omega
+
 /-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option TcpPayload :=
   if tag = 82 then (LoginRequestMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.loginRequestMessage message) else none

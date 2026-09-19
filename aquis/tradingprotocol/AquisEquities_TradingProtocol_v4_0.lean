@@ -1450,6 +1450,73 @@ def encode : Payload → List UInt8
   | .ioiInviteMessage message => IoiInviteMessage.encode message
   | .ioiFirmupMessage message => IoiFirmupMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 99 := by
+  cases message with
+  | loginMessage inner =>
+    simp only [encode, LoginMessage.encode_length]
+    omega
+  | loginResponseMessage inner =>
+    simp only [encode, LoginResponseMessage.encode_length]
+    omega
+  | heartbeat inner =>
+    simp only [encode, Heartbeat.encode_length]
+    omega
+  | logoutRequestMessage inner =>
+    simp only [encode, LogoutRequestMessage.encode_length]
+    omega
+  | logoutMessage inner =>
+    simp only [encode, LogoutMessage.encode_length]
+    omega
+  | orderAddMessage inner =>
+    simp only [encode, OrderAddMessage.encode_length]
+    omega
+  | orderAddExtendedMessage inner =>
+    simp only [encode, OrderAddExtendedMessage.encode_length]
+    omega
+  | orderCancelMessage inner =>
+    simp only [encode, OrderCancelMessage.encode_length]
+    omega
+  | orderModifyMessage inner =>
+    simp only [encode, OrderModifyMessage.encode_length]
+    omega
+  | orderModifyExtendedMessage inner =>
+    simp only [encode, OrderModifyExtendedMessage.encode_length]
+    omega
+  | orderAddResponseMessage inner =>
+    simp only [encode, OrderAddResponseMessage.encode_length]
+    omega
+  | orderCancelResponseMessage inner =>
+    simp only [encode, OrderCancelResponseMessage.encode_length]
+    omega
+  | orderModifyResponseMessage inner =>
+    simp only [encode, OrderModifyResponseMessage.encode_length]
+    omega
+  | icebergOrderRefreshMessage inner =>
+    simp only [encode, IcebergOrderRefreshMessage.encode_length]
+    omega
+  | tradeCaptureMessage inner =>
+    simp only [encode, TradeCaptureMessage.encode_length]
+    omega
+  | tradeCaptureResponseMessage inner =>
+    simp only [encode, TradeCaptureResponseMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [encode, TradeMessage.encode_length]
+    omega
+  | tradeBustMessage inner =>
+    simp only [encode, TradeBustMessage.encode_length]
+    omega
+  | ioiAddMessage inner =>
+    simp only [encode, IoiAddMessage.encode_length]
+    omega
+  | ioiInviteMessage inner =>
+    simp only [encode, IoiInviteMessage.encode_length]
+    omega
+  | ioiFirmupMessage inner =>
+    simp only [encode, IoiFirmupMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 1 then (LoginMessage.decode bytes).map fun (message, rest) => (.loginMessage message, rest)
   else if tag = 2 then (LoginResponseMessage.decode bytes).map fun (message, rest) => (.loginResponseMessage message, rest)

@@ -1400,6 +1400,52 @@ def encode : Payload → List UInt8
   | .tradeMessage message => TradeMessage.encode message
   | .equilibriumPriceUpdateMessage message => EquilibriumPriceUpdateMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 260 := by
+  cases message with
+  | secondsMessage inner =>
+    simp only [encode, SecondsMessage.encode_length]
+    omega
+  | orderBookDirectoryMessage inner =>
+    simp only [encode, OrderBookDirectoryMessage.encode_length]
+    omega
+  | combinationOrderBookDirectoryMessage inner =>
+    simp only [encode, CombinationOrderBookDirectoryMessage.encode_length]
+    omega
+  | tickSizeMessage inner =>
+    simp only [encode, TickSizeMessage.encode_length]
+    omega
+  | systemEventMessage inner =>
+    simp only [encode, SystemEventMessage.encode_length]
+    omega
+  | orderBookStateMessage inner =>
+    simp only [encode, OrderBookStateMessage.encode_length]
+    omega
+  | addOrderNoParticipantIdMessage inner =>
+    simp only [encode, AddOrderNoParticipantIdMessage.encode_length]
+    omega
+  | addOrderParticipantIdMessage inner =>
+    simp only [encode, AddOrderParticipantIdMessage.encode_length]
+    omega
+  | orderExecutedMessage inner =>
+    simp only [encode, OrderExecutedMessage.encode_length]
+    omega
+  | orderExecutedWithPriceMessage inner =>
+    simp only [encode, OrderExecutedWithPriceMessage.encode_length]
+    omega
+  | orderReplaceMessage inner =>
+    simp only [encode, OrderReplaceMessage.encode_length]
+    omega
+  | orderDeleteMessage inner =>
+    simp only [encode, OrderDeleteMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [encode, TradeMessage.encode_length]
+    omega
+  | equilibriumPriceUpdateMessage inner =>
+    simp only [encode, EquilibriumPriceUpdateMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 84 then (SecondsMessage.decode bytes).map fun (message, rest) => (.secondsMessage message, rest)
   else if tag = 82 then (OrderBookDirectoryMessage.decode bytes).map fun (message, rest) => (.orderBookDirectoryMessage message, rest)

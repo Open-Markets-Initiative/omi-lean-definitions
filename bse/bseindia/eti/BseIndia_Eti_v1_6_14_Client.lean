@@ -3244,6 +3244,95 @@ def encode : ClientPayload → List UInt8
   | .userLogoutRequest message => UserLogoutRequest.encode message
   | .userPasswordChangeRequest message => UserPasswordChangeRequest.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ClientPayload) : (encode message).length ≤ 10290 := by
+  cases message with
+  | debtInquiryRequest inner =>
+    simp only [encode, DebtInquiryRequest.encode_length]
+    omega
+  | deleteAllOrderRequest inner =>
+    simp only [encode, DeleteAllOrderRequest.encode_length]
+    omega
+  | deleteAllQuoteRequest inner =>
+    simp only [encode, DeleteAllQuoteRequest.encode_length]
+    omega
+  | deleteOrderComplexRequest inner =>
+    simp only [encode, DeleteOrderComplexRequest.encode_length]
+    omega
+  | deleteOrderSingleRequest inner =>
+    simp only [encode, DeleteOrderSingleRequest.encode_length]
+    omega
+  | gatewayRequest inner =>
+    simp only [encode, GatewayRequest.encode_length]
+    omega
+  | heartbeat inner =>
+    simp only [encode, Heartbeat.encode_length]
+    omega
+  | inquireSessionListRequest inner =>
+    simp only [encode, InquireSessionListRequest.encode_length]
+    omega
+  | logonRequest inner =>
+    simp only [encode, LogonRequest.encode_length]
+    omega
+  | logoutRequest inner =>
+    simp only [encode, LogoutRequest.encode_length]
+    omega
+  | massQuoteRequest inner =>
+    have bound_inner := MassQuoteRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | modifyOrderComplexRequest inner =>
+    have bound_inner := ModifyOrderComplexRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | modifyOrderSingleRequest inner =>
+    simp only [encode, ModifyOrderSingleRequest.encode_length]
+    omega
+  | modifyOrderSingleShortRequest inner =>
+    simp only [encode, ModifyOrderSingleShortRequest.encode_length]
+    omega
+  | multiLegOrderRequest inner =>
+    have bound_inner := MultiLegOrderRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | newOrderComplexRequest inner =>
+    have bound_inner := NewOrderComplexRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | newOrderSingleRequest inner =>
+    simp only [encode, NewOrderSingleRequest.encode_length]
+    omega
+  | newOrderSingleShortRequest inner =>
+    simp only [encode, NewOrderSingleShortRequest.encode_length]
+    omega
+  | retransmitMeMessageRequest inner =>
+    simp only [encode, RetransmitMeMessageRequest.encode_length]
+    omega
+  | retransmitRequest inner =>
+    simp only [encode, RetransmitRequest.encode_length]
+    omega
+  | sessionPasswordChangeRequest inner =>
+    simp only [encode, SessionPasswordChangeRequest.encode_length]
+    omega
+  | sessionRegistrationRequest inner =>
+    simp only [encode, SessionRegistrationRequest.encode_length]
+    omega
+  | subscribeRequest inner =>
+    simp only [encode, SubscribeRequest.encode_length]
+    omega
+  | unsubscribeRequest inner =>
+    simp only [encode, UnsubscribeRequest.encode_length]
+    omega
+  | userLoginRequest inner =>
+    simp only [encode, UserLoginRequest.encode_length]
+    omega
+  | userLogoutRequest inner =>
+    simp only [encode, UserLogoutRequest.encode_length]
+    omega
+  | userPasswordChangeRequest inner =>
+    simp only [encode, UserPasswordChangeRequest.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (ClientPayload × List UInt8) :=
   if tag = 10390 then (DebtInquiryRequest.decode bytes).map fun (message, rest) => (.debtInquiryRequest message, rest)
   else if tag = 10120 then (DeleteAllOrderRequest.decode bytes).map fun (message, rest) => (.deleteAllOrderRequest message, rest)

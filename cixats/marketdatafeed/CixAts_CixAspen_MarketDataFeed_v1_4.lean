@@ -921,6 +921,40 @@ def encode : Payload → List UInt8
   | .tradeCancelMessage message => TradeCancelMessage.encode message
   | .tradeCorrectMessage message => TradeCorrectMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 84 := by
+  cases message with
+  | marketEventMessage inner =>
+    simp only [encode, MarketEventMessage.encode_length]
+    omega
+  | symbolInformationMessage inner =>
+    simp only [encode, SymbolInformationMessage.encode_length]
+    omega
+  | symbolStateMessage inner =>
+    simp only [encode, SymbolStateMessage.encode_length]
+    omega
+  | newOrderAddMessage inner =>
+    simp only [encode, NewOrderAddMessage.encode_length]
+    omega
+  | orderPartialCancelMessage inner =>
+    simp only [encode, OrderPartialCancelMessage.encode_length]
+    omega
+  | orderCancelAllMessage inner =>
+    simp only [encode, OrderCancelAllMessage.encode_length]
+    omega
+  | orderExecutedMessage inner =>
+    simp only [encode, OrderExecutedMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [encode, TradeMessage.encode_length]
+    omega
+  | tradeCancelMessage inner =>
+    simp only [encode, TradeCancelMessage.encode_length]
+    omega
+  | tradeCorrectMessage inner =>
+    simp only [encode, TradeCorrectMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 65 then (MarketEventMessage.decode bytes).map fun (message, rest) => (.marketEventMessage message, rest)
   else if tag = 66 then (SymbolInformationMessage.decode bytes).map fun (message, rest) => (.symbolInformationMessage message, rest)

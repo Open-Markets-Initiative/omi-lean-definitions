@@ -1072,6 +1072,43 @@ def encode : MessageData → List UInt8
   | .tradeBreakMessage message => TradeBreakMessage.encode message
   | .auctionInformationMessage message => AuctionInformationMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : MessageData) : (encode message).length ≤ 79 := by
+  cases message with
+  | systemEventMessage inner =>
+    simp only [encode, SystemEventMessage.encode_length]
+    omega
+  | securityDirectoryMessage inner =>
+    simp only [encode, SecurityDirectoryMessage.encode_length]
+    omega
+  | tradingStatusMessage inner =>
+    simp only [encode, TradingStatusMessage.encode_length]
+    omega
+  | retailLiquidityIndicatorMessage inner =>
+    simp only [encode, RetailLiquidityIndicatorMessage.encode_length]
+    omega
+  | operationalHaltStatusMessage inner =>
+    simp only [encode, OperationalHaltStatusMessage.encode_length]
+    omega
+  | shortSalePriceTestStatusMessage inner =>
+    simp only [encode, ShortSalePriceTestStatusMessage.encode_length]
+    omega
+  | quoteUpdateMessage inner =>
+    simp only [encode, QuoteUpdateMessage.encode_length]
+    omega
+  | tradeReportMessage inner =>
+    simp only [encode, TradeReportMessage.encode_length]
+    omega
+  | officialPriceMessage inner =>
+    simp only [encode, OfficialPriceMessage.encode_length]
+    omega
+  | tradeBreakMessage inner =>
+    simp only [encode, TradeBreakMessage.encode_length]
+    omega
+  | auctionInformationMessage inner =>
+    simp only [encode, AuctionInformationMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (MessageData × List UInt8) :=
   if tag = 83 then (SystemEventMessage.decode bytes).map fun (message, rest) => (.systemEventMessage message, rest)
   else if tag = 68 then (SecurityDirectoryMessage.decode bytes).map fun (message, rest) => (.securityDirectoryMessage message, rest)

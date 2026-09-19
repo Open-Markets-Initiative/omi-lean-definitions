@@ -4088,6 +4088,125 @@ def encode : Payload → List UInt8
   | .massQuoteMmpUnfrozenMessage message => MassQuoteMmpUnfrozenMessage.encode message
   | .ordersMmpUnfrozenMessage message => OrdersMmpUnfrozenMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 11796364 := by
+  cases message with
+  | logonMessage inner =>
+    simp only [encode, LogonMessage.encode_length]
+    omega
+  | logonConfMessage inner =>
+    simp only [encode, LogonConfMessage.encode_length]
+    omega
+  | logoutMessage inner =>
+    have bound_inner := LogoutMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | loggedOutMessage inner =>
+    have bound_inner := LoggedOutMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | heartbeatMessage inner =>
+    simp only [encode, HeartbeatMessage.encode_length]
+    omega
+  | testRequestMessage inner =>
+    simp only [encode, TestRequestMessage.encode_length]
+    omega
+  | resendRequestMessage inner =>
+    simp only [encode, ResendRequestMessage.encode_length]
+    omega
+  | gapFillMessage inner =>
+    simp only [encode, GapFillMessage.encode_length]
+    omega
+  | rejectMessage inner =>
+    have bound_inner := RejectMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | newOrderRequestMessage inner =>
+    simp only [encode, NewOrderRequestMessage.encode_length]
+    omega
+  | amendOrderRequestMessage inner =>
+    simp only [encode, AmendOrderRequestMessage.encode_length]
+    omega
+  | cancelOrderRequestMessage inner =>
+    simp only [encode, CancelOrderRequestMessage.encode_length]
+    omega
+  | massQuoteRequestMessage inner =>
+    have bound_inner := MassQuoteRequestMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | massCancelRequestMessage inner =>
+    simp only [encode, MassCancelRequestMessage.encode_length]
+    omega
+  | massQuoteCancelRequestMessage inner =>
+    simp only [encode, MassQuoteCancelRequestMessage.encode_length]
+    omega
+  | newOrderResponseMessage inner =>
+    have bound_inner := NewOrderResponseMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | newOrderRejectMessage inner =>
+    have bound_inner := NewOrderRejectMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | amendOrderResponseMessage inner =>
+    have bound_inner := AmendOrderResponseMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | amendOrderRejectMessage inner =>
+    have bound_inner := AmendOrderRejectMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | cancelOrderResponseMessage inner =>
+    simp only [encode, CancelOrderResponseMessage.encode_length]
+    omega
+  | cancelOrderRejectMessage inner =>
+    have bound_inner := CancelOrderRejectMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | massQuoteResponseMessage inner =>
+    have bound_inner := MassQuoteResponseMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | massQuoteRejectMessage inner =>
+    have bound_inner := MassQuoteRejectMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | massCancelResponseMessage inner =>
+    simp only [encode, MassCancelResponseMessage.encode_length]
+    omega
+  | massCancelRejectMessage inner =>
+    have bound_inner := MassCancelRejectMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderFilledMessage inner =>
+    have bound_inner := OrderFilledMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | ordersCanceledMessage inner =>
+    have bound_inner := OrdersCanceledMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderPlacedMessage inner =>
+    have bound_inner := OrderPlacedMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | massQuoteOrdersPlacedMessage inner =>
+    have bound_inner := MassQuoteOrdersPlacedMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | massQuoteMmpTriggeredMessage inner =>
+    simp only [encode, MassQuoteMmpTriggeredMessage.encode_length]
+    omega
+  | ordersMmpTriggeredMessage inner =>
+    simp only [encode, OrdersMmpTriggeredMessage.encode_length]
+    omega
+  | massQuoteMmpUnfrozenMessage inner =>
+    simp only [encode, MassQuoteMmpUnfrozenMessage.encode_length]
+    omega
+  | ordersMmpUnfrozenMessage inner =>
+    simp only [encode, OrdersMmpUnfrozenMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 1 then (LogonMessage.decode bytes).map fun (message, rest) => (.logonMessage message, rest)
   else if tag = 2 then (LogonConfMessage.decode bytes).map fun (message, rest) => (.logonConfMessage message, rest)

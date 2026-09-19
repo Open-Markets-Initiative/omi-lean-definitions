@@ -1207,6 +1207,31 @@ def encode : Payload → List UInt8
   | .tradeCancelMessage message => TradeCancelMessage.encode message
   | .tradeCorrectMessage message => TradeCorrectMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 50 := by
+  cases message with
+  | instrumentDirectoryMessage inner =>
+    simp only [encode, InstrumentDirectoryMessage.encode_length]
+    omega
+  | regShoRestrictionMessage inner =>
+    simp only [encode, RegShoRestrictionMessage.encode_length]
+    omega
+  | securityTradingStatusMessage inner =>
+    simp only [encode, SecurityTradingStatusMessage.encode_length]
+    omega
+  | tradingSessionStatusMessage inner =>
+    simp only [encode, TradingSessionStatusMessage.encode_length]
+    omega
+  | tradeReportMessage inner =>
+    simp only [encode, TradeReportMessage.encode_length]
+    omega
+  | tradeCancelMessage inner =>
+    simp only [encode, TradeCancelMessage.encode_length]
+    omega
+  | tradeCorrectMessage inner =>
+    simp only [encode, TradeCorrectMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 1 then (InstrumentDirectoryMessage.decode bytes).map fun (message, rest) => (.instrumentDirectoryMessage message, rest)
   else if tag = 2 then (RegShoRestrictionMessage.decode bytes).map fun (message, rest) => (.regShoRestrictionMessage message, rest)

@@ -1413,6 +1413,46 @@ def encode : ServerPayload → List UInt8
   | .sessionListNotification message => SessionListNotification.encode message
   | .sessionStatusBroadcast message => SessionStatusBroadcast.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ServerPayload) : (encode message).length ≤ 5767114 := by
+  cases message with
+  | deleteOrderBroadcast inner =>
+    have bound_inner := DeleteOrderBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | forcedLogoutNotification inner =>
+    have bound_inner := ForcedLogoutNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | heartbeatNotification inner =>
+    simp only [encode, HeartbeatNotification.encode_length]
+    omega
+  | logonResponse inner =>
+    simp only [encode, LogonResponse.encode_length]
+    omega
+  | logoutResponse inner =>
+    simp only [encode, LogoutResponse.encode_length]
+    omega
+  | orderExecReportBroadcast inner =>
+    have bound_inner := OrderExecReportBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | partitionListNotification inner =>
+    have bound_inner := PartitionListNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | reject inner =>
+    have bound_inner := Reject.encode_length_le inner
+    simp only [encode]
+    omega
+  | sessionListNotification inner =>
+    have bound_inner := SessionListNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | sessionStatusBroadcast inner =>
+    simp only [encode, SessionStatusBroadcast.encode_length]
+    omega
+
 /-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option ServerPayload :=
   if tag = 10902 then (DeleteOrderBroadcast.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.deleteOrderBroadcast message) else none

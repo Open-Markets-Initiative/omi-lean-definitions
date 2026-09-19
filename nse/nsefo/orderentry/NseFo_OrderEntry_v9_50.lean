@@ -1011,6 +1011,70 @@ def encode : MessagePayload → List UInt8
   | .quickAcknowledgementMessage20415 message => QuickAcknowledgementMessage.encode message
   | .quickAcknowledgementMessage20417 message => QuickAcknowledgementMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : MessagePayload) : (encode message).length ≤ 238 := by
+  cases message with
+  | boardLotInTrimmedMessage inner =>
+    simp only [encode, BoardLotInTrimmedMessage.encode_length]
+    omega
+  | boardLotInTrimmedMessage20400 inner =>
+    simp only [encode, BoardLotInTrimmedMessage.encode_length]
+    omega
+  | orderModifyCancelTrimmedMessage inner =>
+    simp only [encode, OrderModifyCancelTrimmedMessage.encode_length]
+    omega
+  | orderModifyCancelTrimmedMessage20060 inner =>
+    simp only [encode, OrderModifyCancelTrimmedMessage.encode_length]
+    omega
+  | orderModifyCancelTrimmedMessage20070 inner =>
+    simp only [encode, OrderModifyCancelTrimmedMessage.encode_length]
+    omega
+  | orderModifyCancelTrimmedMessage20402 inner =>
+    simp only [encode, OrderModifyCancelTrimmedMessage.encode_length]
+    omega
+  | orderModifyCancelTrimmedMessage20404 inner =>
+    simp only [encode, OrderModifyCancelTrimmedMessage.encode_length]
+    omega
+  | orderConfirmationTrimmedMessage inner =>
+    simp only [encode, OrderConfirmationTrimmedMessage.encode_length]
+    omega
+  | orderConfirmationTrimmedMessage20074 inner =>
+    simp only [encode, OrderConfirmationTrimmedMessage.encode_length]
+    omega
+  | orderConfirmationTrimmedMessage20075 inner =>
+    simp only [encode, OrderConfirmationTrimmedMessage.encode_length]
+    omega
+  | tradeConfirmationTrimmedMessage inner =>
+    simp only [encode, TradeConfirmationTrimmedMessage.encode_length]
+    omega
+  | quickAcknowledgementMessage inner =>
+    simp only [encode, QuickAcknowledgementMessage.encode_length]
+    omega
+  | quickAcknowledgementMessage20403 inner =>
+    simp only [encode, QuickAcknowledgementMessage.encode_length]
+    omega
+  | quickAcknowledgementMessage20405 inner =>
+    simp only [encode, QuickAcknowledgementMessage.encode_length]
+    omega
+  | quickAcknowledgementMessage20407 inner =>
+    simp only [encode, QuickAcknowledgementMessage.encode_length]
+    omega
+  | quickAcknowledgementMessage20409 inner =>
+    simp only [encode, QuickAcknowledgementMessage.encode_length]
+    omega
+  | quickAcknowledgementMessage20411 inner =>
+    simp only [encode, QuickAcknowledgementMessage.encode_length]
+    omega
+  | quickAcknowledgementMessage20413 inner =>
+    simp only [encode, QuickAcknowledgementMessage.encode_length]
+    omega
+  | quickAcknowledgementMessage20415 inner =>
+    simp only [encode, QuickAcknowledgementMessage.encode_length]
+    omega
+  | quickAcknowledgementMessage20417 inner =>
+    simp only [encode, QuickAcknowledgementMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (MessagePayload × List UInt8) :=
   if tag = 20000 then (BoardLotInTrimmedMessage.decode bytes).map fun (message, rest) => (.boardLotInTrimmedMessage message, rest)
   else if tag = 20400 then (BoardLotInTrimmedMessage.decode bytes).map fun (message, rest) => (.boardLotInTrimmedMessage20400 message, rest)

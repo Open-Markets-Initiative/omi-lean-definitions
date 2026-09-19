@@ -924,6 +924,32 @@ def encode : Payload → List UInt8
   | .mdSnapshotRefreshTicker message => MdSnapshotRefreshTicker.encode message
   | .globalDayRoll message => GlobalDayRoll.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 24237 := by
+  cases message with
+  | adminHeartbeat inner =>
+    simp only [encode, AdminHeartbeat.encode_length]
+    omega
+  | mdIncrementalRefreshSpectrum inner =>
+    have bound_inner := MdIncrementalRefreshSpectrum.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshTicker inner =>
+    have bound_inner := MdIncrementalRefreshTicker.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdSnapshotRefreshSpectrum inner =>
+    have bound_inner := MdSnapshotRefreshSpectrum.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdSnapshotRefreshTicker inner =>
+    have bound_inner := MdSnapshotRefreshTicker.encode_length_le inner
+    simp only [encode]
+    omega
+  | globalDayRoll inner =>
+    simp only [encode, GlobalDayRoll.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 302 then (AdminHeartbeat.decode bytes).map fun (message, rest) => (.adminHeartbeat message, rest)
   else if tag = 303 then (MdIncrementalRefreshSpectrum.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshSpectrum message, rest)

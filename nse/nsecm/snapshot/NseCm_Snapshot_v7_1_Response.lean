@@ -145,6 +145,13 @@ def tag : ResponsePayload → BitVec 8
 def encode : ResponsePayload → List UInt8
   | .orderBookSnapshotRecoveryResponseMessage message => OrderBookSnapshotRecoveryResponseMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ResponsePayload) : (encode message).length ≤ 1 := by
+  cases message with
+  | orderBookSnapshotRecoveryResponseMessage inner =>
+    simp only [encode, OrderBookSnapshotRecoveryResponseMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (ResponsePayload × List UInt8) :=
   if tag = 66 then (OrderBookSnapshotRecoveryResponseMessage.decode bytes).map fun (message, rest) => (.orderBookSnapshotRecoveryResponseMessage message, rest)
   else none

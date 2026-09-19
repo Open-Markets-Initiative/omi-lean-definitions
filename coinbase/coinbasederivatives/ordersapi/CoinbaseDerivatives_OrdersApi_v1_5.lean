@@ -1920,6 +1920,123 @@ def encode : Payload → List UInt8
   | .eventResendCompleteMessage message => EventResendCompleteMessage.encode message
   | .eventResendRejectMessage message => EventResendRejectMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 281 := by
+  cases message with
+  | logonMessage inner =>
+    simp only [encode, LogonMessage.encode_length]
+    omega
+  | logonConfMessage inner =>
+    simp only [encode, LogonConfMessage.encode_length]
+    omega
+  | logoutMessage inner =>
+    simp only [encode, LogoutMessage.encode_length]
+    omega
+  | loggedOutMessage inner =>
+    simp only [encode, LoggedOutMessage.encode_length]
+    omega
+  | heartbeatMessage inner =>
+    simp only [encode, HeartbeatMessage.encode_length]
+    omega
+  | testRequestMessage inner =>
+    simp only [encode, TestRequestMessage.encode_length]
+    omega
+  | resendRequestMessage inner =>
+    simp only [encode, ResendRequestMessage.encode_length]
+    omega
+  | gapFillMessage inner =>
+    simp only [encode, GapFillMessage.encode_length]
+    omega
+  | pingMessage inner =>
+    have bound_inner := PingMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | pongMessage inner =>
+    have bound_inner := PongMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | instrumentInfoRequestMessage inner =>
+    simp only [encode, InstrumentInfoRequestMessage.encode_length]
+    omega
+  | instrumentInfoMessage inner =>
+    simp only [encode, InstrumentInfoMessage.encode_length]
+    omega
+  | setAccountMessage inner =>
+    simp only [encode, SetAccountMessage.encode_length]
+    omega
+  | setTraderMessage inner =>
+    simp only [encode, SetTraderMessage.encode_length]
+    omega
+  | setAckMessage inner =>
+    simp only [encode, SetAckMessage.encode_length]
+    omega
+  | newOrderMessage inner =>
+    simp only [encode, NewOrderMessage.encode_length]
+    omega
+  | orderEnteredMessage inner =>
+    simp only [encode, OrderEnteredMessage.encode_length]
+    omega
+  | replaceOrderMessage inner =>
+    simp only [encode, ReplaceOrderMessage.encode_length]
+    omega
+  | streamOrderMessage inner =>
+    simp only [encode, StreamOrderMessage.encode_length]
+    omega
+  | orderRejectMessage inner =>
+    simp only [encode, OrderRejectMessage.encode_length]
+    omega
+  | orderReplacedMessage inner =>
+    simp only [encode, OrderReplacedMessage.encode_length]
+    omega
+  | cancelOrderMessage inner =>
+    simp only [encode, CancelOrderMessage.encode_length]
+    omega
+  | orderCanceledMessage inner =>
+    simp only [encode, OrderCanceledMessage.encode_length]
+    omega
+  | cancelOrderRejectMessage inner =>
+    simp only [encode, CancelOrderRejectMessage.encode_length]
+    omega
+  | massCancelOrderMessage inner =>
+    simp only [encode, MassCancelOrderMessage.encode_length]
+    omega
+  | massCancelOrderAckMessage inner =>
+    simp only [encode, MassCancelOrderAckMessage.encode_length]
+    omega
+  | massCancelOrderRejectMessage inner =>
+    simp only [encode, MassCancelOrderRejectMessage.encode_length]
+    omega
+  | unlockTradingMessage inner =>
+    simp only [encode, UnlockTradingMessage.encode_length]
+    omega
+  | unlockTradingAckMessage inner =>
+    simp only [encode, UnlockTradingAckMessage.encode_length]
+    omega
+  | unlockTradingRejectMessage inner =>
+    simp only [encode, UnlockTradingRejectMessage.encode_length]
+    omega
+  | orderFilledMessage inner =>
+    simp only [encode, OrderFilledMessage.encode_length]
+    omega
+  | spreadOrderFilledMessage inner =>
+    simp only [encode, SpreadOrderFilledMessage.encode_length]
+    omega
+  | lastExecIdRequestMessage inner =>
+    simp only [encode, LastExecIdRequestMessage.encode_length]
+    omega
+  | lastExecIdMessage inner =>
+    simp only [encode, LastExecIdMessage.encode_length]
+    omega
+  | eventResendRequestMessage inner =>
+    simp only [encode, EventResendRequestMessage.encode_length]
+    omega
+  | eventResendCompleteMessage inner =>
+    simp only [encode, EventResendCompleteMessage.encode_length]
+    omega
+  | eventResendRejectMessage inner =>
+    simp only [encode, EventResendRejectMessage.encode_length]
+    omega
+
 def decode (schemaId : BitVec 16) (templateId : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if schemaId = 1100 ∧ templateId = 100 then (LogonMessage.decode bytes).map fun (message, rest) => (.logonMessage message, rest)
   else if schemaId = 1100 ∧ templateId = 200 then (LogonConfMessage.decode bytes).map fun (message, rest) => (.logonConfMessage message, rest)

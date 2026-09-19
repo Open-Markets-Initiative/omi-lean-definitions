@@ -5802,6 +5802,138 @@ def encode : ServerPayload → List UInt8
   | .requestAck message => RequestAck.encode message
   | .requestReject message => RequestReject.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ServerPayload) : (encode message).length ≤ 18081 := by
+  cases message with
+  | channelReset inner =>
+    have bound_inner := ChannelReset.encode_length_le inner
+    simp only [encode]
+    omega
+  | adminHeartbeat inner =>
+    simp only [encode, AdminHeartbeat.encode_length]
+    omega
+  | adminLogin inner =>
+    simp only [encode, AdminLogin.encode_length]
+    omega
+  | adminLogout inner =>
+    simp only [encode, AdminLogout.encode_length]
+    omega
+  | mdInstrumentDefinitionFutureLegacy inner =>
+    have bound_inner := MdInstrumentDefinitionFutureLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdInstrumentDefinitionSpreadLegacy inner =>
+    have bound_inner := MdInstrumentDefinitionSpreadLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | securityStatus inner =>
+    simp only [encode, SecurityStatus.encode_length]
+    omega
+  | mdIncrementalRefreshBookLegacy inner =>
+    have bound_inner := MdIncrementalRefreshBookLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshDailyStatisticsLegacy inner =>
+    have bound_inner := MdIncrementalRefreshDailyStatisticsLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshLimitsBandingLegacy inner =>
+    have bound_inner := MdIncrementalRefreshLimitsBandingLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshSessionStatisticsLegacy inner =>
+    have bound_inner := MdIncrementalRefreshSessionStatisticsLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshVolume inner =>
+    have bound_inner := MdIncrementalRefreshVolume.encode_length_le inner
+    simp only [encode]
+    omega
+  | snapshotFullRefreshLegacy inner =>
+    have bound_inner := SnapshotFullRefreshLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | quoteRequest inner =>
+    have bound_inner := QuoteRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdInstrumentDefinitionOptionLegacy inner =>
+    have bound_inner := MdInstrumentDefinitionOptionLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshTradeSummaryLegacy inner =>
+    have bound_inner := MdIncrementalRefreshTradeSummaryLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshOrderBookLegacy inner =>
+    have bound_inner := MdIncrementalRefreshOrderBookLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | snapshotFullRefreshOrderBookLegacy inner =>
+    have bound_inner := SnapshotFullRefreshOrderBookLegacy.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshBook inner =>
+    have bound_inner := MdIncrementalRefreshBook.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshOrderBook inner =>
+    have bound_inner := MdIncrementalRefreshOrderBook.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshTradeSummary inner =>
+    have bound_inner := MdIncrementalRefreshTradeSummary.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshDailyStatistics inner =>
+    have bound_inner := MdIncrementalRefreshDailyStatistics.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshLimitsBanding inner =>
+    have bound_inner := MdIncrementalRefreshLimitsBanding.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshSessionStatistics inner =>
+    have bound_inner := MdIncrementalRefreshSessionStatistics.encode_length_le inner
+    simp only [encode]
+    omega
+  | snapshotFullRefresh inner =>
+    have bound_inner := SnapshotFullRefresh.encode_length_le inner
+    simp only [encode]
+    omega
+  | snapshotFullRefreshOrderBook inner =>
+    have bound_inner := SnapshotFullRefreshOrderBook.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdInstrumentDefinitionFuture inner =>
+    have bound_inner := MdInstrumentDefinitionFuture.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdInstrumentDefinitionOption inner =>
+    have bound_inner := MdInstrumentDefinitionOption.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdInstrumentDefinitionSpread inner =>
+    have bound_inner := MdInstrumentDefinitionSpread.encode_length_le inner
+    simp only [encode]
+    omega
+  | negotiationReject inner =>
+    simp only [encode, NegotiationReject.encode_length]
+    omega
+  | negotiationResponse inner =>
+    simp only [encode, NegotiationResponse.encode_length]
+    omega
+  | terminate inner =>
+    simp only [encode, Terminate.encode_length]
+    omega
+  | requestAck inner =>
+    have bound_inner := RequestAck.encode_length_le inner
+    simp only [encode]
+    omega
+  | requestReject inner =>
+    simp only [encode, RequestReject.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (ServerPayload × List UInt8) :=
   if tag = 4 then (ChannelReset.decode bytes).map fun (message, rest) => (.channelReset message, rest)
   else if tag = 12 then (AdminHeartbeat.decode bytes).map fun (message, rest) => (.adminHeartbeat message, rest)

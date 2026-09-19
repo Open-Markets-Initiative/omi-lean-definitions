@@ -4723,6 +4723,108 @@ def encode : Payload → List UInt8
   | .securityStatusRequest message => SecurityStatusRequest.encode message
   | .subscriberHeartbeat message => SubscriberHeartbeat.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 12262 := by
+  cases message with
+  | channelReset inner =>
+    have bound_inner := ChannelReset.encode_length_le inner
+    simp only [encode]
+    omega
+  | adminHeartbeat inner =>
+    simp only [encode, AdminHeartbeat.encode_length]
+    omega
+  | adminLogin inner =>
+    simp only [encode, AdminLogin.encode_length]
+    omega
+  | adminLogout inner =>
+    simp only [encode, AdminLogout.encode_length]
+    omega
+  | mdInstrumentDefinitionFuture inner =>
+    have bound_inner := MdInstrumentDefinitionFuture.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdInstrumentDefinitionSpread inner =>
+    have bound_inner := MdInstrumentDefinitionSpread.encode_length_le inner
+    simp only [encode]
+    omega
+  | securityStatus inner =>
+    simp only [encode, SecurityStatus.encode_length]
+    omega
+  | mdIncrementalRefreshBook inner =>
+    have bound_inner := MdIncrementalRefreshBook.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshDailyStatistics inner =>
+    have bound_inner := MdIncrementalRefreshDailyStatistics.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshLimitsBanding inner =>
+    have bound_inner := MdIncrementalRefreshLimitsBanding.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshSessionStatistics inner =>
+    have bound_inner := MdIncrementalRefreshSessionStatistics.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshTrade inner =>
+    have bound_inner := MdIncrementalRefreshTrade.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshVolume inner =>
+    have bound_inner := MdIncrementalRefreshVolume.encode_length_le inner
+    simp only [encode]
+    omega
+  | snapshotFullRefresh inner =>
+    have bound_inner := SnapshotFullRefresh.encode_length_le inner
+    simp only [encode]
+    omega
+  | quoteRequest inner =>
+    have bound_inner := QuoteRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdInstrumentDefinitionOption inner =>
+    have bound_inner := MdInstrumentDefinitionOption.encode_length_le inner
+    simp only [encode]
+    omega
+  | mdIncrementalRefreshTradeSummary inner =>
+    have bound_inner := MdIncrementalRefreshTradeSummary.encode_length_le inner
+    simp only [encode]
+    omega
+  | negotiate inner =>
+    simp only [encode, Negotiate.encode_length]
+    omega
+  | negotiationReject inner =>
+    simp only [encode, NegotiationReject.encode_length]
+    omega
+  | negotiationResponse inner =>
+    simp only [encode, NegotiationResponse.encode_length]
+    omega
+  | terminate inner =>
+    simp only [encode, Terminate.encode_length]
+    omega
+  | marketDataRequest inner =>
+    have bound_inner := MarketDataRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | requestAck inner =>
+    have bound_inner := RequestAck.encode_length_le inner
+    simp only [encode]
+    omega
+  | requestReject inner =>
+    simp only [encode, RequestReject.encode_length]
+    omega
+  | securityListRequest inner =>
+    have bound_inner := SecurityListRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | securityStatusRequest inner =>
+    have bound_inner := SecurityStatusRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | subscriberHeartbeat inner =>
+    simp only [encode, SubscriberHeartbeat.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 4 then (ChannelReset.decode bytes).map fun (message, rest) => (.channelReset message, rest)
   else if tag = 12 then (AdminHeartbeat.decode bytes).map fun (message, rest) => (.adminHeartbeat message, rest)

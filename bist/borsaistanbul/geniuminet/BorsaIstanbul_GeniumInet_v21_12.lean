@@ -1269,6 +1269,58 @@ def encode : Payload → List UInt8
   | .tradeMessage message => TradeMessage.encode message
   | .equilibriumPriceUpdate message => EquilibriumPriceUpdate.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 129 := by
+  cases message with
+  | secondsMessage inner =>
+    simp only [encode, SecondsMessage.encode_length]
+    omega
+  | orderBookDirectory inner =>
+    simp only [encode, OrderBookDirectory.encode_length]
+    omega
+  | combinationOrderBookLeg inner =>
+    simp only [encode, CombinationOrderBookLeg.encode_length]
+    omega
+  | tickSizeTableEntry inner =>
+    simp only [encode, TickSizeTableEntry.encode_length]
+    omega
+  | shortSellStatus inner =>
+    simp only [encode, ShortSellStatus.encode_length]
+    omega
+  | systemEventMessage inner =>
+    simp only [encode, SystemEventMessage.encode_length]
+    omega
+  | orderBookStateMessage inner =>
+    simp only [encode, OrderBookStateMessage.encode_length]
+    omega
+  | addOrderNoMpidAttribution inner =>
+    simp only [encode, AddOrderNoMpidAttribution.encode_length]
+    omega
+  | addOrderWithMpidAttribution inner =>
+    simp only [encode, AddOrderWithMpidAttribution.encode_length]
+    omega
+  | orderExecutedMessage inner =>
+    simp only [encode, OrderExecutedMessage.encode_length]
+    omega
+  | orderExecutedWithPriceMessage inner =>
+    simp only [encode, OrderExecutedWithPriceMessage.encode_length]
+    omega
+  | orderReplaceMessage inner =>
+    simp only [encode, OrderReplaceMessage.encode_length]
+    omega
+  | orderDeleteMessage inner =>
+    simp only [encode, OrderDeleteMessage.encode_length]
+    omega
+  | orderBookFlushMessage inner =>
+    simp only [encode, OrderBookFlushMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [encode, TradeMessage.encode_length]
+    omega
+  | equilibriumPriceUpdate inner =>
+    simp only [encode, EquilibriumPriceUpdate.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 84 then (SecondsMessage.decode bytes).map fun (message, rest) => (.secondsMessage message, rest)
   else if tag = 82 then (OrderBookDirectory.decode bytes).map fun (message, rest) => (.orderBookDirectory message, rest)

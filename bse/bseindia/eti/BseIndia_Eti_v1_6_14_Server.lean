@@ -6722,6 +6722,184 @@ def encode : ServerPayload → List UInt8
   | .userLogoutResponse message => UserLogoutResponse.encode message
   | .userPasswordChangeResponse message => UserPasswordChangeResponse.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ServerPayload) : (encode message).length ≤ 2123706 := by
+  cases message with
+  | broadcastErrorNotification inner =>
+    have bound_inner := BroadcastErrorNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | debtInquiryResponse inner =>
+    simp only [encode, DebtInquiryResponse.encode_length]
+    omega
+  | deleteAllOrderBroadcast inner =>
+    have bound_inner := DeleteAllOrderBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | deleteAllOrderNrResponse inner =>
+    simp only [encode, DeleteAllOrderNrResponse.encode_length]
+    omega
+  | deleteAllOrderQuoteEventBroadcast inner =>
+    simp only [encode, DeleteAllOrderQuoteEventBroadcast.encode_length]
+    omega
+  | deleteAllOrderResponse inner =>
+    have bound_inner := DeleteAllOrderResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | deleteAllQuoteBroadcast inner =>
+    have bound_inner := DeleteAllQuoteBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | deleteAllQuoteResponse inner =>
+    have bound_inner := DeleteAllQuoteResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | deleteOrderBroadcast inner =>
+    simp only [encode, DeleteOrderBroadcast.encode_length]
+    omega
+  | deleteOrderNrResponse inner =>
+    simp only [encode, DeleteOrderNrResponse.encode_length]
+    omega
+  | deleteOrderResponse inner =>
+    simp only [encode, DeleteOrderResponse.encode_length]
+    omega
+  | forcedLogoutNotification inner =>
+    have bound_inner := ForcedLogoutNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | gatewayResponse inner =>
+    simp only [encode, GatewayResponse.encode_length]
+    omega
+  | gwOrderAcknowledgement inner =>
+    simp only [encode, GwOrderAcknowledgement.encode_length]
+    omega
+  | heartbeatNotification inner =>
+    simp only [encode, HeartbeatNotification.encode_length]
+    omega
+  | inquireSessionListResponse inner =>
+    have bound_inner := InquireSessionListResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | logonResponse inner =>
+    simp only [encode, LogonResponse.encode_length]
+    omega
+  | logoutResponse inner =>
+    simp only [encode, LogoutResponse.encode_length]
+    omega
+  | massQuoteResponse inner =>
+    have bound_inner := MassQuoteResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | modifyOrderNrResponse inner =>
+    simp only [encode, ModifyOrderNrResponse.encode_length]
+    omega
+  | modifyOrderResponse inner =>
+    simp only [encode, ModifyOrderResponse.encode_length]
+    omega
+  | multiLegExecReportBroadcast inner =>
+    have bound_inner := MultiLegExecReportBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | multiLegExecResponse inner =>
+    have bound_inner := MultiLegExecResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | multiLegOrderReject inner =>
+    have bound_inner := MultiLegOrderReject.encode_length_le inner
+    simp only [encode]
+    omega
+  | newOrderNrResponse inner =>
+    simp only [encode, NewOrderNrResponse.encode_length]
+    omega
+  | newOrderResponse inner =>
+    simp only [encode, NewOrderResponse.encode_length]
+    omega
+  | newsBroadcast inner =>
+    have bound_inner := NewsBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderExecNotification inner =>
+    have bound_inner := OrderExecNotification.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderExecReportBroadcast inner =>
+    have bound_inner := OrderExecReportBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderExecResponse inner =>
+    have bound_inner := OrderExecResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | quoteExecReportBroadcast inner =>
+    have bound_inner := QuoteExecReportBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | quoteExecutionReport inner =>
+    have bound_inner := QuoteExecutionReport.encode_length_le inner
+    simp only [encode]
+    omega
+  | reject inner =>
+    have bound_inner := Reject.encode_length_le inner
+    simp only [encode]
+    omega
+  | retransmitMeMessageResponse inner =>
+    simp only [encode, RetransmitMeMessageResponse.encode_length]
+    omega
+  | retransmitResponse inner =>
+    simp only [encode, RetransmitResponse.encode_length]
+    omega
+  | riskCollateralAlertAdminBroadcast inner =>
+    have bound_inner := RiskCollateralAlertAdminBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | riskCollateralAlertBroadcast inner =>
+    have bound_inner := RiskCollateralAlertBroadcast.encode_length_le inner
+    simp only [encode]
+    omega
+  | riskNotificationBroadcast inner =>
+    simp only [encode, RiskNotificationBroadcast.encode_length]
+    omega
+  | serviceAvailabilityBroadcast inner =>
+    simp only [encode, ServiceAvailabilityBroadcast.encode_length]
+    omega
+  | sessionPasswordChangeResponse inner =>
+    simp only [encode, SessionPasswordChangeResponse.encode_length]
+    omega
+  | sessionRegistrationResponse inner =>
+    have bound_inner := SessionRegistrationResponse.encode_length_le inner
+    simp only [encode]
+    omega
+  | subscribeResponse inner =>
+    simp only [encode, SubscribeResponse.encode_length]
+    omega
+  | tmTradingSessionStatusBroadcast inner =>
+    simp only [encode, TmTradingSessionStatusBroadcast.encode_length]
+    omega
+  | throttleUpdateNotification inner =>
+    simp only [encode, ThrottleUpdateNotification.encode_length]
+    omega
+  | tradeBroadcast inner =>
+    simp only [encode, TradeBroadcast.encode_length]
+    omega
+  | tradeEnhancementBroadcast inner =>
+    simp only [encode, TradeEnhancementBroadcast.encode_length]
+    omega
+  | tradingSessionStatusBroadcast inner =>
+    simp only [encode, TradingSessionStatusBroadcast.encode_length]
+    omega
+  | unsubscribeResponse inner =>
+    simp only [encode, UnsubscribeResponse.encode_length]
+    omega
+  | userLoginResponse inner =>
+    simp only [encode, UserLoginResponse.encode_length]
+    omega
+  | userLogoutResponse inner =>
+    simp only [encode, UserLogoutResponse.encode_length]
+    omega
+  | userPasswordChangeResponse inner =>
+    simp only [encode, UserPasswordChangeResponse.encode_length]
+    omega
+
 /-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option ServerPayload :=
   if tag = 10032 then (BroadcastErrorNotification.decode bytes).map fun message => .broadcastErrorNotification message

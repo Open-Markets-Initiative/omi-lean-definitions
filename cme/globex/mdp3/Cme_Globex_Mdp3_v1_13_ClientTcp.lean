@@ -821,6 +821,31 @@ def encode : ClientPayload → List UInt8
   | .securityStatusRequest message => SecurityStatusRequest.encode message
   | .subscriberHeartbeat message => SubscriberHeartbeat.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ClientPayload) : (encode message).length ≤ 2561 := by
+  cases message with
+  | negotiate inner =>
+    simp only [encode, Negotiate.encode_length]
+    omega
+  | terminate inner =>
+    simp only [encode, Terminate.encode_length]
+    omega
+  | marketDataRequest inner =>
+    have bound_inner := MarketDataRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | securityListRequest inner =>
+    have bound_inner := SecurityListRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | securityStatusRequest inner =>
+    have bound_inner := SecurityStatusRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | subscriberHeartbeat inner =>
+    simp only [encode, SubscriberHeartbeat.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (ClientPayload × List UInt8) :=
   if tag = 200 then (Negotiate.decode bytes).map fun (message, rest) => (.negotiate message, rest)
   else if tag = 203 then (Terminate.decode bytes).map fun (message, rest) => (.terminate message, rest)

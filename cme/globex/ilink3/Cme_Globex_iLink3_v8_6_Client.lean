@@ -2974,6 +2974,73 @@ def encode : ClientPayload → List UInt8
   | .newOrderCross message => NewOrderCross.encode message
   | .securityDefinitionRequest message => SecurityDefinitionRequest.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ClientPayload) : (encode message).length ≤ 65669 := by
+  cases message with
+  | negotiate inner =>
+    have bound_inner := Negotiate.encode_length_le inner
+    simp only [encode]
+    omega
+  | establish inner =>
+    have bound_inner := Establish.encode_length_le inner
+    simp only [encode]
+    omega
+  | sequence inner =>
+    simp only [encode, Sequence.encode_length]
+    omega
+  | terminate inner =>
+    simp only [encode, Terminate.encode_length]
+    omega
+  | retransmitRequest inner =>
+    simp only [encode, RetransmitRequest.encode_length]
+    omega
+  | newOrderSingle inner =>
+    simp only [encode, NewOrderSingle.encode_length]
+    omega
+  | orderCancelReplaceRequest inner =>
+    simp only [encode, OrderCancelReplaceRequest.encode_length]
+    omega
+  | orderCancelRequest inner =>
+    simp only [encode, OrderCancelRequest.encode_length]
+    omega
+  | massQuote inner =>
+    have bound_inner := MassQuote.encode_length_le inner
+    simp only [encode]
+    omega
+  | partyDetailsDefinitionRequest inner =>
+    have bound_inner := PartyDetailsDefinitionRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | quoteCancel inner =>
+    have bound_inner := QuoteCancel.encode_length_le inner
+    simp only [encode]
+    omega
+  | orderMassActionRequest inner =>
+    simp only [encode, OrderMassActionRequest.encode_length]
+    omega
+  | orderMassStatusRequest inner =>
+    simp only [encode, OrderMassStatusRequest.encode_length]
+    omega
+  | orderStatusRequest inner =>
+    simp only [encode, OrderStatusRequest.encode_length]
+    omega
+  | partyDetailsListRequest inner =>
+    have bound_inner := PartyDetailsListRequest.encode_length_le inner
+    simp only [encode]
+    omega
+  | requestForQuote inner =>
+    have bound_inner := RequestForQuote.encode_length_le inner
+    simp only [encode]
+    omega
+  | newOrderCross inner =>
+    have bound_inner := NewOrderCross.encode_length_le inner
+    simp only [encode]
+    omega
+  | securityDefinitionRequest inner =>
+    have bound_inner := SecurityDefinitionRequest.encode_length_le inner
+    simp only [encode]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (ClientPayload × List UInt8) :=
   if tag = 500 then (Negotiate.decode bytes).map fun (message, rest) => (.negotiate message, rest)
   else if tag = 503 then (Establish.decode bytes).map fun (message, rest) => (.establish message, rest)

@@ -1113,6 +1113,52 @@ def encode : MessageData → List UInt8
   | .tradeBreakMessage message => TradeBreakMessage.encode message
   | .clearBookMessage message => ClearBookMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : MessageData) : (encode message).length ≤ 45 := by
+  cases message with
+  | systemEventMessage inner =>
+    simp only [encode, SystemEventMessage.encode_length]
+    omega
+  | securityDirectoryMessage inner =>
+    simp only [encode, SecurityDirectoryMessage.encode_length]
+    omega
+  | tradingStatusMessage inner =>
+    simp only [encode, TradingStatusMessage.encode_length]
+    omega
+  | retailLiquidityIndicatorMessage inner =>
+    simp only [encode, RetailLiquidityIndicatorMessage.encode_length]
+    omega
+  | operationalHaltStatusMessage inner =>
+    simp only [encode, OperationalHaltStatusMessage.encode_length]
+    omega
+  | shortSalePriceTestStatusMessage inner =>
+    simp only [encode, ShortSalePriceTestStatusMessage.encode_length]
+    omega
+  | securityEventMessage inner =>
+    simp only [encode, SecurityEventMessage.encode_length]
+    omega
+  | addOrderMessage inner =>
+    simp only [encode, AddOrderMessage.encode_length]
+    omega
+  | orderModifyMessage inner =>
+    simp only [encode, OrderModifyMessage.encode_length]
+    omega
+  | orderDeleteMessage inner =>
+    simp only [encode, OrderDeleteMessage.encode_length]
+    omega
+  | orderExecutedMessage inner =>
+    simp only [encode, OrderExecutedMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [encode, TradeMessage.encode_length]
+    omega
+  | tradeBreakMessage inner =>
+    simp only [encode, TradeBreakMessage.encode_length]
+    omega
+  | clearBookMessage inner =>
+    simp only [encode, ClearBookMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (MessageData × List UInt8) :=
   if tag = 83 then (SystemEventMessage.decode bytes).map fun (message, rest) => (.systemEventMessage message, rest)
   else if tag = 68 then (SecurityDirectoryMessage.decode bytes).map fun (message, rest) => (.securityDirectoryMessage message, rest)

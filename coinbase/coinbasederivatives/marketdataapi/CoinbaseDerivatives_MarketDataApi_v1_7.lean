@@ -1963,6 +1963,79 @@ def encode : Payload → List UInt8
   | .retransmitRequestMessage message => RetransmitRequestMessage.encode message
   | .retransmitRejectMessage message => RetransmitRejectMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 175 := by
+  cases message with
+  | outrightInstrumentDefinitionMessage inner =>
+    simp only [encode, OutrightInstrumentDefinitionMessage.encode_length]
+    omega
+  | spreadInstrumentDefinitionMessage inner =>
+    simp only [encode, SpreadInstrumentDefinitionMessage.encode_length]
+    omega
+  | optionInstrumentDefinitionMessage inner =>
+    simp only [encode, OptionInstrumentDefinitionMessage.encode_length]
+    omega
+  | tradingStatusUpdateMessage inner =>
+    simp only [encode, TradingStatusUpdateMessage.encode_length]
+    omega
+  | orderPutMessage inner =>
+    simp only [encode, OrderPutMessage.encode_length]
+    omega
+  | orderDeleteMessage inner =>
+    simp only [encode, OrderDeleteMessage.encode_length]
+    omega
+  | impliedOrderUpdateMessage inner =>
+    simp only [encode, ImpliedOrderUpdateMessage.encode_length]
+    omega
+  | tradeSummaryMessage inner =>
+    simp only [encode, TradeSummaryMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [encode, TradeMessage.encode_length]
+    omega
+  | tradeAmendMessage inner =>
+    simp only [encode, TradeAmendMessage.encode_length]
+    omega
+  | spreadTradeAmendMessage inner =>
+    simp only [encode, SpreadTradeAmendMessage.encode_length]
+    omega
+  | tradeBustMessage inner =>
+    simp only [encode, TradeBustMessage.encode_length]
+    omega
+  | marketStatMessage inner =>
+    simp only [encode, MarketStatMessage.encode_length]
+    omega
+  | tradeSessionVolumeMessage inner =>
+    simp only [encode, TradeSessionVolumeMessage.encode_length]
+    omega
+  | openInterestMessage inner =>
+    simp only [encode, OpenInterestMessage.encode_length]
+    omega
+  | startOfOutrightInstrumentSnapshotMessage inner =>
+    simp only [encode, StartOfOutrightInstrumentSnapshotMessage.encode_length]
+    omega
+  | startOfSpreadInstrumentSnapshotMessage inner =>
+    simp only [encode, StartOfSpreadInstrumentSnapshotMessage.encode_length]
+    omega
+  | startOfOptionInstrumentSnapshotMessage inner =>
+    simp only [encode, StartOfOptionInstrumentSnapshotMessage.encode_length]
+    omega
+  | orderSnapshotMessage inner =>
+    simp only [encode, OrderSnapshotMessage.encode_length]
+    omega
+  | endOfSnapshotMessage inner =>
+    simp only [encode, EndOfSnapshotMessage.encode_length]
+    omega
+  | endOfCycleMessage inner =>
+    simp only [encode, EndOfCycleMessage.encode_length]
+    omega
+  | retransmitRequestMessage inner =>
+    simp only [encode, RetransmitRequestMessage.encode_length]
+    omega
+  | retransmitRejectMessage inner =>
+    simp only [encode, RetransmitRejectMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 10 then (OutrightInstrumentDefinitionMessage.decode bytes).map fun (message, rest) => (.outrightInstrumentDefinitionMessage message, rest)
   else if tag = 11 then (SpreadInstrumentDefinitionMessage.decode bytes).map fun (message, rest) => (.spreadInstrumentDefinitionMessage message, rest)

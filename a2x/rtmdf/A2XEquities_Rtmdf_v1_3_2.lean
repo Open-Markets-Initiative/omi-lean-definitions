@@ -583,6 +583,43 @@ def encode : Payload → List UInt8
   | .auctionOnDemandMessage message => AuctionOnDemandMessage.encode message
   | .marketAtClose message => MarketAtClose.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 31 := by
+  cases message with
+  | heartbeatMessage inner =>
+    simp only [encode, HeartbeatMessage.encode_length]
+    omega
+  | orderAddMessage inner =>
+    simp only [encode, OrderAddMessage.encode_length]
+    omega
+  | orderCancelMessage inner =>
+    simp only [encode, OrderCancelMessage.encode_length]
+    omega
+  | orderModifyMessage inner =>
+    simp only [encode, OrderModifyMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [encode, TradeMessage.encode_length]
+    omega
+  | tradeBustMessage inner =>
+    simp only [encode, TradeBustMessage.encode_length]
+    omega
+  | tickTableDataMessage inner =>
+    simp only [encode, TickTableDataMessage.encode_length]
+    omega
+  | securityDefinitionMessage inner =>
+    simp only [encode, SecurityDefinitionMessage.encode_length]
+    omega
+  | securityStatusMessage inner =>
+    simp only [encode, SecurityStatusMessage.encode_length]
+    omega
+  | auctionOnDemandMessage inner =>
+    simp only [encode, AuctionOnDemandMessage.encode_length]
+    omega
+  | marketAtClose inner =>
+    simp only [encode, MarketAtClose.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 1 then (HeartbeatMessage.decode bytes).map fun (message, rest) => (.heartbeatMessage message, rest)
   else if tag = 2 then (OrderAddMessage.decode bytes).map fun (message, rest) => (.orderAddMessage message, rest)

@@ -2603,6 +2603,70 @@ def encode : Payload → List UInt8
   | .brokenTradeMessage message => BrokenTradeMessage.encode message
   | .netOrderImbalanceIndicatorMessage message => NetOrderImbalanceIndicatorMessage.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 49 := by
+  cases message with
+  | systemEventMessage inner =>
+    simp only [encode, SystemEventMessage.encode_length]
+    omega
+  | stockDirectoryMessage inner =>
+    simp only [encode, StockDirectoryMessage.encode_length]
+    omega
+  | stockTradingActionMessage inner =>
+    simp only [encode, StockTradingActionMessage.encode_length]
+    omega
+  | regShoShortSalePriceTestRestrictedIndicatorMessage inner =>
+    simp only [encode, RegShoShortSalePriceTestRestrictedIndicatorMessage.encode_length]
+    omega
+  | marketParticipantPositionMessage inner =>
+    simp only [encode, MarketParticipantPositionMessage.encode_length]
+    omega
+  | mwcbDeclineLevelMessage inner =>
+    simp only [encode, MwcbDeclineLevelMessage.encode_length]
+    omega
+  | mwcbStatusLevelMessage inner =>
+    simp only [encode, MwcbStatusLevelMessage.encode_length]
+    omega
+  | luldAuctionCollarMessage inner =>
+    simp only [encode, LuldAuctionCollarMessage.encode_length]
+    omega
+  | operationalHaltMessage inner =>
+    simp only [encode, OperationalHaltMessage.encode_length]
+    omega
+  | addOrderNoMpidAttributionMessage inner =>
+    simp only [encode, AddOrderNoMpidAttributionMessage.encode_length]
+    omega
+  | addOrderWithMpidAttributionMessage inner =>
+    simp only [encode, AddOrderWithMpidAttributionMessage.encode_length]
+    omega
+  | orderExecutedMessage inner =>
+    simp only [encode, OrderExecutedMessage.encode_length]
+    omega
+  | orderExecutedWithPriceMessage inner =>
+    simp only [encode, OrderExecutedWithPriceMessage.encode_length]
+    omega
+  | orderCancelMessage inner =>
+    simp only [encode, OrderCancelMessage.encode_length]
+    omega
+  | orderDeleteMessage inner =>
+    simp only [encode, OrderDeleteMessage.encode_length]
+    omega
+  | orderReplaceMessage inner =>
+    simp only [encode, OrderReplaceMessage.encode_length]
+    omega
+  | tradeMessageNonCross inner =>
+    simp only [encode, TradeMessageNonCross.encode_length]
+    omega
+  | crossTradeMessage inner =>
+    simp only [encode, CrossTradeMessage.encode_length]
+    omega
+  | brokenTradeMessage inner =>
+    simp only [encode, BrokenTradeMessage.encode_length]
+    omega
+  | netOrderImbalanceIndicatorMessage inner =>
+    simp only [encode, NetOrderImbalanceIndicatorMessage.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 83 then (SystemEventMessage.decode bytes).map fun (message, rest) => (.systemEventMessage message, rest)
   else if tag = 82 then (StockDirectoryMessage.decode bytes).map fun (message, rest) => (.stockDirectoryMessage message, rest)

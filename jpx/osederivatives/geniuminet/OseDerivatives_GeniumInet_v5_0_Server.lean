@@ -572,6 +572,28 @@ def encode : SequencedMessage → List UInt8
   | .orderCanceled message => OrderCanceled.encode message
   | .orderExecuted message => OrderExecuted.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : SequencedMessage) : (encode message).length ≤ 127 := by
+  cases message with
+  | orderAccepted inner =>
+    simp only [encode, OrderAccepted.encode_length]
+    omega
+  | massCancelAccepted inner =>
+    simp only [encode, MassCancelAccepted.encode_length]
+    omega
+  | orderRejected inner =>
+    simp only [encode, OrderRejected.encode_length]
+    omega
+  | orderReplaced inner =>
+    simp only [encode, OrderReplaced.encode_length]
+    omega
+  | orderCanceled inner =>
+    simp only [encode, OrderCanceled.encode_length]
+    omega
+  | orderExecuted inner =>
+    simp only [encode, OrderExecuted.encode_length]
+    omega
+
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (SequencedMessage × List UInt8) :=
   if tag = 65 then (OrderAccepted.decode bytes).map fun (message, rest) => (.orderAccepted message, rest)
   else if tag = 77 then (MassCancelAccepted.decode bytes).map fun (message, rest) => (.massCancelAccepted message, rest)
@@ -711,6 +733,29 @@ def encode : ServerPayload → List UInt8
   | .sequencedDataPacket message => SequencedDataPacket.encode message
   | .serverHeartbeat message => ServerHeartbeat.encode message
   | .endOfSession message => EndOfSession.encode message
+
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ServerPayload) : (encode message).length ≤ 128 := by
+  cases message with
+  | debugPacket inner =>
+    simp only [encode, DebugPacket.encode_length]
+    omega
+  | loginAcceptedPacket inner =>
+    simp only [encode, LoginAcceptedPacket.encode_length]
+    omega
+  | loginRejectedPacket inner =>
+    simp only [encode, LoginRejectedPacket.encode_length]
+    omega
+  | sequencedDataPacket inner =>
+    have bound_inner := SequencedDataPacket.encode_length_le inner
+    simp only [encode]
+    omega
+  | serverHeartbeat inner =>
+    simp only [encode, ServerHeartbeat.encode_length]
+    omega
+  | endOfSession inner =>
+    simp only [encode, EndOfSession.encode_length]
+    omega
 
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (ServerPayload × List UInt8) :=
   if tag = 43 then (DebugPacket.decode bytes).map fun (message, rest) => (.debugPacket message, rest)

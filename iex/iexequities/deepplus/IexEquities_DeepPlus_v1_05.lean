@@ -1,7 +1,7 @@
 import Omi.Wire
 
 /-!
-# Investors Exchange DeepPlus v1.04
+# Investors Exchange DeepPlus v1.05
 
 Generated from the binary model, with the proofs the model's rules call for: every record
 decodes back to what was encoded; a message dispatch selects the message its type names;
@@ -20,7 +20,7 @@ Text fields are kept byte for byte, padding included, so what is decoded encodes
 Prices with implied decimals are proven as the integers on the wire.
 -/
 
-namespace Omi.IexIexequitiesDeepplusIextpV104
+namespace Omi.IexIexequitiesDeepplusIextpV105
 
 /-- System Event: one byte code -/
 def SystemEvent.codes : List UInt8 :=
@@ -1351,4 +1351,4 @@ theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
 
 end Packet
 
-end Omi.IexIexequitiesDeepplusIextpV104
+end Omi.IexIexequitiesDeepplusIextpV105

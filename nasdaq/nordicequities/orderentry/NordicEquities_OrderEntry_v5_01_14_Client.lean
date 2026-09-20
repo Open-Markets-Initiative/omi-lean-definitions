@@ -2152,7 +2152,7 @@ def encode (message : EnterOrderMessage) : List UInt8 :=
     ++ (encodeUInt 4 message.executionWithinFirm
     ++ (encodeUInt 4 message.investmentDecisionWithinFirmShortCode
     ++ (encodeUInt 4 message.clientIdentifier
-    ++ (encodeUIntLE 1 message.partyRoleQualifier
+    ++ (encodeUInt 1 message.partyRoleQualifier
     ++ (Capacity.encode message.capacity
     ++ (AlgoIndicator.encode message.algoIndicator
     ++ (encodeUInt 2 (BitVec.ofNat (8 * 2) (encodeMany Tagvalue.encode message.tagvalue.val).length)
@@ -2168,7 +2168,7 @@ def decode (bytes : List UInt8) : Option (EnterOrderMessage × List UInt8) := do
   let (executionWithinFirm, bytes) ← decodeUInt 4 bytes
   let (investmentDecisionWithinFirmShortCode, bytes) ← decodeUInt 4 bytes
   let (clientIdentifier, bytes) ← decodeUInt 4 bytes
-  let (partyRoleQualifier, bytes) ← decodeUIntLE 1 bytes
+  let (partyRoleQualifier, bytes) ← decodeUInt 1 bytes
   let (capacity, bytes) ← Capacity.decode bytes
   let (algoIndicator, bytes) ← AlgoIndicator.decode bytes
   let (appendageLength, bytes) ← decodeUInt 2 bytes
@@ -2186,7 +2186,7 @@ theorem encode_length_pos (message : EnterOrderMessage) : (encode message).lengt
 theorem encode_length_le (message : EnterOrderMessage) : (encode message).length ≤ 65575 := by
   have bound_tagvalue := message.tagvalue.length_lt
   unfold encode
-  simp only [List.length_append, ← Nat.add_assoc, encodeUInt_length, BuySellIndicator.encode_length, Alpha.encode_length, encodeUIntLE_length, Capacity.encode_length, AlgoIndicator.encode_length]
+  simp only [List.length_append, ← Nat.add_assoc, encodeUInt_length, BuySellIndicator.encode_length, Alpha.encode_length, Capacity.encode_length, AlgoIndicator.encode_length]
   omega
 
 @[simp] theorem decode_encode (message : EnterOrderMessage) (rest : List UInt8) :
@@ -2210,7 +2210,7 @@ theorem encode_length_le (message : EnterOrderMessage) : (encode message).length
   dsimp only
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [List.append_assoc, Capacity.decode_encode, some_bind]
   dsimp only

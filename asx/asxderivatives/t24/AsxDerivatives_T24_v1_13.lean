@@ -2394,7 +2394,7 @@ def encode (message : OpenHighLowLastTradeAdjustmentMessage) : List UInt8 :=
     ++ (encodeUInt 4 message.lastVolume
     ++ (encodeUInt 4 message.totalTradedVolume
     ++ (encodeUInt 4 message.totalTrades
-    ++ (encodeUIntLE 1 message.marketUpdates))))))))))
+    ++ (encodeUInt 1 message.marketUpdates))))))))))
 
 def decode (bytes : List UInt8) : Option (OpenHighLowLastTradeAdjustmentMessage × List UInt8) := do
   let (nanoseconds, bytes) ← decodeUInt 4 bytes
@@ -2407,12 +2407,12 @@ def decode (bytes : List UInt8) : Option (OpenHighLowLastTradeAdjustmentMessage 
   let (lastVolume, bytes) ← decodeUInt 4 bytes
   let (totalTradedVolume, bytes) ← decodeUInt 4 bytes
   let (totalTrades, bytes) ← decodeUInt 4 bytes
-  let (marketUpdates, bytes) ← decodeUIntLE 1 bytes
+  let (marketUpdates, bytes) ← decodeUInt 1 bytes
   pure ({ nanoseconds, tradeDate, contractNumber, openingTrade, highestTrade, lowestTrade, lastTrade, lastVolume, totalTradedVolume, totalTrades, marketUpdates }, bytes)
 
 @[simp] theorem encode_length (message : OpenHighLowLastTradeAdjustmentMessage) : (encode message).length = 39 := by
   unfold encode
-  simp only [List.length_append, encodeUInt_length, encodeUIntLE_length]
+  simp only [List.length_append, encodeUInt_length]
 
 theorem encode_length_pos (message : OpenHighLowLastTradeAdjustmentMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -2441,7 +2441,7 @@ theorem encode_length_pos (message : OpenHighLowLastTradeAdjustmentMessage) : (e
   dsimp only
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, some_bind]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end OpenHighLowLastTradeAdjustmentMessage

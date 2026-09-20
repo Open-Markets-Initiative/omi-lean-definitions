@@ -1,4 +1,5 @@
 import Omi.Wire
+import Std.Tactic.BVDecide
 
 /-!
 # Euronext Market Data Gateway v5.29
@@ -19,6 +20,8 @@ Note: Order Type Rules is a bit field set, proven as its 2 byte integer rather t
 Note: Mm Protections is a bit field set, proven as its 1 byte integer rather than bit by bit.
 
 Note: Strategy Authorized is a bit field set, proven as its 8 byte integer rather than bit by bit.
+
+Note: Compression says whether the Optiq Message was LZ4 transformed: the bytes of a transformed body are carried as they lie rather than read, and Compression is written from which of the two the message holds.
 
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
@@ -1863,51 +1866,6 @@ def decode : List UInt8 → Option (SecurityCondition × List UInt8)
   simp [decode, encode, ofByte_toByte]
 
 end SecurityCondition
-
-/-- Market Data Packet Header: 16 bytes -/
-structure MarketDataPacketHeader where
-  packetTime : BitVec 64
-  packetSequenceNumber : BitVec 32
-  packetFlags : BitVec 16
-  channelId : BitVec 16
-  deriving DecidableEq, Repr
-
-namespace MarketDataPacketHeader
-
-def encode (message : MarketDataPacketHeader) : List UInt8 :=
-  encodeUIntLE 8 message.packetTime
-    ++ (encodeUIntLE 4 message.packetSequenceNumber
-    ++ (encodeUIntLE 2 message.packetFlags
-    ++ (encodeUIntLE 2 message.channelId)))
-
-def decode (bytes : List UInt8) : Option (MarketDataPacketHeader × List UInt8) := do
-  let (packetTime, bytes) ← decodeUIntLE 8 bytes
-  let (packetSequenceNumber, bytes) ← decodeUIntLE 4 bytes
-  let (packetFlags, bytes) ← decodeUIntLE 2 bytes
-  let (channelId, bytes) ← decodeUIntLE 2 bytes
-  pure ({ packetTime, packetSequenceNumber, packetFlags, channelId }, bytes)
-
-@[simp] theorem encode_length (message : MarketDataPacketHeader) : (encode message).length = 16 := by
-  unfold encode
-  simp only [List.length_append, encodeUIntLE_length]
-
-theorem encode_length_pos (message : MarketDataPacketHeader) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
-
-@[simp] theorem decode_encode (message : MarketDataPacketHeader) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [decodeUIntLE_encodeUIntLE, some_bind]
-  rfl
-
-end MarketDataPacketHeader
 
 /-- Start Of Day Message: 10 bytes -/
 structure StartOfDayMessage where
@@ -6624,33 +6582,138 @@ theorem encode_length_pos (message : OptiqMessage) : (encode message).length > 0
 
 end OptiqMessage
 
+/-- Optiq Message -/
+structure OptiqMessagePlain where
+  optiqMessage : List OptiqMessage
+  deriving DecidableEq, Repr
+
+namespace OptiqMessagePlain
+
+def encode (message : OptiqMessagePlain) : List UInt8 :=
+  encodeMany OptiqMessage.encode message.optiqMessage
+
+def decode (bytes : List UInt8) : Option OptiqMessagePlain := do
+  let optiqMessage ← decodeAll OptiqMessage.decode bytes.length bytes
+  pure { optiqMessage }
+
+theorem decode_encode (message : OptiqMessagePlain) : decode (encode message) = some message := by
+  unfold decode encode
+  rw [decodeAll_encodeMany OptiqMessage.encode OptiqMessage.decode OptiqMessage.decode_encode OptiqMessage.encode_length_pos message.optiqMessage _ (encodeMany_length_ge OptiqMessage.encode OptiqMessage.encode_length_pos message.optiqMessage), some_bind]
+  rfl
+
+end OptiqMessagePlain
+
+/-- Optiq Message -/
+structure OptiqMessageLz4 where
+  payload : List UInt8
+  deriving DecidableEq, Repr
+
+namespace OptiqMessageLz4
+
+def encode (message : OptiqMessageLz4) : List UInt8 :=
+  encodeMany Byte.encode message.payload
+
+def decode (bytes : List UInt8) : Option OptiqMessageLz4 := do
+  let payload ← decodeAll Byte.decode bytes.length bytes
+  pure { payload }
+
+theorem decode_encode (message : OptiqMessageLz4) : decode (encode message) = some message := by
+  unfold decode encode
+  rw [decodeAll_encodeMany Byte.encode Byte.decode Byte.decode_encode Byte.encode_length_pos message.payload _ (encodeMany_length_ge Byte.encode Byte.encode_length_pos message.payload), some_bind]
+  rfl
+
+end OptiqMessageLz4
+
+/-- The Optiq Message, as it lies when Compression says it was not LZ4 transformed and as bytes when it says it was -/
+inductive OptiqMessageBody where
+  | plain (message : OptiqMessagePlain) -- 0
+  | lz4 (message : OptiqMessageLz4) -- 1
+  deriving DecidableEq, Repr
+
+namespace OptiqMessageBody
+
+/-- The Compression each message is sent under -/
+def tag : OptiqMessageBody → BitVec 16
+  | .plain _ => 0
+  | .lz4 _ => 1
+
+/-- The tag is written into its own bits of the field that carries it, and no others -/
+theorem tag_inside (message : OptiqMessageBody) : tag message &&& 65534 = 0 := by
+  cases message <;> (simp only [tag]; decide)
+
+def encode : OptiqMessageBody → List UInt8
+  | .plain message => OptiqMessagePlain.encode message
+  | .lz4 message => OptiqMessageLz4.encode message
+
+/-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
+def decode (tag : BitVec 16) (bytes : List UInt8) : Option OptiqMessageBody :=
+  if tag = 0 then (OptiqMessagePlain.decode bytes).map fun message => .plain message
+  else if tag = 1 then (OptiqMessageLz4.decode bytes).map fun message => .lz4 message
+  else none
+
+theorem decode_encode (message : OptiqMessageBody) :
+    decode (tag message) (encode message) = some message := by
+  cases message with
+  | plain message => simp [decode, encode, tag, OptiqMessagePlain.decode_encode]
+  | lz4 message => simp [decode, encode, tag, OptiqMessageLz4.decode_encode]
+
+end OptiqMessageBody
+
 /-- Packet -/
 structure Packet where
-  marketDataPacketHeader : MarketDataPacketHeader
-  optiqMessage : List OptiqMessage
+  packetTime : BitVec 64
+  packetSequenceNumber : BitVec 32
+  packetFlags : Masked 16 1
+  channelId : BitVec 16
+  optiqMessage : OptiqMessageBody
   deriving DecidableEq, Repr
 
 namespace Packet
 
 def encode (message : Packet) : List UInt8 :=
-  MarketDataPacketHeader.encode message.marketDataPacketHeader
-    ++ (encodeMany OptiqMessage.encode message.optiqMessage)
+  encodeUIntLE 8 message.packetTime
+    ++ (encodeUIntLE 4 message.packetSequenceNumber
+    ++ (encodeUIntLE 2 (message.packetFlags.val ||| OptiqMessageBody.tag message.optiqMessage)
+    ++ (encodeUIntLE 2 message.channelId
+    ++ (OptiqMessageBody.encode message.optiqMessage))))
 
 def decode (bytes : List UInt8) : Option Packet := do
-  let (marketDataPacketHeader, bytes) ← MarketDataPacketHeader.decode bytes
-  let optiqMessage ← decodeAll OptiqMessage.decode bytes.length bytes
-  pure { marketDataPacketHeader, optiqMessage }
+  let (packetTime, bytes) ← decodeUIntLE 8 bytes
+  let (packetSequenceNumber, bytes) ← decodeUIntLE 4 bytes
+  let (packetFlags_, bytes) ← decodeUIntLE 2 bytes
+  let (channelId, bytes) ← decodeUIntLE 2 bytes
+  let optiqMessage ← OptiqMessageBody.decode (packetFlags_ &&& 1) bytes
+  if fits_packetFlags : (packetFlags_ &&& 65534) &&& 1 = 0 then
+    pure { packetTime, packetSequenceNumber, packetFlags := ⟨packetFlags_ &&& 65534, fits_packetFlags⟩, channelId, optiqMessage }
+  else none
 
 theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
   unfold encode
-  simp only [MarketDataPacketHeader.encode_length, List.length_append]
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
 theorem decode_encode (message : Packet) : decode (encode message) = some message := by
   unfold decode encode
-  rw [MarketDataPacketHeader.decode_encode, some_bind]
+  have selected_packetFlags : (message.packetFlags.val ||| OptiqMessageBody.tag message.optiqMessage) &&& 1 = OptiqMessageBody.tag message.optiqMessage := by
+    have clear := message.packetFlags.property
+    have inside := OptiqMessageBody.tag_inside message.optiqMessage
+    bv_decide
+  have carried_packetFlags : (message.packetFlags.val ||| OptiqMessageBody.tag message.optiqMessage) &&& 65534 = message.packetFlags.val := by
+    have clear := message.packetFlags.property
+    have inside := OptiqMessageBody.tag_inside message.optiqMessage
+    bv_decide
+  rw [decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeAll_encodeMany OptiqMessage.encode OptiqMessage.decode OptiqMessage.decode_encode OptiqMessage.encode_length_pos message.optiqMessage _ (encodeMany_length_ge OptiqMessage.encode OptiqMessage.encode_length_pos message.optiqMessage), some_bind]
+  rw [decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [selected_packetFlags]
+  rw [OptiqMessageBody.decode_encode, some_bind]
+  rw [dite_eq_left (by rw [carried_packetFlags]; exact message.packetFlags.property)]
+  simp only [carried_packetFlags]
   rfl
 
 end Packet

@@ -214,6 +214,19 @@ theorem Bounded.length_lt (bounded : Bounded n α) : bounded.val.length < 256 ^ 
     (⟨bounded.val, fits⟩ : Bounded n α) = bounded :=
   rfl
 
+/-- A packed field some of whose bits are written from what follows it: the rest is carried, and
+    those bits are clear in what is carried, so the two can be put back together -/
+abbrev Masked (n : Nat) (mask : BitVec n) := { value : BitVec n // value &&& mask = 0 }
+
+instance {n : Nat} {mask : BitVec n} : DecidableEq (Masked n mask) :=
+  inferInstanceAs (DecidableEq { value : BitVec n // value &&& mask = 0 })
+
+instance {n : Nat} {mask : BitVec n} : Repr (Masked n mask) where
+  reprPrec masked precedence := reprPrec masked.val precedence
+
+theorem Masked.clear {n : Nat} {mask : BitVec n} (masked : Masked n mask) : masked.val &&& mask = 0 :=
+  masked.property
+
 /-- A list whose encodings together fit under an `n` byte length, so a length written from them
     needs no side condition: entries filling the bytes a length field states -/
 abbrev Sized (n : Nat) (encode : α → List UInt8) := { items : List α // (encodeMany encode items).length < 256 ^ n }

@@ -1800,7 +1800,7 @@ structure AuctionNotificationMessage where
   auctionSide : AuctionSide
   matchedVolume : BitVec 32
   imbalanceVolume : BitVec 32
-  reserved : BitVec 32
+  reserved4 : BitVec 32
   deriving DecidableEq, Repr
 
 namespace AuctionNotificationMessage
@@ -1818,7 +1818,7 @@ def encode (message : AuctionNotificationMessage) : List UInt8 :=
     ++ (AuctionSide.encode message.auctionSide
     ++ (encodeUInt 4 message.matchedVolume
     ++ (encodeUInt 4 message.imbalanceVolume
-    ++ (encodeUInt 4 message.reserved))))))))))))
+    ++ (encodeUInt 4 message.reserved4))))))))))))
 
 def decode (bytes : List UInt8) : Option (AuctionNotificationMessage × List UInt8) := do
   let (timestamp, bytes) ← Timestamp.decode bytes
@@ -1833,8 +1833,8 @@ def decode (bytes : List UInt8) : Option (AuctionNotificationMessage × List UIn
   let (auctionSide, bytes) ← AuctionSide.decode bytes
   let (matchedVolume, bytes) ← decodeUInt 4 bytes
   let (imbalanceVolume, bytes) ← decodeUInt 4 bytes
-  let (reserved, bytes) ← decodeUInt 4 bytes
-  pure ({ timestamp, optionId, securitySymbol, expiration, explicitStrikePrice, optionType, auctionId, auctionType, price, auctionSide, matchedVolume, imbalanceVolume, reserved }, bytes)
+  let (reserved4, bytes) ← decodeUInt 4 bytes
+  pure ({ timestamp, optionId, securitySymbol, expiration, explicitStrikePrice, optionType, auctionId, auctionType, price, auctionSide, matchedVolume, imbalanceVolume, reserved4 }, bytes)
 
 @[simp] theorem encode_length (message : AuctionNotificationMessage) : (encode message).length = 46 := by
   unfold encode

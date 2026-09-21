@@ -1972,7 +1972,7 @@ structure NetOrderImbalanceIndicatorMessage where
   imbalancePrice : BitVec 32
   imbalanceVolume : BitVec 32
   customerFirmIndicator : CustomerFirmIndicator
-  reserved : BitVec 24
+  reserved3 : BitVec 24
   deriving DecidableEq, Repr
 
 namespace NetOrderImbalanceIndicatorMessage
@@ -1987,7 +1987,7 @@ def encode (message : NetOrderImbalanceIndicatorMessage) : List UInt8 :=
     ++ (encodeUInt 4 message.imbalancePrice
     ++ (encodeUInt 4 message.imbalanceVolume
     ++ (CustomerFirmIndicator.encode message.customerFirmIndicator
-    ++ (encodeUInt 3 message.reserved)))))))))
+    ++ (encodeUInt 3 message.reserved3)))))))))
 
 def decode (bytes : List UInt8) : Option (NetOrderImbalanceIndicatorMessage × List UInt8) := do
   let (nanoseconds, bytes) ← decodeUInt 4 bytes
@@ -1999,8 +1999,8 @@ def decode (bytes : List UInt8) : Option (NetOrderImbalanceIndicatorMessage × L
   let (imbalancePrice, bytes) ← decodeUInt 4 bytes
   let (imbalanceVolume, bytes) ← decodeUInt 4 bytes
   let (customerFirmIndicator, bytes) ← CustomerFirmIndicator.decode bytes
-  let (reserved, bytes) ← decodeUInt 3 bytes
-  pure ({ nanoseconds, auctionId, auctionType, pairedContracts, imbalanceDirection, optionId, imbalancePrice, imbalanceVolume, customerFirmIndicator, reserved }, bytes)
+  let (reserved3, bytes) ← decodeUInt 3 bytes
+  pure ({ nanoseconds, auctionId, auctionType, pairedContracts, imbalanceDirection, optionId, imbalancePrice, imbalanceVolume, customerFirmIndicator, reserved3 }, bytes)
 
 @[simp] theorem encode_length (message : NetOrderImbalanceIndicatorMessage) : (encode message).length = 30 := by
   unfold encode

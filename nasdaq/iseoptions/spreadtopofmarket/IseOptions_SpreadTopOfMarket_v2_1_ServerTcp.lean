@@ -16,6 +16,53 @@ Prices with implied decimals are proven as the integers on the wire.
 
 namespace Omi.NasdaqIseoptionsSpreadtopofmarketItchV21ServerTcp
 
+/-- Reject Reason Code: one byte code -/
+def RejectReasonCode.codes : List UInt8 :=
+  [0x41, 0x53]
+
+inductive RejectReasonCode where
+  | notAuthorized -- Not Authorized
+  | sessionNotAvailable -- Session Not Available
+  | unlisted (byte : { byte : UInt8 // byte ∉ RejectReasonCode.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace RejectReasonCode
+
+def toByte : RejectReasonCode → UInt8
+  | .notAuthorized => 0x41
+  | .sessionNotAvailable => 0x53
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : RejectReasonCode :=
+  if byte = 0x41 then .notAuthorized
+  else .sessionNotAvailable
+
+def ofByte (byte : UInt8) : RejectReasonCode :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : RejectReasonCode) : ofByte value.toByte = value := by
+  cases value with
+  | notAuthorized => decide
+  | sessionNotAvailable => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : RejectReasonCode) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (RejectReasonCode × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : RejectReasonCode) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : RejectReasonCode) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end RejectReasonCode
+
 /-- Event Code: one byte code -/
 def EventCode.codes : List UInt8 :=
   [0x4F, 0x53, 0x51, 0x4E, 0x4C, 0x45, 0x43, 0x57]
@@ -394,21 +441,21 @@ end LoginAcceptedPacket
 
 /-- Login Rejected Packet: 1 bytes -/
 structure LoginRejectedPacket where
-  rejectReasonCode : Alpha 1
+  rejectReasonCode : RejectReasonCode
   deriving DecidableEq, Repr
 
 namespace LoginRejectedPacket
 
 def encode (message : LoginRejectedPacket) : List UInt8 :=
-  Alpha.encode message.rejectReasonCode
+  RejectReasonCode.encode message.rejectReasonCode
 
 def decode (bytes : List UInt8) : Option (LoginRejectedPacket × List UInt8) := do
-  let (rejectReasonCode, bytes) ← Alpha.decode 1 bytes
+  let (rejectReasonCode, bytes) ← RejectReasonCode.decode bytes
   pure ({ rejectReasonCode }, bytes)
 
 @[simp] theorem encode_length (message : LoginRejectedPacket) : (encode message).length = 1 := by
   unfold encode
-  simp only [Alpha.encode_length]
+  simp only [RejectReasonCode.encode_length]
 
 theorem encode_length_pos (message : LoginRejectedPacket) : (encode message).length > 0 := by
   rw [encode_length]
@@ -417,7 +464,7 @@ theorem encode_length_pos (message : LoginRejectedPacket) : (encode message).len
 @[simp] theorem decode_encode (message : LoginRejectedPacket) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  rw [Alpha.decode_encode, some_bind]
+  rw [RejectReasonCode.decode_encode, some_bind]
   rfl
 
 end LoginRejectedPacket

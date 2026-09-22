@@ -3,11 +3,11 @@
 
 ## BSE Limited
 
-| Division | [Protocol][Omi.Bse.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Date | Size | [Status][Omi.Glossary.Status] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Bse.Specifications] |
-| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| [BseIndia][BseIndia.Exchange] | [Eobi][Bse.BseIndia.Eobi] | [Fbe][Omi.Encoding.Fbe] | [1.4][Bse.BseIndia.Eobi.Fbe.v1.4.Definition] | 7/14/2025 | 1746 | [Active][Omi.Glossary.Status.Active] | [Verified][Omi.Glossary.Testing.Verified] | [url][Bse.BseIndia.Eobi.Fbe.v1.4.Url] - [pdf][Bse.BseIndia.Eobi.Fbe.v1.4.Pdf] |
-| [BseIndia][BseIndia.Exchange] | [Eti][Bse.BseIndia.Eti] | [Fbe][Omi.Encoding.Fbe] | [1.6.14][Bse.BseIndia.Eti.Fbe.v1.6.14.Definition] | 3/30/2026 | 3525 | [Active][Omi.Glossary.Status.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Bse.BseIndia.Eti.Fbe.v1.6.14.Url] - [pdf][Bse.BseIndia.Eti.Fbe.v1.6.14.Pdf] - [xml][Bse.BseIndia.Eti.Fbe.v1.6.14.Xml] |
-| [BseIndia][BseIndia.Exchange] | [Eti][Bse.BseIndia.Eti] | [Fbe][Omi.Encoding.Fbe] | [1.6.14][Bse.BseIndia.Eti.Fbe.v1.6.14.Definition] | 3/30/2026 | 7256 | [Active][Omi.Glossary.Status.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Bse.BseIndia.Eti.Fbe.v1.6.14.Url] - [pdf][Bse.BseIndia.Eti.Fbe.v1.6.14.Pdf] - [xml][Bse.BseIndia.Eti.Fbe.v1.6.14.Xml] |
+| Division | [Protocol][Omi.Bse.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Transport | Date | Size | [Status][Omi.Glossary.Status] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Bse.Specifications] |
+| --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| [BseIndia][BseIndia.Exchange] | [Eobi][Bse.BseIndia.Eobi] | [Fbe][Omi.Encoding.Fbe] | [1.4][Bse.BseIndia.Eobi.Fbe.v1.4.Definition] |  | 7/14/2025 | 1746 | [Active][Omi.Glossary.Status.Active] | [Verified][Omi.Glossary.Testing.Verified] | [url][Bse.BseIndia.Eobi.Fbe.v1.4.Url] - [pdf][Bse.BseIndia.Eobi.Fbe.v1.4.Pdf] |
+| [BseIndia][BseIndia.Exchange] | [Eti][Bse.BseIndia.Eti] | [Fbe][Omi.Encoding.Fbe] | [1.6.14][Bse.BseIndia.Eti.Fbe.v1.6.14.Client.Definition] | [Client][Bse.BseIndia.Eti.Fbe.v1.6.14.Client.Definition] | 3/30/2026 | 3525 | [Active][Omi.Glossary.Status.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Bse.BseIndia.Eti.Fbe.v1.6.14.Url] - [pdf][Bse.BseIndia.Eti.Fbe.v1.6.14.Pdf] - [xml][Bse.BseIndia.Eti.Fbe.v1.6.14.Xml] |
+| [BseIndia][BseIndia.Exchange] | [Eti][Bse.BseIndia.Eti] | [Fbe][Omi.Encoding.Fbe] | [1.6.14][Bse.BseIndia.Eti.Fbe.v1.6.14.Server.Definition] | [Server][Bse.BseIndia.Eti.Fbe.v1.6.14.Server.Definition] | 3/30/2026 | 7256 | [Active][Omi.Glossary.Status.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Bse.BseIndia.Eti.Fbe.v1.6.14.Url] - [pdf][Bse.BseIndia.Eti.Fbe.v1.6.14.Pdf] - [xml][Bse.BseIndia.Eti.Fbe.v1.6.14.Xml] |
 
 
 <p align="center"><a href="https://www.bseindia.com" title="BSE Limited Website"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Website.png" alt="Website" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/company/bseindia" title="BSE Limited on LinkedIn"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/LinkedIn.png" alt="LinkedIn" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://en.wikipedia.org/wiki/Bombay_Stock_Exchange" title="BSE Limited on Wikipedia"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Wikipedia.png" alt="Wikipedia" width="32" height="32"></a></p>
@@ -36,11 +36,8 @@
 [Bse.BseIndia.Eobi.Fbe.v1.4.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/bse/bseindia/eobi/BseIndia_Eobi_v1_4.lean "Bse BseIndia Eobi Fbe v1.4 Lean Definition"
 [Bse.BseIndia.Eobi.Fbe.v1.4.Url]: https://www.bseindia.com/nta "BSE Limited 1.4 Url"
 [Bse.BseIndia.Eobi.Fbe.v1.4.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bse/Specifications/Eobi/Bse.BseIndia.Eobi.Fbe.v1.4.pdf "BSE Limited 1.4 Pdf"
-[Bse.BseIndia.Eti.Fbe.v1.6.14.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/bse/bseindia/eti/BseIndia_Eti_v1_6_14_Client.lean "Bse BseIndia Eti Fbe v1.6.14 Lean Definition"
+[Bse.BseIndia.Eti.Fbe.v1.6.14.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/bse/bseindia/eti/BseIndia_Eti_v1_6_14_Client.lean "Bse BseIndia Eti Fbe v1.6.14 Lean Definition"
 [Bse.BseIndia.Eti.Fbe.v1.6.14.Url]: https://www.bseindia.com/nta "BSE Limited 1.6.14 Url"
 [Bse.BseIndia.Eti.Fbe.v1.6.14.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bse/Specifications/Eti/Bse.BseIndia.Eti.Fbe.v1.6.14.pdf "BSE Limited 1.6.14 Pdf"
 [Bse.BseIndia.Eti.Fbe.v1.6.14.Xml]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bse/Specifications/Eti/Bse.BseIndia.Eti.Fbe.v1.6.14.xml "BSE Limited 1.6.14 Xml"
-[Bse.BseIndia.Eti.Fbe.v1.6.14.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/bse/bseindia/eti/BseIndia_Eti_v1_6_14_Server.lean "Bse BseIndia Eti Fbe v1.6.14 Lean Definition"
-[Bse.BseIndia.Eti.Fbe.v1.6.14.Url]: https://www.bseindia.com/nta "BSE Limited 1.6.14 Url"
-[Bse.BseIndia.Eti.Fbe.v1.6.14.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bse/Specifications/Eti/Bse.BseIndia.Eti.Fbe.v1.6.14.pdf "BSE Limited 1.6.14 Pdf"
-[Bse.BseIndia.Eti.Fbe.v1.6.14.Xml]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bse/Specifications/Eti/Bse.BseIndia.Eti.Fbe.v1.6.14.xml "BSE Limited 1.6.14 Xml"
+[Bse.BseIndia.Eti.Fbe.v1.6.14.Server.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/bse/bseindia/eti/BseIndia_Eti_v1_6_14_Server.lean "Bse BseIndia Eti Fbe v1.6.14 Lean Definition"

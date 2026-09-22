@@ -312,10 +312,10 @@ end ComplexStrategyTradeReport
 
 /-- Any Udp Payload, selected by Message Type -/
 inductive UdpPayload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | complexStrategyDirectoryMessage (message : ComplexStrategyDirectoryMessage) -- 's' 0x73
-  | strategyTradingActionMessage (message : StrategyTradingActionMessage) -- 'H' 0x48
-  | complexStrategyTradeReport (message : ComplexStrategyTradeReport) -- 'R' 0x52
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | complexStrategyDirectoryMessage (message : ComplexStrategyDirectoryMessage) -- "s" 0x73
+  | strategyTradingActionMessage (message : StrategyTradingActionMessage) -- "H" 0x48
+  | complexStrategyTradeReport (message : ComplexStrategyTradeReport) -- "R" 0x52
   deriving DecidableEq, Repr
 
 namespace UdpPayload

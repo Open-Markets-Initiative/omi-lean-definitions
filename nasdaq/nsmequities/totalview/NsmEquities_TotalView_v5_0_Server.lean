@@ -175,7 +175,7 @@ end BuySellIndicator
 
 /-- Market Category: one byte code -/
 def MarketCategory.codes : List UInt8 :=
-  [0x51, 0x47, 0x53, 0x4E, 0x41, 0x50, 0x4D, 0x5A, 0x56]
+  [0x51, 0x47, 0x53, 0x4E, 0x41, 0x50, 0x4D, 0x5A, 0x56, 0x20]
 
 inductive MarketCategory where
   | nasdaqGlobalSelectMarket -- Nasdaq Global Select Market
@@ -187,6 +187,7 @@ inductive MarketCategory where
   | nyseTexas -- Nyse Texas
   | batsZExchange -- Bats Z Exchange
   | investorsExchangeLlc -- Investors Exchange Llc
+  | notAvailable -- Not Available
   | unlisted (byte : { byte : UInt8 // byte ∉ MarketCategory.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -202,6 +203,7 @@ def toByte : MarketCategory → UInt8
   | .nyseTexas => 0x4D
   | .batsZExchange => 0x5A
   | .investorsExchangeLlc => 0x56
+  | .notAvailable => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -214,7 +216,8 @@ def listed (byte : UInt8) : MarketCategory :=
   else if byte = 0x50 then .nyseArca
   else if byte = 0x4D then .nyseTexas
   else if byte = 0x5A then .batsZExchange
-  else .investorsExchangeLlc
+  else if byte = 0x56 then .investorsExchangeLlc
+  else .notAvailable
 
 def ofByte (byte : UInt8) : MarketCategory :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -230,6 +233,7 @@ theorem ofByte_toByte (value : MarketCategory) : ofByte value.toByte = value := 
   | nyseTexas => decide
   | batsZExchange => decide
   | investorsExchangeLlc => decide
+  | notAvailable => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : MarketCategory) : List UInt8 :=
@@ -250,7 +254,7 @@ end MarketCategory
 
 /-- Financial Status Indicator: one byte code -/
 def FinancialStatusIndicator.codes : List UInt8 :=
-  [0x44, 0x45, 0x51, 0x53, 0x47, 0x48, 0x4A, 0x4B, 0x43, 0x4E]
+  [0x44, 0x45, 0x51, 0x53, 0x47, 0x48, 0x4A, 0x4B, 0x43, 0x4E, 0x20]
 
 inductive FinancialStatusIndicator where
   | deficient -- Deficient
@@ -263,6 +267,7 @@ inductive FinancialStatusIndicator where
   | deficientDelinquentAndBankrupt -- Deficient Delinquent And Bankrupt
   | creationsAndorRedemptionsSuspendedForExchangeTradedProduct -- Creations Andor Redemptions Suspended For Exchange Traded Product
   | normal -- Normal
+  | notAvailable -- Not Available
   | unlisted (byte : { byte : UInt8 // byte ∉ FinancialStatusIndicator.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -279,6 +284,7 @@ def toByte : FinancialStatusIndicator → UInt8
   | .deficientDelinquentAndBankrupt => 0x4B
   | .creationsAndorRedemptionsSuspendedForExchangeTradedProduct => 0x43
   | .normal => 0x4E
+  | .notAvailable => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -292,7 +298,8 @@ def listed (byte : UInt8) : FinancialStatusIndicator :=
   else if byte = 0x4A then .delinquentAndBankrupt
   else if byte = 0x4B then .deficientDelinquentAndBankrupt
   else if byte = 0x43 then .creationsAndorRedemptionsSuspendedForExchangeTradedProduct
-  else .normal
+  else if byte = 0x4E then .normal
+  else .notAvailable
 
 def ofByte (byte : UInt8) : FinancialStatusIndicator :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -309,6 +316,7 @@ theorem ofByte_toByte (value : FinancialStatusIndicator) : ofByte value.toByte =
   | deficientDelinquentAndBankrupt => decide
   | creationsAndorRedemptionsSuspendedForExchangeTradedProduct => decide
   | normal => decide
+  | notAvailable => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : FinancialStatusIndicator) : List UInt8 :=
@@ -1265,15 +1273,15 @@ end OperationalHaltMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | addOrderMessage (message : AddOrderMessage) -- 'A' 0x41
-  | addOrderMpidAttributionMessage (message : AddOrderMpidAttributionMessage) -- 'F' 0x46
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | regShoRestrictionMessage (message : RegShoRestrictionMessage) -- 'Y' 0x59
-  | retailInterestMessage (message : RetailInterestMessage) -- 'N' 0x4E
-  | endOfSnapshotMessage (message : EndOfSnapshotMessage) -- 'G' 0x47
-  | operationalHaltMessage (message : OperationalHaltMessage) -- 'h' 0x68
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | addOrderMessage (message : AddOrderMessage) -- "A" 0x41
+  | addOrderMpidAttributionMessage (message : AddOrderMpidAttributionMessage) -- "F" 0x46
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | regShoRestrictionMessage (message : RegShoRestrictionMessage) -- "Y" 0x59
+  | retailInterestMessage (message : RetailInterestMessage) -- "N" 0x4E
+  | endOfSnapshotMessage (message : EndOfSnapshotMessage) -- "G" 0x47
+  | operationalHaltMessage (message : OperationalHaltMessage) -- "h" 0x68
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -1457,12 +1465,12 @@ end EndOfSession
 
 /-- Any Server Payload, selected by Server Packet Type -/
 inductive ServerPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeat (message : ServerHeartbeat) -- 'H' 0x48
-  | endOfSession (message : EndOfSession) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeat (message : ServerHeartbeat) -- "H" 0x48
+  | endOfSession (message : EndOfSession) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerPayload

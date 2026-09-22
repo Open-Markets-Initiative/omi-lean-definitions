@@ -2225,33 +2225,33 @@ end AuctionNotificationMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | secondsMessage (message : SecondsMessage) -- 'T' 0x54
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | baseReferenceMessage (message : BaseReferenceMessage) -- 'L' 0x4C
-  | optionDirectoryMessage (message : OptionDirectoryMessage) -- 'R' 0x52
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | securityOpenMessage (message : SecurityOpenMessage) -- 'O' 0x4F
-  | addOrderShortMessage (message : AddOrderShortMessage) -- 'a' 0x61
-  | addOrderLongMessage (message : AddOrderLongMessage) -- 'A' 0x41
-  | addQuoteShortMessage (message : AddQuoteShortMessage) -- 'j' 0x6A
-  | addQuoteLongMessage (message : AddQuoteLongMessage) -- 'J' 0x4A
-  | singleSideExecutedMessage (message : SingleSideExecutedMessage) -- 'E' 0x45
-  | singleSideExecutedWithPriceMessage (message : SingleSideExecutedWithPriceMessage) -- 'C' 0x43
-  | singleSideCancelMessage (message : SingleSideCancelMessage) -- 'X' 0x58
-  | singleSideReplaceShortMessage (message : SingleSideReplaceShortMessage) -- 'u' 0x75
-  | singleSideReplaceLongMessage (message : SingleSideReplaceLongMessage) -- 'U' 0x55
-  | orderReplaceShortMessage (message : OrderReplaceShortMessage) -- 'v' 0x76
-  | orderReplaceLongMessage (message : OrderReplaceLongMessage) -- 'V' 0x56
-  | singleSideDeleteMessage (message : SingleSideDeleteMessage) -- 'D' 0x44
-  | singleSideUpdateMessage (message : SingleSideUpdateMessage) -- 'G' 0x47
-  | quoteReplaceShortMessage (message : QuoteReplaceShortMessage) -- 'k' 0x6B
-  | quoteReplaceLongMessage (message : QuoteReplaceLongMessage) -- 'K' 0x4B
-  | quoteDeleteMessage (message : QuoteDeleteMessage) -- 'Y' 0x59
-  | blockDeleteMessage (message : BlockDeleteMessage) -- 'Z' 0x5A
-  | nonAuctionOptionsTradeMessage (message : NonAuctionOptionsTradeMessage) -- 'P' 0x50
-  | optionsCrossTradeMessage (message : OptionsCrossTradeMessage) -- 'Q' 0x51
-  | brokenTradeOrderExecutedMessage (message : BrokenTradeOrderExecutedMessage) -- 'B' 0x42
-  | auctionNotificationMessage (message : AuctionNotificationMessage) -- 'I' 0x49
+  | secondsMessage (message : SecondsMessage) -- "T" 0x54
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | baseReferenceMessage (message : BaseReferenceMessage) -- "L" 0x4C
+  | optionDirectoryMessage (message : OptionDirectoryMessage) -- "R" 0x52
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | securityOpenMessage (message : SecurityOpenMessage) -- "O" 0x4F
+  | addOrderShortMessage (message : AddOrderShortMessage) -- "a" 0x61
+  | addOrderLongMessage (message : AddOrderLongMessage) -- "A" 0x41
+  | addQuoteShortMessage (message : AddQuoteShortMessage) -- "j" 0x6A
+  | addQuoteLongMessage (message : AddQuoteLongMessage) -- "J" 0x4A
+  | singleSideExecutedMessage (message : SingleSideExecutedMessage) -- "E" 0x45
+  | singleSideExecutedWithPriceMessage (message : SingleSideExecutedWithPriceMessage) -- "C" 0x43
+  | singleSideCancelMessage (message : SingleSideCancelMessage) -- "X" 0x58
+  | singleSideReplaceShortMessage (message : SingleSideReplaceShortMessage) -- "u" 0x75
+  | singleSideReplaceLongMessage (message : SingleSideReplaceLongMessage) -- "U" 0x55
+  | orderReplaceShortMessage (message : OrderReplaceShortMessage) -- "v" 0x76
+  | orderReplaceLongMessage (message : OrderReplaceLongMessage) -- "V" 0x56
+  | singleSideDeleteMessage (message : SingleSideDeleteMessage) -- "D" 0x44
+  | singleSideUpdateMessage (message : SingleSideUpdateMessage) -- "G" 0x47
+  | quoteReplaceShortMessage (message : QuoteReplaceShortMessage) -- "k" 0x6B
+  | quoteReplaceLongMessage (message : QuoteReplaceLongMessage) -- "K" 0x4B
+  | quoteDeleteMessage (message : QuoteDeleteMessage) -- "Y" 0x59
+  | blockDeleteMessage (message : BlockDeleteMessage) -- "Z" 0x5A
+  | nonAuctionOptionsTradeMessage (message : NonAuctionOptionsTradeMessage) -- "P" 0x50
+  | optionsCrossTradeMessage (message : OptionsCrossTradeMessage) -- "Q" 0x51
+  | brokenTradeOrderExecutedMessage (message : BrokenTradeOrderExecutedMessage) -- "B" 0x42
+  | auctionNotificationMessage (message : AuctionNotificationMessage) -- "I" 0x49
   deriving DecidableEq, Repr
 
 namespace Payload

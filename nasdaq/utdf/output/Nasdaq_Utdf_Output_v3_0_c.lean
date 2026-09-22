@@ -2364,16 +2364,16 @@ end FractionalAsOfTradeMessage
 
 /-- Any Trade Message Payload, selected by Trade Message Type -/
 inductive TradeMessagePayload where
-  | tradeReportMessageShortformMessage (message : TradeReportMessageShortformMessage) -- 'A' 0x41
-  | tradeReportMessageLongformMessage (message : TradeReportMessageLongformMessage) -- 'W' 0x57
-  | tradeCancelErrorMessage (message : TradeCancelErrorMessage) -- 'Z' 0x5A
-  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- 'Y' 0x59
-  | priorDayAsOfTradeMessage (message : PriorDayAsOfTradeMessage) -- 'H' 0x48
-  | fractionalTradeReportMessageShortformMessage (message : FractionalTradeReportMessageShortformMessage) -- 'M' 0x4D
-  | fractionalTradeReportMessageLongformMessage (message : FractionalTradeReportMessageLongformMessage) -- 'N' 0x4E
-  | fractionalTradeCancelErrorMessage (message : FractionalTradeCancelErrorMessage) -- 'O' 0x4F
-  | fractionalTradeCorrectionMessage (message : FractionalTradeCorrectionMessage) -- 'P' 0x50
-  | fractionalAsOfTradeMessage (message : FractionalAsOfTradeMessage) -- 'Q' 0x51
+  | tradeReportMessageShortformMessage (message : TradeReportMessageShortformMessage) -- "A" 0x41
+  | tradeReportMessageLongformMessage (message : TradeReportMessageLongformMessage) -- "W" 0x57
+  | tradeCancelErrorMessage (message : TradeCancelErrorMessage) -- "Z" 0x5A
+  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- "Y" 0x59
+  | priorDayAsOfTradeMessage (message : PriorDayAsOfTradeMessage) -- "H" 0x48
+  | fractionalTradeReportMessageShortformMessage (message : FractionalTradeReportMessageShortformMessage) -- "M" 0x4D
+  | fractionalTradeReportMessageLongformMessage (message : FractionalTradeReportMessageLongformMessage) -- "N" 0x4E
+  | fractionalTradeCancelErrorMessage (message : FractionalTradeCancelErrorMessage) -- "O" 0x4F
+  | fractionalTradeCorrectionMessage (message : FractionalTradeCorrectionMessage) -- "P" 0x50
+  | fractionalAsOfTradeMessage (message : FractionalAsOfTradeMessage) -- "Q" 0x51
   deriving DecidableEq, Repr
 
 namespace TradeMessagePayload
@@ -3328,16 +3328,16 @@ end ClosingTradeSummaryReportMessage
 
 /-- Any Administrative Message Payload, selected by Administrative Message Type -/
 inductive AdministrativeMessagePayload where
-  | generalAdministrativeMessage (message : GeneralAdministrativeMessage) -- 'A' 0x41
-  | crossSroTradingActionMessage (message : CrossSroTradingActionMessage) -- 'H' 0x48
-  | marketCenterTradingActionMessage (message : MarketCenterTradingActionMessage) -- 'K' 0x4B
-  | issueSymbolDirectoryMessage (message : IssueSymbolDirectoryMessage) -- 'B' 0x42
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'V' 0x56
-  | limitUpLimitDownPriceBandMessage (message : LimitUpLimitDownPriceBandMessage) -- 'P' 0x50
-  | marketWideCircuitBreakerDeclineLevelMessage (message : MarketWideCircuitBreakerDeclineLevelMessage) -- 'C' 0x43
-  | marketWideCircuitBreakerStatusMessage (message : MarketWideCircuitBreakerStatusMessage) -- 'D' 0x44
-  | auctionCollarMessage (message : AuctionCollarMessage) -- 'E' 0x45
-  | closingTradeSummaryReportMessage (message : ClosingTradeSummaryReportMessage) -- 'U' 0x55
+  | generalAdministrativeMessage (message : GeneralAdministrativeMessage) -- "A" 0x41
+  | crossSroTradingActionMessage (message : CrossSroTradingActionMessage) -- "H" 0x48
+  | marketCenterTradingActionMessage (message : MarketCenterTradingActionMessage) -- "K" 0x4B
+  | issueSymbolDirectoryMessage (message : IssueSymbolDirectoryMessage) -- "B" 0x42
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "V" 0x56
+  | limitUpLimitDownPriceBandMessage (message : LimitUpLimitDownPriceBandMessage) -- "P" 0x50
+  | marketWideCircuitBreakerDeclineLevelMessage (message : MarketWideCircuitBreakerDeclineLevelMessage) -- "C" 0x43
+  | marketWideCircuitBreakerStatusMessage (message : MarketWideCircuitBreakerStatusMessage) -- "D" 0x44
+  | auctionCollarMessage (message : AuctionCollarMessage) -- "E" 0x45
+  | closingTradeSummaryReportMessage (message : ClosingTradeSummaryReportMessage) -- "U" 0x55
   deriving DecidableEq, Repr
 
 namespace AdministrativeMessagePayload
@@ -3599,7 +3599,7 @@ end TotalConsolidatedAndMarketCenterVolumeMessage
 
 /-- Any Total Consolidated Volume Message Payload, selected by Total Consolidated Volume Message Type -/
 inductive TotalConsolidatedVolumeMessagePayload where
-  | totalConsolidatedAndMarketCenterVolumeMessage (message : TotalConsolidatedAndMarketCenterVolumeMessage) -- 'V' 0x56
+  | totalConsolidatedAndMarketCenterVolumeMessage (message : TotalConsolidatedAndMarketCenterVolumeMessage) -- "V" 0x56
   deriving DecidableEq, Repr
 
 namespace TotalConsolidatedVolumeMessagePayload
@@ -4021,13 +4021,13 @@ end EndOfConsolidatedLastSaleEligibilityMessage
 
 /-- Any Control Message Payload, selected by Control Message Type -/
 inductive ControlMessagePayload where
-  | startOfDayMessage (message : StartOfDayMessage) -- 'I' 0x49
-  | endOfDayMessage (message : EndOfDayMessage) -- 'J' 0x4A
-  | marketSessionOpenMessage (message : MarketSessionOpenMessage) -- 'O' 0x4F
-  | marketSessionCloseMessage (message : MarketSessionCloseMessage) -- 'C' 0x43
-  | endOfTransmissionsMessage (message : EndOfTransmissionsMessage) -- 'Z' 0x5A
-  | endOfTradeReportingMessage (message : EndOfTradeReportingMessage) -- 'X' 0x58
-  | endOfConsolidatedLastSaleEligibilityMessage (message : EndOfConsolidatedLastSaleEligibilityMessage) -- 'S' 0x53
+  | startOfDayMessage (message : StartOfDayMessage) -- "I" 0x49
+  | endOfDayMessage (message : EndOfDayMessage) -- "J" 0x4A
+  | marketSessionOpenMessage (message : MarketSessionOpenMessage) -- "O" 0x4F
+  | marketSessionCloseMessage (message : MarketSessionCloseMessage) -- "C" 0x43
+  | endOfTransmissionsMessage (message : EndOfTransmissionsMessage) -- "Z" 0x5A
+  | endOfTradeReportingMessage (message : EndOfTradeReportingMessage) -- "X" 0x58
+  | endOfConsolidatedLastSaleEligibilityMessage (message : EndOfConsolidatedLastSaleEligibilityMessage) -- "S" 0x53
   deriving DecidableEq, Repr
 
 namespace ControlMessagePayload
@@ -4151,10 +4151,10 @@ end ControlMessage
 
 /-- Any Category Payload, selected by Message Category -/
 inductive CategoryPayload where
-  | tradeMessage (message : TradeMessage) -- 'T' 0x54
-  | administrativeMessage (message : AdministrativeMessage) -- 'A' 0x41
-  | totalConsolidatedVolumeMessage (message : TotalConsolidatedVolumeMessage) -- 'V' 0x56
-  | controlMessage (message : ControlMessage) -- 'C' 0x43
+  | tradeMessage (message : TradeMessage) -- "T" 0x54
+  | administrativeMessage (message : AdministrativeMessage) -- "A" 0x41
+  | totalConsolidatedVolumeMessage (message : TotalConsolidatedVolumeMessage) -- "V" 0x56
+  | controlMessage (message : ControlMessage) -- "C" 0x43
   deriving DecidableEq, Repr
 
 namespace CategoryPayload

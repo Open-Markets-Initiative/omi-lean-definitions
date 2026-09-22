@@ -1427,11 +1427,11 @@ end NbboAppendageAbsent
 
 /-- The Short Form National Bbo Appendage or Long Form National Bbo Appendage the Nbbo Appendage Indicator says is attached, or none -/
 inductive NbboAppendageChoice where
-  | shortFormNationalBboAppendage (message : ShortFormNationalBboAppendage) -- '2' 0x32
-  | longFormNationalBboAppendage (message : LongFormNationalBboAppendage) -- '3' 0x33
-  | noNationalBboChange (message : NbboAppendageAbsent) -- '0' 0x30
-  | noNationalBboCanBeCalculated (message : NbboAppendageAbsent) -- '1' 0x31
-  | quoteContainsAllNationalBboInformation (message : NbboAppendageAbsent) -- '4' 0x34
+  | shortFormNationalBboAppendage (message : ShortFormNationalBboAppendage) -- "2" 0x32
+  | longFormNationalBboAppendage (message : LongFormNationalBboAppendage) -- "3" 0x33
+  | noNationalBboChange (message : NbboAppendageAbsent) -- "0" 0x30
+  | noNationalBboCanBeCalculated (message : NbboAppendageAbsent) -- "1" 0x31
+  | quoteContainsAllNationalBboInformation (message : NbboAppendageAbsent) -- "4" 0x34
   deriving DecidableEq, Repr
 
 namespace NbboAppendageChoice
@@ -1648,10 +1648,10 @@ end FinraAdfMpidAppendageAbsent
 
 /-- The Finra Adf Mpid Appendage the Finra Adf Mpid Appendage Indicator says is attached, or none -/
 inductive FinraAdfMpidAppendageChoice where
-  | finraAdfMpidAppendage (message : FinraAdfMpidAppendage) -- '2' 0x32
-  | notApplicable (message : FinraAdfMpidAppendageAbsent) -- ' ' 0x20
-  | noAdfMpidChanges (message : FinraAdfMpidAppendageAbsent) -- '0' 0x30
-  | noAdfMpidExists (message : FinraAdfMpidAppendageAbsent) -- '1' 0x31
+  | finraAdfMpidAppendage (message : FinraAdfMpidAppendage) -- "2" 0x32
+  | notApplicable (message : FinraAdfMpidAppendageAbsent) -- " " 0x20
+  | noAdfMpidChanges (message : FinraAdfMpidAppendageAbsent) -- "0" 0x30
+  | noAdfMpidExists (message : FinraAdfMpidAppendageAbsent) -- "1" 0x31
   deriving DecidableEq, Repr
 
 namespace FinraAdfMpidAppendageChoice
@@ -1891,9 +1891,9 @@ end FinraAdfMarketParticipantQuotationMessage
 
 /-- Any Quote Message Payload, selected by Quote Message Type -/
 inductive QuoteMessagePayload where
-  | quoteShortFormMessage (message : QuoteShortFormMessage) -- 'E' 0x45
-  | quoteLongFormMessage (message : QuoteLongFormMessage) -- 'F' 0x46
-  | finraAdfMarketParticipantQuotationMessage (message : FinraAdfMarketParticipantQuotationMessage) -- 'M' 0x4D
+  | quoteShortFormMessage (message : QuoteShortFormMessage) -- "E" 0x45
+  | quoteLongFormMessage (message : QuoteLongFormMessage) -- "F" 0x46
+  | finraAdfMarketParticipantQuotationMessage (message : FinraAdfMarketParticipantQuotationMessage) -- "M" 0x4D
   deriving DecidableEq, Repr
 
 namespace QuoteMessagePayload
@@ -2589,16 +2589,16 @@ end SessionCloseRecapMessage
 
 /-- Any Administrative Message Payload, selected by Administrative Message Type -/
 inductive AdministrativeMessagePayload where
-  | generalAdministrativeMessage (message : GeneralAdministrativeMessage) -- 'A' 0x41
-  | crossSroTradingActionMessage (message : CrossSroTradingActionMessage) -- 'H' 0x48
-  | marketCenterTradingActionMessage (message : MarketCenterTradingActionMessage) -- 'K' 0x4B
-  | issueSymbolDirectoryMessage (message : IssueSymbolDirectoryMessage) -- 'B' 0x42
-  | regulationShoShortSalePriceTestRestrictedIndicatorMessage (message : RegulationShoShortSalePriceTestRestrictedIndicatorMessage) -- 'V' 0x56
-  | limitUpLimitDownPriceBandMessage (message : LimitUpLimitDownPriceBandMessage) -- 'P' 0x50
-  | marketWideCircuitBreakerDeclineLevelMessage (message : MarketWideCircuitBreakerDeclineLevelMessage) -- 'C' 0x43
-  | marketWideCircuitBreakerStatusMessage (message : MarketWideCircuitBreakerStatusMessage) -- 'D' 0x44
-  | auctionCollarMessage (message : AuctionCollarMessage) -- 'E' 0x45
-  | sessionCloseRecapMessage (message : SessionCloseRecapMessage) -- 'R' 0x52
+  | generalAdministrativeMessage (message : GeneralAdministrativeMessage) -- "A" 0x41
+  | crossSroTradingActionMessage (message : CrossSroTradingActionMessage) -- "H" 0x48
+  | marketCenterTradingActionMessage (message : MarketCenterTradingActionMessage) -- "K" 0x4B
+  | issueSymbolDirectoryMessage (message : IssueSymbolDirectoryMessage) -- "B" 0x42
+  | regulationShoShortSalePriceTestRestrictedIndicatorMessage (message : RegulationShoShortSalePriceTestRestrictedIndicatorMessage) -- "V" 0x56
+  | limitUpLimitDownPriceBandMessage (message : LimitUpLimitDownPriceBandMessage) -- "P" 0x50
+  | marketWideCircuitBreakerDeclineLevelMessage (message : MarketWideCircuitBreakerDeclineLevelMessage) -- "C" 0x43
+  | marketWideCircuitBreakerStatusMessage (message : MarketWideCircuitBreakerStatusMessage) -- "D" 0x44
+  | auctionCollarMessage (message : AuctionCollarMessage) -- "E" 0x45
+  | sessionCloseRecapMessage (message : SessionCloseRecapMessage) -- "R" 0x52
   deriving DecidableEq, Repr
 
 namespace AdministrativeMessagePayload
@@ -2933,12 +2933,12 @@ end QuoteWipeOutMessage
 
 /-- Any Control Message Payload, selected by Control Message Type -/
 inductive ControlMessagePayload where
-  | startOfDayMessage (message : StartOfDayMessage) -- 'I' 0x49
-  | endOfDayMessage (message : EndOfDayMessage) -- 'J' 0x4A
-  | marketSessionOpenMessage (message : MarketSessionOpenMessage) -- 'O' 0x4F
-  | marketSessionCloseMessage (message : MarketSessionCloseMessage) -- 'C' 0x43
-  | endOfTransmissionsMessage (message : EndOfTransmissionsMessage) -- 'Z' 0x5A
-  | quoteWipeOutMessage (message : QuoteWipeOutMessage) -- 'P' 0x50
+  | startOfDayMessage (message : StartOfDayMessage) -- "I" 0x49
+  | endOfDayMessage (message : EndOfDayMessage) -- "J" 0x4A
+  | marketSessionOpenMessage (message : MarketSessionOpenMessage) -- "O" 0x4F
+  | marketSessionCloseMessage (message : MarketSessionCloseMessage) -- "C" 0x43
+  | endOfTransmissionsMessage (message : EndOfTransmissionsMessage) -- "Z" 0x5A
+  | quoteWipeOutMessage (message : QuoteWipeOutMessage) -- "P" 0x50
   deriving DecidableEq, Repr
 
 namespace ControlMessagePayload
@@ -3053,9 +3053,9 @@ end ControlMessage
 
 /-- Any Payload, selected by Message Category -/
 inductive Payload where
-  | quoteMessage (message : QuoteMessage) -- 'Q' 0x51
-  | administrativeMessage (message : AdministrativeMessage) -- 'A' 0x41
-  | controlMessage (message : ControlMessage) -- 'C' 0x43
+  | quoteMessage (message : QuoteMessage) -- "Q" 0x51
+  | administrativeMessage (message : AdministrativeMessage) -- "A" 0x41
+  | controlMessage (message : ControlMessage) -- "C" 0x43
   deriving DecidableEq, Repr
 
 namespace Payload

@@ -2716,11 +2716,11 @@ end MmiNotificationRequestMessage
 
 /-- Any Unsequenced Message, selected by Unsequenced Message Type -/
 inductive UnsequencedMessage where
-  | enterOrderMessage (message : EnterOrderMessage) -- 'O' 0x4F
-  | replaceOrderMessage (message : ReplaceOrderMessage) -- 'U' 0x55
-  | cancelOrderMessage (message : CancelOrderMessage) -- 'X' 0x58
-  | accountQueryMessage (message : AccountQueryMessage) -- 'Q' 0x51
-  | mmiNotificationRequestMessage (message : MmiNotificationRequestMessage) -- 'M' 0x4D
+  | enterOrderMessage (message : EnterOrderMessage) -- "O" 0x4F
+  | replaceOrderMessage (message : ReplaceOrderMessage) -- "U" 0x55
+  | cancelOrderMessage (message : CancelOrderMessage) -- "X" 0x58
+  | accountQueryMessage (message : AccountQueryMessage) -- "Q" 0x51
+  | mmiNotificationRequestMessage (message : MmiNotificationRequestMessage) -- "M" 0x4D
   deriving DecidableEq, Repr
 
 namespace UnsequencedMessage
@@ -2872,11 +2872,11 @@ end LogoutRequest
 
 /-- Any Client Payload, selected by Client Packet Type -/
 inductive ClientPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginRequestPacket (message : LoginRequestPacket) -- 'L' 0x4C
-  | unsequencedDataPacket (message : UnsequencedDataPacket) -- 'U' 0x55
-  | clientHeartbeat (message : ClientHeartbeat) -- 'R' 0x52
-  | logoutRequest (message : LogoutRequest) -- 'O' 0x4F
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginRequestPacket (message : LoginRequestPacket) -- "L" 0x4C
+  | unsequencedDataPacket (message : UnsequencedDataPacket) -- "U" 0x55
+  | clientHeartbeat (message : ClientHeartbeat) -- "R" 0x52
+  | logoutRequest (message : LogoutRequest) -- "O" 0x4F
   deriving DecidableEq, Repr
 
 namespace ClientPayload

@@ -882,16 +882,16 @@ end TradeCorrectMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | marketEventMessage (message : MarketEventMessage) -- 'A' 0x41
-  | symbolInformationMessage (message : SymbolInformationMessage) -- 'B' 0x42
-  | symbolStateMessage (message : SymbolStateMessage) -- 'C' 0x43
-  | newOrderAddMessage (message : NewOrderAddMessage) -- 'D' 0x44
-  | orderPartialCancelMessage (message : OrderPartialCancelMessage) -- 'F' 0x46
-  | orderCancelAllMessage (message : OrderCancelAllMessage) -- 'G' 0x47
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'J' 0x4A
-  | tradeMessage (message : TradeMessage) -- 'K' 0x4B
-  | tradeCancelMessage (message : TradeCancelMessage) -- 'L' 0x4C
-  | tradeCorrectMessage (message : TradeCorrectMessage) -- 'M' 0x4D
+  | marketEventMessage (message : MarketEventMessage) -- "A" 0x41
+  | symbolInformationMessage (message : SymbolInformationMessage) -- "B" 0x42
+  | symbolStateMessage (message : SymbolStateMessage) -- "C" 0x43
+  | newOrderAddMessage (message : NewOrderAddMessage) -- "D" 0x44
+  | orderPartialCancelMessage (message : OrderPartialCancelMessage) -- "F" 0x46
+  | orderCancelAllMessage (message : OrderCancelAllMessage) -- "G" 0x47
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "J" 0x4A
+  | tradeMessage (message : TradeMessage) -- "K" 0x4B
+  | tradeCancelMessage (message : TradeCancelMessage) -- "L" 0x4C
+  | tradeCorrectMessage (message : TradeCorrectMessage) -- "M" 0x4D
   deriving DecidableEq, Repr
 
 namespace Payload

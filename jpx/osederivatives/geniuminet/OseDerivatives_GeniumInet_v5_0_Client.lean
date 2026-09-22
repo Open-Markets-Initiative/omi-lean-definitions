@@ -455,12 +455,12 @@ end MassCancel
 
 /-- Any Unsequenced Message, selected by Unsequenced Message Type -/
 inductive UnsequencedMessage where
-  | enterOrder (message : EnterOrder) -- 'O' 0x4F
-  | enterMmOrder (message : EnterMmOrder) -- 'P' 0x50
-  | replaceOrder (message : ReplaceOrder) -- 'U' 0x55
-  | cancelOrder (message : CancelOrder) -- 'X' 0x58
-  | cancelByOrderId (message : CancelByOrderId) -- 'Y' 0x59
-  | massCancel (message : MassCancel) -- 'M' 0x4D
+  | enterOrder (message : EnterOrder) -- "O" 0x4F
+  | enterMmOrder (message : EnterMmOrder) -- "P" 0x50
+  | replaceOrder (message : ReplaceOrder) -- "U" 0x55
+  | cancelOrder (message : CancelOrder) -- "X" 0x58
+  | cancelByOrderId (message : CancelByOrderId) -- "Y" 0x59
+  | massCancel (message : MassCancel) -- "M" 0x4D
   deriving DecidableEq, Repr
 
 namespace UnsequencedMessage
@@ -617,11 +617,11 @@ end LogoutRequest
 
 /-- Any Client Payload, selected by Client Packet Type -/
 inductive ClientPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginRequestPacket (message : LoginRequestPacket) -- 'L' 0x4C
-  | unsequencedDataPacket (message : UnsequencedDataPacket) -- 'U' 0x55
-  | clientHeartbeat (message : ClientHeartbeat) -- 'R' 0x52
-  | logoutRequest (message : LogoutRequest) -- 'O' 0x4F
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginRequestPacket (message : LoginRequestPacket) -- "L" 0x4C
+  | unsequencedDataPacket (message : UnsequencedDataPacket) -- "U" 0x55
+  | clientHeartbeat (message : ClientHeartbeat) -- "R" 0x52
+  | logoutRequest (message : LogoutRequest) -- "O" 0x4F
   deriving DecidableEq, Repr
 
 namespace ClientPayload

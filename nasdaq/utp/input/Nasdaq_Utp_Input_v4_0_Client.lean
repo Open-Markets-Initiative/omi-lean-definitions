@@ -1910,16 +1910,16 @@ end FinraAdfCombinedQuoteMessageWithBbo
 
 /-- Any Inbound Quote Messages Message Payload, selected by Inbound Quote Messages Message Type -/
 inductive InboundQuoteMessagesMessagePayload where
-  | protectedExchangeQuoteMessageShortformMessage (message : ProtectedExchangeQuoteMessageShortformMessage) -- 'Q' 0x51
-  | protectedExchangeQuoteMessageLongformMessage (message : ProtectedExchangeQuoteMessageLongformMessage) -- 'L' 0x4C
-  | exchangeOddLotQuoteMessageShortFormMessage (message : ExchangeOddLotQuoteMessageShortFormMessage) -- 'O' 0x4F
-  | exchangeOddLotQuoteMessageLongFormMessage (message : ExchangeOddLotQuoteMessageLongFormMessage) -- 'J' 0x4A
-  | exchangeCombinedQuoteMessageShortFormMessage (message : ExchangeCombinedQuoteMessageShortFormMessage) -- 'P' 0x50
-  | exchangeCombinedQuoteMessageLongFormMessage (message : ExchangeCombinedQuoteMessageLongFormMessage) -- 'K' 0x4B
-  | finraProtectedQuoteMessageWithBboInfoMessage (message : FinraProtectedQuoteMessageWithBboInfoMessage) -- 'G' 0x47
-  | finraProtectedQuoteMessageWithoutBboInfoMessage (message : FinraProtectedQuoteMessageWithoutBboInfoMessage) -- 'F' 0x46
-  | finraAdfOddLotQuotationMessage (message : FinraAdfOddLotQuotationMessage) -- 'H' 0x48
-  | finraAdfCombinedQuoteMessageWithBbo (message : FinraAdfCombinedQuoteMessageWithBbo) -- 'R' 0x52
+  | protectedExchangeQuoteMessageShortformMessage (message : ProtectedExchangeQuoteMessageShortformMessage) -- "Q" 0x51
+  | protectedExchangeQuoteMessageLongformMessage (message : ProtectedExchangeQuoteMessageLongformMessage) -- "L" 0x4C
+  | exchangeOddLotQuoteMessageShortFormMessage (message : ExchangeOddLotQuoteMessageShortFormMessage) -- "O" 0x4F
+  | exchangeOddLotQuoteMessageLongFormMessage (message : ExchangeOddLotQuoteMessageLongFormMessage) -- "J" 0x4A
+  | exchangeCombinedQuoteMessageShortFormMessage (message : ExchangeCombinedQuoteMessageShortFormMessage) -- "P" 0x50
+  | exchangeCombinedQuoteMessageLongFormMessage (message : ExchangeCombinedQuoteMessageLongFormMessage) -- "K" 0x4B
+  | finraProtectedQuoteMessageWithBboInfoMessage (message : FinraProtectedQuoteMessageWithBboInfoMessage) -- "G" 0x47
+  | finraProtectedQuoteMessageWithoutBboInfoMessage (message : FinraProtectedQuoteMessageWithoutBboInfoMessage) -- "F" 0x46
+  | finraAdfOddLotQuotationMessage (message : FinraAdfOddLotQuotationMessage) -- "H" 0x48
+  | finraAdfCombinedQuoteMessageWithBbo (message : FinraAdfCombinedQuoteMessageWithBbo) -- "R" 0x52
   deriving DecidableEq, Repr
 
 namespace InboundQuoteMessagesMessagePayload
@@ -2886,14 +2886,14 @@ end FractionalAsOfTradeReportMessage
 
 /-- Any Inbound Trade Messages Message Payload, selected by Inbound Trade Messages Message Type -/
 inductive InboundTradeMessagesMessagePayload where
-  | regularTradeReportMessage (message : RegularTradeReportMessage) -- 'E' 0x45
-  | tradeCancelErrorMessage (message : TradeCancelErrorMessage) -- 'I' 0x49
-  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- 'J' 0x4A
-  | asOfTradeReportMessage (message : AsOfTradeReportMessage) -- 'H' 0x48
-  | fractionalRegularTradeReportMessage (message : FractionalRegularTradeReportMessage) -- 'K' 0x4B
-  | fractionalTradeCancelErrorMessage (message : FractionalTradeCancelErrorMessage) -- 'O' 0x4F
-  | fractionalTradeCorrectionMessage (message : FractionalTradeCorrectionMessage) -- 'P' 0x50
-  | fractionalAsOfTradeReportMessage (message : FractionalAsOfTradeReportMessage) -- 'Q' 0x51
+  | regularTradeReportMessage (message : RegularTradeReportMessage) -- "E" 0x45
+  | tradeCancelErrorMessage (message : TradeCancelErrorMessage) -- "I" 0x49
+  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- "J" 0x4A
+  | asOfTradeReportMessage (message : AsOfTradeReportMessage) -- "H" 0x48
+  | fractionalRegularTradeReportMessage (message : FractionalRegularTradeReportMessage) -- "K" 0x4B
+  | fractionalTradeCancelErrorMessage (message : FractionalTradeCancelErrorMessage) -- "O" 0x4F
+  | fractionalTradeCorrectionMessage (message : FractionalTradeCorrectionMessage) -- "P" 0x50
+  | fractionalAsOfTradeReportMessage (message : FractionalAsOfTradeReportMessage) -- "Q" 0x51
   deriving DecidableEq, Repr
 
 namespace InboundTradeMessagesMessagePayload
@@ -3651,16 +3651,16 @@ end AuctionCollarMessage
 
 /-- Any Inbound Administrative Messages Message Payload, selected by Inbound Administrative Messages Message Type -/
 inductive InboundAdministrativeMessagesMessagePayload where
-  | generalAdministrativeMessage (message : GeneralAdministrativeMessage) -- 'A' 0x41
-  | tradingActionMessage (message : TradingActionMessage) -- 'O' 0x4F
-  | marketCenterTradingActionMessage (message : MarketCenterTradingActionMessage) -- 'J' 0x4A
-  | marketCenterMassTradingActionMessage (message : MarketCenterMassTradingActionMessage) -- 'U' 0x55
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'V' 0x56
-  | openingReferenceMidpointPriceMessage (message : OpeningReferenceMidpointPriceMessage) -- 'M' 0x4D
-  | t1AdjustedClosingPriceMessage (message : T1AdjustedClosingPriceMessage) -- 'N' 0x4E
-  | marketOpenMessage (message : MarketOpenMessage) -- 'X' 0x58
-  | marketClosedMessage (message : MarketClosedMessage) -- 'Y' 0x59
-  | auctionCollarMessage (message : AuctionCollarMessage) -- 'E' 0x45
+  | generalAdministrativeMessage (message : GeneralAdministrativeMessage) -- "A" 0x41
+  | tradingActionMessage (message : TradingActionMessage) -- "O" 0x4F
+  | marketCenterTradingActionMessage (message : MarketCenterTradingActionMessage) -- "J" 0x4A
+  | marketCenterMassTradingActionMessage (message : MarketCenterMassTradingActionMessage) -- "U" 0x55
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "V" 0x56
+  | openingReferenceMidpointPriceMessage (message : OpeningReferenceMidpointPriceMessage) -- "M" 0x4D
+  | t1AdjustedClosingPriceMessage (message : T1AdjustedClosingPriceMessage) -- "N" 0x4E
+  | marketOpenMessage (message : MarketOpenMessage) -- "X" 0x58
+  | marketClosedMessage (message : MarketClosedMessage) -- "Y" 0x59
+  | auctionCollarMessage (message : AuctionCollarMessage) -- "E" 0x45
   deriving DecidableEq, Repr
 
 namespace InboundAdministrativeMessagesMessagePayload
@@ -3963,9 +3963,9 @@ end EndOfParticipantReportingMessage
 
 /-- Any Inbound Control Messages Message Payload, selected by Inbound Control Messages Message Type -/
 inductive InboundControlMessagesMessagePayload where
-  | sequenceInquiryMessage (message : SequenceInquiryMessage) -- 'C' 0x43
-  | symbolStateInquiryMessage (message : SymbolStateInquiryMessage) -- 'S' 0x53
-  | endOfParticipantReportingMessage (message : EndOfParticipantReportingMessage) -- 'G' 0x47
+  | sequenceInquiryMessage (message : SequenceInquiryMessage) -- "C" 0x43
+  | symbolStateInquiryMessage (message : SymbolStateInquiryMessage) -- "S" 0x53
+  | endOfParticipantReportingMessage (message : EndOfParticipantReportingMessage) -- "G" 0x47
   deriving DecidableEq, Repr
 
 namespace InboundControlMessagesMessagePayload
@@ -4416,13 +4416,13 @@ end ParticipantInputWarningMessage
 
 /-- Any Return Administrative Messages Message Payload, selected by Return Administrative Messages Message Type -/
 inductive ReturnAdministrativeMessagesMessagePayload where
-  | returnGeneralAdministrativeMessage (message : ReturnGeneralAdministrativeMessage) -- 'A' 0x41
-  | returnMarketCenterTradingActionAcknowledgementMessage (message : ReturnMarketCenterTradingActionAcknowledgementMessage) -- 'J' 0x4A
-  | returnMarketOpenMessage (message : ReturnMarketOpenMessage) -- 'X' 0x58
-  | returnMarketClosedMessage (message : ReturnMarketClosedMessage) -- 'Y' 0x59
-  | rejectMessage (message : RejectMessage) -- 'R' 0x52
-  | sequenceAcknowledgementMessage (message : SequenceAcknowledgementMessage) -- 'K' 0x4B
-  | participantInputWarningMessage (message : ParticipantInputWarningMessage) -- 'W' 0x57
+  | returnGeneralAdministrativeMessage (message : ReturnGeneralAdministrativeMessage) -- "A" 0x41
+  | returnMarketCenterTradingActionAcknowledgementMessage (message : ReturnMarketCenterTradingActionAcknowledgementMessage) -- "J" 0x4A
+  | returnMarketOpenMessage (message : ReturnMarketOpenMessage) -- "X" 0x58
+  | returnMarketClosedMessage (message : ReturnMarketClosedMessage) -- "Y" 0x59
+  | rejectMessage (message : RejectMessage) -- "R" 0x52
+  | sequenceAcknowledgementMessage (message : SequenceAcknowledgementMessage) -- "K" 0x4B
+  | participantInputWarningMessage (message : ParticipantInputWarningMessage) -- "W" 0x57
   deriving DecidableEq, Repr
 
 namespace ReturnAdministrativeMessagesMessagePayload
@@ -4730,10 +4730,10 @@ end SymbolStateInquiryResponseMessage
 
 /-- Any Return Control Messages Message Payload, selected by Return Control Messages Message Type -/
 inductive ReturnControlMessagesMessagePayload where
-  | startOfDayMessage (message : StartOfDayMessage) -- 'E' 0x45
-  | endOfDayMessage (message : EndOfDayMessage) -- 'F' 0x46
-  | sequenceInquiryResponseMessage (message : SequenceInquiryResponseMessage) -- 'C' 0x43
-  | symbolStateInquiryResponseMessage (message : SymbolStateInquiryResponseMessage) -- 'S' 0x53
+  | startOfDayMessage (message : StartOfDayMessage) -- "E" 0x45
+  | endOfDayMessage (message : EndOfDayMessage) -- "F" 0x46
+  | sequenceInquiryResponseMessage (message : SequenceInquiryResponseMessage) -- "C" 0x43
+  | symbolStateInquiryResponseMessage (message : SymbolStateInquiryResponseMessage) -- "S" 0x53
   deriving DecidableEq, Repr
 
 namespace ReturnControlMessagesMessagePayload
@@ -4834,12 +4834,12 @@ end ReturnControlMessagesMessage
 
 /-- Any Category Payload, selected by Message Category -/
 inductive CategoryPayload where
-  | inboundQuoteMessagesMessage (message : InboundQuoteMessagesMessage) -- 'Q' 0x51
-  | inboundTradeMessagesMessage (message : InboundTradeMessagesMessage) -- 'T' 0x54
-  | inboundAdministrativeMessagesMessage (message : InboundAdministrativeMessagesMessage) -- 'A' 0x41
-  | inboundControlMessagesMessage (message : InboundControlMessagesMessage) -- 'C' 0x43
-  | returnAdministrativeMessagesMessage (message : ReturnAdministrativeMessagesMessage) -- 'a' 0x61
-  | returnControlMessagesMessage (message : ReturnControlMessagesMessage) -- 'c' 0x63
+  | inboundQuoteMessagesMessage (message : InboundQuoteMessagesMessage) -- "Q" 0x51
+  | inboundTradeMessagesMessage (message : InboundTradeMessagesMessage) -- "T" 0x54
+  | inboundAdministrativeMessagesMessage (message : InboundAdministrativeMessagesMessage) -- "A" 0x41
+  | inboundControlMessagesMessage (message : InboundControlMessagesMessage) -- "C" 0x43
+  | returnAdministrativeMessagesMessage (message : ReturnAdministrativeMessagesMessage) -- "a" 0x61
+  | returnControlMessagesMessage (message : ReturnControlMessagesMessage) -- "c" 0x63
   deriving DecidableEq, Repr
 
 namespace CategoryPayload
@@ -5105,11 +5105,11 @@ end LogoutRequestPacket
 
 /-- Any Client Tcp Payload, selected by Client Packet Type -/
 inductive ClientTcpPayload where
-  | unsequencedDataPacket (message : UnsequencedDataPacket) -- 'U' 0x55
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginRequestPacket (message : LoginRequestPacket) -- 'L' 0x4C
-  | clientHeartbeatPacket (message : ClientHeartbeatPacket) -- 'R' 0x52
-  | logoutRequestPacket (message : LogoutRequestPacket) -- 'O' 0x4F
+  | unsequencedDataPacket (message : UnsequencedDataPacket) -- "U" 0x55
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginRequestPacket (message : LoginRequestPacket) -- "L" 0x4C
+  | clientHeartbeatPacket (message : ClientHeartbeatPacket) -- "R" 0x52
+  | logoutRequestPacket (message : LogoutRequestPacket) -- "O" 0x4F
   deriving DecidableEq, Repr
 
 namespace ClientTcpPayload

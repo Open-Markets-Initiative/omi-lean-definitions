@@ -1094,19 +1094,19 @@ end BrokenTradeReportMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | timestampMessage (message : TimestampMessage) -- 'T' 0x54
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | optionsDirectoryMessage (message : OptionsDirectoryMessage) -- 'D' 0x44
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | securityOpenClosedMessage (message : SecurityOpenClosedMessage) -- 'O' 0x4F
-  | shortBestBidAndAskUpdateMessage (message : ShortBestBidAndAskUpdateMessage) -- 'q' 0x71
-  | longBestBidAndAskUpdateMessage (message : LongBestBidAndAskUpdateMessage) -- 'Q' 0x51
-  | shortBestAskUpdateMessage (message : ShortBestAskUpdateMessage) -- 'a' 0x61
-  | shortBestBidUpdateMessage (message : ShortBestBidUpdateMessage) -- 'b' 0x62
-  | longBestAskUpdateMessage (message : LongBestAskUpdateMessage) -- 'A' 0x41
-  | longBestBidUpdateMessage (message : LongBestBidUpdateMessage) -- 'B' 0x42
-  | tradeReportMessage (message : TradeReportMessage) -- 'R' 0x52
-  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- 'X' 0x58
+  | timestampMessage (message : TimestampMessage) -- "T" 0x54
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | optionsDirectoryMessage (message : OptionsDirectoryMessage) -- "D" 0x44
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | securityOpenClosedMessage (message : SecurityOpenClosedMessage) -- "O" 0x4F
+  | shortBestBidAndAskUpdateMessage (message : ShortBestBidAndAskUpdateMessage) -- "q" 0x71
+  | longBestBidAndAskUpdateMessage (message : LongBestBidAndAskUpdateMessage) -- "Q" 0x51
+  | shortBestAskUpdateMessage (message : ShortBestAskUpdateMessage) -- "a" 0x61
+  | shortBestBidUpdateMessage (message : ShortBestBidUpdateMessage) -- "b" 0x62
+  | longBestAskUpdateMessage (message : LongBestAskUpdateMessage) -- "A" 0x41
+  | longBestBidUpdateMessage (message : LongBestBidUpdateMessage) -- "B" 0x42
+  | tradeReportMessage (message : TradeReportMessage) -- "R" 0x52
+  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- "X" 0x58
   deriving DecidableEq, Repr
 
 namespace Payload

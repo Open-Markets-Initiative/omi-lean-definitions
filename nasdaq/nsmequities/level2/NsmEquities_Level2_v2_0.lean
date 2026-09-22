@@ -1866,17 +1866,17 @@ end IpoQuotingPeriodUpdateMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'Y' 0x59
-  | marketParticipantPositionMessage (message : MarketParticipantPositionMessage) -- 'P' 0x50
-  | operationalHaltMessage (message : OperationalHaltMessage) -- 'h' 0x68
-  | marketParticipantBidAskUpdateMessage (message : MarketParticipantBidAskUpdateMessage) -- 'U' 0x55
-  | retailPriceInterestIndicatorMessage (message : RetailPriceInterestIndicatorMessage) -- 'N' 0x4E
-  | marketWideCircuitBreakerDeclineLevelMessage (message : MarketWideCircuitBreakerDeclineLevelMessage) -- 'V' 0x56
-  | marketWideCircuitBreakerStatusMessage (message : MarketWideCircuitBreakerStatusMessage) -- 'W' 0x57
-  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- 'K' 0x4B
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "Y" 0x59
+  | marketParticipantPositionMessage (message : MarketParticipantPositionMessage) -- "P" 0x50
+  | operationalHaltMessage (message : OperationalHaltMessage) -- "h" 0x68
+  | marketParticipantBidAskUpdateMessage (message : MarketParticipantBidAskUpdateMessage) -- "U" 0x55
+  | retailPriceInterestIndicatorMessage (message : RetailPriceInterestIndicatorMessage) -- "N" 0x4E
+  | marketWideCircuitBreakerDeclineLevelMessage (message : MarketWideCircuitBreakerDeclineLevelMessage) -- "V" 0x56
+  | marketWideCircuitBreakerStatusMessage (message : MarketWideCircuitBreakerStatusMessage) -- "W" 0x57
+  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- "K" 0x4B
   deriving DecidableEq, Repr
 
 namespace Payload

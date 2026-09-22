@@ -832,12 +832,12 @@ end EndOfReplaySequenceMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- 'm' 0x6D
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | tradeMessage (message : TradeMessage) -- 'R' 0x52
-  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- 'X' 0x58
-  | endOfReplaySequenceMessage (message : EndOfReplaySequenceMessage) -- 'M' 0x4D
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- "m" 0x6D
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | tradeMessage (message : TradeMessage) -- "R" 0x52
+  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- "X" 0x58
+  | endOfReplaySequenceMessage (message : EndOfReplaySequenceMessage) -- "M" 0x4D
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -994,12 +994,12 @@ end EndOfSessionPacket
 
 /-- Any Server Tcp Payload, selected by Server Packet Type -/
 inductive ServerTcpPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- 'H' 0x48
-  | endOfSessionPacket (message : EndOfSessionPacket) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- "H" 0x48
+  | endOfSessionPacket (message : EndOfSessionPacket) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerTcpPayload

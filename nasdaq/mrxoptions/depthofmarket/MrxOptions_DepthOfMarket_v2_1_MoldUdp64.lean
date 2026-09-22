@@ -417,7 +417,7 @@ end Side
 
 /-- Order Capacity: one byte code -/
 def OrderCapacity.codes : List UInt8 :=
-  [0x43, 0x46, 0x4D, 0x42, 0x50, 0x4F, 0x4A]
+  [0x43, 0x46, 0x4D, 0x42, 0x50, 0x4F, 0x4A, 0x20]
 
 inductive OrderCapacity where
   | customerOrder -- Customer Order
@@ -427,6 +427,7 @@ inductive OrderCapacity where
   | professionalOrder -- Professional Order
   | otherExchangeMarketMakerOrder -- Other Exchange Market Maker Order
   | jointBackOffice -- Joint Back Office
+  | na -- Na
   | unlisted (byte : { byte : UInt8 // byte ∉ OrderCapacity.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -440,6 +441,7 @@ def toByte : OrderCapacity → UInt8
   | .professionalOrder => 0x50
   | .otherExchangeMarketMakerOrder => 0x4F
   | .jointBackOffice => 0x4A
+  | .na => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -450,7 +452,8 @@ def listed (byte : UInt8) : OrderCapacity :=
   else if byte = 0x42 then .brokerDealerOrder
   else if byte = 0x50 then .professionalOrder
   else if byte = 0x4F then .otherExchangeMarketMakerOrder
-  else .jointBackOffice
+  else if byte = 0x4A then .jointBackOffice
+  else .na
 
 def ofByte (byte : UInt8) : OrderCapacity :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -464,6 +467,7 @@ theorem ofByte_toByte (value : OrderCapacity) : ofByte value.toByte = value := b
   | professionalOrder => decide
   | otherExchangeMarketMakerOrder => decide
   | jointBackOffice => decide
+  | na => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : OrderCapacity) : List UInt8 :=
@@ -2081,25 +2085,25 @@ end NetOrderImbalanceMessage
 
 /-- Any Udp Payload, selected by Message Type -/
 inductive UdpPayload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- 'm' 0x6D
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | addOrderShortFormMessage (message : AddOrderShortFormMessage) -- 'r' 0x72
-  | addOrderLongFormMessage (message : AddOrderLongFormMessage) -- 'o' 0x6F
-  | addQuoteShortFormMessage (message : AddQuoteShortFormMessage) -- 'j' 0x6A
-  | addQuoteLongFormMessage (message : AddQuoteLongFormMessage) -- 'J' 0x4A
-  | singleSideExecutedMessage (message : SingleSideExecutedMessage) -- 'e' 0x65
-  | singleSideExecutedWithPriceMessage (message : SingleSideExecutedWithPriceMessage) -- 'c' 0x63
-  | orderCancelMessage (message : OrderCancelMessage) -- 'X' 0x58
-  | singleSideReplaceShortFormMessage (message : SingleSideReplaceShortFormMessage) -- 'u' 0x75
-  | singleSideReplaceLongFormMessage (message : SingleSideReplaceLongFormMessage) -- 'U' 0x55
-  | singleSideDeleteMessage (message : SingleSideDeleteMessage) -- 'D' 0x44
-  | singleSideUpdateMessage (message : SingleSideUpdateMessage) -- 'G' 0x47
-  | quoteReplaceShortFormMessage (message : QuoteReplaceShortFormMessage) -- 'k' 0x6B
-  | quoteReplaceLongFormMessage (message : QuoteReplaceLongFormMessage) -- 'K' 0x4B
-  | quoteDeleteMessage (message : QuoteDeleteMessage) -- 'Y' 0x59
-  | tradeMessage (message : TradeMessage) -- 'q' 0x71
-  | netOrderImbalanceMessage (message : NetOrderImbalanceMessage) -- 'O' 0x4F
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- "m" 0x6D
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | addOrderShortFormMessage (message : AddOrderShortFormMessage) -- "r" 0x72
+  | addOrderLongFormMessage (message : AddOrderLongFormMessage) -- "o" 0x6F
+  | addQuoteShortFormMessage (message : AddQuoteShortFormMessage) -- "j" 0x6A
+  | addQuoteLongFormMessage (message : AddQuoteLongFormMessage) -- "J" 0x4A
+  | singleSideExecutedMessage (message : SingleSideExecutedMessage) -- "e" 0x65
+  | singleSideExecutedWithPriceMessage (message : SingleSideExecutedWithPriceMessage) -- "c" 0x63
+  | orderCancelMessage (message : OrderCancelMessage) -- "X" 0x58
+  | singleSideReplaceShortFormMessage (message : SingleSideReplaceShortFormMessage) -- "u" 0x75
+  | singleSideReplaceLongFormMessage (message : SingleSideReplaceLongFormMessage) -- "U" 0x55
+  | singleSideDeleteMessage (message : SingleSideDeleteMessage) -- "D" 0x44
+  | singleSideUpdateMessage (message : SingleSideUpdateMessage) -- "G" 0x47
+  | quoteReplaceShortFormMessage (message : QuoteReplaceShortFormMessage) -- "k" 0x6B
+  | quoteReplaceLongFormMessage (message : QuoteReplaceLongFormMessage) -- "K" 0x4B
+  | quoteDeleteMessage (message : QuoteDeleteMessage) -- "Y" 0x59
+  | tradeMessage (message : TradeMessage) -- "q" 0x71
+  | netOrderImbalanceMessage (message : NetOrderImbalanceMessage) -- "O" 0x4F
   deriving DecidableEq, Repr
 
 namespace UdpPayload

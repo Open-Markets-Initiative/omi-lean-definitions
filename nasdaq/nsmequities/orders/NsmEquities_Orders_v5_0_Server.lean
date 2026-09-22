@@ -3606,24 +3606,24 @@ end EnableOrderEntryResponseMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | orderAcceptedMessage (message : OrderAcceptedMessage) -- 'A' 0x41
-  | replacedMessage (message : ReplacedMessage) -- 'U' 0x55
-  | canceledMessage (message : CanceledMessage) -- 'C' 0x43
-  | aiqCanceledMessage (message : AiqCanceledMessage) -- 'D' 0x44
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | brokenTradeMessage (message : BrokenTradeMessage) -- 'B' 0x42
-  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- 'F' 0x46
-  | rejectedOrderMessage (message : RejectedOrderMessage) -- 'J' 0x4A
-  | cancelPendingMessage (message : CancelPendingMessage) -- 'P' 0x50
-  | cancelRejectMessage (message : CancelRejectMessage) -- 'I' 0x49
-  | orderPriorityUpdateMessage (message : OrderPriorityUpdateMessage) -- 'T' 0x54
-  | orderModifiedMessage (message : OrderModifiedMessage) -- 'M' 0x4D
-  | orderRestatedMessage (message : OrderRestatedMessage) -- 'R' 0x52
-  | accountQueryResponseMessage (message : AccountQueryResponseMessage) -- 'Q' 0x51
-  | massCancelResponseMessage (message : MassCancelResponseMessage) -- 'X' 0x58
-  | disableOrderEntryResponseMessage (message : DisableOrderEntryResponseMessage) -- 'G' 0x47
-  | enableOrderEntryResponseMessage (message : EnableOrderEntryResponseMessage) -- 'K' 0x4B
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | orderAcceptedMessage (message : OrderAcceptedMessage) -- "A" 0x41
+  | replacedMessage (message : ReplacedMessage) -- "U" 0x55
+  | canceledMessage (message : CanceledMessage) -- "C" 0x43
+  | aiqCanceledMessage (message : AiqCanceledMessage) -- "D" 0x44
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | brokenTradeMessage (message : BrokenTradeMessage) -- "B" 0x42
+  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- "F" 0x46
+  | rejectedOrderMessage (message : RejectedOrderMessage) -- "J" 0x4A
+  | cancelPendingMessage (message : CancelPendingMessage) -- "P" 0x50
+  | cancelRejectMessage (message : CancelRejectMessage) -- "I" 0x49
+  | orderPriorityUpdateMessage (message : OrderPriorityUpdateMessage) -- "T" 0x54
+  | orderModifiedMessage (message : OrderModifiedMessage) -- "M" 0x4D
+  | orderRestatedMessage (message : OrderRestatedMessage) -- "R" 0x52
+  | accountQueryResponseMessage (message : AccountQueryResponseMessage) -- "Q" 0x51
+  | massCancelResponseMessage (message : MassCancelResponseMessage) -- "X" 0x58
+  | disableOrderEntryResponseMessage (message : DisableOrderEntryResponseMessage) -- "G" 0x47
+  | enableOrderEntryResponseMessage (message : EnableOrderEntryResponseMessage) -- "K" 0x4B
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -3902,12 +3902,12 @@ end EndOfSession
 
 /-- Any Server Payload, selected by Server Packet Type -/
 inductive ServerPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeat (message : ServerHeartbeat) -- 'H' 0x48
-  | endOfSession (message : EndOfSession) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeat (message : ServerHeartbeat) -- "H" 0x48
+  | endOfSession (message : EndOfSession) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerPayload

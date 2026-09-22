@@ -1502,14 +1502,14 @@ end DirectListingWithCapitalRaisePriceDiscoveryMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEvent (message : SystemEvent) -- 'S' 0x53
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'Y' 0x59
-  | netOrderImbalanceIndicatorMessage (message : NetOrderImbalanceIndicatorMessage) -- 'I' 0x49
-  | crossTradeMessage (message : CrossTradeMessage) -- 'Q' 0x51
-  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- 'K' 0x4B
-  | directListingWithCapitalRaisePriceDiscoveryMessage (message : DirectListingWithCapitalRaisePriceDiscoveryMessage) -- 'O' 0x4F
+  | systemEvent (message : SystemEvent) -- "S" 0x53
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "Y" 0x59
+  | netOrderImbalanceIndicatorMessage (message : NetOrderImbalanceIndicatorMessage) -- "I" 0x49
+  | crossTradeMessage (message : CrossTradeMessage) -- "Q" 0x51
+  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- "K" 0x4B
+  | directListingWithCapitalRaisePriceDiscoveryMessage (message : DirectListingWithCapitalRaisePriceDiscoveryMessage) -- "O" 0x4F
   deriving DecidableEq, Repr
 
 namespace Payload

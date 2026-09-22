@@ -202,9 +202,9 @@ end TradeBreakMessage
 
 /-- Any Message Data, selected by Message Type -/
 inductive MessageData where
-  | quoteUpdateMessage (message : QuoteUpdateMessage) -- 'Q' 0x51
-  | tradeReportMessage (message : TradeReportMessage) -- 'T' 0x54
-  | tradeBreakMessage (message : TradeBreakMessage) -- 'B' 0x42
+  | quoteUpdateMessage (message : QuoteUpdateMessage) -- "Q" 0x51
+  | tradeReportMessage (message : TradeReportMessage) -- "T" 0x54
+  | tradeBreakMessage (message : TradeBreakMessage) -- "B" 0x42
   deriving DecidableEq, Repr
 
 namespace MessageData

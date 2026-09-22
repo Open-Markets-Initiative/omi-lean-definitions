@@ -399,9 +399,10 @@ end CurrentTradingState
 
 /-- Quote Condition: one byte code -/
 def QuoteCondition.codes : List UInt8 :=
-  [0x58, 0x59]
+  [0x20, 0x58, 0x59]
 
 inductive QuoteCondition where
+  | regularQuoteautoxEligible -- Regular Quoteautox Eligible
   | askSideNotFirmBidSideFirm -- Ask Side Not Firm Bid Side Firm
   | bidSideNotFirmAskSideFirm -- Bid Side Not Firm Ask Side Firm
   | unlisted (byte : { byte : UInt8 // byte ∉ QuoteCondition.codes }) -- any other code, kept as it is
@@ -410,13 +411,15 @@ inductive QuoteCondition where
 namespace QuoteCondition
 
 def toByte : QuoteCondition → UInt8
+  | .regularQuoteautoxEligible => 0x20
   | .askSideNotFirmBidSideFirm => 0x58
   | .bidSideNotFirmAskSideFirm => 0x59
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : QuoteCondition :=
-  if byte = 0x58 then .askSideNotFirmBidSideFirm
+  if byte = 0x20 then .regularQuoteautoxEligible
+  else if byte = 0x58 then .askSideNotFirmBidSideFirm
   else .bidSideNotFirmAskSideFirm
 
 def ofByte (byte : UInt8) : QuoteCondition :=
@@ -424,6 +427,7 @@ def ofByte (byte : UInt8) : QuoteCondition :=
 
 theorem ofByte_toByte (value : QuoteCondition) : ofByte value.toByte = value := by
   cases value with
+  | regularQuoteautoxEligible => decide
   | askSideNotFirmBidSideFirm => decide
   | bidSideNotFirmAskSideFirm => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
@@ -1236,16 +1240,16 @@ end EndOfReplaySequenceMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- 'R' 0x52
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | bestBidAndAskUpdateShortFormMessage (message : BestBidAndAskUpdateShortFormMessage) -- 'q' 0x71
-  | bestBidAndAskUpdateLongFormMessage (message : BestBidAndAskUpdateLongFormMessage) -- 'Q' 0x51
-  | bestBidOrAskUpdateShortFormMessage (message : BestBidOrAskUpdateShortFormMessage) -- 'b' 0x62
-  | bestBidOrAskUpdateLongFormMessage (message : BestBidOrAskUpdateLongFormMessage) -- 'B' 0x42
-  | tradeReportMessage (message : TradeReportMessage) -- 'T' 0x54
-  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- 'X' 0x58
-  | endOfReplaySequenceMessage (message : EndOfReplaySequenceMessage) -- 'M' 0x4D
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- "R" 0x52
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | bestBidAndAskUpdateShortFormMessage (message : BestBidAndAskUpdateShortFormMessage) -- "q" 0x71
+  | bestBidAndAskUpdateLongFormMessage (message : BestBidAndAskUpdateLongFormMessage) -- "Q" 0x51
+  | bestBidOrAskUpdateShortFormMessage (message : BestBidOrAskUpdateShortFormMessage) -- "b" 0x62
+  | bestBidOrAskUpdateLongFormMessage (message : BestBidOrAskUpdateLongFormMessage) -- "B" 0x42
+  | tradeReportMessage (message : TradeReportMessage) -- "T" 0x54
+  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- "X" 0x58
+  | endOfReplaySequenceMessage (message : EndOfReplaySequenceMessage) -- "M" 0x4D
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -1438,12 +1442,12 @@ end EndOfSessionPacket
 
 /-- Any Server Tcp Payload, selected by Server Packet Type -/
 inductive ServerTcpPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- 'H' 0x48
-  | endOfSessionPacket (message : EndOfSessionPacket) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- "H" 0x48
+  | endOfSessionPacket (message : EndOfSessionPacket) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerTcpPayload

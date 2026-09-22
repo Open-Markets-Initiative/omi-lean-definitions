@@ -56,7 +56,7 @@ end TickDataRecoveryRequestMessage
 
 /-- Any Client Payload, selected by Client Message Type -/
 inductive ClientPayload where
-  | tickDataRecoveryRequestMessage (message : TickDataRecoveryRequestMessage) -- 'R' 0x52
+  | tickDataRecoveryRequestMessage (message : TickDataRecoveryRequestMessage) -- "R" 0x52
   deriving DecidableEq, Repr
 
 namespace ClientPayload

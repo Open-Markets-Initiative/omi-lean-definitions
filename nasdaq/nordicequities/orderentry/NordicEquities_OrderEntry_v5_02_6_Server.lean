@@ -3927,23 +3927,23 @@ end StreamStatusMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | orderAcceptedMessage (message : OrderAcceptedMessage) -- 'A' 0x41
-  | orderReplacedMessage (message : OrderReplacedMessage) -- 'U' 0x55
-  | cancelledOrderMessage (message : CancelledOrderMessage) -- 'C' 0x43
-  | cancelPendingMessage (message : CancelPendingMessage) -- 'P' 0x50
-  | replacePendingMessage (message : ReplacePendingMessage) -- 'N' 0x4E
-  | executedOrderMessage (message : ExecutedOrderMessage) -- 'E' 0x45
-  | brokenTradeMessage (message : BrokenTradeMessage) -- 'B' 0x42
-  | rejectedOrderMessage (message : RejectedOrderMessage) -- 'J' 0x4A
-  | cancelRejectedMessage (message : CancelRejectedMessage) -- 'I' 0x49
-  | orderRestatedMessage (message : OrderRestatedMessage) -- 'T' 0x54
-  | mmoRefreshRequestMessage (message : MmoRefreshRequestMessage) -- 'W' 0x57
-  | accountQueryResponseMessage (message : AccountQueryResponseMessage) -- 'Q' 0x51
-  | gtcCancelledMessage (message : GtcCancelledMessage) -- 'G' 0x47
-  | responseToMmiNotificationMessage (message : ResponseToMmiNotificationMessage) -- 'R' 0x52
-  | pendingOrderMessage (message : PendingOrderMessage) -- 'M' 0x4D
-  | streamStatusMessage (message : StreamStatusMessage) -- 'D' 0x44
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | orderAcceptedMessage (message : OrderAcceptedMessage) -- "A" 0x41
+  | orderReplacedMessage (message : OrderReplacedMessage) -- "U" 0x55
+  | cancelledOrderMessage (message : CancelledOrderMessage) -- "C" 0x43
+  | cancelPendingMessage (message : CancelPendingMessage) -- "P" 0x50
+  | replacePendingMessage (message : ReplacePendingMessage) -- "N" 0x4E
+  | executedOrderMessage (message : ExecutedOrderMessage) -- "E" 0x45
+  | brokenTradeMessage (message : BrokenTradeMessage) -- "B" 0x42
+  | rejectedOrderMessage (message : RejectedOrderMessage) -- "J" 0x4A
+  | cancelRejectedMessage (message : CancelRejectedMessage) -- "I" 0x49
+  | orderRestatedMessage (message : OrderRestatedMessage) -- "T" 0x54
+  | mmoRefreshRequestMessage (message : MmoRefreshRequestMessage) -- "W" 0x57
+  | accountQueryResponseMessage (message : AccountQueryResponseMessage) -- "Q" 0x51
+  | gtcCancelledMessage (message : GtcCancelledMessage) -- "G" 0x47
+  | responseToMmiNotificationMessage (message : ResponseToMmiNotificationMessage) -- "R" 0x52
+  | pendingOrderMessage (message : PendingOrderMessage) -- "M" 0x4D
+  | streamStatusMessage (message : StreamStatusMessage) -- "D" 0x44
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -4205,12 +4205,12 @@ end EndOfSession
 
 /-- Any Server Payload, selected by Server Packet Type -/
 inductive ServerPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeat (message : ServerHeartbeat) -- 'H' 0x48
-  | endOfSession (message : EndOfSession) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeat (message : ServerHeartbeat) -- "H" 0x48
+  | endOfSession (message : EndOfSession) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerPayload

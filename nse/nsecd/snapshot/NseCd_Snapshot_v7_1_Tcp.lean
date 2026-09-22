@@ -173,8 +173,8 @@ end NewSpreadOrderMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | newOrderMessage (message : NewOrderMessage) -- 'N' 0x4E
-  | newSpreadOrderMessage (message : NewSpreadOrderMessage) -- 'G' 0x47
+  | newOrderMessage (message : NewOrderMessage) -- "N" 0x4E
+  | newSpreadOrderMessage (message : NewSpreadOrderMessage) -- "G" 0x47
   deriving DecidableEq, Repr
 
 namespace Payload

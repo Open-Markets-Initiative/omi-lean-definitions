@@ -590,12 +590,12 @@ end TradeCancelMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | stockDirectory (message : StockDirectory) -- 'R' 0x52
-  | stockTradingAction (message : StockTradingAction) -- 'H' 0x48
-  | regShoShortSalePriceTestRestrictedIndicator (message : RegShoShortSalePriceTestRestrictedIndicator) -- 'Y' 0x59
-  | tradeReportMessage (message : TradeReportMessage) -- 'T' 0x54
-  | tradeCancelMessage (message : TradeCancelMessage) -- 'X' 0x58
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | stockDirectory (message : StockDirectory) -- "R" 0x52
+  | stockTradingAction (message : StockTradingAction) -- "H" 0x48
+  | regShoShortSalePriceTestRestrictedIndicator (message : RegShoShortSalePriceTestRestrictedIndicator) -- "Y" 0x59
+  | tradeReportMessage (message : TradeReportMessage) -- "T" 0x54
+  | tradeCancelMessage (message : TradeCancelMessage) -- "X" 0x58
   deriving DecidableEq, Repr
 
 namespace Payload

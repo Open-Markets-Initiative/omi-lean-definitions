@@ -2723,36 +2723,36 @@ end VolumeAndOpenInterestMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | timeMessage (message : TimeMessage) -- 'T' 0x54
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | futureSymbolDirectoryMessage (message : FutureSymbolDirectoryMessage) -- 'f' 0x66
-  | spreadSymbolDirectoryMessage (message : SpreadSymbolDirectoryMessage) -- 'g' 0x67
-  | optionSymbolDirectoryMessage (message : OptionSymbolDirectoryMessage) -- 'h' 0x68
-  | orderBookStateMessage (message : OrderBookStateMessage) -- 'O' 0x4F
-  | orderAddedMessage (message : OrderAddedMessage) -- 'A' 0x41
-  | orderReplacedMessage (message : OrderReplacedMessage) -- 'U' 0x55
-  | orderVolumeCancelledMessage (message : OrderVolumeCancelledMessage) -- 'X' 0x58
-  | orderDeletedMessage (message : OrderDeletedMessage) -- 'D' 0x44
-  | impliedOrderAddedMessage (message : ImpliedOrderAddedMessage) -- 'j' 0x6A
-  | impliedOrderReplacedMessage (message : ImpliedOrderReplacedMessage) -- 'l' 0x6C
-  | impliedOrderDeletedMessage (message : ImpliedOrderDeletedMessage) -- 'k' 0x6B
-  | customMarketOrderAddedMessage (message : CustomMarketOrderAddedMessage) -- 'm' 0x6D
-  | customMarketOrderReplacedMessage (message : CustomMarketOrderReplacedMessage) -- 'n' 0x6E
-  | customMarketOrderDeletedMessage (message : CustomMarketOrderDeletedMessage) -- 'r' 0x72
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | spreadExecutedMessage (message : SpreadExecutedMessage) -- 'e' 0x65
-  | tradeSpreadExecutionChainMessage (message : TradeSpreadExecutionChainMessage) -- 'P' 0x50
-  | customMarketExecutedMessage (message : CustomMarketExecutedMessage) -- 'u' 0x75
-  | customMarketTradeMessage (message : CustomMarketTradeMessage) -- 'p' 0x70
-  | tradeCancellationMessage (message : TradeCancellationMessage) -- 'B' 0x42
-  | equilibriumPriceAuctionInfoMessage (message : EquilibriumPriceAuctionInfoMessage) -- 'Z' 0x5A
-  | openHighLowLastTradeAdjustmentMessage (message : OpenHighLowLastTradeAdjustmentMessage) -- 't' 0x74
-  | marketSettlementMessage (message : MarketSettlementMessage) -- 'Y' 0x59
-  | adHocTextMessage (message : AdHocTextMessage) -- 'x' 0x78
-  | requestForQuoteMessage (message : RequestForQuoteMessage) -- 'q' 0x71
-  | anomalousOrderThresholdPublishMessage (message : AnomalousOrderThresholdPublishMessage) -- 'W' 0x57
-  | volumeAndOpenInterestMessage (message : VolumeAndOpenInterestMessage) -- 'V' 0x56
+  | timeMessage (message : TimeMessage) -- "T" 0x54
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | futureSymbolDirectoryMessage (message : FutureSymbolDirectoryMessage) -- "f" 0x66
+  | spreadSymbolDirectoryMessage (message : SpreadSymbolDirectoryMessage) -- "g" 0x67
+  | optionSymbolDirectoryMessage (message : OptionSymbolDirectoryMessage) -- "h" 0x68
+  | orderBookStateMessage (message : OrderBookStateMessage) -- "O" 0x4F
+  | orderAddedMessage (message : OrderAddedMessage) -- "A" 0x41
+  | orderReplacedMessage (message : OrderReplacedMessage) -- "U" 0x55
+  | orderVolumeCancelledMessage (message : OrderVolumeCancelledMessage) -- "X" 0x58
+  | orderDeletedMessage (message : OrderDeletedMessage) -- "D" 0x44
+  | impliedOrderAddedMessage (message : ImpliedOrderAddedMessage) -- "j" 0x6A
+  | impliedOrderReplacedMessage (message : ImpliedOrderReplacedMessage) -- "l" 0x6C
+  | impliedOrderDeletedMessage (message : ImpliedOrderDeletedMessage) -- "k" 0x6B
+  | customMarketOrderAddedMessage (message : CustomMarketOrderAddedMessage) -- "m" 0x6D
+  | customMarketOrderReplacedMessage (message : CustomMarketOrderReplacedMessage) -- "n" 0x6E
+  | customMarketOrderDeletedMessage (message : CustomMarketOrderDeletedMessage) -- "r" 0x72
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | spreadExecutedMessage (message : SpreadExecutedMessage) -- "e" 0x65
+  | tradeSpreadExecutionChainMessage (message : TradeSpreadExecutionChainMessage) -- "P" 0x50
+  | customMarketExecutedMessage (message : CustomMarketExecutedMessage) -- "u" 0x75
+  | customMarketTradeMessage (message : CustomMarketTradeMessage) -- "p" 0x70
+  | tradeCancellationMessage (message : TradeCancellationMessage) -- "B" 0x42
+  | equilibriumPriceAuctionInfoMessage (message : EquilibriumPriceAuctionInfoMessage) -- "Z" 0x5A
+  | openHighLowLastTradeAdjustmentMessage (message : OpenHighLowLastTradeAdjustmentMessage) -- "t" 0x74
+  | marketSettlementMessage (message : MarketSettlementMessage) -- "Y" 0x59
+  | adHocTextMessage (message : AdHocTextMessage) -- "x" 0x78
+  | requestForQuoteMessage (message : RequestForQuoteMessage) -- "q" 0x71
+  | anomalousOrderThresholdPublishMessage (message : AnomalousOrderThresholdPublishMessage) -- "W" 0x57
+  | volumeAndOpenInterestMessage (message : VolumeAndOpenInterestMessage) -- "V" 0x56
   deriving DecidableEq, Repr
 
 namespace Payload

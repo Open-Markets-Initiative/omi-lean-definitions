@@ -191,11 +191,11 @@ end LogoutRequest
 
 /-- Any Client Payload, selected by Client Packet Type -/
 inductive ClientPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginRequestPacket (message : LoginRequestPacket) -- 'L' 0x4C
-  | unsequencedDataPacket (message : UnsequencedDataPacket) -- 'U' 0x55
-  | clientHeartbeat (message : ClientHeartbeat) -- 'R' 0x52
-  | logoutRequest (message : LogoutRequest) -- 'O' 0x4F
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginRequestPacket (message : LoginRequestPacket) -- "L" 0x4C
+  | unsequencedDataPacket (message : UnsequencedDataPacket) -- "U" 0x55
+  | clientHeartbeat (message : ClientHeartbeat) -- "R" 0x52
+  | logoutRequest (message : LogoutRequest) -- "O" 0x4F
   deriving DecidableEq, Repr
 
 namespace ClientPayload

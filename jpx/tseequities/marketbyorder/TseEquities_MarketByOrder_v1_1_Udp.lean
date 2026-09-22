@@ -544,15 +544,15 @@ end CommunicationControlMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | secondsTimestampMessage (message : SecondsTimestampMessage) -- 'T' 0x54
-  | tradingStatusMessage (message : TradingStatusMessage) -- 'O' 0x4F
-  | executionSummaryMessage (message : ExecutionSummaryMessage) -- 'K' 0x4B
-  | addOrderMessage (message : AddOrderMessage) -- 'A' 0x41
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
-  | resetMessage (message : ResetMessage) -- 'R' 0x52
-  | communicationControlMessage (message : CommunicationControlMessage) -- 'L' 0x4C
+  | secondsTimestampMessage (message : SecondsTimestampMessage) -- "T" 0x54
+  | tradingStatusMessage (message : TradingStatusMessage) -- "O" 0x4F
+  | executionSummaryMessage (message : ExecutionSummaryMessage) -- "K" 0x4B
+  | addOrderMessage (message : AddOrderMessage) -- "A" 0x41
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "D" 0x44
+  | resetMessage (message : ResetMessage) -- "R" 0x52
+  | communicationControlMessage (message : CommunicationControlMessage) -- "L" 0x4C
   deriving DecidableEq, Repr
 
 namespace Payload

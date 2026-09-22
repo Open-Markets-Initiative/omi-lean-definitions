@@ -1088,16 +1088,16 @@ end OrderbookReferencePriceMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | timeStampSecondsMessage (message : TimeStampSecondsMessage) -- 'T' 0x54
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | priceTickSizeMessage (message : PriceTickSizeMessage) -- 'L' 0x4C
-  | quantityTickSizeMessage (message : QuantityTickSizeMessage) -- 'M' 0x4D
-  | orderbookDirectoryMessage (message : OrderbookDirectoryMessage) -- 'R' 0x52
-  | participantDirectoryMessage (message : ParticipantDirectoryMessage) -- 'F' 0x46
-  | orderbookTradingActionMessage (message : OrderbookTradingActionMessage) -- 'H' 0x48
-  | tradeMessage (message : TradeMessage) -- 'P' 0x50
-  | bestBidOfferMessage (message : BestBidOfferMessage) -- 'Q' 0x51
-  | orderbookReferencePriceMessage (message : OrderbookReferencePriceMessage) -- 'X' 0x58
+  | timeStampSecondsMessage (message : TimeStampSecondsMessage) -- "T" 0x54
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | priceTickSizeMessage (message : PriceTickSizeMessage) -- "L" 0x4C
+  | quantityTickSizeMessage (message : QuantityTickSizeMessage) -- "M" 0x4D
+  | orderbookDirectoryMessage (message : OrderbookDirectoryMessage) -- "R" 0x52
+  | participantDirectoryMessage (message : ParticipantDirectoryMessage) -- "F" 0x46
+  | orderbookTradingActionMessage (message : OrderbookTradingActionMessage) -- "H" 0x48
+  | tradeMessage (message : TradeMessage) -- "P" 0x50
+  | bestBidOfferMessage (message : BestBidOfferMessage) -- "Q" 0x51
+  | orderbookReferencePriceMessage (message : OrderbookReferencePriceMessage) -- "X" 0x58
   deriving DecidableEq, Repr
 
 namespace Payload

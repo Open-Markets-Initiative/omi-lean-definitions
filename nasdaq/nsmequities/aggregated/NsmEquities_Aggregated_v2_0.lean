@@ -2346,20 +2346,20 @@ end DirectListingWithCapitalRaisePriceDiscoveryMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'Y' 0x59
-  | marketParticipantPositionMessage (message : MarketParticipantPositionMessage) -- 'P' 0x50
-  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- 'V' 0x56
-  | mwcbStatusMessage (message : MwcbStatusMessage) -- 'W' 0x57
-  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- 'K' 0x4B
-  | luldAuctionCollarMessage (message : LuldAuctionCollarMessage) -- 'J' 0x4A
-  | operationalHaltMessage (message : OperationalHaltMessage) -- 'h' 0x68
-  | priceLevelUpdateMessage (message : PriceLevelUpdateMessage) -- 'U' 0x55
-  | netOrderImbalanceIndicatorMessage (message : NetOrderImbalanceIndicatorMessage) -- 'I' 0x49
-  | retailPriceImprovementIndicatorMessage (message : RetailPriceImprovementIndicatorMessage) -- 'N' 0x4E
-  | directListingWithCapitalRaisePriceDiscoveryMessage (message : DirectListingWithCapitalRaisePriceDiscoveryMessage) -- 'O' 0x4F
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "Y" 0x59
+  | marketParticipantPositionMessage (message : MarketParticipantPositionMessage) -- "P" 0x50
+  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- "V" 0x56
+  | mwcbStatusMessage (message : MwcbStatusMessage) -- "W" 0x57
+  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- "K" 0x4B
+  | luldAuctionCollarMessage (message : LuldAuctionCollarMessage) -- "J" 0x4A
+  | operationalHaltMessage (message : OperationalHaltMessage) -- "h" 0x68
+  | priceLevelUpdateMessage (message : PriceLevelUpdateMessage) -- "U" 0x55
+  | netOrderImbalanceIndicatorMessage (message : NetOrderImbalanceIndicatorMessage) -- "I" 0x49
+  | retailPriceImprovementIndicatorMessage (message : RetailPriceImprovementIndicatorMessage) -- "N" 0x4E
+  | directListingWithCapitalRaisePriceDiscoveryMessage (message : DirectListingWithCapitalRaisePriceDiscoveryMessage) -- "O" 0x4F
   deriving DecidableEq, Repr
 
 namespace Payload

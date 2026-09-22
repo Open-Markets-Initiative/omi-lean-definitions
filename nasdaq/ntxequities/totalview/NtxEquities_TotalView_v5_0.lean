@@ -2742,27 +2742,27 @@ end RetailInterestMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'Y' 0x59
-  | marketParticipantPositionMessage (message : MarketParticipantPositionMessage) -- 'L' 0x4C
-  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- 'V' 0x56
-  | mwcbStatusMessage (message : MwcbStatusMessage) -- 'W' 0x57
-  | luldAuctionCollarMessage (message : LuldAuctionCollarMessage) -- 'J' 0x4A
-  | operationalHaltMessage (message : OperationalHaltMessage) -- 'h' 0x68
-  | addOrderNoMpidAttributionMessage (message : AddOrderNoMpidAttributionMessage) -- 'A' 0x41
-  | addOrderMpidAttributionMessage (message : AddOrderMpidAttributionMessage) -- 'F' 0x46
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | orderCancelMessage (message : OrderCancelMessage) -- 'X' 0x58
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
-  | orderReplaceMessage (message : OrderReplaceMessage) -- 'U' 0x55
-  | nonCrossTradeMessage (message : NonCrossTradeMessage) -- 'P' 0x50
-  | crossTradeMessage (message : CrossTradeMessage) -- 'Q' 0x51
-  | brokenTradeMessage (message : BrokenTradeMessage) -- 'B' 0x42
-  | netOrderImbalanceIndicatorMessage (message : NetOrderImbalanceIndicatorMessage) -- 'I' 0x49
-  | retailInterestMessage (message : RetailInterestMessage) -- 'N' 0x4E
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "Y" 0x59
+  | marketParticipantPositionMessage (message : MarketParticipantPositionMessage) -- "L" 0x4C
+  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- "V" 0x56
+  | mwcbStatusMessage (message : MwcbStatusMessage) -- "W" 0x57
+  | luldAuctionCollarMessage (message : LuldAuctionCollarMessage) -- "J" 0x4A
+  | operationalHaltMessage (message : OperationalHaltMessage) -- "h" 0x68
+  | addOrderNoMpidAttributionMessage (message : AddOrderNoMpidAttributionMessage) -- "A" 0x41
+  | addOrderMpidAttributionMessage (message : AddOrderMpidAttributionMessage) -- "F" 0x46
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | orderCancelMessage (message : OrderCancelMessage) -- "X" 0x58
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "D" 0x44
+  | orderReplaceMessage (message : OrderReplaceMessage) -- "U" 0x55
+  | nonCrossTradeMessage (message : NonCrossTradeMessage) -- "P" 0x50
+  | crossTradeMessage (message : CrossTradeMessage) -- "Q" 0x51
+  | brokenTradeMessage (message : BrokenTradeMessage) -- "B" 0x42
+  | netOrderImbalanceIndicatorMessage (message : NetOrderImbalanceIndicatorMessage) -- "I" 0x49
+  | retailInterestMessage (message : RetailInterestMessage) -- "N" 0x4E
   deriving DecidableEq, Repr
 
 namespace Payload

@@ -628,16 +628,16 @@ end HeartbeatMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | newOrderMessage (message : NewOrderMessage) -- 'N' 0x4E
-  | orderModificationMessage (message : OrderModificationMessage) -- 'M' 0x4D
-  | orderCancellationMessage (message : OrderCancellationMessage) -- 'X' 0x58
-  | tradeMessage (message : TradeMessage) -- 'T' 0x54
-  | newSpreadOrderMessage (message : NewSpreadOrderMessage) -- 'G' 0x47
-  | spreadOrderModificationMessage (message : SpreadOrderModificationMessage) -- 'H' 0x48
-  | spreadOrderCancellationMessage (message : SpreadOrderCancellationMessage) -- 'J' 0x4A
-  | spreadTradeMessage (message : SpreadTradeMessage) -- 'K' 0x4B
-  | tradeCancelMessage (message : TradeCancelMessage) -- 'C' 0x43
-  | heartbeatMessage (message : HeartbeatMessage) -- 'Z' 0x5A
+  | newOrderMessage (message : NewOrderMessage) -- "N" 0x4E
+  | orderModificationMessage (message : OrderModificationMessage) -- "M" 0x4D
+  | orderCancellationMessage (message : OrderCancellationMessage) -- "X" 0x58
+  | tradeMessage (message : TradeMessage) -- "T" 0x54
+  | newSpreadOrderMessage (message : NewSpreadOrderMessage) -- "G" 0x47
+  | spreadOrderModificationMessage (message : SpreadOrderModificationMessage) -- "H" 0x48
+  | spreadOrderCancellationMessage (message : SpreadOrderCancellationMessage) -- "J" 0x4A
+  | spreadTradeMessage (message : SpreadTradeMessage) -- "K" 0x4B
+  | tradeCancelMessage (message : TradeCancelMessage) -- "C" 0x43
+  | heartbeatMessage (message : HeartbeatMessage) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace Payload

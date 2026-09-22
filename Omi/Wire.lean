@@ -196,6 +196,119 @@ theorem Byte.encode_length_pos (byte : UInt8) : (Byte.encode byte).length > 0 :=
     Byte.decode (Byte.encode byte ++ rest) = some (byte, rest) :=
   rfl
 
+/-- Bytes closed by a terminator, which they may not themselves hold -/
+abbrev Terminated (terminator : UInt8) := { bytes : List UInt8 // terminator ∉ bytes }
+
+instance {terminator : UInt8} : DecidableEq (Terminated terminator) :=
+  inferInstanceAs (DecidableEq { bytes : List UInt8 // terminator ∉ bytes })
+
+instance {terminator : UInt8} : Repr (Terminated terminator) where
+  reprPrec terminated precedence := reprPrec terminated.val precedence
+
+/-- The bytes, then the terminator that closes them -/
+def encodeTerminated (terminator : UInt8) (item : Terminated terminator) : List UInt8 :=
+  item.val ++ [terminator]
+
+/-- The bytes ahead of the first terminator, and what follows it; nothing when none closes them -/
+def takeTerminated (terminator : UInt8) : List UInt8 → Option (List UInt8 × List UInt8)
+  | [] => none
+  | byte :: rest =>
+    if byte = terminator then some ([], rest)
+    else (takeTerminated terminator rest).map fun (taken, left) => (byte :: taken, left)
+
+def decodeTerminated (terminator : UInt8) (bytes : List UInt8) : Option (Terminated terminator × List UInt8) :=
+  (takeTerminated terminator bytes).bind fun (taken, rest) =>
+    if free : terminator ∉ taken then some (⟨taken, free⟩, rest) else none
+
+/-- Bytes holding no terminator are taken whole, up to the one written after them -/
+theorem takeTerminated_append (terminator : UInt8) (bytes : List UInt8) (free : terminator ∉ bytes) (rest : List UInt8) :
+    takeTerminated terminator (bytes ++ terminator :: rest) = some (bytes, rest) := by
+  induction bytes with
+  | nil => simp [takeTerminated]
+  | cons byte others ih =>
+    have head : byte ≠ terminator := by
+      intro same
+      exact free (by simp [same])
+    have others_free : terminator ∉ others := by
+      intro inside
+      exact free (by simp [inside])
+    simp [takeTerminated, head, ih others_free]
+
+theorem encodeTerminated_length_pos (terminator : UInt8) (item : Terminated terminator) :
+    (encodeTerminated terminator item).length > 0 := by
+  simp [encodeTerminated]
+
+theorem decodeTerminated_encodeTerminated (terminator : UInt8) (item : Terminated terminator) (rest : List UInt8) :
+    decodeTerminated terminator (encodeTerminated terminator item ++ rest) = some (item, rest) := by
+  unfold decodeTerminated encodeTerminated
+  rw [List.append_assoc, List.cons_append, List.nil_append,
+    takeTerminated_append terminator item.val item.property rest]
+  simp [item.property]
+
+/-- The ascii digit of a value under ten -/
+def digit (value : Nat) : UInt8 := UInt8.ofNat (0x30 + value % 10)
+
+/-- A value written as `n` ascii digits, most significant first, zero filled -/
+def encodeDigits : Nat → Nat → List UInt8
+  | 0, _ => []
+  | n + 1, value => digit (value / 10 ^ n) :: encodeDigits n (value % 10 ^ n)
+
+/-- The value `n` ascii digits hold, and what follows them; nothing when a byte is no digit -/
+def decodeDigits : Nat → List UInt8 → Option (Nat × List UInt8)
+  | 0, bytes => some (0, bytes)
+  | _ + 1, [] => none
+  | n + 1, byte :: rest =>
+    if _digits : 0x30 ≤ byte.toNat ∧ byte.toNat ≤ 0x39
+    then (decodeDigits n rest).map fun (value, left) => ((byte.toNat - 0x30) * 10 ^ n + value, left)
+    else none
+
+@[simp] theorem encodeDigits_length (n value : Nat) : (encodeDigits n value).length = n := by
+  induction n generalizing value with
+  | zero => rfl
+  | succ n ih => simp [encodeDigits, ih]
+
+/-- The byte an ascii digit is written as -/
+theorem digit_toNat (value : Nat) (small : value < 10) : (digit value).toNat = 0x30 + value := by
+  unfold digit
+  rw [Nat.mod_eq_of_lt small]
+  simp [UInt8.toNat_ofNat, Nat.mod_eq_of_lt (show 0x30 + value < 256 by omega)]
+
+/-- Digits written from a value under their limit read that value back -/
+theorem decodeDigits_encodeDigits (n value : Nat) (fits : value < 10 ^ n) (rest : List UInt8) :
+    decodeDigits n (encodeDigits n value ++ rest) = some (value, rest) := by
+  induction n generalizing value with
+  | zero =>
+    have : value = 0 := by simpa using fits
+    simp [encodeDigits, decodeDigits, this]
+  | succ n ih =>
+    have positive : 0 < 10 ^ n := Nat.pow_pos (by decide)
+    have head : value / 10 ^ n < 10 := Nat.div_lt_of_lt_mul (by rw [← Nat.pow_succ]; exact fits)
+    have split : value / 10 ^ n * 10 ^ n + value % 10 ^ n = value := by
+      rw [Nat.mul_comm]
+      exact Nat.div_add_mod value (10 ^ n)
+    have left : value % 10 ^ n < 10 ^ n := Nat.mod_lt _ positive
+    simp only [encodeDigits, List.cons_append, decodeDigits]
+    -- the digit and what follows it are taken as they stand, so each reads back by its own value
+    generalize value / 10 ^ n = first at head split ⊢
+    generalize value % 10 ^ n = others at left split ⊢
+    have spelled := digit_toNat first head
+    rw [dite_eq_left (show 0x30 ≤ _ ∧ _ ≤ 0x39 from by omega), ih others left]
+    simp only [Option.map_some, spelled]
+    rw [show 0x30 + first - 0x30 = first from by omega, split]
+
+/-- A list whose length fits `n` ascii digits, so a count written from it as digits needs no
+    side condition. Reducible, so a proof may see through it to the list and its bound -/
+abbrev Digited (n : Nat) (α : Type) := { items : List α // items.length < 10 ^ n }
+
+instance [DecidableEq α] : DecidableEq (Digited n α) :=
+  inferInstanceAs (DecidableEq { items : List α // items.length < 10 ^ n })
+
+instance [Repr α] : Repr (Digited n α) where
+  reprPrec digited precedence := reprPrec digited.val precedence
+
+theorem Digited.length_lt (digited : Digited n α) : digited.val.length < 10 ^ n :=
+  digited.property
+
 /-- A list whose length fits an `n` byte count, so a count written from it needs no side condition.
     Reducible, so a proof may see through it to the list and its bound -/
 abbrev Bounded (n : Nat) (α : Type) := { items : List α // items.length < 256 ^ n }

@@ -1155,19 +1155,19 @@ end AuctionInformationMessage
 
 /-- Any Message Data, selected by Message Type -/
 inductive MessageData where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | securityDirectoryMessage (message : SecurityDirectoryMessage) -- 'D' 0x44
-  | tradingStatusMessage (message : TradingStatusMessage) -- 'H' 0x48
-  | retailLiquidityIndicatorMessage (message : RetailLiquidityIndicatorMessage) -- 'I' 0x49
-  | operationalHaltStatusMessage (message : OperationalHaltStatusMessage) -- 'O' 0x4F
-  | shortSalePriceTestStatusMessage (message : ShortSalePriceTestStatusMessage) -- 'P' 0x50
-  | securityEventMessage (message : SecurityEventMessage) -- 'E' 0x45
-  | priceLevelBuyUpdateMessage (message : PriceLevelBuyUpdateMessage) -- '8' 0x38
-  | priceLevelSellUpdateMessage (message : PriceLevelSellUpdateMessage) -- '5' 0x35
-  | tradeReportMessage (message : TradeReportMessage) -- 'T' 0x54
-  | officialPriceMessage (message : OfficialPriceMessage) -- 'X' 0x58
-  | tradeBreakMessage (message : TradeBreakMessage) -- 'B' 0x42
-  | auctionInformationMessage (message : AuctionInformationMessage) -- 'A' 0x41
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | securityDirectoryMessage (message : SecurityDirectoryMessage) -- "D" 0x44
+  | tradingStatusMessage (message : TradingStatusMessage) -- "H" 0x48
+  | retailLiquidityIndicatorMessage (message : RetailLiquidityIndicatorMessage) -- "I" 0x49
+  | operationalHaltStatusMessage (message : OperationalHaltStatusMessage) -- "O" 0x4F
+  | shortSalePriceTestStatusMessage (message : ShortSalePriceTestStatusMessage) -- "P" 0x50
+  | securityEventMessage (message : SecurityEventMessage) -- "E" 0x45
+  | priceLevelBuyUpdateMessage (message : PriceLevelBuyUpdateMessage) -- "8" 0x38
+  | priceLevelSellUpdateMessage (message : PriceLevelSellUpdateMessage) -- "5" 0x35
+  | tradeReportMessage (message : TradeReportMessage) -- "T" 0x54
+  | officialPriceMessage (message : OfficialPriceMessage) -- "X" 0x58
+  | tradeBreakMessage (message : TradeBreakMessage) -- "B" 0x42
+  | auctionInformationMessage (message : AuctionInformationMessage) -- "A" 0x41
   deriving DecidableEq, Repr
 
 namespace MessageData

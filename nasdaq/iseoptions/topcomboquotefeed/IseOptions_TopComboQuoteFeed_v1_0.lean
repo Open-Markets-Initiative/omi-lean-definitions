@@ -1009,14 +1009,14 @@ end ComplexStrategyTickerMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | complexStrategyDirectoryMessage (message : ComplexStrategyDirectoryMessage) -- 'R' 0x52
-  | strategyOpenClosedMessage (message : StrategyOpenClosedMessage) -- 'O' 0x4F
-  | strategyTradingActionMessage (message : StrategyTradingActionMessage) -- 'H' 0x48
-  | strategyBestBidAndAskUpdate (message : StrategyBestBidAndAskUpdate) -- 'C' 0x43
-  | strategyBestBidUpdate (message : StrategyBestBidUpdate) -- 'D' 0x44
-  | strategyBestAskUpdate (message : StrategyBestAskUpdate) -- 'E' 0x45
-  | complexStrategyTickerMessage (message : ComplexStrategyTickerMessage) -- 't' 0x74
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | complexStrategyDirectoryMessage (message : ComplexStrategyDirectoryMessage) -- "R" 0x52
+  | strategyOpenClosedMessage (message : StrategyOpenClosedMessage) -- "O" 0x4F
+  | strategyTradingActionMessage (message : StrategyTradingActionMessage) -- "H" 0x48
+  | strategyBestBidAndAskUpdate (message : StrategyBestBidAndAskUpdate) -- "C" 0x43
+  | strategyBestBidUpdate (message : StrategyBestBidUpdate) -- "D" 0x44
+  | strategyBestAskUpdate (message : StrategyBestAskUpdate) -- "E" 0x45
+  | complexStrategyTickerMessage (message : ComplexStrategyTickerMessage) -- "t" 0x74
   deriving DecidableEq, Repr
 
 namespace Payload

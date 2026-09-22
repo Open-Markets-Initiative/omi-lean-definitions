@@ -2217,19 +2217,19 @@ end OperationalHaltMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | tradeReportMessage (message : TradeReportMessage) -- 'T' 0x54
-  | nextSharesTradeReportMessage (message : NextSharesTradeReportMessage) -- 'M' 0x4D
-  | tradeCancelErrorMessage (message : TradeCancelErrorMessage) -- 'X' 0x58
-  | tradeCancelErrorForNextSharesMessage (message : TradeCancelErrorForNextSharesMessage) -- 'O' 0x4F
-  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- 'C' 0x43
-  | tradeCorrectionForNextSharesMessage (message : TradeCorrectionForNextSharesMessage) -- 'Z' 0x5A
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'Y' 0x59
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- 'V' 0x56
-  | mwcbBreachMessage (message : MwcbBreachMessage) -- 'W' 0x57
-  | operationalHaltMessage (message : OperationalHaltMessage) -- 'h' 0x68
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | tradeReportMessage (message : TradeReportMessage) -- "T" 0x54
+  | nextSharesTradeReportMessage (message : NextSharesTradeReportMessage) -- "M" 0x4D
+  | tradeCancelErrorMessage (message : TradeCancelErrorMessage) -- "X" 0x58
+  | tradeCancelErrorForNextSharesMessage (message : TradeCancelErrorForNextSharesMessage) -- "O" 0x4F
+  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- "C" 0x43
+  | tradeCorrectionForNextSharesMessage (message : TradeCorrectionForNextSharesMessage) -- "Z" 0x5A
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "Y" 0x59
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- "V" 0x56
+  | mwcbBreachMessage (message : MwcbBreachMessage) -- "W" 0x57
+  | operationalHaltMessage (message : OperationalHaltMessage) -- "h" 0x68
   deriving DecidableEq, Repr
 
 namespace Payload

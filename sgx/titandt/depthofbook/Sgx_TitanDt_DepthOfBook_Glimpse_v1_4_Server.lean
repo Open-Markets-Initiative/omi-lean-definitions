@@ -860,13 +860,13 @@ end EndOfSnapshotMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | secondsMessage (message : SecondsMessage) -- 'T' 0x54
-  | orderBookDirectoryMessage (message : OrderBookDirectoryMessage) -- 'R' 0x52
-  | combinationOrderBookDirectoryMessage (message : CombinationOrderBookDirectoryMessage) -- 'M' 0x4D
-  | tickSizeTableEntryMessage (message : TickSizeTableEntryMessage) -- 'L' 0x4C
-  | orderBookStateMessage (message : OrderBookStateMessage) -- 'O' 0x4F
-  | addOrderMessage (message : AddOrderMessage) -- 'A' 0x41
-  | endOfSnapshotMessage (message : EndOfSnapshotMessage) -- 'G' 0x47
+  | secondsMessage (message : SecondsMessage) -- "T" 0x54
+  | orderBookDirectoryMessage (message : OrderBookDirectoryMessage) -- "R" 0x52
+  | combinationOrderBookDirectoryMessage (message : CombinationOrderBookDirectoryMessage) -- "M" 0x4D
+  | tickSizeTableEntryMessage (message : TickSizeTableEntryMessage) -- "L" 0x4C
+  | orderBookStateMessage (message : OrderBookStateMessage) -- "O" 0x4F
+  | addOrderMessage (message : AddOrderMessage) -- "A" 0x41
+  | endOfSnapshotMessage (message : EndOfSnapshotMessage) -- "G" 0x47
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -1032,12 +1032,12 @@ end EndOfSession
 
 /-- Any Server Payload, selected by Server Packet Type -/
 inductive ServerPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeat (message : ServerHeartbeat) -- 'H' 0x48
-  | endOfSession (message : EndOfSession) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeat (message : ServerHeartbeat) -- "H" 0x48
+  | endOfSession (message : EndOfSession) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerPayload

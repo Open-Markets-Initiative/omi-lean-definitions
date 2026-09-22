@@ -1545,22 +1545,22 @@ end IndicativePriceQuantityMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | timeStampSecondsMessage (message : TimeStampSecondsMessage) -- 'T' 0x54
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | priceTickSizeMessage (message : PriceTickSizeMessage) -- 'L' 0x4C
-  | quantityTickSizeMessage (message : QuantityTickSizeMessage) -- 'M' 0x4D
-  | orderbookDirectoryMessage (message : OrderbookDirectoryMessage) -- 'R' 0x52
-  | participantDirectoryMessage (message : ParticipantDirectoryMessage) -- 'F' 0x46
-  | orderbookTradingActionMessage (message : OrderbookTradingActionMessage) -- 'H' 0x48
-  | orderbookReferencePriceMessage (message : OrderbookReferencePriceMessage) -- 'X' 0x58
-  | addOrderMessage (message : AddOrderMessage) -- 'A' 0x41
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | tradeMessage (message : TradeMessage) -- 'P' 0x50
-  | brokenTradeMessage (message : BrokenTradeMessage) -- 'B' 0x42
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
-  | orderReplaceMessage (message : OrderReplaceMessage) -- 'U' 0x55
-  | indicativePriceQuantityMessage (message : IndicativePriceQuantityMessage) -- 'I' 0x49
+  | timeStampSecondsMessage (message : TimeStampSecondsMessage) -- "T" 0x54
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | priceTickSizeMessage (message : PriceTickSizeMessage) -- "L" 0x4C
+  | quantityTickSizeMessage (message : QuantityTickSizeMessage) -- "M" 0x4D
+  | orderbookDirectoryMessage (message : OrderbookDirectoryMessage) -- "R" 0x52
+  | participantDirectoryMessage (message : ParticipantDirectoryMessage) -- "F" 0x46
+  | orderbookTradingActionMessage (message : OrderbookTradingActionMessage) -- "H" 0x48
+  | orderbookReferencePriceMessage (message : OrderbookReferencePriceMessage) -- "X" 0x58
+  | addOrderMessage (message : AddOrderMessage) -- "A" 0x41
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | tradeMessage (message : TradeMessage) -- "P" 0x50
+  | brokenTradeMessage (message : BrokenTradeMessage) -- "B" 0x42
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "D" 0x44
+  | orderReplaceMessage (message : OrderReplaceMessage) -- "U" 0x55
+  | indicativePriceQuantityMessage (message : IndicativePriceQuantityMessage) -- "I" 0x49
   deriving DecidableEq, Repr
 
 namespace Payload

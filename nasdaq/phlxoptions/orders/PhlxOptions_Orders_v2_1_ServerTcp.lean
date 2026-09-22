@@ -552,11 +552,12 @@ end OrderType
 
 /-- Order Qualifier: one byte code -/
 def OrderQualifier.codes : List UInt8 :=
-  [0x4F, 0x49]
+  [0x4F, 0x49, 0x20]
 
 inductive OrderQualifier where
   | openingOrder -- Opening Order
   | impliedOrder -- Implied Order
+  | na -- Na
   | unlisted (byte : { byte : UInt8 // byte ∉ OrderQualifier.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -565,12 +566,14 @@ namespace OrderQualifier
 def toByte : OrderQualifier → UInt8
   | .openingOrder => 0x4F
   | .impliedOrder => 0x49
+  | .na => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : OrderQualifier :=
   if byte = 0x4F then .openingOrder
-  else .impliedOrder
+  else if byte = 0x49 then .impliedOrder
+  else .na
 
 def ofByte (byte : UInt8) : OrderQualifier :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -579,6 +582,7 @@ theorem ofByte_toByte (value : OrderQualifier) : ofByte value.toByte = value := 
   cases value with
   | openingOrder => decide
   | impliedOrder => decide
+  | na => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : OrderQualifier) : List UInt8 :=
@@ -693,7 +697,7 @@ end TimeInForce
 
 /-- Order Capacity: one byte code -/
 def OrderCapacity.codes : List UInt8 :=
-  [0x43, 0x46, 0x4D, 0x42, 0x50, 0x4F, 0x4A]
+  [0x43, 0x46, 0x4D, 0x42, 0x50, 0x4F, 0x4A, 0x20]
 
 inductive OrderCapacity where
   | customerOrder -- Customer Order
@@ -703,6 +707,7 @@ inductive OrderCapacity where
   | professionalOrder -- Professional Order
   | otherExchangeMarketMakerOrder -- Other Exchange Market Maker Order
   | jointBackOffice -- Joint Back Office
+  | na -- Na
   | unlisted (byte : { byte : UInt8 // byte ∉ OrderCapacity.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -716,6 +721,7 @@ def toByte : OrderCapacity → UInt8
   | .professionalOrder => 0x50
   | .otherExchangeMarketMakerOrder => 0x4F
   | .jointBackOffice => 0x4A
+  | .na => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -726,7 +732,8 @@ def listed (byte : UInt8) : OrderCapacity :=
   else if byte = 0x42 then .brokerDealerOrder
   else if byte = 0x50 then .professionalOrder
   else if byte = 0x4F then .otherExchangeMarketMakerOrder
-  else .jointBackOffice
+  else if byte = 0x4A then .jointBackOffice
+  else .na
 
 def ofByte (byte : UInt8) : OrderCapacity :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -740,6 +747,7 @@ theorem ofByte_toByte (value : OrderCapacity) : ofByte value.toByte = value := b
   | professionalOrder => decide
   | otherExchangeMarketMakerOrder => decide
   | jointBackOffice => decide
+  | na => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : OrderCapacity) : List UInt8 :=
@@ -760,11 +768,12 @@ end OrderCapacity
 
 /-- Open Close Indicator: one byte code -/
 def OpenCloseIndicator.codes : List UInt8 :=
-  [0x4F, 0x43]
+  [0x4F, 0x43, 0x20]
 
 inductive OpenCloseIndicator where
   | opensPosition -- Opens Position
   | closesPosition -- Closes Position
+  | na -- Na
   | unlisted (byte : { byte : UInt8 // byte ∉ OpenCloseIndicator.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -773,12 +782,14 @@ namespace OpenCloseIndicator
 def toByte : OpenCloseIndicator → UInt8
   | .opensPosition => 0x4F
   | .closesPosition => 0x43
+  | .na => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : OpenCloseIndicator :=
   if byte = 0x4F then .opensPosition
-  else .closesPosition
+  else if byte = 0x43 then .closesPosition
+  else .na
 
 def ofByte (byte : UInt8) : OpenCloseIndicator :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -787,6 +798,7 @@ theorem ofByte_toByte (value : OpenCloseIndicator) : ofByte value.toByte = value
   cases value with
   | opensPosition => decide
   | closesPosition => decide
+  | na => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : OpenCloseIndicator) : List UInt8 :=
@@ -1506,12 +1518,12 @@ end EndOfReplaySequenceMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- 'm' 0x6D
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | addOrderMessage (message : AddOrderMessage) -- 'O' 0x4F
-  | auctionMessage (message : AuctionMessage) -- 'J' 0x4A
-  | endOfReplaySequenceMessage (message : EndOfReplaySequenceMessage) -- 'M' 0x4D
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- "m" 0x6D
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | addOrderMessage (message : AddOrderMessage) -- "O" 0x4F
+  | auctionMessage (message : AuctionMessage) -- "J" 0x4A
+  | endOfReplaySequenceMessage (message : EndOfReplaySequenceMessage) -- "M" 0x4D
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -1668,12 +1680,12 @@ end EndOfSessionPacket
 
 /-- Any Server Tcp Payload, selected by Server Packet Type -/
 inductive ServerTcpPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- 'H' 0x48
-  | endOfSessionPacket (message : EndOfSessionPacket) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- "H" 0x48
+  | endOfSessionPacket (message : EndOfSessionPacket) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerTcpPayload

@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 600 | 2212872 |
+| 610 | 2236440 |
 
 ## Testing
 
@@ -39,11 +39,11 @@ Please report any parsing errors as an [issue](https://github.com/Open-Markets-I
 Other generated code can be found at [Omi Projects](https://github.com/Open-Markets-Initiative/Directory/tree/main/Projects "Open Markets Initiative Projects"); for Omi rules and regulations, see [Omi Directory](https://github.com/Open-Markets-Initiative/Directory "Open Markets Initiative Directory").
 ## Organizations
 
-> [24X][24X.Directory] · [A2X][A2X.Directory] · [Aquis][Aquis.Directory] · [Asx][Asx.Directory] · [B3][B3.Directory] · [Bist][Bist.Directory] · [Biva][Biva.Directory] · [BlueOceanAts][BlueOceanAts.Directory] · [BruceAts][BruceAts.Directory] · [Bse][Bse.Directory] · [CixAts][CixAts.Directory] · [Cme][Cme.Directory] · [Coinbase][Coinbase.Directory] · [Eurex][Eurex.Directory] · [Euronext][Euronext.Directory] · [Iex][Iex.Directory] · [Imperative][Imperative.Directory] · [Jpx][Jpx.Directory] · [Nasdaq][Nasdaq.Directory] · [Nse][Nse.Directory] · [Sgx][Sgx.Directory]
+> [24X][24X.Directory] · [A2X][A2X.Directory] · [Aquis][Aquis.Directory] · [Asx][Asx.Directory] · [B3][B3.Directory] · [Bist][Bist.Directory] · [Biva][Biva.Directory] · [BlueOceanAts][BlueOceanAts.Directory] · [Box][Box.Directory] · [BruceAts][BruceAts.Directory] · [Bse][Bse.Directory] · [CixAts][CixAts.Directory] · [Cme][Cme.Directory] · [Coinbase][Coinbase.Directory] · [Eurex][Eurex.Directory] · [Euronext][Euronext.Directory] · [Iex][Iex.Directory] · [Imperative][Imperative.Directory] · [Jpx][Jpx.Directory] · [Nasdaq][Nasdaq.Directory] · [Nse][Nse.Directory] · [Sgx][Sgx.Directory]
 
 ## Exchanges
 
-> [24XEquities][24XEquities.Exchange] · [A2XEquities][A2XEquities.Exchange] · [AquisEquities][AquisEquities.Exchange] · [AsxDerivatives][AsxDerivatives.Exchange] · [AsxSecurities][AsxSecurities.Exchange] · [B3Derivatives][B3Derivatives.Exchange] · [BivaEquities][BivaEquities.Exchange] · [BlueEquities][BlueEquities.Ats] · [BorsaIstanbul][BorsaIstanbul.Exchange] · [BruceEquities][BruceEquities.Ats] · [BseIndia][BseIndia.Exchange] · [CoinbaseDerivatives][CoinbaseDerivatives.Exchange] · [Deribit][Deribit.Exchange] · [FseEquities][FseEquities.Exchange] · [GemxOptions][GemxOptions.Exchange] · [IexEquities][IexEquities.Exchange] · [IntelligentCross][IntelligentCross.Ats] · [IseOptions][IseOptions.Exchange] · [MrxOptions][MrxOptions.Exchange] · [NomOptions][NomOptions.Exchange] · [NordicEquities][NordicEquities.Exchange] · [NseCd][NseCd.Exchange] · [NseCm][NseCm.Exchange] · [NseCom][NseCom.Exchange] · [NseEquities][NseEquities.Exchange] · [NseFo][NseFo.Exchange] · [NsmEquities][NsmEquities.Exchange] · [NtxEquities][NtxEquities.Exchange] · [NtxOptions][NtxOptions.Exchange] · [OseDerivatives][OseDerivatives.Exchange] · [PhlxOptions][PhlxOptions.Exchange] · [PsxEquities][PsxEquities.Exchange] · [SseEquities][SseEquities.Exchange] · [TseEquities][TseEquities.Exchange]
+> [24XEquities][24XEquities.Exchange] · [A2XEquities][A2XEquities.Exchange] · [AquisEquities][AquisEquities.Exchange] · [AsxDerivatives][AsxDerivatives.Exchange] · [AsxSecurities][AsxSecurities.Exchange] · [B3Derivatives][B3Derivatives.Exchange] · [BivaEquities][BivaEquities.Exchange] · [BlueEquities][BlueEquities.Ats] · [BorsaIstanbul][BorsaIstanbul.Exchange] · [BoxOptions][BoxOptions.Exchange] · [BruceEquities][BruceEquities.Ats] · [BseIndia][BseIndia.Exchange] · [CoinbaseDerivatives][CoinbaseDerivatives.Exchange] · [Deribit][Deribit.Exchange] · [FseEquities][FseEquities.Exchange] · [GemxOptions][GemxOptions.Exchange] · [IexEquities][IexEquities.Exchange] · [IntelligentCross][IntelligentCross.Ats] · [IseOptions][IseOptions.Exchange] · [MrxOptions][MrxOptions.Exchange] · [NomOptions][NomOptions.Exchange] · [NordicEquities][NordicEquities.Exchange] · [NseCd][NseCd.Exchange] · [NseCm][NseCm.Exchange] · [NseCom][NseCom.Exchange] · [NseEquities][NseEquities.Exchange] · [NseFo][NseFo.Exchange] · [NsmEquities][NsmEquities.Exchange] · [NtxEquities][NtxEquities.Exchange] · [NtxOptions][NtxOptions.Exchange] · [OseDerivatives][OseDerivatives.Exchange] · [PhlxOptions][PhlxOptions.Exchange] · [PsxEquities][PsxEquities.Exchange] · [SseEquities][SseEquities.Exchange] · [TseEquities][TseEquities.Exchange]
 
 ## Platforms
 
@@ -87,6 +87,7 @@ Enjoy.
 [Omi.Encoding.Ouch]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Ouch.md "Ouch Encoding"
 [Omi.Encoding.Glimpse]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Glimpse.md "Glimpse Encoding"
 [Omi.Encoding.Udp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Udp.md "Udp Encoding"
+[Omi.Encoding.Hsvf]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Hsvf.md "Hsvf Encoding"
 [Omi.Encoding.Fbe]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Fbe.md "Fbe Encoding"
 [Omi.Encoding.Aspen]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Aspen.md "Aspen Encoding"
 [Omi.Encoding.Tcp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Tcp.md "Tcp Encoding"
@@ -118,6 +119,7 @@ Enjoy.
 [Biva.BivaEquities.Basic]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Biva/Protocols/BivaEquities/Basic.md "Basic"
 [Biva.BivaEquities.Index]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Biva/Protocols/BivaEquities/Index.md "Index"
 [Biva.BivaEquities.LastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Biva/Protocols/BivaEquities/LastSale.md "Last Sale"
+[Biva.BivaEquities.News]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Biva/Protocols/BivaEquities/News.md "News"
 [Biva.BivaEquities.OrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Biva/Protocols/BivaEquities/OrderEntry.md "Order Entry"
 [Biva.BivaEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Biva/Protocols/BivaEquities/TotalView.md "Total View"
 [BlueOceanAts.BlueEquities.Memo]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BlueOceanAts/Protocols/BlueEquities/Memo.md "Members Orders"
@@ -125,6 +127,7 @@ Enjoy.
 [BlueOceanAts.BlueEquities.MemoirLastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BlueOceanAts/Protocols/BlueEquities/MemoirLastSale.md "Member Order Information Record Last Sale"
 [BlueOceanAts.BlueEquities.MemoirTopOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BlueOceanAts/Protocols/BlueEquities/MemoirTopOfBook.md "Member Order Information Record Top Of Book"
 [BlueOceanAts.CommonHeader]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BlueOceanAts/Protocols/CommonHeader.md "Common Header"
+[Box.BoxOptions.SolaMulticast]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Box/Protocols/BoxOptions/SolaMulticast.md "Sola Multicast"
 [BruceAts.BruceEquities.BestBidAndOffer]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BruceAts/Protocols/BruceEquities/BestBidAndOffer.md "Best Bid And Offer"
 [BruceAts.BruceEquities.DepthOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BruceAts/Protocols/BruceEquities/DepthOfBook.md "Depth Of Book"
 [BruceAts.BruceEquities.LastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BruceAts/Protocols/BruceEquities/LastSale.md "Last Sale"
@@ -239,6 +242,7 @@ Enjoy.
 [Bist.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/bist "Borsa İstanbul A.Ş."
 [Biva.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/biva "Bolsa Institucional de Valores"
 [BlueOceanAts.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/blueoceanats "Blue Ocean Technologies"
+[Box.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/box "Box Options Market"
 [BruceAts.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/bruceats "Bruce ATS"
 [Bse.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/bse "BSE Limited"
 [CixAts.Directory]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/cixats "CIX Trading Inc."
@@ -262,6 +266,7 @@ Enjoy.
 [BivaEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/biva/bivaequities "Biva Equities"
 [BlueEquities.Ats]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/blueoceanats "Blue Equities"
 [BorsaIstanbul.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/bist/borsaistanbul "Borsa Istanbul"
+[BoxOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/box/boxoptions "BOX Options Exchange"
 [BruceEquities.Ats]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/bruceats "Bruce ATS Equities"
 [BseIndia.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/bse/bseindia "BSE India"
 [CixAspen.Platform]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/cixats "CIX Aspen"

@@ -249,10 +249,10 @@ end EndOfMessageMessage
 
 /-- Any Tcp Payload, selected by Packet Type -/
 inductive TcpPayload where
-  | loginRequestMessage (message : LoginRequestMessage) -- 'R' 0x52
-  | loginResultMessage (message : LoginResultMessage) -- 'A' 0x41
-  | messageResponseMessage (message : MessageResponseMessage) -- 'S' 0x53
-  | endOfMessageMessage (message : EndOfMessageMessage) -- 'G' 0x47
+  | loginRequestMessage (message : LoginRequestMessage) -- "R" 0x52
+  | loginResultMessage (message : LoginResultMessage) -- "A" 0x41
+  | messageResponseMessage (message : MessageResponseMessage) -- "S" 0x53
+  | endOfMessageMessage (message : EndOfMessageMessage) -- "G" 0x47
   deriving DecidableEq, Repr
 
 namespace TcpPayload

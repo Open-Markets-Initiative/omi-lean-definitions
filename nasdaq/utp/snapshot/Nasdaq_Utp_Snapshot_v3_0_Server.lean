@@ -2079,15 +2079,15 @@ end SnapshotSequenceMessage
 
 /-- Any Administrative Message Payload, selected by Administrative Message Type -/
 inductive AdministrativeMessagePayload where
-  | issueSymbolDirectoryMessage (message : IssueSymbolDirectoryMessage) -- 'B' 0x42
-  | enhancedIssueSymbolDirectoryMessage (message : EnhancedIssueSymbolDirectoryMessage) -- 'F' 0x46
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'V' 0x56
-  | crossSroTradingActionMessage (message : CrossSroTradingActionMessage) -- 'H' 0x48
-  | marketCenterTradingActionMessage (message : MarketCenterTradingActionMessage) -- 'K' 0x4B
-  | marketWideCircuitBreakerDeclineLevelMessage (message : MarketWideCircuitBreakerDeclineLevelMessage) -- 'C' 0x43
-  | limitUpLimitDownPriceBandMessage (message : LimitUpLimitDownPriceBandMessage) -- 'P' 0x50
-  | auctionCollarMessage (message : AuctionCollarMessage) -- 'E' 0x45
-  | snapshotSequenceMessage (message : SnapshotSequenceMessage) -- 'S' 0x53
+  | issueSymbolDirectoryMessage (message : IssueSymbolDirectoryMessage) -- "B" 0x42
+  | enhancedIssueSymbolDirectoryMessage (message : EnhancedIssueSymbolDirectoryMessage) -- "F" 0x46
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "V" 0x56
+  | crossSroTradingActionMessage (message : CrossSroTradingActionMessage) -- "H" 0x48
+  | marketCenterTradingActionMessage (message : MarketCenterTradingActionMessage) -- "K" 0x4B
+  | marketWideCircuitBreakerDeclineLevelMessage (message : MarketWideCircuitBreakerDeclineLevelMessage) -- "C" 0x43
+  | limitUpLimitDownPriceBandMessage (message : LimitUpLimitDownPriceBandMessage) -- "P" 0x50
+  | auctionCollarMessage (message : AuctionCollarMessage) -- "E" 0x45
+  | snapshotSequenceMessage (message : SnapshotSequenceMessage) -- "S" 0x53
   deriving DecidableEq, Repr
 
 namespace AdministrativeMessagePayload
@@ -2479,11 +2479,11 @@ end EndOfTransmissionsMessage
 
 /-- Any Control Message Payload, selected by Control Message Type -/
 inductive ControlMessagePayload where
-  | startOfDayMessage (message : StartOfDayMessage) -- 'I' 0x49
-  | marketSessionOpenMessage (message : MarketSessionOpenMessage) -- 'O' 0x4F
-  | marketSessionCloseMessage (message : MarketSessionCloseMessage) -- 'C' 0x43
-  | endOfDayMessage (message : EndOfDayMessage) -- 'J' 0x4A
-  | endOfTransmissionsMessage (message : EndOfTransmissionsMessage) -- 'Z' 0x5A
+  | startOfDayMessage (message : StartOfDayMessage) -- "I" 0x49
+  | marketSessionOpenMessage (message : MarketSessionOpenMessage) -- "O" 0x4F
+  | marketSessionCloseMessage (message : MarketSessionCloseMessage) -- "C" 0x43
+  | endOfDayMessage (message : EndOfDayMessage) -- "J" 0x4A
+  | endOfTransmissionsMessage (message : EndOfTransmissionsMessage) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ControlMessagePayload
@@ -2979,8 +2979,8 @@ end OddLotQuoteMessageLongForm
 
 /-- Any Quote Message Payload, selected by Quote Message Type -/
 inductive QuoteMessagePayload where
-  | utpCombinedQuoteMessageLongForm (message : UtpCombinedQuoteMessageLongForm) -- 'D' 0x44
-  | oddLotQuoteMessageLongForm (message : OddLotQuoteMessageLongForm) -- 'B' 0x42
+  | utpCombinedQuoteMessageLongForm (message : UtpCombinedQuoteMessageLongForm) -- "D" 0x44
+  | oddLotQuoteMessageLongForm (message : OddLotQuoteMessageLongForm) -- "B" 0x42
   deriving DecidableEq, Repr
 
 namespace QuoteMessagePayload
@@ -3059,9 +3059,9 @@ end QuoteMessage
 
 /-- Any Category Payload, selected by Message Category -/
 inductive CategoryPayload where
-  | administrativeMessage (message : AdministrativeMessage) -- 'A' 0x41
-  | controlMessage (message : ControlMessage) -- 'C' 0x43
-  | quoteMessage (message : QuoteMessage) -- 'Q' 0x51
+  | administrativeMessage (message : AdministrativeMessage) -- "A" 0x41
+  | controlMessage (message : ControlMessage) -- "C" 0x43
+  | quoteMessage (message : QuoteMessage) -- "Q" 0x51
   deriving DecidableEq, Repr
 
 namespace CategoryPayload
@@ -3297,12 +3297,12 @@ end EndOfSessionPacket
 
 /-- Any Server Tcp Payload, selected by Server Packet Type -/
 inductive ServerTcpPayload where
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- 'H' 0x48
-  | endOfSessionPacket (message : EndOfSessionPacket) -- 'Z' 0x5A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- "H" 0x48
+  | endOfSessionPacket (message : EndOfSessionPacket) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerTcpPayload

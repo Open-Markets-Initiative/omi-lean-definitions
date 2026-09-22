@@ -838,12 +838,12 @@ end EndOfSnapshotMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | orderBookTradingActionMessage (message : OrderBookTradingActionMessage) -- 'H' 0x48
-  | orderBookDirectoryMessage (message : OrderBookDirectoryMessage) -- 'R' 0x52
-  | addOrderMessage (message : AddOrderMessage) -- 'A' 0x41
-  | addOrderMpidAttributionMessage (message : AddOrderMpidAttributionMessage) -- 'F' 0x46
-  | endOfSnapshotMessage (message : EndOfSnapshotMessage) -- 'G' 0x47
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | orderBookTradingActionMessage (message : OrderBookTradingActionMessage) -- "H" 0x48
+  | orderBookDirectoryMessage (message : OrderBookDirectoryMessage) -- "R" 0x52
+  | addOrderMessage (message : AddOrderMessage) -- "A" 0x41
+  | addOrderMpidAttributionMessage (message : AddOrderMpidAttributionMessage) -- "F" 0x46
+  | endOfSnapshotMessage (message : EndOfSnapshotMessage) -- "G" 0x47
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -1000,12 +1000,12 @@ end EndOfSession
 
 /-- Any Server Payload, selected by Server Packet Type -/
 inductive ServerPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeat (message : ServerHeartbeat) -- 'H' 0x48
-  | endOfSession (message : EndOfSession) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeat (message : ServerHeartbeat) -- "H" 0x48
+  | endOfSession (message : EndOfSession) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerPayload

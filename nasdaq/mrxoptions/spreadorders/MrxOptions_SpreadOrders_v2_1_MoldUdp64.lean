@@ -174,11 +174,12 @@ end StrategyType
 
 /-- Option Type: one byte code -/
 def OptionType.codes : List UInt8 :=
-  [0x43, 0x50]
+  [0x43, 0x50, 0x20]
 
 inductive OptionType where
   | callOption -- Call Option
   | putOption -- Put Option
+  | stockLeg -- Stock Leg
   | unlisted (byte : { byte : UInt8 // byte ∉ OptionType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -187,12 +188,14 @@ namespace OptionType
 def toByte : OptionType → UInt8
   | .callOption => 0x43
   | .putOption => 0x50
+  | .stockLeg => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : OptionType :=
   if byte = 0x43 then .callOption
-  else .putOption
+  else if byte = 0x50 then .putOption
+  else .stockLeg
 
 def ofByte (byte : UInt8) : OptionType :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -201,6 +204,7 @@ theorem ofByte_toByte (value : OptionType) : ofByte value.toByte = value := by
   cases value with
   | callOption => decide
   | putOption => decide
+  | stockLeg => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : OptionType) : List UInt8 :=
@@ -1251,11 +1255,11 @@ end ComplexStrategyAuctionMessage
 
 /-- Any Udp Payload, selected by Message Type -/
 inductive UdpPayload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | complexStrategyDirectoryMessage (message : ComplexStrategyDirectoryMessage) -- 's' 0x73
-  | strategyTradingActionMessage (message : StrategyTradingActionMessage) -- 'H' 0x48
-  | complexAddOrderMessage (message : ComplexAddOrderMessage) -- 'C' 0x43
-  | complexStrategyAuctionMessage (message : ComplexStrategyAuctionMessage) -- 'a' 0x61
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | complexStrategyDirectoryMessage (message : ComplexStrategyDirectoryMessage) -- "s" 0x73
+  | strategyTradingActionMessage (message : StrategyTradingActionMessage) -- "H" 0x48
+  | complexAddOrderMessage (message : ComplexAddOrderMessage) -- "C" 0x43
+  | complexStrategyAuctionMessage (message : ComplexStrategyAuctionMessage) -- "a" 0x61
   deriving DecidableEq, Repr
 
 namespace UdpPayload

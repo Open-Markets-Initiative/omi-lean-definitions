@@ -1943,17 +1943,17 @@ end ComplexAuctionNotificationMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | optionsDirectoryMessage (message : OptionsDirectoryMessage) -- 'D' 0x44
-  | complexOrderStrategyMessage (message : ComplexOrderStrategyMessage) -- 'R' 0x52
-  | securityTradingActionMessage (message : SecurityTradingActionMessage) -- 'H' 0x48
-  | complexTradingActionMessage (message : ComplexTradingActionMessage) -- 'I' 0x49
-  | securityOpenClosedMessage (message : SecurityOpenClosedMessage) -- 'P' 0x50
-  | strategyOpenClosedMessage (message : StrategyOpenClosedMessage) -- 'Q' 0x51
-  | simpleOrderMessage (message : SimpleOrderMessage) -- 'O' 0x4F
-  | complexOrderMessage (message : ComplexOrderMessage) -- 'X' 0x58
-  | auctionNotificationMessage (message : AuctionNotificationMessage) -- 'A' 0x41
-  | complexAuctionNotificationMessage (message : ComplexAuctionNotificationMessage) -- 'C' 0x43
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | optionsDirectoryMessage (message : OptionsDirectoryMessage) -- "D" 0x44
+  | complexOrderStrategyMessage (message : ComplexOrderStrategyMessage) -- "R" 0x52
+  | securityTradingActionMessage (message : SecurityTradingActionMessage) -- "H" 0x48
+  | complexTradingActionMessage (message : ComplexTradingActionMessage) -- "I" 0x49
+  | securityOpenClosedMessage (message : SecurityOpenClosedMessage) -- "P" 0x50
+  | strategyOpenClosedMessage (message : StrategyOpenClosedMessage) -- "Q" 0x51
+  | simpleOrderMessage (message : SimpleOrderMessage) -- "O" 0x4F
+  | complexOrderMessage (message : ComplexOrderMessage) -- "X" 0x58
+  | auctionNotificationMessage (message : AuctionNotificationMessage) -- "A" 0x41
+  | complexAuctionNotificationMessage (message : ComplexAuctionNotificationMessage) -- "C" 0x43
   deriving DecidableEq, Repr
 
 namespace Payload

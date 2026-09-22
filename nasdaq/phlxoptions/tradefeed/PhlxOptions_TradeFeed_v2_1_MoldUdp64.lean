@@ -662,11 +662,11 @@ end BrokenTradeReportMessage
 
 /-- Any Udp Payload, selected by Message Type -/
 inductive UdpPayload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- 'm' 0x6D
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | tradeMessage (message : TradeMessage) -- 'R' 0x52
-  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- 'X' 0x58
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- "m" 0x6D
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | tradeMessage (message : TradeMessage) -- "R" 0x52
+  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- "X" 0x58
   deriving DecidableEq, Repr
 
 namespace UdpPayload

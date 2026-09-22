@@ -2226,28 +2226,28 @@ end NoiiMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | optionsDirectoryMessage (message : OptionsDirectoryMessage) -- 'R' 0x52
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | securityOpenMessage (message : SecurityOpenMessage) -- 'O' 0x4F
-  | addOrderMessageShortMessageForm (message : AddOrderMessageShortMessageForm) -- 'a' 0x61
-  | addOrderMessageLongFormMessage (message : AddOrderMessageLongFormMessage) -- 'A' 0x41
-  | addQuoteMessageShortFormMessage (message : AddQuoteMessageShortFormMessage) -- 'j' 0x6A
-  | addQuoteMessageLongFormMessage (message : AddQuoteMessageLongFormMessage) -- 'J' 0x4A
-  | singleSideExecutedMessage (message : SingleSideExecutedMessage) -- 'E' 0x45
-  | singleSideExecutedWithPriceMessage (message : SingleSideExecutedWithPriceMessage) -- 'C' 0x43
-  | orderCancelMessage (message : OrderCancelMessage) -- 'X' 0x58
-  | singleSideReplaceMessageShortForm (message : SingleSideReplaceMessageShortForm) -- 'u' 0x75
-  | singleSideReplaceMessageLongForm (message : SingleSideReplaceMessageLongForm) -- 'U' 0x55
-  | singleSideDeleteMessage (message : SingleSideDeleteMessage) -- 'D' 0x44
-  | singleSideChangeMessage (message : SingleSideChangeMessage) -- 'G' 0x47
-  | quoteReplaceMessageShortForm (message : QuoteReplaceMessageShortForm) -- 'k' 0x6B
-  | quoteReplaceMessageLongForm (message : QuoteReplaceMessageLongForm) -- 'K' 0x4B
-  | quoteDeleteMessage (message : QuoteDeleteMessage) -- 'Y' 0x59
-  | optionsTradeMessagesNonAuction (message : OptionsTradeMessagesNonAuction) -- 'P' 0x50
-  | optionsCrossTradeMessage (message : OptionsCrossTradeMessage) -- 'Q' 0x51
-  | brokenTradeOrderExecutedMessage (message : BrokenTradeOrderExecutedMessage) -- 'B' 0x42
-  | noiiMessage (message : NoiiMessage) -- 'I' 0x49
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | optionsDirectoryMessage (message : OptionsDirectoryMessage) -- "R" 0x52
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | securityOpenMessage (message : SecurityOpenMessage) -- "O" 0x4F
+  | addOrderMessageShortMessageForm (message : AddOrderMessageShortMessageForm) -- "a" 0x61
+  | addOrderMessageLongFormMessage (message : AddOrderMessageLongFormMessage) -- "A" 0x41
+  | addQuoteMessageShortFormMessage (message : AddQuoteMessageShortFormMessage) -- "j" 0x6A
+  | addQuoteMessageLongFormMessage (message : AddQuoteMessageLongFormMessage) -- "J" 0x4A
+  | singleSideExecutedMessage (message : SingleSideExecutedMessage) -- "E" 0x45
+  | singleSideExecutedWithPriceMessage (message : SingleSideExecutedWithPriceMessage) -- "C" 0x43
+  | orderCancelMessage (message : OrderCancelMessage) -- "X" 0x58
+  | singleSideReplaceMessageShortForm (message : SingleSideReplaceMessageShortForm) -- "u" 0x75
+  | singleSideReplaceMessageLongForm (message : SingleSideReplaceMessageLongForm) -- "U" 0x55
+  | singleSideDeleteMessage (message : SingleSideDeleteMessage) -- "D" 0x44
+  | singleSideChangeMessage (message : SingleSideChangeMessage) -- "G" 0x47
+  | quoteReplaceMessageShortForm (message : QuoteReplaceMessageShortForm) -- "k" 0x6B
+  | quoteReplaceMessageLongForm (message : QuoteReplaceMessageLongForm) -- "K" 0x4B
+  | quoteDeleteMessage (message : QuoteDeleteMessage) -- "Y" 0x59
+  | optionsTradeMessagesNonAuction (message : OptionsTradeMessagesNonAuction) -- "P" 0x50
+  | optionsCrossTradeMessage (message : OptionsCrossTradeMessage) -- "Q" 0x51
+  | brokenTradeOrderExecutedMessage (message : BrokenTradeOrderExecutedMessage) -- "B" 0x42
+  | noiiMessage (message : NoiiMessage) -- "I" 0x49
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -2548,12 +2548,12 @@ end EndOfSessionPacket
 
 /-- Any Server Tcp Payload, selected by Server Packet Type -/
 inductive ServerTcpPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- 'H' 0x48
-  | endOfSessionPacket (message : EndOfSessionPacket) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- "H" 0x48
+  | endOfSessionPacket (message : EndOfSessionPacket) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerTcpPayload

@@ -2003,25 +2003,25 @@ end NetOrderImbalanceMessage
 
 /-- Any Udp Payload, selected by Message Type -/
 inductive UdpPayload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- 'R' 0x52
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | addOrderShortFormMessage (message : AddOrderShortFormMessage) -- 'a' 0x61
-  | addOrderLongFormMessage (message : AddOrderLongFormMessage) -- 'A' 0x41
-  | addQuoteShortFormMessage (message : AddQuoteShortFormMessage) -- 'j' 0x6A
-  | addQuoteLongFormMessage (message : AddQuoteLongFormMessage) -- 'J' 0x4A
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | orderCancelMessage (message : OrderCancelMessage) -- 'X' 0x58
-  | orderReplaceShortFormMessage (message : OrderReplaceShortFormMessage) -- 'u' 0x75
-  | orderReplaceLongFormMessage (message : OrderReplaceLongFormMessage) -- 'U' 0x55
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
-  | orderChangeMessage (message : OrderChangeMessage) -- 'G' 0x47
-  | quoteReplaceShortFormMessage (message : QuoteReplaceShortFormMessage) -- 'k' 0x6B
-  | quoteReplaceLongFormMessage (message : QuoteReplaceLongFormMessage) -- 'K' 0x4B
-  | quoteDeleteMessage (message : QuoteDeleteMessage) -- 'Y' 0x59
-  | tradeMessage (message : TradeMessage) -- 'Q' 0x51
-  | netOrderImbalanceMessage (message : NetOrderImbalanceMessage) -- 'I' 0x49
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- "R" 0x52
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | addOrderShortFormMessage (message : AddOrderShortFormMessage) -- "a" 0x61
+  | addOrderLongFormMessage (message : AddOrderLongFormMessage) -- "A" 0x41
+  | addQuoteShortFormMessage (message : AddQuoteShortFormMessage) -- "j" 0x6A
+  | addQuoteLongFormMessage (message : AddQuoteLongFormMessage) -- "J" 0x4A
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | orderCancelMessage (message : OrderCancelMessage) -- "X" 0x58
+  | orderReplaceShortFormMessage (message : OrderReplaceShortFormMessage) -- "u" 0x75
+  | orderReplaceLongFormMessage (message : OrderReplaceLongFormMessage) -- "U" 0x55
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "D" 0x44
+  | orderChangeMessage (message : OrderChangeMessage) -- "G" 0x47
+  | quoteReplaceShortFormMessage (message : QuoteReplaceShortFormMessage) -- "k" 0x6B
+  | quoteReplaceLongFormMessage (message : QuoteReplaceLongFormMessage) -- "K" 0x4B
+  | quoteDeleteMessage (message : QuoteDeleteMessage) -- "Y" 0x59
+  | tradeMessage (message : TradeMessage) -- "Q" 0x51
+  | netOrderImbalanceMessage (message : NetOrderImbalanceMessage) -- "I" 0x49
   deriving DecidableEq, Repr
 
 namespace UdpPayload

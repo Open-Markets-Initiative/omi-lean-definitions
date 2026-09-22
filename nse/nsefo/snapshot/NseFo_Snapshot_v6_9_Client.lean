@@ -56,7 +56,7 @@ end OrderBookSnapshotRecoveryRequestMessage
 
 /-- Any Client Payload, selected by Client Message Type -/
 inductive ClientPayload where
-  | orderBookSnapshotRecoveryRequestMessage (message : OrderBookSnapshotRecoveryRequestMessage) -- 'O' 0x4F
+  | orderBookSnapshotRecoveryRequestMessage (message : OrderBookSnapshotRecoveryRequestMessage) -- "O" 0x4F
   deriving DecidableEq, Repr
 
 namespace ClientPayload

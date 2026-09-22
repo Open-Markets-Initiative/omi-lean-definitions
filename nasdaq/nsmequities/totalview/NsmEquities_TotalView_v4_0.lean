@@ -150,7 +150,7 @@ end MarketCategory
 
 /-- Financial Status Indicator: one byte code -/
 def FinancialStatusIndicator.codes : List UInt8 :=
-  [0x44, 0x45, 0x51, 0x53, 0x47, 0x48, 0x4A, 0x4B]
+  [0x44, 0x45, 0x51, 0x53, 0x47, 0x48, 0x4A, 0x4B, 0x20]
 
 inductive FinancialStatusIndicator where
   | deficient -- Deficient
@@ -161,6 +161,7 @@ inductive FinancialStatusIndicator where
   | deficientAndDelinquent -- Deficient And Delinquent
   | delinquentAndBankrupt -- Delinquent And Bankrupt
   | deficientDelinquentAndBankrupt -- Deficient Delinquent And Bankrupt
+  | inCompliance -- In Compliance
   | unlisted (byte : { byte : UInt8 // byte ∉ FinancialStatusIndicator.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -175,6 +176,7 @@ def toByte : FinancialStatusIndicator → UInt8
   | .deficientAndDelinquent => 0x48
   | .delinquentAndBankrupt => 0x4A
   | .deficientDelinquentAndBankrupt => 0x4B
+  | .inCompliance => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -186,7 +188,8 @@ def listed (byte : UInt8) : FinancialStatusIndicator :=
   else if byte = 0x47 then .deficientAndBankrupt
   else if byte = 0x48 then .deficientAndDelinquent
   else if byte = 0x4A then .delinquentAndBankrupt
-  else .deficientDelinquentAndBankrupt
+  else if byte = 0x4B then .deficientDelinquentAndBankrupt
+  else .inCompliance
 
 def ofByte (byte : UInt8) : FinancialStatusIndicator :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -201,6 +204,7 @@ theorem ofByte_toByte (value : FinancialStatusIndicator) : ofByte value.toByte =
   | deficientAndDelinquent => decide
   | delinquentAndBankrupt => decide
   | deficientDelinquentAndBankrupt => decide
+  | inCompliance => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : FinancialStatusIndicator) : List UInt8 :=
@@ -696,7 +700,7 @@ end ImbalanceDirection
 
 /-- Price Variation Indicator: one byte code -/
 def PriceVariationIndicator.codes : List UInt8 :=
-  [0x4C, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43]
+  [0x4C, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x20]
 
 inductive PriceVariationIndicator where
   | lessThanOnePercent -- Less Than One Percent
@@ -712,6 +716,7 @@ inductive PriceVariationIndicator where
   | tenToNineteenPointNineNinePercent -- Ten To Nineteen Point Nine Nine Percent
   | twentyToTwentyNinePointNineNinePercent -- Twenty To Twenty Nine Point Nine Nine Percent
   | thirtyPercentOrGreater -- Thirty Percent Or Greater
+  | cannotBeCalculated -- Cannot Be Calculated
   | unlisted (byte : { byte : UInt8 // byte ∉ PriceVariationIndicator.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -731,6 +736,7 @@ def toByte : PriceVariationIndicator → UInt8
   | .tenToNineteenPointNineNinePercent => 0x41
   | .twentyToTwentyNinePointNineNinePercent => 0x42
   | .thirtyPercentOrGreater => 0x43
+  | .cannotBeCalculated => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -747,7 +753,8 @@ def listed (byte : UInt8) : PriceVariationIndicator :=
   else if byte = 0x39 then .nineToNinePointNineNinePercent
   else if byte = 0x41 then .tenToNineteenPointNineNinePercent
   else if byte = 0x42 then .twentyToTwentyNinePointNineNinePercent
-  else .thirtyPercentOrGreater
+  else if byte = 0x43 then .thirtyPercentOrGreater
+  else .cannotBeCalculated
 
 def ofByte (byte : UInt8) : PriceVariationIndicator :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -767,6 +774,7 @@ theorem ofByte_toByte (value : PriceVariationIndicator) : ofByte value.toByte = 
   | tenToNineteenPointNineNinePercent => decide
   | twentyToTwentyNinePointNineNinePercent => decide
   | thirtyPercentOrGreater => decide
+  | cannotBeCalculated => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : PriceVariationIndicator) : List UInt8 :=
@@ -1577,22 +1585,22 @@ end NetOrderImbalanceIndicatorMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | timestampMessage (message : TimestampMessage) -- 'T' 0x54
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | marketParticipantPositionMessage (message : MarketParticipantPositionMessage) -- 'L' 0x4C
-  | addOrderMessage (message : AddOrderMessage) -- 'A' 0x41
-  | addOrderWithMpidMessage (message : AddOrderWithMpidMessage) -- 'F' 0x46
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | orderCancelMessage (message : OrderCancelMessage) -- 'X' 0x58
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
-  | orderReplaceMessage (message : OrderReplaceMessage) -- 'U' 0x55
-  | tradeMessage (message : TradeMessage) -- 'P' 0x50
-  | crossTradeMessage (message : CrossTradeMessage) -- 'Q' 0x51
-  | brokenTradeMessage (message : BrokenTradeMessage) -- 'B' 0x42
-  | netOrderImbalanceIndicatorMessage (message : NetOrderImbalanceIndicatorMessage) -- 'I' 0x49
+  | timestampMessage (message : TimestampMessage) -- "T" 0x54
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | marketParticipantPositionMessage (message : MarketParticipantPositionMessage) -- "L" 0x4C
+  | addOrderMessage (message : AddOrderMessage) -- "A" 0x41
+  | addOrderWithMpidMessage (message : AddOrderWithMpidMessage) -- "F" 0x46
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | orderCancelMessage (message : OrderCancelMessage) -- "X" 0x58
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "D" 0x44
+  | orderReplaceMessage (message : OrderReplaceMessage) -- "U" 0x55
+  | tradeMessage (message : TradeMessage) -- "P" 0x50
+  | crossTradeMessage (message : CrossTradeMessage) -- "Q" 0x51
+  | brokenTradeMessage (message : BrokenTradeMessage) -- "B" 0x42
+  | netOrderImbalanceIndicatorMessage (message : NetOrderImbalanceIndicatorMessage) -- "I" 0x49
   deriving DecidableEq, Repr
 
 namespace Payload

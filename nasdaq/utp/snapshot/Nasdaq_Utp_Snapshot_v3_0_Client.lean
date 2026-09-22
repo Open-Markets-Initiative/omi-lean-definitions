@@ -133,10 +133,10 @@ end LogoutRequestPacket
 
 /-- Any Client Tcp Payload, selected by Client Packet Type -/
 inductive ClientTcpPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginRequestPacket (message : LoginRequestPacket) -- 'L' 0x4C
-  | clientHeartbeatPacket (message : ClientHeartbeatPacket) -- 'R' 0x52
-  | logoutRequestPacket (message : LogoutRequestPacket) -- 'O' 0x4F
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginRequestPacket (message : LoginRequestPacket) -- "L" 0x4C
+  | clientHeartbeatPacket (message : ClientHeartbeatPacket) -- "R" 0x52
+  | logoutRequestPacket (message : LogoutRequestPacket) -- "O" 0x4F
   deriving DecidableEq, Repr
 
 namespace ClientTcpPayload

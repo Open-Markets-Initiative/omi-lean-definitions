@@ -2086,28 +2086,28 @@ end NoiiMessage
 
 /-- Any Udp Payload, selected by Message Type -/
 inductive UdpPayload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | optionsDirectoryMessage (message : OptionsDirectoryMessage) -- 'R' 0x52
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | securityOpenMessage (message : SecurityOpenMessage) -- 'O' 0x4F
-  | addOrderMessageShortMessageForm (message : AddOrderMessageShortMessageForm) -- 'a' 0x61
-  | addOrderMessageLongFormMessage (message : AddOrderMessageLongFormMessage) -- 'A' 0x41
-  | addQuoteMessageShortFormMessage (message : AddQuoteMessageShortFormMessage) -- 'j' 0x6A
-  | addQuoteMessageLongFormMessage (message : AddQuoteMessageLongFormMessage) -- 'J' 0x4A
-  | singleSideExecutedMessage (message : SingleSideExecutedMessage) -- 'E' 0x45
-  | singleSideExecutedWithPriceMessage (message : SingleSideExecutedWithPriceMessage) -- 'C' 0x43
-  | orderCancelMessage (message : OrderCancelMessage) -- 'X' 0x58
-  | singleSideReplaceMessageShortForm (message : SingleSideReplaceMessageShortForm) -- 'u' 0x75
-  | singleSideReplaceMessageLongForm (message : SingleSideReplaceMessageLongForm) -- 'U' 0x55
-  | singleSideDeleteMessage (message : SingleSideDeleteMessage) -- 'D' 0x44
-  | singleSideChangeMessage (message : SingleSideChangeMessage) -- 'G' 0x47
-  | quoteReplaceMessageShortForm (message : QuoteReplaceMessageShortForm) -- 'k' 0x6B
-  | quoteReplaceMessageLongForm (message : QuoteReplaceMessageLongForm) -- 'K' 0x4B
-  | quoteDeleteMessage (message : QuoteDeleteMessage) -- 'Y' 0x59
-  | optionsTradeMessagesNonAuction (message : OptionsTradeMessagesNonAuction) -- 'P' 0x50
-  | optionsCrossTradeMessage (message : OptionsCrossTradeMessage) -- 'Q' 0x51
-  | brokenTradeOrderExecutedMessage (message : BrokenTradeOrderExecutedMessage) -- 'B' 0x42
-  | noiiMessage (message : NoiiMessage) -- 'I' 0x49
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | optionsDirectoryMessage (message : OptionsDirectoryMessage) -- "R" 0x52
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | securityOpenMessage (message : SecurityOpenMessage) -- "O" 0x4F
+  | addOrderMessageShortMessageForm (message : AddOrderMessageShortMessageForm) -- "a" 0x61
+  | addOrderMessageLongFormMessage (message : AddOrderMessageLongFormMessage) -- "A" 0x41
+  | addQuoteMessageShortFormMessage (message : AddQuoteMessageShortFormMessage) -- "j" 0x6A
+  | addQuoteMessageLongFormMessage (message : AddQuoteMessageLongFormMessage) -- "J" 0x4A
+  | singleSideExecutedMessage (message : SingleSideExecutedMessage) -- "E" 0x45
+  | singleSideExecutedWithPriceMessage (message : SingleSideExecutedWithPriceMessage) -- "C" 0x43
+  | orderCancelMessage (message : OrderCancelMessage) -- "X" 0x58
+  | singleSideReplaceMessageShortForm (message : SingleSideReplaceMessageShortForm) -- "u" 0x75
+  | singleSideReplaceMessageLongForm (message : SingleSideReplaceMessageLongForm) -- "U" 0x55
+  | singleSideDeleteMessage (message : SingleSideDeleteMessage) -- "D" 0x44
+  | singleSideChangeMessage (message : SingleSideChangeMessage) -- "G" 0x47
+  | quoteReplaceMessageShortForm (message : QuoteReplaceMessageShortForm) -- "k" 0x6B
+  | quoteReplaceMessageLongForm (message : QuoteReplaceMessageLongForm) -- "K" 0x4B
+  | quoteDeleteMessage (message : QuoteDeleteMessage) -- "Y" 0x59
+  | optionsTradeMessagesNonAuction (message : OptionsTradeMessagesNonAuction) -- "P" 0x50
+  | optionsCrossTradeMessage (message : OptionsCrossTradeMessage) -- "Q" 0x51
+  | brokenTradeOrderExecutedMessage (message : BrokenTradeOrderExecutedMessage) -- "B" 0x42
+  | noiiMessage (message : NoiiMessage) -- "I" 0x49
   deriving DecidableEq, Repr
 
 namespace UdpPayload

@@ -354,9 +354,10 @@ end CurrentTradingState
 
 /-- Quote Condition: one byte code -/
 def QuoteCondition.codes : List UInt8 :=
-  [0x58, 0x59]
+  [0x20, 0x58, 0x59]
 
 inductive QuoteCondition where
+  | regularQuoteautoxEligible -- Regular Quoteautox Eligible
   | askSideNotFirmBidSideFirm -- Ask Side Not Firm Bid Side Firm
   | bidSideNotFirmAskSideFirm -- Bid Side Not Firm Ask Side Firm
   | unlisted (byte : { byte : UInt8 // byte ∉ QuoteCondition.codes }) -- any other code, kept as it is
@@ -365,13 +366,15 @@ inductive QuoteCondition where
 namespace QuoteCondition
 
 def toByte : QuoteCondition → UInt8
+  | .regularQuoteautoxEligible => 0x20
   | .askSideNotFirmBidSideFirm => 0x58
   | .bidSideNotFirmAskSideFirm => 0x59
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : QuoteCondition :=
-  if byte = 0x58 then .askSideNotFirmBidSideFirm
+  if byte = 0x20 then .regularQuoteautoxEligible
+  else if byte = 0x58 then .askSideNotFirmBidSideFirm
   else .bidSideNotFirmAskSideFirm
 
 def ofByte (byte : UInt8) : QuoteCondition :=
@@ -379,6 +382,7 @@ def ofByte (byte : UInt8) : QuoteCondition :=
 
 theorem ofByte_toByte (value : QuoteCondition) : ofByte value.toByte = value := by
   cases value with
+  | regularQuoteautoxEligible => decide
   | askSideNotFirmBidSideFirm => decide
   | bidSideNotFirmAskSideFirm => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
@@ -1066,15 +1070,15 @@ end BrokenTradeReportMessage
 
 /-- Any Udp Payload, selected by Message Type -/
 inductive UdpPayload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- 'R' 0x52
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | bestBidAndAskUpdateShortFormMessage (message : BestBidAndAskUpdateShortFormMessage) -- 'q' 0x71
-  | bestBidAndAskUpdateLongFormMessage (message : BestBidAndAskUpdateLongFormMessage) -- 'Q' 0x51
-  | bestBidOrAskUpdateShortFormMessage (message : BestBidOrAskUpdateShortFormMessage) -- 'b' 0x62
-  | bestBidOrAskUpdateLongFormMessage (message : BestBidOrAskUpdateLongFormMessage) -- 'B' 0x42
-  | tradeReportMessage (message : TradeReportMessage) -- 'T' 0x54
-  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- 'X' 0x58
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- "R" 0x52
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | bestBidAndAskUpdateShortFormMessage (message : BestBidAndAskUpdateShortFormMessage) -- "q" 0x71
+  | bestBidAndAskUpdateLongFormMessage (message : BestBidAndAskUpdateLongFormMessage) -- "Q" 0x51
+  | bestBidOrAskUpdateShortFormMessage (message : BestBidOrAskUpdateShortFormMessage) -- "b" 0x62
+  | bestBidOrAskUpdateLongFormMessage (message : BestBidOrAskUpdateLongFormMessage) -- "B" 0x42
+  | tradeReportMessage (message : TradeReportMessage) -- "T" 0x54
+  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- "X" 0x58
   deriving DecidableEq, Repr
 
 namespace UdpPayload

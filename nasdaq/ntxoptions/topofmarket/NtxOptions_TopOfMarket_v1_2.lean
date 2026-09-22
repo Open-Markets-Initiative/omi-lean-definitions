@@ -1047,19 +1047,19 @@ end BrokenTradeReportMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | timestampMessage (message : TimestampMessage) -- 'T' 0x54
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | optionsDirectoryMessage (message : OptionsDirectoryMessage) -- 'D' 0x44
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | securityOpenMessage (message : SecurityOpenMessage) -- 'O' 0x4F
-  | bestBidAndAskUpdateShortFormMessage (message : BestBidAndAskUpdateShortFormMessage) -- 'q' 0x71
-  | bestBidAndAskUpdateLongFormMessage (message : BestBidAndAskUpdateLongFormMessage) -- 'Q' 0x51
-  | bestBidUpdateShortFormMessage (message : BestBidUpdateShortFormMessage) -- 'b' 0x62
-  | bestAskUpdateShortFormMessage (message : BestAskUpdateShortFormMessage) -- 'a' 0x61
-  | bestBidUpdateLongFormMessage (message : BestBidUpdateLongFormMessage) -- 'B' 0x42
-  | bestAskUpdateLongFormMessage (message : BestAskUpdateLongFormMessage) -- 'A' 0x41
-  | tradeReportMessage (message : TradeReportMessage) -- 'R' 0x52
-  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- 'X' 0x58
+  | timestampMessage (message : TimestampMessage) -- "T" 0x54
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | optionsDirectoryMessage (message : OptionsDirectoryMessage) -- "D" 0x44
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | securityOpenMessage (message : SecurityOpenMessage) -- "O" 0x4F
+  | bestBidAndAskUpdateShortFormMessage (message : BestBidAndAskUpdateShortFormMessage) -- "q" 0x71
+  | bestBidAndAskUpdateLongFormMessage (message : BestBidAndAskUpdateLongFormMessage) -- "Q" 0x51
+  | bestBidUpdateShortFormMessage (message : BestBidUpdateShortFormMessage) -- "b" 0x62
+  | bestAskUpdateShortFormMessage (message : BestAskUpdateShortFormMessage) -- "a" 0x61
+  | bestBidUpdateLongFormMessage (message : BestBidUpdateLongFormMessage) -- "B" 0x42
+  | bestAskUpdateLongFormMessage (message : BestAskUpdateLongFormMessage) -- "A" 0x41
+  | tradeReportMessage (message : TradeReportMessage) -- "R" 0x52
+  | brokenTradeReportMessage (message : BrokenTradeReportMessage) -- "X" 0x58
   deriving DecidableEq, Repr
 
 namespace Payload

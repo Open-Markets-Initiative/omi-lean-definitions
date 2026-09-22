@@ -2052,20 +2052,20 @@ end OperationalHaltMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | tradeReportMessage (message : TradeReportMessage) -- 'e' 0x65
-  | tradeCancelErrorMessage (message : TradeCancelErrorMessage) -- 'o' 0x6F
-  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- 'b' 0x62
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'Y' 0x59
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | adjustedClosingPriceMessage (message : AdjustedClosingPriceMessage) -- 'g' 0x67
-  | endOfDayTradeSummaryMessage (message : EndOfDayTradeSummaryMessage) -- 'p' 0x70
-  | ipoInformationMessage (message : IpoInformationMessage) -- 'i' 0x69
-  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- 'V' 0x56
-  | mwcbStatusMessage (message : MwcbStatusMessage) -- 'W' 0x57
-  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- 'k' 0x6B
-  | operationalHaltMessage (message : OperationalHaltMessage) -- 'h' 0x68
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | tradeReportMessage (message : TradeReportMessage) -- "e" 0x65
+  | tradeCancelErrorMessage (message : TradeCancelErrorMessage) -- "o" 0x6F
+  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- "b" 0x62
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "Y" 0x59
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | adjustedClosingPriceMessage (message : AdjustedClosingPriceMessage) -- "g" 0x67
+  | endOfDayTradeSummaryMessage (message : EndOfDayTradeSummaryMessage) -- "p" 0x70
+  | ipoInformationMessage (message : IpoInformationMessage) -- "i" 0x69
+  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- "V" 0x56
+  | mwcbStatusMessage (message : MwcbStatusMessage) -- "W" 0x57
+  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- "k" 0x6B
+  | operationalHaltMessage (message : OperationalHaltMessage) -- "h" 0x68
   deriving DecidableEq, Repr
 
 namespace Payload

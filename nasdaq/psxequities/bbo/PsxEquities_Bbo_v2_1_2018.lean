@@ -1408,15 +1408,15 @@ end NextSharesQuotationMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'Y' 0x59
-  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- 'V' 0x56
-  | mwcbStatusMessage (message : MwcbStatusMessage) -- 'W' 0x57
-  | operationalHaltMessage (message : OperationalHaltMessage) -- 'h' 0x68
-  | quotationMessage (message : QuotationMessage) -- 'Q' 0x51
-  | nextSharesQuotationMessage (message : NextSharesQuotationMessage) -- 'A' 0x41
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "Y" 0x59
+  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- "V" 0x56
+  | mwcbStatusMessage (message : MwcbStatusMessage) -- "W" 0x57
+  | operationalHaltMessage (message : OperationalHaltMessage) -- "h" 0x68
+  | quotationMessage (message : QuotationMessage) -- "Q" 0x51
+  | nextSharesQuotationMessage (message : NextSharesQuotationMessage) -- "A" 0x41
   deriving DecidableEq, Repr
 
 namespace Payload

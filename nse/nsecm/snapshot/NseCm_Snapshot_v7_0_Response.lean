@@ -133,7 +133,7 @@ end OrderBookSnapshotRecoveryResponseMessage
 
 /-- Any Response Payload, selected by Response Message Type -/
 inductive ResponsePayload where
-  | orderBookSnapshotRecoveryResponseMessage (message : OrderBookSnapshotRecoveryResponseMessage) -- 'B' 0x42
+  | orderBookSnapshotRecoveryResponseMessage (message : OrderBookSnapshotRecoveryResponseMessage) -- "B" 0x42
   deriving DecidableEq, Repr
 
 namespace ResponsePayload

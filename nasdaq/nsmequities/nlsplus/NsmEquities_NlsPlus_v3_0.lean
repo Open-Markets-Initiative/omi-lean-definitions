@@ -3538,29 +3538,29 @@ end OperationalHaltMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | tradeReportMessage (message : TradeReportMessage) -- 'T' 0x54
-  | longFormTradeReportMessage (message : LongFormTradeReportMessage) -- 't' 0x74
-  | nextSharesTradeReportMessage (message : NextSharesTradeReportMessage) -- 'M' 0x4D
-  | tradeCancelErrorMessage (message : TradeCancelErrorMessage) -- 'X' 0x58
-  | longFormTradeCancelErrorMessage (message : LongFormTradeCancelErrorMessage) -- 'x' 0x78
-  | nextSharesTradeCancelErrorMessage (message : NextSharesTradeCancelErrorMessage) -- 'O' 0x4F
-  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- 'C' 0x43
-  | longFormTradeCorrectionMessage (message : LongFormTradeCorrectionMessage) -- 'c' 0x63
-  | nextSharesTradeCorrectionMessage (message : NextSharesTradeCorrectionMessage) -- 'Z' 0x5A
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'Y' 0x59
-  | adjustedClosingPriceMessage (message : AdjustedClosingPriceMessage) -- 'G' 0x47
-  | longFormAdjustedClosingPriceMessage (message : LongFormAdjustedClosingPriceMessage) -- 'g' 0x67
-  | endOfDayTradeSummaryMessage (message : EndOfDayTradeSummaryMessage) -- 'J' 0x4A
-  | longFormEndOfDayTradeSummaryMessage (message : LongFormEndOfDayTradeSummaryMessage) -- 'j' 0x6A
-  | nextSharesEndOfDayTradeSummaryMessage (message : NextSharesEndOfDayTradeSummaryMessage) -- 'N' 0x4E
-  | ipoInformationMessage (message : IpoInformationMessage) -- 'I' 0x49
-  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- 'V' 0x56
-  | mwcbStatusMessage (message : MwcbStatusMessage) -- 'W' 0x57
-  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- 'K' 0x4B
-  | operationalHaltMessage (message : OperationalHaltMessage) -- 'h' 0x68
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | tradeReportMessage (message : TradeReportMessage) -- "T" 0x54
+  | longFormTradeReportMessage (message : LongFormTradeReportMessage) -- "t" 0x74
+  | nextSharesTradeReportMessage (message : NextSharesTradeReportMessage) -- "M" 0x4D
+  | tradeCancelErrorMessage (message : TradeCancelErrorMessage) -- "X" 0x58
+  | longFormTradeCancelErrorMessage (message : LongFormTradeCancelErrorMessage) -- "x" 0x78
+  | nextSharesTradeCancelErrorMessage (message : NextSharesTradeCancelErrorMessage) -- "O" 0x4F
+  | tradeCorrectionMessage (message : TradeCorrectionMessage) -- "C" 0x43
+  | longFormTradeCorrectionMessage (message : LongFormTradeCorrectionMessage) -- "c" 0x63
+  | nextSharesTradeCorrectionMessage (message : NextSharesTradeCorrectionMessage) -- "Z" 0x5A
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "Y" 0x59
+  | adjustedClosingPriceMessage (message : AdjustedClosingPriceMessage) -- "G" 0x47
+  | longFormAdjustedClosingPriceMessage (message : LongFormAdjustedClosingPriceMessage) -- "g" 0x67
+  | endOfDayTradeSummaryMessage (message : EndOfDayTradeSummaryMessage) -- "J" 0x4A
+  | longFormEndOfDayTradeSummaryMessage (message : LongFormEndOfDayTradeSummaryMessage) -- "j" 0x6A
+  | nextSharesEndOfDayTradeSummaryMessage (message : NextSharesEndOfDayTradeSummaryMessage) -- "N" 0x4E
+  | ipoInformationMessage (message : IpoInformationMessage) -- "I" 0x49
+  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- "V" 0x56
+  | mwcbStatusMessage (message : MwcbStatusMessage) -- "W" 0x57
+  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- "K" 0x4B
+  | operationalHaltMessage (message : OperationalHaltMessage) -- "h" 0x68
   deriving DecidableEq, Repr
 
 namespace Payload

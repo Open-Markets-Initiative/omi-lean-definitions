@@ -1062,20 +1062,20 @@ end ClearBookMessage
 
 /-- Any Message Data, selected by Message Type -/
 inductive MessageData where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | securityDirectoryMessage (message : SecurityDirectoryMessage) -- 'D' 0x44
-  | tradingStatusMessage (message : TradingStatusMessage) -- 'H' 0x48
-  | retailLiquidityIndicatorMessage (message : RetailLiquidityIndicatorMessage) -- 'I' 0x49
-  | operationalHaltStatusMessage (message : OperationalHaltStatusMessage) -- 'O' 0x4F
-  | shortSalePriceTestStatusMessage (message : ShortSalePriceTestStatusMessage) -- 'P' 0x50
-  | securityEventMessage (message : SecurityEventMessage) -- 'E' 0x45
-  | addOrderMessage (message : AddOrderMessage) -- 'a' 0x61
-  | orderModifyMessage (message : OrderModifyMessage) -- 'M' 0x4D
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'R' 0x52
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'L' 0x4C
-  | tradeMessage (message : TradeMessage) -- 'T' 0x54
-  | tradeBreakMessage (message : TradeBreakMessage) -- 'B' 0x42
-  | clearBookMessage (message : ClearBookMessage) -- 'C' 0x43
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | securityDirectoryMessage (message : SecurityDirectoryMessage) -- "D" 0x44
+  | tradingStatusMessage (message : TradingStatusMessage) -- "H" 0x48
+  | retailLiquidityIndicatorMessage (message : RetailLiquidityIndicatorMessage) -- "I" 0x49
+  | operationalHaltStatusMessage (message : OperationalHaltStatusMessage) -- "O" 0x4F
+  | shortSalePriceTestStatusMessage (message : ShortSalePriceTestStatusMessage) -- "P" 0x50
+  | securityEventMessage (message : SecurityEventMessage) -- "E" 0x45
+  | addOrderMessage (message : AddOrderMessage) -- "a" 0x61
+  | orderModifyMessage (message : OrderModifyMessage) -- "M" 0x4D
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "R" 0x52
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "L" 0x4C
+  | tradeMessage (message : TradeMessage) -- "T" 0x54
+  | tradeBreakMessage (message : TradeBreakMessage) -- "B" 0x42
+  | clearBookMessage (message : ClearBookMessage) -- "C" 0x43
   deriving DecidableEq, Repr
 
 namespace MessageData

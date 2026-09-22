@@ -1242,12 +1242,12 @@ end ComplexStrategyAuctionMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | complexStrategyDirectoryMessage (message : ComplexStrategyDirectoryMessage) -- 'R' 0x52
-  | strategyTradingActionMessage (message : StrategyTradingActionMessage) -- 'H' 0x48
-  | strategyOpenClosedMessage (message : StrategyOpenClosedMessage) -- 'O' 0x4F
-  | complexStrategyOrderOnBookMessage (message : ComplexStrategyOrderOnBookMessage) -- 'L' 0x4C
-  | complexStrategyAuctionMessage (message : ComplexStrategyAuctionMessage) -- 'J' 0x4A
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | complexStrategyDirectoryMessage (message : ComplexStrategyDirectoryMessage) -- "R" 0x52
+  | strategyTradingActionMessage (message : StrategyTradingActionMessage) -- "H" 0x48
+  | strategyOpenClosedMessage (message : StrategyOpenClosedMessage) -- "O" 0x4F
+  | complexStrategyOrderOnBookMessage (message : ComplexStrategyOrderOnBookMessage) -- "L" 0x4C
+  | complexStrategyAuctionMessage (message : ComplexStrategyAuctionMessage) -- "J" 0x4A
   deriving DecidableEq, Repr
 
 namespace Payload

@@ -1127,20 +1127,20 @@ end EquilibriumPriceUpdate
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | secondsMessage (message : SecondsMessage) -- 'T' 0x54
-  | orderBookDirectory (message : OrderBookDirectory) -- 'R' 0x52
-  | combinationOrderbookLeg (message : CombinationOrderbookLeg) -- 'M' 0x4D
-  | tickSizeTableEntry (message : TickSizeTableEntry) -- 'L' 0x4C
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | orderBookStateMessage (message : OrderBookStateMessage) -- 'O' 0x4F
-  | addOrderNoMpid (message : AddOrderNoMpid) -- 'A' 0x41
-  | addOrderWithMpid (message : AddOrderWithMpid) -- 'F' 0x46
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | orderReplaceMessage (message : OrderReplaceMessage) -- 'U' 0x55
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
-  | tradeMessage (message : TradeMessage) -- 'P' 0x50
-  | equilibriumPriceUpdate (message : EquilibriumPriceUpdate) -- 'Z' 0x5A
+  | secondsMessage (message : SecondsMessage) -- "T" 0x54
+  | orderBookDirectory (message : OrderBookDirectory) -- "R" 0x52
+  | combinationOrderbookLeg (message : CombinationOrderbookLeg) -- "M" 0x4D
+  | tickSizeTableEntry (message : TickSizeTableEntry) -- "L" 0x4C
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | orderBookStateMessage (message : OrderBookStateMessage) -- "O" 0x4F
+  | addOrderNoMpid (message : AddOrderNoMpid) -- "A" 0x41
+  | addOrderWithMpid (message : AddOrderWithMpid) -- "F" 0x46
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | orderReplaceMessage (message : OrderReplaceMessage) -- "U" 0x55
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "D" 0x44
+  | tradeMessage (message : TradeMessage) -- "P" 0x50
+  | equilibriumPriceUpdate (message : EquilibriumPriceUpdate) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace Payload

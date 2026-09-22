@@ -481,9 +481,9 @@ end OtcTradeMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | adjustedClosingPriceMessage (message : AdjustedClosingPriceMessage) -- 'G' 0x47
-  | onExchangeTradeMessage (message : OnExchangeTradeMessage) -- 'T' 0x54
-  | otcTradeMessage (message : OtcTradeMessage) -- 'Z' 0x5A
+  | adjustedClosingPriceMessage (message : AdjustedClosingPriceMessage) -- "G" 0x47
+  | onExchangeTradeMessage (message : OnExchangeTradeMessage) -- "T" 0x54
+  | otcTradeMessage (message : OtcTradeMessage) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace Payload

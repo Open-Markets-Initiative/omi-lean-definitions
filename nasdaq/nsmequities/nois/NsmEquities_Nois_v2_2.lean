@@ -654,10 +654,10 @@ end NoisMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | stockDirectory (message : StockDirectory) -- 'R' 0x52
-  | stockTradingAction (message : StockTradingAction) -- 'H' 0x48
-  | noisMessage (message : NoisMessage) -- 'I' 0x49
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | stockDirectory (message : StockDirectory) -- "R" 0x52
+  | stockTradingAction (message : StockTradingAction) -- "H" 0x48
+  | noisMessage (message : NoisMessage) -- "I" 0x49
   deriving DecidableEq, Repr
 
 namespace Payload

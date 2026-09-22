@@ -1371,13 +1371,13 @@ end IpoQuotingPeriodUpdateMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | regShoRestrictionMessage (message : RegShoRestrictionMessage) -- 'Y' 0x59
-  | noiiMessage (message : NoiiMessage) -- 'I' 0x49
-  | crossTradeMessage (message : CrossTradeMessage) -- 'Q' 0x51
-  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- 'K' 0x4B
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | regShoRestrictionMessage (message : RegShoRestrictionMessage) -- "Y" 0x59
+  | noiiMessage (message : NoiiMessage) -- "I" 0x49
+  | crossTradeMessage (message : CrossTradeMessage) -- "Q" 0x51
+  | ipoQuotingPeriodUpdateMessage (message : IpoQuotingPeriodUpdateMessage) -- "K" 0x4B
   deriving DecidableEq, Repr
 
 namespace Payload

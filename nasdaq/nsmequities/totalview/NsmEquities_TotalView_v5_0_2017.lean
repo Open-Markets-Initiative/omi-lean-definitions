@@ -293,19 +293,19 @@ def IssueClassification.codes : List UInt8 :=
 inductive IssueClassification where
   | americanDepositaryShare -- American Depositary Share
   | bond -- Bond
-  | common -- Common
-  | depository -- Depository
+  | commonStock -- Common Stock
+  | depositoryReceipt -- Depository Receipt
   | sec144A -- Sec 144 A
-  | limited -- Limited
+  | limitedPartnership -- Limited Partnership
   | notes -- Notes
   | ordinaryShare -- Ordinary Share
-  | preferred -- Preferred
-  | other -- Other
+  | preferredStock -- Preferred Stock
+  | otherSecurities -- Other Securities
   | right -- Right
-  | shares -- Shares
-  | convertible -- Convertible
+  | sharesOfBeneficialInterest -- Shares Of Beneficial Interest
+  | convertibleDebenture -- Convertible Debenture
   | unit -- Unit
-  | unitsBenifInt -- Units Benif Int
+  | unitsOfBeneficialInterest -- Units Of Beneficial Interest
   | warrant -- Warrant
   | unlisted (byte : { byte : UInt8 // byte ∉ IssueClassification.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
@@ -315,19 +315,19 @@ namespace IssueClassification
 def toByte : IssueClassification → UInt8
   | .americanDepositaryShare => 0x41
   | .bond => 0x42
-  | .common => 0x43
-  | .depository => 0x46
+  | .commonStock => 0x43
+  | .depositoryReceipt => 0x46
   | .sec144A => 0x49
-  | .limited => 0x4C
+  | .limitedPartnership => 0x4C
   | .notes => 0x4E
   | .ordinaryShare => 0x4F
-  | .preferred => 0x50
-  | .other => 0x51
+  | .preferredStock => 0x50
+  | .otherSecurities => 0x51
   | .right => 0x52
-  | .shares => 0x53
-  | .convertible => 0x54
+  | .sharesOfBeneficialInterest => 0x53
+  | .convertibleDebenture => 0x54
   | .unit => 0x55
-  | .unitsBenifInt => 0x56
+  | .unitsOfBeneficialInterest => 0x56
   | .warrant => 0x57
   | .unlisted byte => byte.val
 
@@ -335,19 +335,19 @@ def toByte : IssueClassification → UInt8
 def listed (byte : UInt8) : IssueClassification :=
   if byte = 0x41 then .americanDepositaryShare
   else if byte = 0x42 then .bond
-  else if byte = 0x43 then .common
-  else if byte = 0x46 then .depository
+  else if byte = 0x43 then .commonStock
+  else if byte = 0x46 then .depositoryReceipt
   else if byte = 0x49 then .sec144A
-  else if byte = 0x4C then .limited
+  else if byte = 0x4C then .limitedPartnership
   else if byte = 0x4E then .notes
   else if byte = 0x4F then .ordinaryShare
-  else if byte = 0x50 then .preferred
-  else if byte = 0x51 then .other
+  else if byte = 0x50 then .preferredStock
+  else if byte = 0x51 then .otherSecurities
   else if byte = 0x52 then .right
-  else if byte = 0x53 then .shares
-  else if byte = 0x54 then .convertible
+  else if byte = 0x53 then .sharesOfBeneficialInterest
+  else if byte = 0x54 then .convertibleDebenture
   else if byte = 0x55 then .unit
-  else if byte = 0x56 then .unitsBenifInt
+  else if byte = 0x56 then .unitsOfBeneficialInterest
   else .warrant
 
 def ofByte (byte : UInt8) : IssueClassification :=
@@ -357,19 +357,19 @@ theorem ofByte_toByte (value : IssueClassification) : ofByte value.toByte = valu
   cases value with
   | americanDepositaryShare => decide
   | bond => decide
-  | common => decide
-  | depository => decide
+  | commonStock => decide
+  | depositoryReceipt => decide
   | sec144A => decide
-  | limited => decide
+  | limitedPartnership => decide
   | notes => decide
   | ordinaryShare => decide
-  | preferred => decide
-  | other => decide
+  | preferredStock => decide
+  | otherSecurities => decide
   | right => decide
-  | shares => decide
-  | convertible => decide
+  | sharesOfBeneficialInterest => decide
+  | convertibleDebenture => decide
   | unit => decide
-  | unitsBenifInt => decide
+  | unitsOfBeneficialInterest => decide
   | warrant => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
@@ -1573,7 +1573,7 @@ structure StockTradingActionMessage where
   stock : Alpha 8
   tradingState : TradingState
   reserved : Alpha 1
-  reason : Alpha 4
+  reasonCode : Alpha 4
   deriving DecidableEq, Repr
 
 namespace StockTradingActionMessage
@@ -1585,7 +1585,7 @@ def encode (message : StockTradingActionMessage) : List UInt8 :=
     ++ (Alpha.encode message.stock
     ++ (TradingState.encode message.tradingState
     ++ (Alpha.encode message.reserved
-    ++ (Alpha.encode message.reason))))))
+    ++ (Alpha.encode message.reasonCode))))))
 
 def decode (bytes : List UInt8) : Option (StockTradingActionMessage × List UInt8) := do
   let (stockLocate, bytes) ← decodeUInt 2 bytes
@@ -1594,8 +1594,8 @@ def decode (bytes : List UInt8) : Option (StockTradingActionMessage × List UInt
   let (stock, bytes) ← Alpha.decode 8 bytes
   let (tradingState, bytes) ← TradingState.decode bytes
   let (reserved, bytes) ← Alpha.decode 1 bytes
-  let (reason, bytes) ← Alpha.decode 4 bytes
-  pure ({ stockLocate, trackingNumber, timestamp, stock, tradingState, reserved, reason }, bytes)
+  let (reasonCode, bytes) ← Alpha.decode 4 bytes
+  pure ({ stockLocate, trackingNumber, timestamp, stock, tradingState, reserved, reasonCode }, bytes)
 
 @[simp] theorem encode_length (message : StockTradingActionMessage) : (encode message).length = 24 := by
   unfold encode
@@ -1900,71 +1900,6 @@ theorem encode_length_pos (message : IpoQuotingPeriodUpdate) : (encode message).
 
 end IpoQuotingPeriodUpdate
 
-/-- Add Order No Mpid Attribution Message: 35 bytes -/
-structure AddOrderNoMpidAttributionMessage where
-  stockLocate : BitVec 16
-  trackingNumber : BitVec 16
-  timestamp : BitVec 48
-  orderReferenceNumber : BitVec 64
-  buySellIndicator : BuySellIndicator
-  shares : BitVec 32
-  stock : Alpha 8
-  price : BitVec 32
-  deriving DecidableEq, Repr
-
-namespace AddOrderNoMpidAttributionMessage
-
-def encode (message : AddOrderNoMpidAttributionMessage) : List UInt8 :=
-  encodeUInt 2 message.stockLocate
-    ++ (encodeUInt 2 message.trackingNumber
-    ++ (encodeUInt 6 message.timestamp
-    ++ (encodeUInt 8 message.orderReferenceNumber
-    ++ (BuySellIndicator.encode message.buySellIndicator
-    ++ (encodeUInt 4 message.shares
-    ++ (Alpha.encode message.stock
-    ++ (encodeUInt 4 message.price)))))))
-
-def decode (bytes : List UInt8) : Option (AddOrderNoMpidAttributionMessage × List UInt8) := do
-  let (stockLocate, bytes) ← decodeUInt 2 bytes
-  let (trackingNumber, bytes) ← decodeUInt 2 bytes
-  let (timestamp, bytes) ← decodeUInt 6 bytes
-  let (orderReferenceNumber, bytes) ← decodeUInt 8 bytes
-  let (buySellIndicator, bytes) ← BuySellIndicator.decode bytes
-  let (shares, bytes) ← decodeUInt 4 bytes
-  let (stock, bytes) ← Alpha.decode 8 bytes
-  let (price, bytes) ← decodeUInt 4 bytes
-  pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber, buySellIndicator, shares, stock, price }, bytes)
-
-@[simp] theorem encode_length (message : AddOrderNoMpidAttributionMessage) : (encode message).length = 35 := by
-  unfold encode
-  simp only [List.length_append, encodeUInt_length, BuySellIndicator.encode_length, Alpha.encode_length]
-
-theorem encode_length_pos (message : AddOrderNoMpidAttributionMessage) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
-
-@[simp] theorem decode_encode (message : AddOrderNoMpidAttributionMessage) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [List.append_assoc, BuySellIndicator.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
-  rfl
-
-end AddOrderNoMpidAttributionMessage
-
 /-- Luld Auction Collar Message: 34 bytes -/
 structure LuldAuctionCollarMessage where
   stockLocate : BitVec 16
@@ -2029,6 +1964,71 @@ theorem encode_length_pos (message : LuldAuctionCollarMessage) : (encode message
   rfl
 
 end LuldAuctionCollarMessage
+
+/-- Add Order No Mpid Attribution Message: 35 bytes -/
+structure AddOrderNoMpidAttributionMessage where
+  stockLocate : BitVec 16
+  trackingNumber : BitVec 16
+  timestamp : BitVec 48
+  orderReferenceNumber : BitVec 64
+  buySellIndicator : BuySellIndicator
+  shares : BitVec 32
+  stock : Alpha 8
+  price : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace AddOrderNoMpidAttributionMessage
+
+def encode (message : AddOrderNoMpidAttributionMessage) : List UInt8 :=
+  encodeUInt 2 message.stockLocate
+    ++ (encodeUInt 2 message.trackingNumber
+    ++ (encodeUInt 6 message.timestamp
+    ++ (encodeUInt 8 message.orderReferenceNumber
+    ++ (BuySellIndicator.encode message.buySellIndicator
+    ++ (encodeUInt 4 message.shares
+    ++ (Alpha.encode message.stock
+    ++ (encodeUInt 4 message.price)))))))
+
+def decode (bytes : List UInt8) : Option (AddOrderNoMpidAttributionMessage × List UInt8) := do
+  let (stockLocate, bytes) ← decodeUInt 2 bytes
+  let (trackingNumber, bytes) ← decodeUInt 2 bytes
+  let (timestamp, bytes) ← decodeUInt 6 bytes
+  let (orderReferenceNumber, bytes) ← decodeUInt 8 bytes
+  let (buySellIndicator, bytes) ← BuySellIndicator.decode bytes
+  let (shares, bytes) ← decodeUInt 4 bytes
+  let (stock, bytes) ← Alpha.decode 8 bytes
+  let (price, bytes) ← decodeUInt 4 bytes
+  pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber, buySellIndicator, shares, stock, price }, bytes)
+
+@[simp] theorem encode_length (message : AddOrderNoMpidAttributionMessage) : (encode message).length = 35 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, BuySellIndicator.encode_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : AddOrderNoMpidAttributionMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : AddOrderNoMpidAttributionMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, BuySellIndicator.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end AddOrderNoMpidAttributionMessage
 
 /-- Add Order With Mpid Attribution Message: 39 bytes -/
 structure AddOrderWithMpidAttributionMessage where
@@ -2692,27 +2692,27 @@ end RetailInterestMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | stockDirectoryMessage (message : StockDirectoryMessage) -- 'R' 0x52
-  | stockTradingActionMessage (message : StockTradingActionMessage) -- 'H' 0x48
-  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- 'Y' 0x59
-  | marketParticipantPositionMessage (message : MarketParticipantPositionMessage) -- 'L' 0x4C
-  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- 'V' 0x56
-  | mwcbStatusLevelMessage (message : MwcbStatusLevelMessage) -- 'W' 0x57
-  | ipoQuotingPeriodUpdate (message : IpoQuotingPeriodUpdate) -- 'K' 0x4B
-  | addOrderNoMpidAttributionMessage (message : AddOrderNoMpidAttributionMessage) -- 'A' 0x41
-  | luldAuctionCollarMessage (message : LuldAuctionCollarMessage) -- 'J' 0x4A
-  | addOrderWithMpidAttributionMessage (message : AddOrderWithMpidAttributionMessage) -- 'F' 0x46
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | orderCancelMessage (message : OrderCancelMessage) -- 'X' 0x58
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
-  | orderReplaceMessage (message : OrderReplaceMessage) -- 'U' 0x55
-  | nonCrossTradeMessage (message : NonCrossTradeMessage) -- 'P' 0x50
-  | crossTradeMessage (message : CrossTradeMessage) -- 'Q' 0x51
-  | brokenTradeMessage (message : BrokenTradeMessage) -- 'B' 0x42
-  | netOrderImbalanceIndicatorMessage (message : NetOrderImbalanceIndicatorMessage) -- 'I' 0x49
-  | retailInterestMessage (message : RetailInterestMessage) -- 'N' 0x4E
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
+  | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
+  | regShoShortSalePriceTestRestrictedIndicatorMessage (message : RegShoShortSalePriceTestRestrictedIndicatorMessage) -- "Y" 0x59
+  | marketParticipantPositionMessage (message : MarketParticipantPositionMessage) -- "L" 0x4C
+  | mwcbDeclineLevelMessage (message : MwcbDeclineLevelMessage) -- "V" 0x56
+  | mwcbStatusLevelMessage (message : MwcbStatusLevelMessage) -- "W" 0x57
+  | ipoQuotingPeriodUpdate (message : IpoQuotingPeriodUpdate) -- "K" 0x4B
+  | luldAuctionCollarMessage (message : LuldAuctionCollarMessage) -- "J" 0x4A
+  | addOrderNoMpidAttributionMessage (message : AddOrderNoMpidAttributionMessage) -- "A" 0x41
+  | addOrderWithMpidAttributionMessage (message : AddOrderWithMpidAttributionMessage) -- "F" 0x46
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | orderCancelMessage (message : OrderCancelMessage) -- "X" 0x58
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "D" 0x44
+  | orderReplaceMessage (message : OrderReplaceMessage) -- "U" 0x55
+  | nonCrossTradeMessage (message : NonCrossTradeMessage) -- "P" 0x50
+  | crossTradeMessage (message : CrossTradeMessage) -- "Q" 0x51
+  | brokenTradeMessage (message : BrokenTradeMessage) -- "B" 0x42
+  | netOrderImbalanceIndicatorMessage (message : NetOrderImbalanceIndicatorMessage) -- "I" 0x49
+  | retailInterestMessage (message : RetailInterestMessage) -- "N" 0x4E
   deriving DecidableEq, Repr
 
 namespace Payload
@@ -2727,8 +2727,8 @@ def tag : Payload → BitVec 8
   | .mwcbDeclineLevelMessage _ => 86
   | .mwcbStatusLevelMessage _ => 87
   | .ipoQuotingPeriodUpdate _ => 75
-  | .addOrderNoMpidAttributionMessage _ => 65
   | .luldAuctionCollarMessage _ => 74
+  | .addOrderNoMpidAttributionMessage _ => 65
   | .addOrderWithMpidAttributionMessage _ => 70
   | .orderExecutedMessage _ => 69
   | .orderExecutedWithPriceMessage _ => 67
@@ -2750,8 +2750,8 @@ def encode : Payload → List UInt8
   | .mwcbDeclineLevelMessage message => MwcbDeclineLevelMessage.encode message
   | .mwcbStatusLevelMessage message => MwcbStatusLevelMessage.encode message
   | .ipoQuotingPeriodUpdate message => IpoQuotingPeriodUpdate.encode message
-  | .addOrderNoMpidAttributionMessage message => AddOrderNoMpidAttributionMessage.encode message
   | .luldAuctionCollarMessage message => LuldAuctionCollarMessage.encode message
+  | .addOrderNoMpidAttributionMessage message => AddOrderNoMpidAttributionMessage.encode message
   | .addOrderWithMpidAttributionMessage message => AddOrderWithMpidAttributionMessage.encode message
   | .orderExecutedMessage message => OrderExecutedMessage.encode message
   | .orderExecutedWithPriceMessage message => OrderExecutedWithPriceMessage.encode message
@@ -2791,11 +2791,11 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 49 :=
   | ipoQuotingPeriodUpdate inner =>
     simp only [encode, IpoQuotingPeriodUpdate.encode_length]
     omega
-  | addOrderNoMpidAttributionMessage inner =>
-    simp only [encode, AddOrderNoMpidAttributionMessage.encode_length]
-    omega
   | luldAuctionCollarMessage inner =>
     simp only [encode, LuldAuctionCollarMessage.encode_length]
+    omega
+  | addOrderNoMpidAttributionMessage inner =>
+    simp only [encode, AddOrderNoMpidAttributionMessage.encode_length]
     omega
   | addOrderWithMpidAttributionMessage inner =>
     simp only [encode, AddOrderWithMpidAttributionMessage.encode_length]
@@ -2840,8 +2840,8 @@ def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8
   else if tag = 86 then (MwcbDeclineLevelMessage.decode bytes).map fun (message, rest) => (.mwcbDeclineLevelMessage message, rest)
   else if tag = 87 then (MwcbStatusLevelMessage.decode bytes).map fun (message, rest) => (.mwcbStatusLevelMessage message, rest)
   else if tag = 75 then (IpoQuotingPeriodUpdate.decode bytes).map fun (message, rest) => (.ipoQuotingPeriodUpdate message, rest)
-  else if tag = 65 then (AddOrderNoMpidAttributionMessage.decode bytes).map fun (message, rest) => (.addOrderNoMpidAttributionMessage message, rest)
   else if tag = 74 then (LuldAuctionCollarMessage.decode bytes).map fun (message, rest) => (.luldAuctionCollarMessage message, rest)
+  else if tag = 65 then (AddOrderNoMpidAttributionMessage.decode bytes).map fun (message, rest) => (.addOrderNoMpidAttributionMessage message, rest)
   else if tag = 70 then (AddOrderWithMpidAttributionMessage.decode bytes).map fun (message, rest) => (.addOrderWithMpidAttributionMessage message, rest)
   else if tag = 69 then (OrderExecutedMessage.decode bytes).map fun (message, rest) => (.orderExecutedMessage message, rest)
   else if tag = 67 then (OrderExecutedWithPriceMessage.decode bytes).map fun (message, rest) => (.orderExecutedWithPriceMessage message, rest)
@@ -2913,11 +2913,11 @@ theorem encodeBody_length_lt (message : Message) : (encodeBody message).length +
   | ipoQuotingPeriodUpdate inner =>
     simp only [Payload.encode, List.length_append, encodeUInt_length, IpoQuotingPeriodUpdate.encode_length]
     omega
-  | addOrderNoMpidAttributionMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUInt_length, AddOrderNoMpidAttributionMessage.encode_length]
-    omega
   | luldAuctionCollarMessage inner =>
     simp only [Payload.encode, List.length_append, encodeUInt_length, LuldAuctionCollarMessage.encode_length]
+    omega
+  | addOrderNoMpidAttributionMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, AddOrderNoMpidAttributionMessage.encode_length]
     omega
   | addOrderWithMpidAttributionMessage inner =>
     simp only [Payload.encode, List.length_append, encodeUInt_length, AddOrderWithMpidAttributionMessage.encode_length]

@@ -2516,32 +2516,32 @@ end VolumeAndOpenInterestMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | secondsMessage (message : SecondsMessage) -- 'T' 0x54
-  | endOfBusinessTradeDateMessage (message : EndOfBusinessTradeDateMessage) -- 'S' 0x53
-  | futureSymbolDirectoryMessage (message : FutureSymbolDirectoryMessage) -- 'f' 0x66
-  | optionsSymbolDirectoryMessage (message : OptionsSymbolDirectoryMessage) -- 'h' 0x68
-  | combinationSymbolDirectoryMessage (message : CombinationSymbolDirectoryMessage) -- 'M' 0x4D
-  | bundlesSymbolDirectory (message : BundlesSymbolDirectory) -- 'm' 0x6D
-  | orderBookStateMessage (message : OrderBookStateMessage) -- 'O' 0x4F
-  | addOrderMessage (message : AddOrderMessage) -- 'A' 0x41
-  | orderVolumeCancelledMessage (message : OrderVolumeCancelledMessage) -- 'X' 0x58
-  | orderDeletedMessage (message : OrderDeletedMessage) -- 'D' 0x44
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | auctionOrderExecutedMessage (message : AuctionOrderExecutedMessage) -- 'C' 0x43
-  | combinationOrderExecutedMessage (message : CombinationOrderExecutedMessage) -- 'e' 0x65
-  | impliedOrderAddedMessage (message : ImpliedOrderAddedMessage) -- 'j' 0x6A
-  | impliedOrderReplacedMessage (message : ImpliedOrderReplacedMessage) -- 'l' 0x6C
-  | impliedOrderDeletedMessage (message : ImpliedOrderDeletedMessage) -- 'k' 0x6B
-  | tradeExecutedMessage (message : TradeExecutedMessage) -- 'P' 0x50
-  | combinationTradeExecutedMessage (message : CombinationTradeExecutedMessage) -- 'p' 0x70
-  | tradeCancellationMessage (message : TradeCancellationMessage) -- 'B' 0x42
-  | equilibriumPriceMessage (message : EquilibriumPriceMessage) -- 'Z' 0x5A
-  | openHighLowLastTradeAdjustmentMessage (message : OpenHighLowLastTradeAdjustmentMessage) -- 't' 0x74
-  | marketSettlementMessage (message : MarketSettlementMessage) -- 'Y' 0x59
-  | textMessage (message : TextMessage) -- 'x' 0x78
-  | requestForQuoteMessage (message : RequestForQuoteMessage) -- 'q' 0x71
-  | anomalousOrderThresholdPublishMessage (message : AnomalousOrderThresholdPublishMessage) -- 'W' 0x57
-  | volumeAndOpenInterestMessage (message : VolumeAndOpenInterestMessage) -- 'V' 0x56
+  | secondsMessage (message : SecondsMessage) -- "T" 0x54
+  | endOfBusinessTradeDateMessage (message : EndOfBusinessTradeDateMessage) -- "S" 0x53
+  | futureSymbolDirectoryMessage (message : FutureSymbolDirectoryMessage) -- "f" 0x66
+  | optionsSymbolDirectoryMessage (message : OptionsSymbolDirectoryMessage) -- "h" 0x68
+  | combinationSymbolDirectoryMessage (message : CombinationSymbolDirectoryMessage) -- "M" 0x4D
+  | bundlesSymbolDirectory (message : BundlesSymbolDirectory) -- "m" 0x6D
+  | orderBookStateMessage (message : OrderBookStateMessage) -- "O" 0x4F
+  | addOrderMessage (message : AddOrderMessage) -- "A" 0x41
+  | orderVolumeCancelledMessage (message : OrderVolumeCancelledMessage) -- "X" 0x58
+  | orderDeletedMessage (message : OrderDeletedMessage) -- "D" 0x44
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | auctionOrderExecutedMessage (message : AuctionOrderExecutedMessage) -- "C" 0x43
+  | combinationOrderExecutedMessage (message : CombinationOrderExecutedMessage) -- "e" 0x65
+  | impliedOrderAddedMessage (message : ImpliedOrderAddedMessage) -- "j" 0x6A
+  | impliedOrderReplacedMessage (message : ImpliedOrderReplacedMessage) -- "l" 0x6C
+  | impliedOrderDeletedMessage (message : ImpliedOrderDeletedMessage) -- "k" 0x6B
+  | tradeExecutedMessage (message : TradeExecutedMessage) -- "P" 0x50
+  | combinationTradeExecutedMessage (message : CombinationTradeExecutedMessage) -- "p" 0x70
+  | tradeCancellationMessage (message : TradeCancellationMessage) -- "B" 0x42
+  | equilibriumPriceMessage (message : EquilibriumPriceMessage) -- "Z" 0x5A
+  | openHighLowLastTradeAdjustmentMessage (message : OpenHighLowLastTradeAdjustmentMessage) -- "t" 0x74
+  | marketSettlementMessage (message : MarketSettlementMessage) -- "Y" 0x59
+  | textMessage (message : TextMessage) -- "x" 0x78
+  | requestForQuoteMessage (message : RequestForQuoteMessage) -- "q" 0x71
+  | anomalousOrderThresholdPublishMessage (message : AnomalousOrderThresholdPublishMessage) -- "W" 0x57
+  | volumeAndOpenInterestMessage (message : VolumeAndOpenInterestMessage) -- "V" 0x56
   deriving DecidableEq, Repr
 
 namespace Payload

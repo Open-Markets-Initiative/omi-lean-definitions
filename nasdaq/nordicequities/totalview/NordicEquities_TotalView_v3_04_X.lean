@@ -1697,23 +1697,23 @@ end ExecutionSummaryMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | orderBookTradingActionMessage (message : OrderBookTradingActionMessage) -- 'H' 0x48
-  | orderBookDirectoryMessage (message : OrderBookDirectoryMessage) -- 'R' 0x52
-  | addOrderMessage (message : AddOrderMessage) -- 'A' 0x41
-  | addOrderMpidAttributionMessage (message : AddOrderMpidAttributionMessage) -- 'F' 0x46
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | orderCancelMessage (message : OrderCancelMessage) -- 'X' 0x58
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
-  | orderBookFlushMessage (message : OrderBookFlushMessage) -- 'Y' 0x59
-  | orderReplaceMessage (message : OrderReplaceMessage) -- 'U' 0x55
-  | tradeMessage (message : TradeMessage) -- 'P' 0x50
-  | crossTradeMessage (message : CrossTradeMessage) -- 'Q' 0x51
-  | brokenTradeMessage (message : BrokenTradeMessage) -- 'B' 0x42
-  | noiiMessage (message : NoiiMessage) -- 'I' 0x49
-  | moiiMessage (message : MoiiMessage) -- 'J' 0x4A
-  | executionSummaryMessage (message : ExecutionSummaryMessage) -- 'K' 0x4B
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | orderBookTradingActionMessage (message : OrderBookTradingActionMessage) -- "H" 0x48
+  | orderBookDirectoryMessage (message : OrderBookDirectoryMessage) -- "R" 0x52
+  | addOrderMessage (message : AddOrderMessage) -- "A" 0x41
+  | addOrderMpidAttributionMessage (message : AddOrderMpidAttributionMessage) -- "F" 0x46
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | orderCancelMessage (message : OrderCancelMessage) -- "X" 0x58
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "D" 0x44
+  | orderBookFlushMessage (message : OrderBookFlushMessage) -- "Y" 0x59
+  | orderReplaceMessage (message : OrderReplaceMessage) -- "U" 0x55
+  | tradeMessage (message : TradeMessage) -- "P" 0x50
+  | crossTradeMessage (message : CrossTradeMessage) -- "Q" 0x51
+  | brokenTradeMessage (message : BrokenTradeMessage) -- "B" 0x42
+  | noiiMessage (message : NoiiMessage) -- "I" 0x49
+  | moiiMessage (message : MoiiMessage) -- "J" 0x4A
+  | executionSummaryMessage (message : ExecutionSummaryMessage) -- "K" 0x4B
   deriving DecidableEq, Repr
 
 namespace Payload

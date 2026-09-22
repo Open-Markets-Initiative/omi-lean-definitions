@@ -1349,20 +1349,20 @@ end EquilibriumPriceUpdateMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | secondsMessage (message : SecondsMessage) -- 'T' 0x54
-  | orderBookDirectoryMessage (message : OrderBookDirectoryMessage) -- 'R' 0x52
-  | combinationOrderBookDirectoryMessage (message : CombinationOrderBookDirectoryMessage) -- 'M' 0x4D
-  | tickSizeMessage (message : TickSizeMessage) -- 'L' 0x4C
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | orderBookStateMessage (message : OrderBookStateMessage) -- 'O' 0x4F
-  | addOrderNoParticipantIdMessage (message : AddOrderNoParticipantIdMessage) -- 'A' 0x41
-  | addOrderParticipantIdMessage (message : AddOrderParticipantIdMessage) -- 'F' 0x46
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | orderReplaceMessage (message : OrderReplaceMessage) -- 'U' 0x55
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
-  | tradeMessage (message : TradeMessage) -- 'P' 0x50
-  | equilibriumPriceUpdateMessage (message : EquilibriumPriceUpdateMessage) -- 'Z' 0x5A
+  | secondsMessage (message : SecondsMessage) -- "T" 0x54
+  | orderBookDirectoryMessage (message : OrderBookDirectoryMessage) -- "R" 0x52
+  | combinationOrderBookDirectoryMessage (message : CombinationOrderBookDirectoryMessage) -- "M" 0x4D
+  | tickSizeMessage (message : TickSizeMessage) -- "L" 0x4C
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | orderBookStateMessage (message : OrderBookStateMessage) -- "O" 0x4F
+  | addOrderNoParticipantIdMessage (message : AddOrderNoParticipantIdMessage) -- "A" 0x41
+  | addOrderParticipantIdMessage (message : AddOrderParticipantIdMessage) -- "F" 0x46
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | orderReplaceMessage (message : OrderReplaceMessage) -- "U" 0x55
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "D" 0x44
+  | tradeMessage (message : TradeMessage) -- "P" 0x50
+  | equilibriumPriceUpdateMessage (message : EquilibriumPriceUpdateMessage) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace Payload

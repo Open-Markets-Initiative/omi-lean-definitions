@@ -1319,13 +1319,13 @@ end AuctionMessage
 
 /-- Any Payload, selected by Message Type -/
 inductive Payload where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | optionDirectoryMessage (message : OptionDirectoryMessage) -- 'D' 0x44
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | securityOpenClosedMessage (message : SecurityOpenClosedMessage) -- 'O' 0x4F
-  | openingImbalanceMessage (message : OpeningImbalanceMessage) -- 'N' 0x4E
-  | orderOnBookMessage (message : OrderOnBookMessage) -- 'B' 0x42
-  | auctionMessage (message : AuctionMessage) -- 'A' 0x41
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | optionDirectoryMessage (message : OptionDirectoryMessage) -- "D" 0x44
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | securityOpenClosedMessage (message : SecurityOpenClosedMessage) -- "O" 0x4F
+  | openingImbalanceMessage (message : OpeningImbalanceMessage) -- "N" 0x4E
+  | orderOnBookMessage (message : OrderOnBookMessage) -- "B" 0x42
+  | auctionMessage (message : AuctionMessage) -- "A" 0x41
   deriving DecidableEq, Repr
 
 namespace Payload

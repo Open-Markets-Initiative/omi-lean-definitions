@@ -1177,17 +1177,17 @@ end GlimpseSnapshotMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | timeStampSecondsMessage (message : TimeStampSecondsMessage) -- 'T' 0x54
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | priceTickSizeMessage (message : PriceTickSizeMessage) -- 'L' 0x4C
-  | quantityTickSizeMessage (message : QuantityTickSizeMessage) -- 'M' 0x4D
-  | orderbookDirectoryMessage (message : OrderbookDirectoryMessage) -- 'R' 0x52
-  | participantDirectoryMessage (message : ParticipantDirectoryMessage) -- 'F' 0x46
-  | orderbookTradingActionMessage (message : OrderbookTradingActionMessage) -- 'H' 0x48
-  | orderbookReferencePriceMessage (message : OrderbookReferencePriceMessage) -- 'X' 0x58
-  | addOrderMessage (message : AddOrderMessage) -- 'A' 0x41
-  | indicativePriceQuantityMessage (message : IndicativePriceQuantityMessage) -- 'I' 0x49
-  | glimpseSnapshotMessage (message : GlimpseSnapshotMessage) -- 'G' 0x47
+  | timeStampSecondsMessage (message : TimeStampSecondsMessage) -- "T" 0x54
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | priceTickSizeMessage (message : PriceTickSizeMessage) -- "L" 0x4C
+  | quantityTickSizeMessage (message : QuantityTickSizeMessage) -- "M" 0x4D
+  | orderbookDirectoryMessage (message : OrderbookDirectoryMessage) -- "R" 0x52
+  | participantDirectoryMessage (message : ParticipantDirectoryMessage) -- "F" 0x46
+  | orderbookTradingActionMessage (message : OrderbookTradingActionMessage) -- "H" 0x48
+  | orderbookReferencePriceMessage (message : OrderbookReferencePriceMessage) -- "X" 0x58
+  | addOrderMessage (message : AddOrderMessage) -- "A" 0x41
+  | indicativePriceQuantityMessage (message : IndicativePriceQuantityMessage) -- "I" 0x49
+  | glimpseSnapshotMessage (message : GlimpseSnapshotMessage) -- "G" 0x47
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -1389,12 +1389,12 @@ end EndOfSession
 
 /-- Any Server Payload, selected by Server Packet Type -/
 inductive ServerPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeat (message : ServerHeartbeat) -- 'H' 0x48
-  | endOfSession (message : EndOfSession) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeat (message : ServerHeartbeat) -- "H" 0x48
+  | endOfSession (message : EndOfSession) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerPayload

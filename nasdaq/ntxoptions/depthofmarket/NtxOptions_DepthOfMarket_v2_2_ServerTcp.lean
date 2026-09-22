@@ -2173,26 +2173,26 @@ end EndOfReplaySequenceMessage
 
 /-- Any Sequenced Message, selected by Sequenced Message Type -/
 inductive SequencedMessage where
-  | systemEventMessage (message : SystemEventMessage) -- 'S' 0x53
-  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- 'R' 0x52
-  | tradingActionMessage (message : TradingActionMessage) -- 'H' 0x48
-  | addOrderShortFormMessage (message : AddOrderShortFormMessage) -- 'a' 0x61
-  | addOrderLongFormMessage (message : AddOrderLongFormMessage) -- 'A' 0x41
-  | addQuoteShortFormMessage (message : AddQuoteShortFormMessage) -- 'j' 0x6A
-  | addQuoteLongFormMessage (message : AddQuoteLongFormMessage) -- 'J' 0x4A
-  | orderExecutedMessage (message : OrderExecutedMessage) -- 'E' 0x45
-  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- 'C' 0x43
-  | orderCancelMessage (message : OrderCancelMessage) -- 'X' 0x58
-  | orderReplaceShortFormMessage (message : OrderReplaceShortFormMessage) -- 'u' 0x75
-  | orderReplaceLongFormMessage (message : OrderReplaceLongFormMessage) -- 'U' 0x55
-  | orderDeleteMessage (message : OrderDeleteMessage) -- 'D' 0x44
-  | orderChangeMessage (message : OrderChangeMessage) -- 'G' 0x47
-  | quoteReplaceShortFormMessage (message : QuoteReplaceShortFormMessage) -- 'k' 0x6B
-  | quoteReplaceLongFormMessage (message : QuoteReplaceLongFormMessage) -- 'K' 0x4B
-  | quoteDeleteMessage (message : QuoteDeleteMessage) -- 'Y' 0x59
-  | tradeMessage (message : TradeMessage) -- 'Q' 0x51
-  | netOrderImbalanceMessage (message : NetOrderImbalanceMessage) -- 'I' 0x49
-  | endOfReplaySequenceMessage (message : EndOfReplaySequenceMessage) -- 'M' 0x4D
+  | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
+  | derivativeDirectoryMessage (message : DerivativeDirectoryMessage) -- "R" 0x52
+  | tradingActionMessage (message : TradingActionMessage) -- "H" 0x48
+  | addOrderShortFormMessage (message : AddOrderShortFormMessage) -- "a" 0x61
+  | addOrderLongFormMessage (message : AddOrderLongFormMessage) -- "A" 0x41
+  | addQuoteShortFormMessage (message : AddQuoteShortFormMessage) -- "j" 0x6A
+  | addQuoteLongFormMessage (message : AddQuoteLongFormMessage) -- "J" 0x4A
+  | orderExecutedMessage (message : OrderExecutedMessage) -- "E" 0x45
+  | orderExecutedWithPriceMessage (message : OrderExecutedWithPriceMessage) -- "C" 0x43
+  | orderCancelMessage (message : OrderCancelMessage) -- "X" 0x58
+  | orderReplaceShortFormMessage (message : OrderReplaceShortFormMessage) -- "u" 0x75
+  | orderReplaceLongFormMessage (message : OrderReplaceLongFormMessage) -- "U" 0x55
+  | orderDeleteMessage (message : OrderDeleteMessage) -- "D" 0x44
+  | orderChangeMessage (message : OrderChangeMessage) -- "G" 0x47
+  | quoteReplaceShortFormMessage (message : QuoteReplaceShortFormMessage) -- "k" 0x6B
+  | quoteReplaceLongFormMessage (message : QuoteReplaceLongFormMessage) -- "K" 0x4B
+  | quoteDeleteMessage (message : QuoteDeleteMessage) -- "Y" 0x59
+  | tradeMessage (message : TradeMessage) -- "Q" 0x51
+  | netOrderImbalanceMessage (message : NetOrderImbalanceMessage) -- "I" 0x49
+  | endOfReplaySequenceMessage (message : EndOfReplaySequenceMessage) -- "M" 0x4D
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
@@ -2475,12 +2475,12 @@ end EndOfSessionPacket
 
 /-- Any Server Tcp Payload, selected by Server Packet Type -/
 inductive ServerTcpPayload where
-  | debugPacket (message : DebugPacket) -- '+' 0x2B
-  | loginAcceptedPacket (message : LoginAcceptedPacket) -- 'A' 0x41
-  | loginRejectedPacket (message : LoginRejectedPacket) -- 'J' 0x4A
-  | sequencedDataPacket (message : SequencedDataPacket) -- 'S' 0x53
-  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- 'H' 0x48
-  | endOfSessionPacket (message : EndOfSessionPacket) -- 'Z' 0x5A
+  | debugPacket (message : DebugPacket) -- "+" 0x2B
+  | loginAcceptedPacket (message : LoginAcceptedPacket) -- "A" 0x41
+  | loginRejectedPacket (message : LoginRejectedPacket) -- "J" 0x4A
+  | sequencedDataPacket (message : SequencedDataPacket) -- "S" 0x53
+  | serverHeartbeatPacket (message : ServerHeartbeatPacket) -- "H" 0x48
+  | endOfSessionPacket (message : EndOfSessionPacket) -- "Z" 0x5A
   deriving DecidableEq, Repr
 
 namespace ServerTcpPayload

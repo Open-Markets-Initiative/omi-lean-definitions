@@ -373,9 +373,10 @@ end OpenState
 
 /-- Quote Condition: one byte code -/
 def QuoteCondition.codes : List UInt8 :=
-  [0x52, 0x58, 0x59]
+  [0x20, 0x52, 0x58, 0x59]
 
 inductive QuoteCondition where
+  | regularQuoteautoxEligible -- Regular Quoteautox Eligible
   | rotationalQuote -- Rotational Quote
   | bidSideFirm -- Bid Side Firm
   | askSideFirm -- Ask Side Firm
@@ -385,6 +386,7 @@ inductive QuoteCondition where
 namespace QuoteCondition
 
 def toByte : QuoteCondition → UInt8
+  | .regularQuoteautoxEligible => 0x20
   | .rotationalQuote => 0x52
   | .bidSideFirm => 0x58
   | .askSideFirm => 0x59
@@ -392,7 +394,8 @@ def toByte : QuoteCondition → UInt8
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : QuoteCondition :=
-  if byte = 0x52 then .rotationalQuote
+  if byte = 0x20 then .regularQuoteautoxEligible
+  else if byte = 0x52 then .rotationalQuote
   else if byte = 0x58 then .bidSideFirm
   else .askSideFirm
 
@@ -401,6 +404,7 @@ def ofByte (byte : UInt8) : QuoteCondition :=
 
 theorem ofByte_toByte (value : QuoteCondition) : ofByte value.toByte = value := by
   cases value with
+  | regularQuoteautoxEligible => decide
   | rotationalQuote => decide
   | bidSideFirm => decide
   | askSideFirm => decide

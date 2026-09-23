@@ -545,26 +545,26 @@ theorem encode_length_pos (message : DebugPacket) : (encode message).length > 0 
 
 end DebugPacket
 
-/-- Login Accepted Packet: 18 bytes -/
+/-- Login Accepted Packet: 30 bytes -/
 structure LoginAcceptedPacket where
-  session : Alpha 10
-  sequenceNumber : BitVec 64
+  acceptedSession : Alpha 10
+  acceptedSequenceNumber : Alpha 20
   deriving DecidableEq, Repr
 
 namespace LoginAcceptedPacket
 
 def encode (message : LoginAcceptedPacket) : List UInt8 :=
-  Alpha.encode message.session
-    ++ (encodeUInt 8 message.sequenceNumber)
+  Alpha.encode message.acceptedSession
+    ++ (Alpha.encode message.acceptedSequenceNumber)
 
 def decode (bytes : List UInt8) : Option (LoginAcceptedPacket × List UInt8) := do
-  let (session, bytes) ← Alpha.decode 10 bytes
-  let (sequenceNumber, bytes) ← decodeUInt 8 bytes
-  pure ({ session, sequenceNumber }, bytes)
+  let (acceptedSession, bytes) ← Alpha.decode 10 bytes
+  let (acceptedSequenceNumber, bytes) ← Alpha.decode 20 bytes
+  pure ({ acceptedSession, acceptedSequenceNumber }, bytes)
 
-@[simp] theorem encode_length (message : LoginAcceptedPacket) : (encode message).length = 18 := by
+@[simp] theorem encode_length (message : LoginAcceptedPacket) : (encode message).length = 30 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, encodeUInt_length]
+  simp only [List.length_append, Alpha.encode_length]
 
 theorem encode_length_pos (message : LoginAcceptedPacket) : (encode message).length > 0 := by
   rw [encode_length]
@@ -575,7 +575,7 @@ theorem encode_length_pos (message : LoginAcceptedPacket) : (encode message).len
   unfold decode encode
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
+  rw [Alpha.decode_encode, some_bind]
   rfl
 
 end LoginAcceptedPacket

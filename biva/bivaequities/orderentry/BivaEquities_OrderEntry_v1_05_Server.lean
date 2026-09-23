@@ -563,20 +563,20 @@ end DebugPacket
 
 /-- Login Accepted Packet: 30 bytes -/
 structure LoginAcceptedPacket where
-  session : Alpha 10
-  sequenceNumber : Alpha 20
+  acceptedSession : Alpha 10
+  acceptedSequenceNumber : Alpha 20
   deriving DecidableEq, Repr
 
 namespace LoginAcceptedPacket
 
 def encode (message : LoginAcceptedPacket) : List UInt8 :=
-  Alpha.encode message.session
-    ++ (Alpha.encode message.sequenceNumber)
+  Alpha.encode message.acceptedSession
+    ++ (Alpha.encode message.acceptedSequenceNumber)
 
 def decode (bytes : List UInt8) : Option (LoginAcceptedPacket × List UInt8) := do
-  let (session, bytes) ← Alpha.decode 10 bytes
-  let (sequenceNumber, bytes) ← Alpha.decode 20 bytes
-  pure ({ session, sequenceNumber }, bytes)
+  let (acceptedSession, bytes) ← Alpha.decode 10 bytes
+  let (acceptedSequenceNumber, bytes) ← Alpha.decode 20 bytes
+  pure ({ acceptedSession, acceptedSequenceNumber }, bytes)
 
 @[simp] theorem encode_length (message : LoginAcceptedPacket) : (encode message).length = 30 := by
   unfold encode

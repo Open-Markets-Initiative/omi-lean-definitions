@@ -322,13 +322,14 @@ end OpenState
 
 /-- Quote Condition: one byte code -/
 def QuoteCondition.codes : List UInt8 :=
-  [0x46, 0x52, 0x58, 0x59]
+  [0x46, 0x52, 0x58, 0x59, 0x20]
 
 inductive QuoteCondition where
   | nonfirmQuote -- Nonfirm Quote
   | rotationalQuote -- Rotational Quote
   | bidSideFirm -- Bid Side Firm
   | askSideFirm -- Ask Side Firm
+  | regularQuote -- Regular Quote
   | unlisted (byte : { byte : UInt8 // byte ∉ QuoteCondition.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -339,6 +340,7 @@ def toByte : QuoteCondition → UInt8
   | .rotationalQuote => 0x52
   | .bidSideFirm => 0x58
   | .askSideFirm => 0x59
+  | .regularQuote => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -346,7 +348,8 @@ def listed (byte : UInt8) : QuoteCondition :=
   if byte = 0x46 then .nonfirmQuote
   else if byte = 0x52 then .rotationalQuote
   else if byte = 0x58 then .bidSideFirm
-  else .askSideFirm
+  else if byte = 0x59 then .askSideFirm
+  else .regularQuote
 
 def ofByte (byte : UInt8) : QuoteCondition :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -357,6 +360,7 @@ theorem ofByte_toByte (value : QuoteCondition) : ofByte value.toByte = value := 
   | rotationalQuote => decide
   | bidSideFirm => decide
   | askSideFirm => decide
+  | regularQuote => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : QuoteCondition) : List UInt8 :=

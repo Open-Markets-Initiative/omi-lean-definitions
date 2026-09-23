@@ -93,11 +93,12 @@ end EventCode
 
 /-- Option Type: one byte code -/
 def OptionType.codes : List UInt8 :=
-  [0x43, 0x50]
+  [0x43, 0x50, 0x20]
 
 inductive OptionType where
   | call -- Call
   | put -- Put
+  | stock -- Stock
   | unlisted (byte : { byte : UInt8 // byte ∉ OptionType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -106,12 +107,14 @@ namespace OptionType
 def toByte : OptionType → UInt8
   | .call => 0x43
   | .put => 0x50
+  | .stock => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : OptionType :=
   if byte = 0x43 then .call
-  else .put
+  else if byte = 0x50 then .put
+  else .stock
 
 def ofByte (byte : UInt8) : OptionType :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -120,6 +123,7 @@ theorem ofByte_toByte (value : OptionType) : ofByte value.toByte = value := by
   cases value with
   | call => decide
   | put => decide
+  | stock => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : OptionType) : List UInt8 :=

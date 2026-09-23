@@ -252,7 +252,7 @@ end SaleConditionModifierLevel1
 
 /-- Sale Condition Modifier Level 2: one byte code -/
 def SaleConditionModifierLevel2.codes : List UInt8 :=
-  [0x46, 0x4F, 0x34, 0x35, 0x36]
+  [0x46, 0x4F, 0x34, 0x35, 0x36, 0x20]
 
 inductive SaleConditionModifierLevel2 where
   | intermarketSweep -- Intermarket Sweep
@@ -260,6 +260,7 @@ inductive SaleConditionModifierLevel2 where
   | derivativePriced -- Derivative Priced
   | reOpeningPrint -- Re Opening Print
   | closingPrint -- Closing Print
+  | notApplicable -- Not Applicable
   | unlisted (byte : { byte : UInt8 // byte ∉ SaleConditionModifierLevel2.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -271,6 +272,7 @@ def toByte : SaleConditionModifierLevel2 → UInt8
   | .derivativePriced => 0x34
   | .reOpeningPrint => 0x35
   | .closingPrint => 0x36
+  | .notApplicable => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -279,7 +281,8 @@ def listed (byte : UInt8) : SaleConditionModifierLevel2 :=
   else if byte = 0x4F then .openingPrint
   else if byte = 0x34 then .derivativePriced
   else if byte = 0x35 then .reOpeningPrint
-  else .closingPrint
+  else if byte = 0x36 then .closingPrint
+  else .notApplicable
 
 def ofByte (byte : UInt8) : SaleConditionModifierLevel2 :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -291,6 +294,7 @@ theorem ofByte_toByte (value : SaleConditionModifierLevel2) : ofByte value.toByt
   | derivativePriced => decide
   | reOpeningPrint => decide
   | closingPrint => decide
+  | notApplicable => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : SaleConditionModifierLevel2) : List UInt8 :=
@@ -311,13 +315,14 @@ end SaleConditionModifierLevel2
 
 /-- Sale Condition Modifier Level 3: one byte code -/
 def SaleConditionModifierLevel3.codes : List UInt8 :=
-  [0x54, 0x55, 0x4C, 0x5A]
+  [0x54, 0x55, 0x4C, 0x5A, 0x20]
 
 inductive SaleConditionModifierLevel3 where
   | extendedHoursTrade -- Extended Hours Trade
   | reportedLateOrOutOfSequence -- Reported Late Or Out Of Sequence
   | reportedLateButInSequence -- Reported Late But In Sequence
   | soldOutOfSequence -- Sold Out Of Sequence
+  | notApplicable -- Not Applicable
   | unlisted (byte : { byte : UInt8 // byte ∉ SaleConditionModifierLevel3.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -328,6 +333,7 @@ def toByte : SaleConditionModifierLevel3 → UInt8
   | .reportedLateOrOutOfSequence => 0x55
   | .reportedLateButInSequence => 0x4C
   | .soldOutOfSequence => 0x5A
+  | .notApplicable => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -335,7 +341,8 @@ def listed (byte : UInt8) : SaleConditionModifierLevel3 :=
   if byte = 0x54 then .extendedHoursTrade
   else if byte = 0x55 then .reportedLateOrOutOfSequence
   else if byte = 0x4C then .reportedLateButInSequence
-  else .soldOutOfSequence
+  else if byte = 0x5A then .soldOutOfSequence
+  else .notApplicable
 
 def ofByte (byte : UInt8) : SaleConditionModifierLevel3 :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -346,6 +353,7 @@ theorem ofByte_toByte (value : SaleConditionModifierLevel3) : ofByte value.toByt
   | reportedLateOrOutOfSequence => decide
   | reportedLateButInSequence => decide
   | soldOutOfSequence => decide
+  | notApplicable => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : SaleConditionModifierLevel3) : List UInt8 :=
@@ -366,7 +374,7 @@ end SaleConditionModifierLevel3
 
 /-- Sale Condition Modifier Level 4: one byte code -/
 def SaleConditionModifierLevel4.codes : List UInt8 :=
-  [0x41, 0x42, 0x44, 0x48, 0x4D, 0x50, 0x51, 0x53, 0x57, 0x58, 0x6F, 0x78]
+  [0x41, 0x42, 0x44, 0x48, 0x4D, 0x50, 0x51, 0x53, 0x57, 0x58, 0x6F, 0x78, 0x20]
 
 inductive SaleConditionModifierLevel4 where
   | acquisition -- Acquisition
@@ -381,6 +389,7 @@ inductive SaleConditionModifierLevel4 where
   | crossTrade -- Cross Trade
   | oddLotExecution -- Odd Lot Execution
   | oddLotCrossExecution -- Odd Lot Cross Execution
+  | notApplicable -- Not Applicable
   | unlisted (byte : { byte : UInt8 // byte ∉ SaleConditionModifierLevel4.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -399,6 +408,7 @@ def toByte : SaleConditionModifierLevel4 → UInt8
   | .crossTrade => 0x58
   | .oddLotExecution => 0x6F
   | .oddLotCrossExecution => 0x78
+  | .notApplicable => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -414,7 +424,8 @@ def listed (byte : UInt8) : SaleConditionModifierLevel4 :=
   else if byte = 0x57 then .weightedAveragePrice
   else if byte = 0x58 then .crossTrade
   else if byte = 0x6F then .oddLotExecution
-  else .oddLotCrossExecution
+  else if byte = 0x78 then .oddLotCrossExecution
+  else .notApplicable
 
 def ofByte (byte : UInt8) : SaleConditionModifierLevel4 :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -433,6 +444,7 @@ theorem ofByte_toByte (value : SaleConditionModifierLevel4) : ofByte value.toByt
   | crossTrade => decide
   | oddLotExecution => decide
   | oddLotCrossExecution => decide
+  | notApplicable => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : SaleConditionModifierLevel4) : List UInt8 :=
@@ -555,7 +567,7 @@ end RegShoAction
 
 /-- Market Category: one byte code -/
 def MarketCategory.codes : List UInt8 :=
-  [0x51, 0x47, 0x53, 0x4E, 0x41, 0x50, 0x5A, 0x56]
+  [0x51, 0x47, 0x53, 0x4E, 0x41, 0x50, 0x5A, 0x56, 0x20]
 
 inductive MarketCategory where
   | nasdaqGlobalSelectMarket -- Nasdaq Global Select Market
@@ -566,6 +578,7 @@ inductive MarketCategory where
   | nyseArca -- Nyse Arca
   | batsZ -- Bats Z
   | investorsExchange -- Investors Exchange
+  | notAvailable -- Not Available
   | unlisted (byte : { byte : UInt8 // byte ∉ MarketCategory.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -580,6 +593,7 @@ def toByte : MarketCategory → UInt8
   | .nyseArca => 0x50
   | .batsZ => 0x5A
   | .investorsExchange => 0x56
+  | .notAvailable => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -591,7 +605,8 @@ def listed (byte : UInt8) : MarketCategory :=
   else if byte = 0x41 then .nyseMkt
   else if byte = 0x50 then .nyseArca
   else if byte = 0x5A then .batsZ
-  else .investorsExchange
+  else if byte = 0x56 then .investorsExchange
+  else .notAvailable
 
 def ofByte (byte : UInt8) : MarketCategory :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -606,6 +621,7 @@ theorem ofByte_toByte (value : MarketCategory) : ofByte value.toByte = value := 
   | nyseArca => decide
   | batsZ => decide
   | investorsExchange => decide
+  | notAvailable => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : MarketCategory) : List UInt8 :=

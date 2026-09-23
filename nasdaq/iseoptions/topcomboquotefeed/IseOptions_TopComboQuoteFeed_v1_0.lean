@@ -166,11 +166,12 @@ end StrategyType
 
 /-- Option Type: one byte code -/
 def OptionType.codes : List UInt8 :=
-  [0x43, 0x50]
+  [0x43, 0x50, 0x20]
 
 inductive OptionType where
   | call -- Call
   | put -- Put
+  | na -- Na
   | unlisted (byte : { byte : UInt8 // byte ∉ OptionType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -179,12 +180,14 @@ namespace OptionType
 def toByte : OptionType → UInt8
   | .call => 0x43
   | .put => 0x50
+  | .na => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : OptionType :=
   if byte = 0x43 then .call
-  else .put
+  else if byte = 0x50 then .put
+  else .na
 
 def ofByte (byte : UInt8) : OptionType :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -193,6 +196,7 @@ theorem ofByte_toByte (value : OptionType) : ofByte value.toByte = value := by
   cases value with
   | call => decide
   | put => decide
+  | na => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : OptionType) : List UInt8 :=
@@ -213,11 +217,12 @@ end OptionType
 
 /-- Side: one byte code -/
 def Side.codes : List UInt8 :=
-  [0x42, 0x53]
+  [0x42, 0x53, 0x20]
 
 inductive Side where
   | buy -- Buy
   | sell -- Sell
+  | hidden -- Hidden
   | unlisted (byte : { byte : UInt8 // byte ∉ Side.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -226,12 +231,14 @@ namespace Side
 def toByte : Side → UInt8
   | .buy => 0x42
   | .sell => 0x53
+  | .hidden => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : Side :=
   if byte = 0x42 then .buy
-  else .sell
+  else if byte = 0x53 then .sell
+  else .hidden
 
 def ofByte (byte : UInt8) : Side :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -240,6 +247,7 @@ theorem ofByte_toByte (value : Side) : ofByte value.toByte = value := by
   cases value with
   | buy => decide
   | sell => decide
+  | hidden => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : Side) : List UInt8 :=
@@ -354,9 +362,10 @@ end CurrentTradingState
 
 /-- Quote Condition: one byte code -/
 def QuoteCondition.codes : List UInt8 :=
-  [0x58]
+  [0x20, 0x58]
 
 inductive QuoteCondition where
+  | regularQuote -- Regular Quote
   | halted -- Halted
   | unlisted (byte : { byte : UInt8 // byte ∉ QuoteCondition.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
@@ -364,18 +373,21 @@ inductive QuoteCondition where
 namespace QuoteCondition
 
 def toByte : QuoteCondition → UInt8
+  | .regularQuote => 0x20
   | .halted => 0x58
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
-def listed (_ : UInt8) : QuoteCondition :=
-  .halted
+def listed (byte : UInt8) : QuoteCondition :=
+  if byte = 0x20 then .regularQuote
+  else .halted
 
 def ofByte (byte : UInt8) : QuoteCondition :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
 
 theorem ofByte_toByte (value : QuoteCondition) : ofByte value.toByte = value := by
   cases value with
+  | regularQuote => decide
   | halted => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 

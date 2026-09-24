@@ -6,6 +6,7 @@
 | [Protocol][Omi.CixAts.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.CixAts.Specifications] |
 | --- | --- | --- | ---: | ---: | --- | --- | --- |
 | [MarketDataFeed][CixAts.CixAspen.MarketDataFeed] | [Aspen][Omi.Encoding.Aspen] | [1.4][CixAts.CixAspen.MarketDataFeed.Aspen.v1.4.Definition] | 4/9/2026 | 1104 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][CixAts.CixAspen.MarketDataFeed.Aspen.v1.4.Url] - [pdf][CixAts.CixAspen.MarketDataFeed.Aspen.v1.4.Pdf] |
+| [Snapshot][CixAts.CixAspen.Snapshot] | [TcpOut][Omi.Encoding.TcpOut] | [1.1][CixAts.CixAspen.Snapshot.TcpOut.v1.1.Definition] | 9/15/2025 | 1182 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][CixAts.CixAspen.Snapshot.TcpOut.v1.1.Url] - [pdf][CixAts.CixAspen.Snapshot.TcpOut.v1.1.Pdf] |
 
 
 <p align="center"><a href="https://www.thecix.ca" title="CIX Trading Inc. Website"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Website.png" alt="Website" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/company/cix-trading" title="CIX Trading Inc. on LinkedIn"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/LinkedIn.png" alt="LinkedIn" width="32" height="32"></a></p>
@@ -28,9 +29,14 @@
 [Omi.CixAts.Protocol.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/CixAts/Protocols "CixAts Protocol Directory"
 [Omi.CixAts.Specifications]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/CixAts/Specifications "CixAts Specifications Directory"
 [Omi.Encoding.Aspen]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Aspen.md "Aspen Encoding"
+[Omi.Encoding.TcpOut]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/TcpOut.md "TcpOut Encoding"
 [CixAspen.Platform]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/CixAts/Protocols/CixAspen "CixAts CixAspen"
 [CixAts.CixAspen.MarketDataFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/CixAts/Protocols/CixAspen/MarketDataFeed.md "CIX Market Data Feed"
+[CixAts.CixAspen.Snapshot]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/CixAts/Protocols/CixAspen/Snapshot.md "CIX Tcp Snapshot"
 
 [CixAts.CixAspen.MarketDataFeed.Aspen.v1.4.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/cixats/marketdatafeed/CixAts_CixAspen_MarketDataFeed_v1_4.lean "CixAts MarketDataFeed Aspen v1.4 Lean Definition"
 [CixAts.CixAspen.MarketDataFeed.Aspen.v1.4.Url]: https://www.thecix.ca/market-data "CIX Trading Inc. 1.4 Url"
 [CixAts.CixAspen.MarketDataFeed.Aspen.v1.4.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/CixAts/Specifications/CixAspen/MarketDataFeed/CixAts.CixAspen.MarketDataFeed.Aspen.v1.4.pdf "CIX Trading Inc. 1.4 Pdf"
+[CixAts.CixAspen.Snapshot.TcpOut.v1.1.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/cixats/snapshot/CixAts_CixAspen_Snapshot_v1_1.lean "CixAts Snapshot TcpOut v1.1 Lean Definition"
+[CixAts.CixAspen.Snapshot.TcpOut.v1.1.Url]: https://www.thecix.ca/market-data "CIX Trading Inc. 1.1 Url"
+[CixAts.CixAspen.Snapshot.TcpOut.v1.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/CixAts/Specifications/CixAspen/MarketDataFeed/CixAts.CixAspen.MarketDataFeed.Recovery.Aspen.v1.1.pdf "CIX Trading Inc. 1.1 Pdf"

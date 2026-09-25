@@ -415,9 +415,10 @@ end HedgeSpec
 
 /-- Clearing Operation Mode: one byte code -/
 def ClearingOperationMode.codes : List UInt8 :=
-  [0x43, 0x47, 0x49]
+  [0x20, 0x43, 0x47, 0x49]
 
 inductive ClearingOperationMode where
+  | noClearingOperation -- No Clearing Operation
   | cmtaClearingMemberTradingAgreementFirmWillBeDefinedInTheClearingDestinationField -- Cmta Clearing Member Trading Agreement Firm Will Be Defined In The Clearing Destination Field
   | giveUpFirmWillBeDefinedInTheClearingDestinationField -- Give Up Firm Will Be Defined In The Clearing Destination Field
   | bothCmtaAndGiveUpFirmsWillBeDefinedInThePostTradingInstructionFieldTheGuideStatesNoWidthForThisTypeOneCharacterIsInferredFromTheValuesItStatesEachOfWhichIsOneCharacterWide -- Both Cmta And Give Up Firms Will Be Defined In The Post Trading Instruction Field The Guide States No Width For This Type One Character Is Inferred From The Values It States Each Of Which Is One Character Wide
@@ -427,6 +428,7 @@ inductive ClearingOperationMode where
 namespace ClearingOperationMode
 
 def toByte : ClearingOperationMode → UInt8
+  | .noClearingOperation => 0x20
   | .cmtaClearingMemberTradingAgreementFirmWillBeDefinedInTheClearingDestinationField => 0x43
   | .giveUpFirmWillBeDefinedInTheClearingDestinationField => 0x47
   | .bothCmtaAndGiveUpFirmsWillBeDefinedInThePostTradingInstructionFieldTheGuideStatesNoWidthForThisTypeOneCharacterIsInferredFromTheValuesItStatesEachOfWhichIsOneCharacterWide => 0x49
@@ -434,7 +436,8 @@ def toByte : ClearingOperationMode → UInt8
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : ClearingOperationMode :=
-  if byte = 0x43 then .cmtaClearingMemberTradingAgreementFirmWillBeDefinedInTheClearingDestinationField
+  if byte = 0x20 then .noClearingOperation
+  else if byte = 0x43 then .cmtaClearingMemberTradingAgreementFirmWillBeDefinedInTheClearingDestinationField
   else if byte = 0x47 then .giveUpFirmWillBeDefinedInTheClearingDestinationField
   else .bothCmtaAndGiveUpFirmsWillBeDefinedInThePostTradingInstructionFieldTheGuideStatesNoWidthForThisTypeOneCharacterIsInferredFromTheValuesItStatesEachOfWhichIsOneCharacterWide
 
@@ -443,6 +446,7 @@ def ofByte (byte : UInt8) : ClearingOperationMode :=
 
 theorem ofByte_toByte (value : ClearingOperationMode) : ofByte value.toByte = value := by
   cases value with
+  | noClearingOperation => decide
   | cmtaClearingMemberTradingAgreementFirmWillBeDefinedInTheClearingDestinationField => decide
   | giveUpFirmWillBeDefinedInTheClearingDestinationField => decide
   | bothCmtaAndGiveUpFirmsWillBeDefinedInThePostTradingInstructionFieldTheGuideStatesNoWidthForThisTypeOneCharacterIsInferredFromTheValuesItStatesEachOfWhichIsOneCharacterWide => decide

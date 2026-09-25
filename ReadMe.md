@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 748 | 2492754 |
+| 748 | 2492766 |
 
 ## Testing
 
@@ -61,6 +61,7 @@ The Open Markets Initiative provides protocol definitions in several formats:
 - [DFDL Definitions][Dfdl.Definitions.Repository] — declarative DFDL schemas for cross language parsing
 - [P4 Definitions][P4.Definitions.Repository] — P4 programs for software and hardware data planes
 - [Spicy Definitions][Spicy.Definitions.Repository] — declarative Spicy grammars for the spicy toolchain and the zeek network security monitor
+- [TLA+ Definitions][Tla.Definitions.Repository] — TLA+ modules whose encode and decode are model checked with TLC
 - [FIX Dictionaries][Fix.Dictionaries.Repository] — QuickFIX format xml data dictionaries, one per FIX version
 - [Xml Specifications][Xml.Specifications.Repository] — the exchange protocol specification xmls, matching the original files
 ## Disclaimer
@@ -364,5 +365,6 @@ Enjoy.
 [Dfdl.Definitions.Repository]: https://github.com/Open-Markets-Initiative/omi-dfdl-definitions "Omi DFDL Definitions"
 [P4.Definitions.Repository]: https://github.com/Open-Markets-Initiative/omi-p4-definitions "Omi P4 Definitions"
 [Spicy.Definitions.Repository]: https://github.com/Open-Markets-Initiative/omi-spicy-definitions "Omi Spicy Definitions"
+[Tla.Definitions.Repository]: https://github.com/Open-Markets-Initiative/omi-tla-definitions "Omi TLA+ Definitions"
 [Fix.Dictionaries.Repository]: https://github.com/Open-Markets-Initiative/omi-fix-dictionaries "Omi FIX Dictionaries"
 [Xml.Specifications.Repository]: https://github.com/Open-Markets-Initiative/omi-xml-specifications "Omi Xml Specifications"

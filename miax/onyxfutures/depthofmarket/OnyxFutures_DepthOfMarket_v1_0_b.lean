@@ -1791,9 +1791,75 @@ theorem encode_length_le (message : ApplicationMessage) : (encode message).lengt
 
 end ApplicationMessage
 
+/-- Heartbeat: 0 bytes -/
+structure Heartbeat where
+  deriving DecidableEq, Repr
+
+namespace Heartbeat
+
+def encode (_ : Heartbeat) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (Heartbeat × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : Heartbeat) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : Heartbeat) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end Heartbeat
+
+/-- Start Of Session: 0 bytes -/
+structure StartOfSession where
+  deriving DecidableEq, Repr
+
+namespace StartOfSession
+
+def encode (_ : StartOfSession) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (StartOfSession × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : StartOfSession) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : StartOfSession) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end StartOfSession
+
+/-- End Of Session: 0 bytes -/
+structure EndOfSession where
+  deriving DecidableEq, Repr
+
+namespace EndOfSession
+
+def encode (_ : EndOfSession) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (EndOfSession × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : EndOfSession) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : EndOfSession) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end EndOfSession
+
 /-- Any Payload, selected by Packet Type -/
 inductive Payload where
   | applicationMessage (message : ApplicationMessage) -- 3
+  | heartbeat (message : Heartbeat) -- 0
+  | startOfSession (message : StartOfSession) -- 1
+  | endOfSession (message : EndOfSession) -- 2
   deriving DecidableEq, Repr
 
 namespace Payload
@@ -1801,9 +1867,15 @@ namespace Payload
 /-- The Packet Type each message is sent under -/
 def tag : Payload → BitVec 8
   | .applicationMessage _ => 3
+  | .heartbeat _ => 0
+  | .startOfSession _ => 1
+  | .endOfSession _ => 2
 
 def encode : Payload → List UInt8
   | .applicationMessage message => ApplicationMessage.encode message
+  | .heartbeat message => Heartbeat.encode message
+  | .startOfSession message => StartOfSession.encode message
+  | .endOfSession message => EndOfSession.encode message
 
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : Payload) : (encode message).length ≤ 5185 := by
@@ -1812,9 +1884,21 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 5185 
     have bound_inner := ApplicationMessage.encode_length_le inner
     simp only [encode]
     omega
+  | heartbeat inner =>
+    simp only [encode, Heartbeat.encode_length]
+    omega
+  | startOfSession inner =>
+    simp only [encode, StartOfSession.encode_length]
+    omega
+  | endOfSession inner =>
+    simp only [encode, EndOfSession.encode_length]
+    omega
 
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 3 then (ApplicationMessage.decode bytes).map fun (message, rest) => (.applicationMessage message, rest)
+  else if tag = 0 then (Heartbeat.decode bytes).map fun (message, rest) => (.heartbeat message, rest)
+  else if tag = 1 then (StartOfSession.decode bytes).map fun (message, rest) => (.startOfSession message, rest)
+  else if tag = 2 then (EndOfSession.decode bytes).map fun (message, rest) => (.endOfSession message, rest)
   else none
 
 @[simp] theorem decode_encode (message : Payload) (rest : List UInt8) :
@@ -1826,55 +1910,71 @@ end Payload
 /-- Mach Message -/
 structure MachMessage where
   sequenceNumber : BitVec 64
-  packetLength : BitVec 16
   sessionNumber : BitVec 8
   payload : Payload
   deriving DecidableEq, Repr
 
 namespace MachMessage
 
-def encode (message : MachMessage) : List UInt8 :=
-  encodeUIntLE 8 message.sequenceNumber
-    ++ (encodeUIntLE 2 message.packetLength
-    ++ (encodeUInt 1 (Payload.tag message.payload)
+def encodeBody (message : MachMessage) : List UInt8 :=
+  encodeUInt 1 (Payload.tag message.payload)
     ++ (encodeUInt 1 message.sessionNumber
-    ++ (Payload.encode message.payload))))
+    ++ (Payload.encode message.payload))
 
-def decode (bytes : List UInt8) : Option (MachMessage × List UInt8) := do
-  let (sequenceNumber, bytes) ← decodeUIntLE 8 bytes
-  let (packetLength, bytes) ← decodeUIntLE 2 bytes
+def decodeBody (sequenceNumber : BitVec 64) (bytes : List UInt8) : Option (MachMessage × List UInt8) := do
   let (packetType, bytes) ← decodeUInt 1 bytes
   let (sessionNumber, bytes) ← decodeUInt 1 bytes
   let (payload, bytes) ← Payload.decode packetType bytes
-  pure ({ sequenceNumber, packetLength, sessionNumber, payload }, bytes)
+  pure ({ sequenceNumber, sessionNumber, payload }, bytes)
 
-theorem encode_length_pos (message : MachMessage) : (encode message).length > 0 := by
-  unfold encode
-  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
-  omega
-
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : MachMessage) : (encode message).length ≤ 5197 := by
-  unfold encode
-  cases message.payload with
-  | applicationMessage inner =>
-    have bound_inner := ApplicationMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length]
-    omega
-
-@[simp] theorem decode_encode (message : MachMessage) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
+theorem decodeBody_encodeBody (message : MachMessage) (rest : List UInt8) :
+    decodeBody message.sequenceNumber (encodeBody message ++ rest) = some (message, rest) := by
+  unfold decodeBody encodeBody
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [Payload.decode_encode, some_bind]
   rfl
+
+/-- Every body fits the length prefix -/
+theorem encodeBody_length_lt (message : MachMessage) : (encodeBody message).length + 10 < 256 ^ 2 := by
+  unfold encodeBody
+  cases message.payload with
+  | applicationMessage inner =>
+    have bound_inner := ApplicationMessage.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length]
+    omega
+  | heartbeat inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, Heartbeat.encode_length]
+    omega
+  | startOfSession inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, StartOfSession.encode_length]
+    omega
+  | endOfSession inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, EndOfSession.encode_length]
+    omega
+
+/-- Size rule: Packet Length counts the bytes after it plus 10, so it is written from the body and checked on decode; Sequence Number is read ahead of it -/
+def encode (message : MachMessage) : List UInt8 :=
+  encodeUIntLE 8 message.sequenceNumber
+    ++ (encodeFramedLE 2 10 encodeBody message)
+
+def decode (bytes : List UInt8) : Option (MachMessage × List UInt8) := do
+  let (sequenceNumber, bytes) ← decodeUIntLE 8 bytes
+  decodeFramedLE 2 10 (decodeBody sequenceNumber) bytes
+
+@[simp] theorem decode_encode (message : MachMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  exact decodeFramedLE_encodeFramedLE 2 10 encodeBody (decodeBody message.sequenceNumber) message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
+
+theorem encode_length_pos (message : MachMessage) : (encode message).length > 0 := by
+  unfold encode
+  simp only [encodeUIntLE_length, List.length_append, encodeFramedLE_length]
+  omega
 
 end MachMessage
 

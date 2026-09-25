@@ -1320,7 +1320,7 @@ def PriceVariationIndicator.codes : List UInt8 :=
   [0x4C, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x20]
 
 inductive PriceVariationIndicator where
-  | lessThan1 -- Less Than 1
+  | lessThan1 -- Less Than 1%
   | oneToOnePointNineNinePercent -- One To One Point Nine Nine Percent
   | twoToTwoPointNineNinePercent -- Two To Two Point Nine Nine Percent
   | threeToThreePointNineNinePercent -- Three To Three Point Nine Nine Percent

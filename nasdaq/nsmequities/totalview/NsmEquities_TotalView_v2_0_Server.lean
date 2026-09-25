@@ -559,22 +559,22 @@ end SequencedMessage
 
 /-- Sequenced Data Packet -/
 structure SequencedDataPacket where
-  timeStamp : Alpha 8
+  timestamp : Alpha 8
   sequencedMessage : SequencedMessage
   deriving DecidableEq, Repr
 
 namespace SequencedDataPacket
 
 def encode (message : SequencedDataPacket) : List UInt8 :=
-  Alpha.encode message.timeStamp
+  Alpha.encode message.timestamp
     ++ (encodeUInt 1 (SequencedMessage.tag message.sequencedMessage)
     ++ (SequencedMessage.encode message.sequencedMessage))
 
 def decode (bytes : List UInt8) : Option (SequencedDataPacket × List UInt8) := do
-  let (timeStamp, bytes) ← Alpha.decode 8 bytes
+  let (timestamp, bytes) ← Alpha.decode 8 bytes
   let (messageType, bytes) ← decodeUInt 1 bytes
   let (sequencedMessage, bytes) ← SequencedMessage.decode messageType bytes
-  pure ({ timeStamp, sequencedMessage }, bytes)
+  pure ({ timestamp, sequencedMessage }, bytes)
 
 theorem encode_length_pos (message : SequencedDataPacket) : (encode message).length > 0 := by
   unfold encode

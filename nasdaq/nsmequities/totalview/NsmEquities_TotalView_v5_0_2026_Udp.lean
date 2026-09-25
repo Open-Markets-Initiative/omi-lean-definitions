@@ -2982,8 +2982,8 @@ theorem encode_length_pos (message : DirectListingWithCapitalRaisePriceDiscovery
 
 end DirectListingWithCapitalRaisePriceDiscoveryMessage
 
-/-- Any Udp Payload, selected by Message Type -/
-inductive UdpPayload where
+/-- Any Payload, selected by Message Type -/
+inductive Payload where
   | systemEventMessage (message : SystemEventMessage) -- "S" 0x53
   | stockDirectoryMessage (message : StockDirectoryMessage) -- "R" 0x52
   | stockTradingActionMessage (message : StockTradingActionMessage) -- "H" 0x48
@@ -3009,10 +3009,10 @@ inductive UdpPayload where
   | directListingWithCapitalRaisePriceDiscoveryMessage (message : DirectListingWithCapitalRaisePriceDiscoveryMessage) -- "O" 0x4F
   deriving DecidableEq, Repr
 
-namespace UdpPayload
+namespace Payload
 
 /-- The Message Type each message is sent under -/
-def tag : UdpPayload → BitVec 8
+def tag : Payload → BitVec 8
   | .systemEventMessage _ => 83
   | .stockDirectoryMessage _ => 82
   | .stockTradingActionMessage _ => 72
@@ -3037,7 +3037,7 @@ def tag : UdpPayload → BitVec 8
   | .retailPriceImprovementIndicatorMessage _ => 78
   | .directListingWithCapitalRaisePriceDiscoveryMessage _ => 79
 
-def encode : UdpPayload → List UInt8
+def encode : Payload → List UInt8
   | .systemEventMessage message => SystemEventMessage.encode message
   | .stockDirectoryMessage message => StockDirectoryMessage.encode message
   | .stockTradingActionMessage message => StockTradingActionMessage.encode message
@@ -3063,7 +3063,7 @@ def encode : UdpPayload → List UInt8
   | .directListingWithCapitalRaisePriceDiscoveryMessage message => DirectListingWithCapitalRaisePriceDiscoveryMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : UdpPayload) : (encode message).length ≤ 49 := by
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 49 := by
   cases message with
   | systemEventMessage inner =>
     simp only [encode, SystemEventMessage.encode_length]
@@ -3135,7 +3135,7 @@ theorem encode_length_le (message : UdpPayload) : (encode message).length ≤ 49
     simp only [encode, DirectListingWithCapitalRaisePriceDiscoveryMessage.encode_length]
     omega
 
-def decode (tag : BitVec 8) (bytes : List UInt8) : Option (UdpPayload × List UInt8) :=
+def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 83 then (SystemEventMessage.decode bytes).map fun (message, rest) => (.systemEventMessage message, rest)
   else if tag = 82 then (StockDirectoryMessage.decode bytes).map fun (message, rest) => (.stockDirectoryMessage message, rest)
   else if tag = 72 then (StockTradingActionMessage.decode bytes).map fun (message, rest) => (.stockTradingActionMessage message, rest)
@@ -3161,108 +3161,108 @@ def decode (tag : BitVec 8) (bytes : List UInt8) : Option (UdpPayload × List UI
   else if tag = 79 then (DirectListingWithCapitalRaisePriceDiscoveryMessage.decode bytes).map fun (message, rest) => (.directListingWithCapitalRaisePriceDiscoveryMessage message, rest)
   else none
 
-@[simp] theorem decode_encode (message : UdpPayload) (rest : List UInt8) :
+@[simp] theorem decode_encode (message : Payload) (rest : List UInt8) :
     decode (tag message) (encode message ++ rest) = some (message, rest) := by
   cases message <;> simp [decode, encode, tag]
 
-end UdpPayload
+end Payload
 
 /-- Message -/
 structure Message where
-  udpPayload : UdpPayload
+  payload : Payload
   deriving DecidableEq, Repr
 
 namespace Message
 
 def encodeBody (message : Message) : List UInt8 :=
-  encodeUInt 1 (UdpPayload.tag message.udpPayload)
-    ++ (UdpPayload.encode message.udpPayload)
+  encodeUInt 1 (Payload.tag message.payload)
+    ++ (Payload.encode message.payload)
 
 def decodeBody (bytes : List UInt8) : Option (Message × List UInt8) := do
   let (messageType, bytes) ← decodeUInt 1 bytes
-  let (udpPayload, bytes) ← UdpPayload.decode messageType bytes
-  pure ({ udpPayload }, bytes)
+  let (payload, bytes) ← Payload.decode messageType bytes
+  pure ({ payload }, bytes)
 
 theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
     decodeBody (encodeBody message ++ rest) = some (message, rest) := by
   unfold decodeBody encodeBody
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [UdpPayload.decode_encode, some_bind]
+  rw [Payload.decode_encode, some_bind]
   rfl
 
 /-- Every body fits the length prefix -/
 theorem encodeBody_length_lt (message : Message) : (encodeBody message).length + 0 < 256 ^ 2 := by
   unfold encodeBody
-  cases message.udpPayload with
+  cases message.payload with
   | systemEventMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, SystemEventMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, SystemEventMessage.encode_length]
     omega
   | stockDirectoryMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, StockDirectoryMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, StockDirectoryMessage.encode_length]
     omega
   | stockTradingActionMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, StockTradingActionMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, StockTradingActionMessage.encode_length]
     omega
   | regShoShortSalePriceTestRestrictedIndicatorMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, RegShoShortSalePriceTestRestrictedIndicatorMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, RegShoShortSalePriceTestRestrictedIndicatorMessage.encode_length]
     omega
   | marketParticipantPositionMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, MarketParticipantPositionMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, MarketParticipantPositionMessage.encode_length]
     omega
   | mwcbDeclineLevelMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, MwcbDeclineLevelMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, MwcbDeclineLevelMessage.encode_length]
     omega
   | mwcbStatusLevelMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, MwcbStatusLevelMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, MwcbStatusLevelMessage.encode_length]
     omega
   | ipoQuotingPeriodUpdate inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, IpoQuotingPeriodUpdate.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, IpoQuotingPeriodUpdate.encode_length]
     omega
   | luldAuctionCollarMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, LuldAuctionCollarMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, LuldAuctionCollarMessage.encode_length]
     omega
   | operationalHaltMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, OperationalHaltMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OperationalHaltMessage.encode_length]
     omega
   | addOrderNoMpidAttributionMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, AddOrderNoMpidAttributionMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, AddOrderNoMpidAttributionMessage.encode_length]
     omega
   | addOrderWithMpidAttributionMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, AddOrderWithMpidAttributionMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, AddOrderWithMpidAttributionMessage.encode_length]
     omega
   | orderExecutedMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, OrderExecutedMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderExecutedMessage.encode_length]
     omega
   | orderExecutedWithPriceMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, OrderExecutedWithPriceMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderExecutedWithPriceMessage.encode_length]
     omega
   | orderCancelMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, OrderCancelMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderCancelMessage.encode_length]
     omega
   | orderDeleteMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, OrderDeleteMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderDeleteMessage.encode_length]
     omega
   | orderReplaceMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, OrderReplaceMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, OrderReplaceMessage.encode_length]
     omega
   | nonCrossTradeMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, NonCrossTradeMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, NonCrossTradeMessage.encode_length]
     omega
   | crossTradeMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, CrossTradeMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, CrossTradeMessage.encode_length]
     omega
   | brokenTradeMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, BrokenTradeMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, BrokenTradeMessage.encode_length]
     omega
   | netOrderImbalanceIndicatorMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, NetOrderImbalanceIndicatorMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, NetOrderImbalanceIndicatorMessage.encode_length]
     omega
   | retailPriceImprovementIndicatorMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, RetailPriceImprovementIndicatorMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, RetailPriceImprovementIndicatorMessage.encode_length]
     omega
   | directListingWithCapitalRaisePriceDiscoveryMessage inner =>
-    simp only [UdpPayload.encode, List.length_append, encodeUInt_length, DirectListingWithCapitalRaisePriceDiscoveryMessage.encode_length]
+    simp only [Payload.encode, List.length_append, encodeUInt_length, DirectListingWithCapitalRaisePriceDiscoveryMessage.encode_length]
     omega
 
 /-- Size rule: Message Length counts the bytes after it, so it is written from the body and checked on decode -/
@@ -3285,26 +3285,26 @@ end Message
 
 /-- Packet -/
 structure Packet where
-  udpSession : Alpha 10
-  udpSequenceNumber : BitVec 64
+  session : Alpha 10
+  sequenceNumber : BitVec 64
   message : Bounded 2 Message
   deriving DecidableEq, Repr
 
 namespace Packet
 
 def encode (message : Packet) : List UInt8 :=
-  Alpha.encode message.udpSession
-    ++ (encodeUInt 8 message.udpSequenceNumber
+  Alpha.encode message.session
+    ++ (encodeUInt 8 message.sequenceNumber
     ++ (encodeUInt 2 (BitVec.ofNat (8 * 2) message.message.val.length)
     ++ (encodeMany Message.encode message.message.val)))
 
 def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
-  let (udpSession, bytes) ← Alpha.decode 10 bytes
-  let (udpSequenceNumber, bytes) ← decodeUInt 8 bytes
+  let (session, bytes) ← Alpha.decode 10 bytes
+  let (sequenceNumber, bytes) ← decodeUInt 8 bytes
   let (messageCount, bytes) ← decodeUInt 2 bytes
   let (message_, bytes) ← decodeMany Message.decode messageCount.toNat bytes
   if fits_message : message_.length < 256 ^ 2 then
-    pure ({ udpSession, udpSequenceNumber, message := ⟨message_, fits_message⟩ }, bytes)
+    pure ({ session, sequenceNumber, message := ⟨message_, fits_message⟩ }, bytes)
   else none
 
 theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by

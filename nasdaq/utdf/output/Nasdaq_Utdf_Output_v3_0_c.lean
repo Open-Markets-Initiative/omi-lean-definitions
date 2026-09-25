@@ -996,9 +996,9 @@ def MwcbStatusLevelIndicator.codes : List UInt8 :=
   [0x31, 0x32, 0x33]
 
 inductive MwcbStatusLevelIndicator where
-  | marketWideCircuitBreakerDeclineLevel1Breached7Decline -- Market Wide Circuit Breaker Decline Level 1 Breached 7 Decline
-  | marketWideCircuitBreakerDeclineLevel2Breached13Decline -- Market Wide Circuit Breaker Decline Level 2 Breached 13 Decline
-  | marketWideCircuitBreakerDeclineLevel3Breached20Decline -- Market Wide Circuit Breaker Decline Level 3 Breached 20 Decline
+  | marketWideCircuitBreakerDeclineLevel1Breached7Decline -- Market Wide Circuit Breaker Decline Level 1 Breached 7% Decline
+  | marketWideCircuitBreakerDeclineLevel2Breached13Decline -- Market Wide Circuit Breaker Decline Level 2 Breached 13% Decline
+  | marketWideCircuitBreakerDeclineLevel3Breached20Decline -- Market Wide Circuit Breaker Decline Level 3 Breached 20% Decline
   | unlisted (byte : { byte : UInt8 // byte ∉ MwcbStatusLevelIndicator.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 

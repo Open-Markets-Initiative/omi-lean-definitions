@@ -18,17 +18,17 @@ namespace Omi.NasdaqMrxoptionsDepthofmarketItchV21Client
 
 /-- Debug Packet: 1 bytes -/
 structure DebugPacket where
-  text : Alpha 1
+  debugText : Alpha 1
   deriving DecidableEq, Repr
 
 namespace DebugPacket
 
 def encode (message : DebugPacket) : List UInt8 :=
-  Alpha.encode message.text
+  Alpha.encode message.debugText
 
 def decode (bytes : List UInt8) : Option (DebugPacket × List UInt8) := do
-  let (text, bytes) ← Alpha.decode 1 bytes
-  pure ({ text }, bytes)
+  let (debugText, bytes) ← Alpha.decode 1 bytes
+  pure ({ debugText }, bytes)
 
 @[simp] theorem encode_length (message : DebugPacket) : (encode message).length = 1 := by
   unfold encode

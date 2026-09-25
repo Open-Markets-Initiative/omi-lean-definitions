@@ -566,22 +566,22 @@ end Payload
 
 /-- Message -/
 structure Message where
-  timeStamp : Alpha 8
+  timestamp : Alpha 8
   payload : Payload
   deriving DecidableEq, Repr
 
 namespace Message
 
 def encodeBody (message : Message) : List UInt8 :=
-  Alpha.encode message.timeStamp
+  Alpha.encode message.timestamp
     ++ (encodeUInt 1 (Payload.tag message.payload)
     ++ (Payload.encode message.payload))
 
 def decodeBody (bytes : List UInt8) : Option (Message × List UInt8) := do
-  let (timeStamp, bytes) ← Alpha.decode 8 bytes
+  let (timestamp, bytes) ← Alpha.decode 8 bytes
   let (messageType, bytes) ← decodeUInt 1 bytes
   let (payload, bytes) ← Payload.decode messageType bytes
-  pure ({ timeStamp, payload }, bytes)
+  pure ({ timestamp, payload }, bytes)
 
 theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
     decodeBody (encodeBody message ++ rest) = some (message, rest) := by

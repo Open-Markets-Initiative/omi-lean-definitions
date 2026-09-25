@@ -2262,36 +2262,36 @@ end Payload
 /-- Mach Message -/
 structure MachMessage where
   sequenceNumber : BitVec 64
-  packetLength : BitVec 16
   sessionNumber : BitVec 8
   payload : Payload
   deriving DecidableEq, Repr
 
 namespace MachMessage
 
-def encode (message : MachMessage) : List UInt8 :=
-  encodeUIntLE 8 message.sequenceNumber
-    ++ (encodeUIntLE 2 message.packetLength
-    ++ (encodeUIntLE 1 (Payload.tag message.payload)
+def encodeBody (message : MachMessage) : List UInt8 :=
+  encodeUIntLE 1 (Payload.tag message.payload)
     ++ (encodeUIntLE 1 message.sessionNumber
-    ++ (Payload.encode message.payload))))
+    ++ (Payload.encode message.payload))
 
-def decode (bytes : List UInt8) : Option (MachMessage × List UInt8) := do
-  let (sequenceNumber, bytes) ← decodeUIntLE 8 bytes
-  let (packetLength, bytes) ← decodeUIntLE 2 bytes
+def decodeBody (sequenceNumber : BitVec 64) (bytes : List UInt8) : Option (MachMessage × List UInt8) := do
   let (packetType, bytes) ← decodeUIntLE 1 bytes
   let (sessionNumber, bytes) ← decodeUIntLE 1 bytes
   let (payload, bytes) ← Payload.decode packetType bytes
-  pure ({ sequenceNumber, packetLength, sessionNumber, payload }, bytes)
+  pure ({ sequenceNumber, sessionNumber, payload }, bytes)
 
-theorem encode_length_pos (message : MachMessage) : (encode message).length > 0 := by
-  unfold encode
-  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
-  omega
+theorem decodeBody_encodeBody (message : MachMessage) (rest : List UInt8) :
+    decodeBody message.sequenceNumber (encodeBody message ++ rest) = some (message, rest) := by
+  unfold decodeBody encodeBody
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [Payload.decode_encode, some_bind]
+  rfl
 
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : MachMessage) : (encode message).length ≤ 85 := by
-  unfold encode
+/-- Every body fits the length prefix -/
+theorem encodeBody_length_lt (message : MachMessage) : (encodeBody message).length + 10 < 256 ^ 2 := by
+  unfold encodeBody
   cases message.payload with
   | heartbeat inner =>
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, Heartbeat.encode_length]
@@ -2307,19 +2307,26 @@ theorem encode_length_le (message : MachMessage) : (encode message).length ≤ 8
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
     omega
 
+/-- Size rule: Packet Length counts the bytes after it plus 10, so it is written from the body and checked on decode; Sequence Number is read ahead of it -/
+def encode (message : MachMessage) : List UInt8 :=
+  encodeUIntLE 8 message.sequenceNumber
+    ++ (encodeFramedLE 2 10 encodeBody message)
+
+def decode (bytes : List UInt8) : Option (MachMessage × List UInt8) := do
+  let (sequenceNumber, bytes) ← decodeUIntLE 8 bytes
+  decodeFramedLE 2 10 (decodeBody sequenceNumber) bytes
+
 @[simp] theorem decode_encode (message : MachMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [Payload.decode_encode, some_bind]
-  rfl
+  exact decodeFramedLE_encodeFramedLE 2 10 encodeBody (decodeBody message.sequenceNumber) message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
+
+theorem encode_length_pos (message : MachMessage) : (encode message).length > 0 := by
+  unfold encode
+  simp only [encodeUIntLE_length, List.length_append, encodeFramedLE_length]
+  omega
 
 end MachMessage
 

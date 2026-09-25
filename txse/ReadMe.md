@@ -5,6 +5,7 @@
 
 | Division | [Protocol][Omi.Txse.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Txse.Specifications] |
 | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| [TxseEquities][TxseEquities.Exchange] | [Framing][Txse.TxseEquities.Framing] | [Tcp][Omi.Encoding.Tcp] | [1.0][Txse.TxseEquities.Framing.Tcp.v1.0.Definition] | 6/12/2026 | 432 | [Header][Omi.Glossary.Deployment.Header] | [Untested][Omi.Glossary.Testing.Untested] | [url][Txse.TxseEquities.Framing.Tcp.v1.0.Url] - [pdf][Txse.TxseEquities.Framing.Tcp.v1.0.Pdf] |
 | [TxseEquities][TxseEquities.Exchange] | [Framing][Txse.TxseEquities.Framing] | [Udp][Omi.Encoding.Udp] | [1.0][Txse.TxseEquities.Framing.Udp.v1.0.Definition] | 6/12/2026 | 123 | [Header][Omi.Glossary.Deployment.Header] | [Untested][Omi.Glossary.Testing.Untested] | [url][Txse.TxseEquities.Framing.Udp.v1.0.Url] - [pdf][Txse.TxseEquities.Framing.Udp.v1.0.Pdf] |
 
 
@@ -27,10 +28,14 @@
 [Omi.Encoding.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Protocols/ReadMe.md "Encoding Directory"
 [Omi.Txse.Protocol.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Txse/Protocols "Txse Protocol Directory"
 [Omi.Txse.Specifications]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Txse/Specifications "Txse Specifications Directory"
+[Omi.Encoding.Tcp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Tcp.md "Tcp Encoding"
 [Omi.Encoding.Udp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Udp.md "Udp Encoding"
 [TxseEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Txse/Protocols/TxseEquities "Txse TxseEquities"
 [Txse.TxseEquities.Framing]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Txse/Protocols/TxseEquities/Framing.md ""
 
+[Txse.TxseEquities.Framing.Tcp.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/txse/txseequities/framing/TxseEquities_Framing_Tcp_v1_0.lean "Txse TxseEquities Framing Tcp v1.0 Lean Definition"
+[Txse.TxseEquities.Framing.Tcp.v1.0.Url]: https://www.txse.com "Texas Stock Exchange 1.0 Url"
+[Txse.TxseEquities.Framing.Tcp.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Txse/Specifications/Rake\Txse.Equities.Rake.v1.0.pdf "Texas Stock Exchange 1.0 Pdf"
 [Txse.TxseEquities.Framing.Udp.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/txse/txseequities/framing/TxseEquities_Framing_Udp_v1_0.lean "Txse TxseEquities Framing Udp v1.0 Lean Definition"
 [Txse.TxseEquities.Framing.Udp.v1.0.Url]: https://www.txse.com "Texas Stock Exchange 1.0 Url"
 [Txse.TxseEquities.Framing.Udp.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Txse/Specifications/Rake\Txse.Equities.Rake.v1.0.pdf "Texas Stock Exchange 1.0 Pdf"

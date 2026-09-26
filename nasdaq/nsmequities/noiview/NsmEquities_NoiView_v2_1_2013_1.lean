@@ -1,7 +1,7 @@
 import Omi.Wire
 
 /-!
-# National Association of Securities Dealers Automated Quotations (Nasdaq) Net Order Imbalance View v2.1.20110502
+# National Association of Securities Dealers Automated Quotations (Nasdaq) Net Order Imbalance View v2.1.2013
 
 Generated from the binary model, with the proofs the model's rules call for: every record
 decodes back to what was encoded; a message dispatch selects the message its type names;
@@ -16,7 +16,7 @@ Text fields are kept byte for byte, padding included, so what is decoded encodes
 Prices with implied decimals are proven as the integers on the wire.
 -/
 
-namespace Omi.NasdaqNsmequitiesNoiviewItchV2120110502
+namespace Omi.NasdaqNsmequitiesNoiviewItchV2120131
 
 /-- Event Code: one byte code -/
 def EventCode.codes : List UInt8 :=
@@ -87,7 +87,7 @@ end EventCode
 
 /-- Market Category: one byte code -/
 def MarketCategory.codes : List UInt8 :=
-  [0x4E, 0x41, 0x50, 0x51, 0x47, 0x53]
+  [0x4E, 0x41, 0x50, 0x51, 0x47, 0x53, 0x5A]
 
 inductive MarketCategory where
   | newYorkStockExchangeNyse -- New York Stock Exchange Nyse
@@ -96,6 +96,7 @@ inductive MarketCategory where
   | nasdaqGlobalSelectMarket -- Nasdaq Global Select Market
   | nasdaqGlobalMarket -- Nasdaq Global Market
   | nasdaqCapitalMarket -- Nasdaq Capital Market
+  | batsBzxExchange -- Bats Bzx Exchange
   | unlisted (byte : { byte : UInt8 // byte ∉ MarketCategory.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -108,6 +109,7 @@ def toByte : MarketCategory → UInt8
   | .nasdaqGlobalSelectMarket => 0x51
   | .nasdaqGlobalMarket => 0x47
   | .nasdaqCapitalMarket => 0x53
+  | .batsBzxExchange => 0x5A
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -117,7 +119,8 @@ def listed (byte : UInt8) : MarketCategory :=
   else if byte = 0x50 then .nyseArca
   else if byte = 0x51 then .nasdaqGlobalSelectMarket
   else if byte = 0x47 then .nasdaqGlobalMarket
-  else .nasdaqCapitalMarket
+  else if byte = 0x53 then .nasdaqCapitalMarket
+  else .batsBzxExchange
 
 def ofByte (byte : UInt8) : MarketCategory :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -130,6 +133,7 @@ theorem ofByte_toByte (value : MarketCategory) : ofByte value.toByte = value := 
   | nasdaqGlobalSelectMarket => decide
   | nasdaqGlobalMarket => decide
   | nasdaqCapitalMarket => decide
+  | batsBzxExchange => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : MarketCategory) : List UInt8 :=
@@ -272,13 +276,12 @@ end RoundLotsOnly
 
 /-- Current Trading State: one byte code -/
 def CurrentTradingState.codes : List UInt8 :=
-  [0x48, 0x56, 0x51, 0x52, 0x54]
+  [0x48, 0x50, 0x51, 0x54]
 
 inductive CurrentTradingState where
   | haltedOrPausedAcrossAllUsEquityMarketsSrOs -- Halted Or Paused Across All Us Equity Markets Sr Os
-  | haltedOrPausedOnNasdaqOnly -- Halted Or Paused On Nasdaq Only
+  | pausedAcrossAllUsEquityMarketsSrOs -- Paused Across All Us Equity Markets Sr Os
   | quotationOnlyPeriodForCrossSroHaltOrPause -- Quotation Only Period For Cross Sro Halt Or Pause
-  | quotationOnlyPeriodForNasdaqOnlyHaltOrPause -- Quotation Only Period For Nasdaq Only Halt Or Pause
   | tradingOnNasdaq -- Trading On Nasdaq
   | unlisted (byte : { byte : UInt8 // byte ∉ CurrentTradingState.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
@@ -287,18 +290,16 @@ namespace CurrentTradingState
 
 def toByte : CurrentTradingState → UInt8
   | .haltedOrPausedAcrossAllUsEquityMarketsSrOs => 0x48
-  | .haltedOrPausedOnNasdaqOnly => 0x56
+  | .pausedAcrossAllUsEquityMarketsSrOs => 0x50
   | .quotationOnlyPeriodForCrossSroHaltOrPause => 0x51
-  | .quotationOnlyPeriodForNasdaqOnlyHaltOrPause => 0x52
   | .tradingOnNasdaq => 0x54
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : CurrentTradingState :=
   if byte = 0x48 then .haltedOrPausedAcrossAllUsEquityMarketsSrOs
-  else if byte = 0x56 then .haltedOrPausedOnNasdaqOnly
+  else if byte = 0x50 then .pausedAcrossAllUsEquityMarketsSrOs
   else if byte = 0x51 then .quotationOnlyPeriodForCrossSroHaltOrPause
-  else if byte = 0x52 then .quotationOnlyPeriodForNasdaqOnlyHaltOrPause
   else .tradingOnNasdaq
 
 def ofByte (byte : UInt8) : CurrentTradingState :=
@@ -307,9 +308,8 @@ def ofByte (byte : UInt8) : CurrentTradingState :=
 theorem ofByte_toByte (value : CurrentTradingState) : ofByte value.toByte = value := by
   cases value with
   | haltedOrPausedAcrossAllUsEquityMarketsSrOs => decide
-  | haltedOrPausedOnNasdaqOnly => decide
+  | pausedAcrossAllUsEquityMarketsSrOs => decide
   | quotationOnlyPeriodForCrossSroHaltOrPause => decide
-  | quotationOnlyPeriodForNasdaqOnlyHaltOrPause => decide
   | tradingOnNasdaq => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
@@ -1037,4 +1037,4 @@ theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
 
 end Packet
 
-end Omi.NasdaqNsmequitiesNoiviewItchV2120110502
+end Omi.NasdaqNsmequitiesNoiviewItchV2120131

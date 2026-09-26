@@ -245,6 +245,48 @@ theorem decodeTerminated_encodeTerminated (terminator : UInt8) (item : Terminate
     takeTerminated_append terminator item.val item.property rest]
   simp [item.property]
 
+/-- The bits a value's presence states: the mask when the value is there, nothing when it is not.
+
+    A presence bit set is written from the fields its bits state rather than carried, as a count
+    is written from the list it counts, so a set and the fields behind it cannot disagree. -/
+def presence {n : Nat} (mask : BitVec n) (present : Bool) : BitVec n :=
+  bif present then mask else 0
+
+/-- A value written only when it is there -/
+def encodeOptional {α : Type} (encode : α → List UInt8) : Option α → List UInt8
+  | none => []
+  | some value => encode value
+
+/-- A value read only when the bit stating its presence says it is there -/
+def decodeOptional {α : Type} (decode : List UInt8 → Option (α × List UInt8)) (present : Bool)
+    (bytes : List UInt8) : Option (Option α × List UInt8) :=
+  bif present then (decode bytes).map (fun (value, rest) => (some value, rest))
+  else some (none, bytes)
+
+theorem decodeOptional_encodeOptional {α : Type} (encode : α → List UInt8)
+    (decode : List UInt8 → Option (α × List UInt8))
+    (round : ∀ (value : α) (rest : List UInt8), decode (encode value ++ rest) = some (value, rest))
+    (value : Option α) (rest : List UInt8) :
+    decodeOptional decode value.isSome (encodeOptional encode value ++ rest) = some (value, rest) := by
+  cases value <;> simp [encodeOptional, decodeOptional, round]
+
+/-- The data split a fixed number of bytes from its end: what leads the trailer, and the trailer.
+
+    A field reading to the end of the data reads all of it, so a field behind it can be told
+    apart only by counting back from the end, which is sound while every one of them has a fixed
+    width. SoupTcp closes each packet with a line feed behind a payload that carries no length,
+    so the payload is the packet's data less that one byte. -/
+def splitTrailer (width : Nat) (bytes : List UInt8) : Option (List UInt8 × List UInt8) :=
+  if bytes.length < width then none
+  else some (bytes.take (bytes.length - width), bytes.drop (bytes.length - width))
+
+/-- The trailer is handed on as a stream with nothing after it, so the fields read from it read
+    as they do anywhere else: each leads what follows -/
+theorem splitTrailer_append (width : Nat) (leading trailer : List UInt8) (fixed : trailer.length = width) :
+    splitTrailer width (leading ++ trailer) = some (leading, trailer ++ []) := by
+  subst fixed
+  simp [splitTrailer]
+
 /-- The ascii digit of a value under ten -/
 def digit (value : Nat) : UInt8 := UInt8.ofNat (0x30 + value % 10)
 

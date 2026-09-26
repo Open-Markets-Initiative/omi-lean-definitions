@@ -1,7 +1,7 @@
 import Omi.Wire
 
 /-!
-# National Association of Securities Dealers Automated Quotations (Nasdaq) Net Order Imbalance View v2.0.20100702
+# National Association of Securities Dealers Automated Quotations (Nasdaq) Net Order Imbalance View v2.0.2010
 
 Generated from the binary model, with the proofs the model's rules call for: every record
 decodes back to what was encoded; a message dispatch selects the message its type names;
@@ -16,7 +16,7 @@ Text fields are kept byte for byte, padding included, so what is decoded encodes
 Prices with implied decimals are proven as the integers on the wire.
 -/
 
-namespace Omi.NasdaqNsmequitiesNoiviewItchV2020100702
+namespace Omi.NasdaqNsmequitiesNoiviewItchV2020102
 
 /-- Event Code: one byte code -/
 def EventCode.codes : List UInt8 :=
@@ -262,64 +262,64 @@ def decode : List UInt8 → Option (RoundLotsOnly × List UInt8)
 
 end RoundLotsOnly
 
-/-- Trading State: one byte code -/
-def TradingState.codes : List UInt8 :=
+/-- Current Trading State: one byte code -/
+def CurrentTradingState.codes : List UInt8 :=
   [0x48, 0x56, 0x51, 0x52, 0x54]
 
-inductive TradingState where
-  | haltedOrPausedOnNasdaqAndAllUtpParticipants -- Halted Or Paused On Nasdaq And All Utp Participants
-  | haltedOrPausedOnNasdaqOmx -- Halted Or Paused On Nasdaq Omx
+inductive CurrentTradingState where
+  | haltedOrPausedAcrossAllUsEquityMarketsSrOs -- Halted Or Paused Across All Us Equity Markets Sr Os
+  | haltedOrPausedOnNasdaqOnly -- Halted Or Paused On Nasdaq Only
   | quotationOnlyPeriodForCrossSroHaltOrPause -- Quotation Only Period For Cross Sro Halt Or Pause
-  | quotationOnlyPeriodForNasdaqOmxOnlyHaltOrPause -- Quotation Only Period For Nasdaq Omx Only Halt Or Pause
-  | tradingOnNasdaqOmx -- Trading On Nasdaq Omx
-  | unlisted (byte : { byte : UInt8 // byte ∉ TradingState.codes }) -- any other code, kept as it is
+  | quotationOnlyPeriodForNasdaqOnlyHaltOrPause -- Quotation Only Period For Nasdaq Only Halt Or Pause
+  | tradingOnNasdaq -- Trading On Nasdaq
+  | unlisted (byte : { byte : UInt8 // byte ∉ CurrentTradingState.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
-namespace TradingState
+namespace CurrentTradingState
 
-def toByte : TradingState → UInt8
-  | .haltedOrPausedOnNasdaqAndAllUtpParticipants => 0x48
-  | .haltedOrPausedOnNasdaqOmx => 0x56
+def toByte : CurrentTradingState → UInt8
+  | .haltedOrPausedAcrossAllUsEquityMarketsSrOs => 0x48
+  | .haltedOrPausedOnNasdaqOnly => 0x56
   | .quotationOnlyPeriodForCrossSroHaltOrPause => 0x51
-  | .quotationOnlyPeriodForNasdaqOmxOnlyHaltOrPause => 0x52
-  | .tradingOnNasdaqOmx => 0x54
+  | .quotationOnlyPeriodForNasdaqOnlyHaltOrPause => 0x52
+  | .tradingOnNasdaq => 0x54
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
-def listed (byte : UInt8) : TradingState :=
-  if byte = 0x48 then .haltedOrPausedOnNasdaqAndAllUtpParticipants
-  else if byte = 0x56 then .haltedOrPausedOnNasdaqOmx
+def listed (byte : UInt8) : CurrentTradingState :=
+  if byte = 0x48 then .haltedOrPausedAcrossAllUsEquityMarketsSrOs
+  else if byte = 0x56 then .haltedOrPausedOnNasdaqOnly
   else if byte = 0x51 then .quotationOnlyPeriodForCrossSroHaltOrPause
-  else if byte = 0x52 then .quotationOnlyPeriodForNasdaqOmxOnlyHaltOrPause
-  else .tradingOnNasdaqOmx
+  else if byte = 0x52 then .quotationOnlyPeriodForNasdaqOnlyHaltOrPause
+  else .tradingOnNasdaq
 
-def ofByte (byte : UInt8) : TradingState :=
+def ofByte (byte : UInt8) : CurrentTradingState :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
 
-theorem ofByte_toByte (value : TradingState) : ofByte value.toByte = value := by
+theorem ofByte_toByte (value : CurrentTradingState) : ofByte value.toByte = value := by
   cases value with
-  | haltedOrPausedOnNasdaqAndAllUtpParticipants => decide
-  | haltedOrPausedOnNasdaqOmx => decide
+  | haltedOrPausedAcrossAllUsEquityMarketsSrOs => decide
+  | haltedOrPausedOnNasdaqOnly => decide
   | quotationOnlyPeriodForCrossSroHaltOrPause => decide
-  | quotationOnlyPeriodForNasdaqOmxOnlyHaltOrPause => decide
-  | tradingOnNasdaqOmx => decide
+  | quotationOnlyPeriodForNasdaqOnlyHaltOrPause => decide
+  | tradingOnNasdaq => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
-def encode (value : TradingState) : List UInt8 :=
+def encode (value : CurrentTradingState) : List UInt8 :=
   [value.toByte]
 
-def decode : List UInt8 → Option (TradingState × List UInt8)
+def decode : List UInt8 → Option (CurrentTradingState × List UInt8)
   | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
-@[simp] theorem encode_length (value : TradingState) : (encode value).length = 1 :=
+@[simp] theorem encode_length (value : CurrentTradingState) : (encode value).length = 1 :=
   rfl
 
-@[simp] theorem decode_encode (value : TradingState) (rest : List UInt8) :
+@[simp] theorem decode_encode (value : CurrentTradingState) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
 
-end TradingState
+end CurrentTradingState
 
 /-- Imbalance Direction: one byte code -/
 def ImbalanceDirection.codes : List UInt8 :=
@@ -602,11 +602,10 @@ theorem encode_length_pos (message : StockDirectoryMessage) : (encode message).l
 
 end StockDirectoryMessage
 
-/-- Stock Trading Action Message: 12 bytes -/
+/-- Stock Trading Action Message: 11 bytes -/
 structure StockTradingActionMessage where
   stock : Alpha 6
-  tradingState : TradingState
-  reserved1 : Alpha 1
+  currentTradingState : CurrentTradingState
   reason : Alpha 4
   deriving DecidableEq, Repr
 
@@ -614,20 +613,18 @@ namespace StockTradingActionMessage
 
 def encode (message : StockTradingActionMessage) : List UInt8 :=
   Alpha.encode message.stock
-    ++ (TradingState.encode message.tradingState
-    ++ (Alpha.encode message.reserved1
-    ++ (Alpha.encode message.reason)))
+    ++ (CurrentTradingState.encode message.currentTradingState
+    ++ (Alpha.encode message.reason))
 
 def decode (bytes : List UInt8) : Option (StockTradingActionMessage × List UInt8) := do
   let (stock, bytes) ← Alpha.decode 6 bytes
-  let (tradingState, bytes) ← TradingState.decode bytes
-  let (reserved1, bytes) ← Alpha.decode 1 bytes
+  let (currentTradingState, bytes) ← CurrentTradingState.decode bytes
   let (reason, bytes) ← Alpha.decode 4 bytes
-  pure ({ stock, tradingState, reserved1, reason }, bytes)
+  pure ({ stock, currentTradingState, reason }, bytes)
 
-@[simp] theorem encode_length (message : StockTradingActionMessage) : (encode message).length = 12 := by
+@[simp] theorem encode_length (message : StockTradingActionMessage) : (encode message).length = 11 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, TradingState.encode_length]
+  simp only [List.length_append, Alpha.encode_length, CurrentTradingState.encode_length]
 
 theorem encode_length_pos (message : StockTradingActionMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -638,9 +635,7 @@ theorem encode_length_pos (message : StockTradingActionMessage) : (encode messag
   unfold decode encode
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, TradingState.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, CurrentTradingState.decode_encode, some_bind]
   dsimp only
   rw [Alpha.decode_encode, some_bind]
   rfl
@@ -878,4 +873,4 @@ theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
 
 end Packet
 
-end Omi.NasdaqNsmequitiesNoiviewItchV2020100702
+end Omi.NasdaqNsmequitiesNoiviewItchV2020102

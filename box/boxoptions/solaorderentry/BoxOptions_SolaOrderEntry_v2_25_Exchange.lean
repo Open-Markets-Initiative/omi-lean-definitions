@@ -468,21 +468,21 @@ def decode : List UInt8 → Option (ClearingOperationMode × List UInt8)
 
 end ClearingOperationMode
 
-/-- Type Of Cancellation Only Q Quotes Only Can Be Returned: one byte code -/
-def TypeOfCancellationOnlyQQuotesOnlyCanBeReturned.codes : List UInt8 :=
+/-- Type Of Cancellation: one byte code -/
+def TypeOfCancellation.codes : List UInt8 :=
   [0x41, 0x4C, 0x4F, 0x51]
 
-inductive TypeOfCancellationOnlyQQuotesOnlyCanBeReturned where
+inductive TypeOfCancellation where
   | all -- All
   | locked -- Locked
   | ordersOnly -- Orders Only
   | quotesOnly -- Quotes Only
-  | unlisted (byte : { byte : UInt8 // byte ∉ TypeOfCancellationOnlyQQuotesOnlyCanBeReturned.codes }) -- any other code, kept as it is
+  | unlisted (byte : { byte : UInt8 // byte ∉ TypeOfCancellation.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
-namespace TypeOfCancellationOnlyQQuotesOnlyCanBeReturned
+namespace TypeOfCancellation
 
-def toByte : TypeOfCancellationOnlyQQuotesOnlyCanBeReturned → UInt8
+def toByte : TypeOfCancellation → UInt8
   | .all => 0x41
   | .locked => 0x4C
   | .ordersOnly => 0x4F
@@ -490,16 +490,16 @@ def toByte : TypeOfCancellationOnlyQQuotesOnlyCanBeReturned → UInt8
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
-def listed (byte : UInt8) : TypeOfCancellationOnlyQQuotesOnlyCanBeReturned :=
+def listed (byte : UInt8) : TypeOfCancellation :=
   if byte = 0x41 then .all
   else if byte = 0x4C then .locked
   else if byte = 0x4F then .ordersOnly
   else .quotesOnly
 
-def ofByte (byte : UInt8) : TypeOfCancellationOnlyQQuotesOnlyCanBeReturned :=
+def ofByte (byte : UInt8) : TypeOfCancellation :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
 
-theorem ofByte_toByte (value : TypeOfCancellationOnlyQQuotesOnlyCanBeReturned) : ofByte value.toByte = value := by
+theorem ofByte_toByte (value : TypeOfCancellation) : ofByte value.toByte = value := by
   cases value with
   | all => decide
   | locked => decide
@@ -507,21 +507,21 @@ theorem ofByte_toByte (value : TypeOfCancellationOnlyQQuotesOnlyCanBeReturned) :
   | quotesOnly => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
-def encode (value : TypeOfCancellationOnlyQQuotesOnlyCanBeReturned) : List UInt8 :=
+def encode (value : TypeOfCancellation) : List UInt8 :=
   [value.toByte]
 
-def decode : List UInt8 → Option (TypeOfCancellationOnlyQQuotesOnlyCanBeReturned × List UInt8)
+def decode : List UInt8 → Option (TypeOfCancellation × List UInt8)
   | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
-@[simp] theorem encode_length (value : TypeOfCancellationOnlyQQuotesOnlyCanBeReturned) : (encode value).length = 1 :=
+@[simp] theorem encode_length (value : TypeOfCancellation) : (encode value).length = 1 :=
   rfl
 
-@[simp] theorem decode_encode (value : TypeOfCancellationOnlyQQuotesOnlyCanBeReturned) (rest : List UInt8) :
+@[simp] theorem decode_encode (value : TypeOfCancellation) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
 
-end TypeOfCancellationOnlyQQuotesOnlyCanBeReturned
+end TypeOfCancellation
 
 /-- Leg Verb: one byte code -/
 def LegVerb.codes : List UInt8 :=
@@ -1335,7 +1335,7 @@ end Action
 
 /-- Heartbeat Question: 20 bytes -/
 structure HeartbeatQuestion where
-  userSequenceIdFirstUserSequenceIdForNextcurrentHeartbeatPeriod : Alpha 8
+  firstUserSequenceId : Alpha 8
   lastExchangeMessageIdSentToParticipant : Alpha 6
   timeLocal : Alpha 6
   deriving DecidableEq, Repr
@@ -1343,15 +1343,15 @@ structure HeartbeatQuestion where
 namespace HeartbeatQuestion
 
 def encode (message : HeartbeatQuestion) : List UInt8 :=
-  Alpha.encode message.userSequenceIdFirstUserSequenceIdForNextcurrentHeartbeatPeriod
+  Alpha.encode message.firstUserSequenceId
     ++ (Alpha.encode message.lastExchangeMessageIdSentToParticipant
     ++ (Alpha.encode message.timeLocal))
 
 def decode (bytes : List UInt8) : Option (HeartbeatQuestion × List UInt8) := do
-  let (userSequenceIdFirstUserSequenceIdForNextcurrentHeartbeatPeriod, bytes) ← Alpha.decode 8 bytes
+  let (firstUserSequenceId, bytes) ← Alpha.decode 8 bytes
   let (lastExchangeMessageIdSentToParticipant, bytes) ← Alpha.decode 6 bytes
   let (timeLocal, bytes) ← Alpha.decode 6 bytes
-  pure ({ userSequenceIdFirstUserSequenceIdForNextcurrentHeartbeatPeriod, lastExchangeMessageIdSentToParticipant, timeLocal }, bytes)
+  pure ({ firstUserSequenceId, lastExchangeMessageIdSentToParticipant, timeLocal }, bytes)
 
 @[simp] theorem encode_length (message : HeartbeatQuestion) : (encode message).length = 20 := by
   unfold encode
@@ -1416,7 +1416,7 @@ end OutOfSequence
 /-- Technical Error Notice: 218 bytes -/
 structure TechnicalErrorNotice where
   receivedMessageType : Alpha 2
-  precedingUserSequenceIdReceivedZeroesIfNone : Alpha 8
+  precedingUserSequenceIdReceived : Alpha 8
   errorCode : Alpha 4
   errorPosition : Alpha 4
   errorMessage : Alpha 100
@@ -1427,7 +1427,7 @@ namespace TechnicalErrorNotice
 
 def encode (message : TechnicalErrorNotice) : List UInt8 :=
   Alpha.encode message.receivedMessageType
-    ++ (Alpha.encode message.precedingUserSequenceIdReceivedZeroesIfNone
+    ++ (Alpha.encode message.precedingUserSequenceIdReceived
     ++ (Alpha.encode message.errorCode
     ++ (Alpha.encode message.errorPosition
     ++ (Alpha.encode message.errorMessage
@@ -1435,12 +1435,12 @@ def encode (message : TechnicalErrorNotice) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option (TechnicalErrorNotice × List UInt8) := do
   let (receivedMessageType, bytes) ← Alpha.decode 2 bytes
-  let (precedingUserSequenceIdReceivedZeroesIfNone, bytes) ← Alpha.decode 8 bytes
+  let (precedingUserSequenceIdReceived, bytes) ← Alpha.decode 8 bytes
   let (errorCode, bytes) ← Alpha.decode 4 bytes
   let (errorPosition, bytes) ← Alpha.decode 4 bytes
   let (errorMessage, bytes) ← Alpha.decode 100 bytes
   let (startOfMessageInError, bytes) ← Alpha.decode 100 bytes
-  pure ({ receivedMessageType, precedingUserSequenceIdReceivedZeroesIfNone, errorCode, errorPosition, errorMessage, startOfMessageInError }, bytes)
+  pure ({ receivedMessageType, precedingUserSequenceIdReceived, errorCode, errorPosition, errorMessage, startOfMessageInError }, bytes)
 
 @[simp] theorem encode_length (message : TechnicalErrorNotice) : (encode message).length = 218 := by
   unfold encode
@@ -1576,7 +1576,7 @@ end DisconnectionAcknowledgement
 /-- End Of Transmission: 18 bytes -/
 structure EndOfTransmission where
   endedSessionId : Alpha 4
-  lastUserSequenceIdReceivedIfNoBusinessMessageHasBeenReceivedOnThisConnectionThisFieldIsEqualToZeroes : Alpha 8
+  lastUserSequenceIdReceived : Alpha 8
   time : Alpha 6
   deriving DecidableEq, Repr
 
@@ -1584,14 +1584,14 @@ namespace EndOfTransmission
 
 def encode (message : EndOfTransmission) : List UInt8 :=
   Alpha.encode message.endedSessionId
-    ++ (Alpha.encode message.lastUserSequenceIdReceivedIfNoBusinessMessageHasBeenReceivedOnThisConnectionThisFieldIsEqualToZeroes
+    ++ (Alpha.encode message.lastUserSequenceIdReceived
     ++ (Alpha.encode message.time))
 
 def decode (bytes : List UInt8) : Option (EndOfTransmission × List UInt8) := do
   let (endedSessionId, bytes) ← Alpha.decode 4 bytes
-  let (lastUserSequenceIdReceivedIfNoBusinessMessageHasBeenReceivedOnThisConnectionThisFieldIsEqualToZeroes, bytes) ← Alpha.decode 8 bytes
+  let (lastUserSequenceIdReceived, bytes) ← Alpha.decode 8 bytes
   let (time, bytes) ← Alpha.decode 6 bytes
-  pure ({ endedSessionId, lastUserSequenceIdReceivedIfNoBusinessMessageHasBeenReceivedOnThisConnectionThisFieldIsEqualToZeroes, time }, bytes)
+  pure ({ endedSessionId, lastUserSequenceIdReceived, time }, bytes)
 
 @[simp] theorem encode_length (message : EndOfTransmission) : (encode message).length = 18 := by
   unfold encode
@@ -1618,9 +1618,9 @@ structure ErrorNotice where
   errorCode : Alpha 4
   errorDescription : Alpha 100
   group : Alpha 2
-  instrument : Alpha 4
-  orderIdClientOrderId20 : Alpha 20
-  auctionId : Alpha 6
+  instrumentOptional : Alpha 4
+  orderIdX20 : Alpha 20
+  auctionIdOptional : Alpha 6
   originalMessageType : Alpha 2
   errorDetail : Alpha 200
   clientOrderId : Alpha 20
@@ -1632,9 +1632,9 @@ def encode (message : ErrorNotice) : List UInt8 :=
   Alpha.encode message.errorCode
     ++ (Alpha.encode message.errorDescription
     ++ (Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
-    ++ (Alpha.encode message.orderIdClientOrderId20
-    ++ (Alpha.encode message.auctionId
+    ++ (Alpha.encode message.instrumentOptional
+    ++ (Alpha.encode message.orderIdX20
+    ++ (Alpha.encode message.auctionIdOptional
     ++ (Alpha.encode message.originalMessageType
     ++ (Alpha.encode message.errorDetail
     ++ (Alpha.encode message.clientOrderId))))))))
@@ -1643,13 +1643,13 @@ def decode (bytes : List UInt8) : Option (ErrorNotice × List UInt8) := do
   let (errorCode, bytes) ← Alpha.decode 4 bytes
   let (errorDescription, bytes) ← Alpha.decode 100 bytes
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
-  let (orderIdClientOrderId20, bytes) ← Alpha.decode 20 bytes
-  let (auctionId, bytes) ← Alpha.decode 6 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
+  let (orderIdX20, bytes) ← Alpha.decode 20 bytes
+  let (auctionIdOptional, bytes) ← Alpha.decode 6 bytes
   let (originalMessageType, bytes) ← Alpha.decode 2 bytes
   let (errorDetail, bytes) ← Alpha.decode 200 bytes
   let (clientOrderId, bytes) ← Alpha.decode 20 bytes
-  pure ({ errorCode, errorDescription, group, instrument, orderIdClientOrderId20, auctionId, originalMessageType, errorDetail, clientOrderId }, bytes)
+  pure ({ errorCode, errorDescription, group, instrumentOptional, orderIdX20, auctionIdOptional, originalMessageType, errorDetail, clientOrderId }, bytes)
 
 @[simp] theorem encode_length (message : ErrorNotice) : (encode message).length = 358 := by
   unfold encode
@@ -1687,7 +1687,7 @@ end ErrorNotice
 structure BulkQuoteDataAcknowledgement where
   group : Alpha 2
   traderId : Alpha 8
-  quoteIdIdentifiesTradersQuoteOnThisGroup : Alpha 8
+  quoteId : Alpha 8
   deriving DecidableEq, Repr
 
 namespace BulkQuoteDataAcknowledgement
@@ -1695,13 +1695,13 @@ namespace BulkQuoteDataAcknowledgement
 def encode (message : BulkQuoteDataAcknowledgement) : List UInt8 :=
   Alpha.encode message.group
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.quoteIdIdentifiesTradersQuoteOnThisGroup))
+    ++ (Alpha.encode message.quoteId))
 
 def decode (bytes : List UInt8) : Option (BulkQuoteDataAcknowledgement × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (quoteIdIdentifiesTradersQuoteOnThisGroup, bytes) ← Alpha.decode 8 bytes
-  pure ({ group, traderId, quoteIdIdentifiesTradersQuoteOnThisGroup }, bytes)
+  let (quoteId, bytes) ← Alpha.decode 8 bytes
+  pure ({ group, traderId, quoteId }, bytes)
 
 @[simp] theorem encode_length (message : BulkQuoteDataAcknowledgement) : (encode message).length = 18 := by
   unfold encode
@@ -1821,9 +1821,9 @@ end OwnerData
 /-- Order Acknowledgement: 167 bytes -/
 structure OrderAcknowledgement where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
-  orderIdOrderId8 : Alpha 8
+  orderIdX8 : Alpha 8
   status : Status
   verbSide : VerbSide
   quantity : Alpha 8
@@ -1831,18 +1831,18 @@ structure OrderAcknowledgement where
   clearingData : ClearingData
   ownerData : OwnerData
   originalOrderId : Alpha 8
-  fillerNumeric66 : Alpha 6
+  fillerN6 : Alpha 6
   additionalClientMemo : Alpha 16
-  fillerMustBeBlankString44 : Alpha 4
+  filler2X4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace OrderAcknowledgement
 
 def encode (message : OrderAcknowledgement) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.orderIdOrderId8
+    ++ (Alpha.encode message.orderIdX8
     ++ (Status.encode message.status
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantity
@@ -1850,15 +1850,15 @@ def encode (message : OrderAcknowledgement) : List UInt8 :=
     ++ (ClearingData.encode message.clearingData
     ++ (OwnerData.encode message.ownerData
     ++ (Alpha.encode message.originalOrderId
-    ++ (Alpha.encode message.fillerNumeric66
+    ++ (Alpha.encode message.fillerN6
     ++ (Alpha.encode message.additionalClientMemo
-    ++ (Alpha.encode message.fillerMustBeBlankString44)))))))))))))
+    ++ (Alpha.encode message.filler2X4)))))))))))))
 
 def decode (bytes : List UInt8) : Option (OrderAcknowledgement × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (orderIdOrderId8, bytes) ← Alpha.decode 8 bytes
+  let (orderIdX8, bytes) ← Alpha.decode 8 bytes
   let (status, bytes) ← Status.decode bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantity, bytes) ← Alpha.decode 8 bytes
@@ -1866,10 +1866,10 @@ def decode (bytes : List UInt8) : Option (OrderAcknowledgement × List UInt8) :=
   let (clearingData, bytes) ← ClearingData.decode bytes
   let (ownerData, bytes) ← OwnerData.decode bytes
   let (originalOrderId, bytes) ← Alpha.decode 8 bytes
-  let (fillerNumeric66, bytes) ← Alpha.decode 6 bytes
+  let (fillerN6, bytes) ← Alpha.decode 6 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  let (fillerMustBeBlankString44, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, instrument, traderId, orderIdOrderId8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, fillerNumeric66, additionalClientMemo, fillerMustBeBlankString44 }, bytes)
+  let (filler2X4, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, instrumentOptional, traderId, orderIdX8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, fillerN6, additionalClientMemo, filler2X4 }, bytes)
 
 @[simp] theorem encode_length (message : OrderAcknowledgement) : (encode message).length = 167 := by
   unfold encode
@@ -1917,7 +1917,7 @@ end OrderAcknowledgement
 structure GlobalCancellationConfirmation where
   group : Alpha 2
   traderId : Alpha 8
-  typeOfCancellationOnlyQQuotesOnlyCanBeReturned : TypeOfCancellationOnlyQQuotesOnlyCanBeReturned
+  typeOfCancellation : TypeOfCancellation
   deriving DecidableEq, Repr
 
 namespace GlobalCancellationConfirmation
@@ -1925,17 +1925,17 @@ namespace GlobalCancellationConfirmation
 def encode (message : GlobalCancellationConfirmation) : List UInt8 :=
   Alpha.encode message.group
     ++ (Alpha.encode message.traderId
-    ++ (TypeOfCancellationOnlyQQuotesOnlyCanBeReturned.encode message.typeOfCancellationOnlyQQuotesOnlyCanBeReturned))
+    ++ (TypeOfCancellation.encode message.typeOfCancellation))
 
 def decode (bytes : List UInt8) : Option (GlobalCancellationConfirmation × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (typeOfCancellationOnlyQQuotesOnlyCanBeReturned, bytes) ← TypeOfCancellationOnlyQQuotesOnlyCanBeReturned.decode bytes
-  pure ({ group, traderId, typeOfCancellationOnlyQQuotesOnlyCanBeReturned }, bytes)
+  let (typeOfCancellation, bytes) ← TypeOfCancellation.decode bytes
+  pure ({ group, traderId, typeOfCancellation }, bytes)
 
 @[simp] theorem encode_length (message : GlobalCancellationConfirmation) : (encode message).length = 11 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, TypeOfCancellationOnlyQQuotesOnlyCanBeReturned.encode_length]
+  simp only [List.length_append, Alpha.encode_length, TypeOfCancellation.encode_length]
 
 theorem encode_length_pos (message : GlobalCancellationConfirmation) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1948,7 +1948,7 @@ theorem encode_length_pos (message : GlobalCancellationConfirmation) : (encode m
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [TypeOfCancellationOnlyQQuotesOnlyCanBeReturned.decode_encode, some_bind]
+  rw [TypeOfCancellation.decode_encode, some_bind]
   rfl
 
 end GlobalCancellationConfirmation
@@ -1956,9 +1956,9 @@ end GlobalCancellationConfirmation
 /-- Improvement Order Acknowlegment: 167 bytes -/
 structure ImprovementOrderAcknowlegment where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
-  orderIdOrderId8 : Alpha 8
+  orderIdX8 : Alpha 8
   status : Status
   verbSide : VerbSide
   quantity : Alpha 8
@@ -1966,18 +1966,18 @@ structure ImprovementOrderAcknowlegment where
   clearingData : ClearingData
   ownerData : OwnerData
   originalOrderId : Alpha 8
-  auctionIdOnlyIfMessageTypeIsKiOrElseZeroes : Alpha 6
+  auctionId : Alpha 6
   additionalClientMemo : Alpha 16
-  fillerMustBeBlankString44 : Alpha 4
+  fillerX4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace ImprovementOrderAcknowlegment
 
 def encode (message : ImprovementOrderAcknowlegment) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.orderIdOrderId8
+    ++ (Alpha.encode message.orderIdX8
     ++ (Status.encode message.status
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantity
@@ -1985,15 +1985,15 @@ def encode (message : ImprovementOrderAcknowlegment) : List UInt8 :=
     ++ (ClearingData.encode message.clearingData
     ++ (OwnerData.encode message.ownerData
     ++ (Alpha.encode message.originalOrderId
-    ++ (Alpha.encode message.auctionIdOnlyIfMessageTypeIsKiOrElseZeroes
+    ++ (Alpha.encode message.auctionId
     ++ (Alpha.encode message.additionalClientMemo
-    ++ (Alpha.encode message.fillerMustBeBlankString44)))))))))))))
+    ++ (Alpha.encode message.fillerX4)))))))))))))
 
 def decode (bytes : List UInt8) : Option (ImprovementOrderAcknowlegment × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (orderIdOrderId8, bytes) ← Alpha.decode 8 bytes
+  let (orderIdX8, bytes) ← Alpha.decode 8 bytes
   let (status, bytes) ← Status.decode bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantity, bytes) ← Alpha.decode 8 bytes
@@ -2001,10 +2001,10 @@ def decode (bytes : List UInt8) : Option (ImprovementOrderAcknowlegment × List 
   let (clearingData, bytes) ← ClearingData.decode bytes
   let (ownerData, bytes) ← OwnerData.decode bytes
   let (originalOrderId, bytes) ← Alpha.decode 8 bytes
-  let (auctionIdOnlyIfMessageTypeIsKiOrElseZeroes, bytes) ← Alpha.decode 6 bytes
+  let (auctionId, bytes) ← Alpha.decode 6 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  let (fillerMustBeBlankString44, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, instrument, traderId, orderIdOrderId8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, auctionIdOnlyIfMessageTypeIsKiOrElseZeroes, additionalClientMemo, fillerMustBeBlankString44 }, bytes)
+  let (fillerX4, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, instrumentOptional, traderId, orderIdX8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, auctionId, additionalClientMemo, fillerX4 }, bytes)
 
 @[simp] theorem encode_length (message : ImprovementOrderAcknowlegment) : (encode message).length = 167 := by
   unfold encode
@@ -2051,9 +2051,9 @@ end ImprovementOrderAcknowlegment
 /-- Order Modification Acknowledgement: 167 bytes -/
 structure OrderModificationAcknowledgement where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
-  orderIdOrderId8 : Alpha 8
+  orderIdX8 : Alpha 8
   status : Status
   verbSide : VerbSide
   quantity : Alpha 8
@@ -2061,18 +2061,18 @@ structure OrderModificationAcknowledgement where
   clearingData : ClearingData
   ownerData : OwnerData
   originalOrderId : Alpha 8
-  fillerNumeric66 : Alpha 6
+  fillerN6 : Alpha 6
   additionalClientMemo : Alpha 16
-  fillerMustBeBlankString44 : Alpha 4
+  filler2X4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace OrderModificationAcknowledgement
 
 def encode (message : OrderModificationAcknowledgement) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.orderIdOrderId8
+    ++ (Alpha.encode message.orderIdX8
     ++ (Status.encode message.status
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantity
@@ -2080,15 +2080,15 @@ def encode (message : OrderModificationAcknowledgement) : List UInt8 :=
     ++ (ClearingData.encode message.clearingData
     ++ (OwnerData.encode message.ownerData
     ++ (Alpha.encode message.originalOrderId
-    ++ (Alpha.encode message.fillerNumeric66
+    ++ (Alpha.encode message.fillerN6
     ++ (Alpha.encode message.additionalClientMemo
-    ++ (Alpha.encode message.fillerMustBeBlankString44)))))))))))))
+    ++ (Alpha.encode message.filler2X4)))))))))))))
 
 def decode (bytes : List UInt8) : Option (OrderModificationAcknowledgement × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (orderIdOrderId8, bytes) ← Alpha.decode 8 bytes
+  let (orderIdX8, bytes) ← Alpha.decode 8 bytes
   let (status, bytes) ← Status.decode bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantity, bytes) ← Alpha.decode 8 bytes
@@ -2096,10 +2096,10 @@ def decode (bytes : List UInt8) : Option (OrderModificationAcknowledgement × Li
   let (clearingData, bytes) ← ClearingData.decode bytes
   let (ownerData, bytes) ← OwnerData.decode bytes
   let (originalOrderId, bytes) ← Alpha.decode 8 bytes
-  let (fillerNumeric66, bytes) ← Alpha.decode 6 bytes
+  let (fillerN6, bytes) ← Alpha.decode 6 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  let (fillerMustBeBlankString44, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, instrument, traderId, orderIdOrderId8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, fillerNumeric66, additionalClientMemo, fillerMustBeBlankString44 }, bytes)
+  let (filler2X4, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, instrumentOptional, traderId, orderIdX8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, fillerN6, additionalClientMemo, filler2X4 }, bytes)
 
 @[simp] theorem encode_length (message : OrderModificationAcknowledgement) : (encode message).length = 167 := by
   unfold encode
@@ -2148,7 +2148,7 @@ structure NewComplexOrderInstrumentAcknowledgementOccurrence where
   legGroup : Alpha 2
   legInstrumentId : Alpha 4
   legVerb : LegVerb
-  fillerMustBeSpaces : Alpha 1
+  fillerX1 : Alpha 1
   legQuantityRatio : Alpha 8
   deriving DecidableEq, Repr
 
@@ -2158,16 +2158,16 @@ def encode (message : NewComplexOrderInstrumentAcknowledgementOccurrence) : List
   Alpha.encode message.legGroup
     ++ (Alpha.encode message.legInstrumentId
     ++ (LegVerb.encode message.legVerb
-    ++ (Alpha.encode message.fillerMustBeSpaces
+    ++ (Alpha.encode message.fillerX1
     ++ (Alpha.encode message.legQuantityRatio))))
 
 def decode (bytes : List UInt8) : Option (NewComplexOrderInstrumentAcknowledgementOccurrence × List UInt8) := do
   let (legGroup, bytes) ← Alpha.decode 2 bytes
   let (legInstrumentId, bytes) ← Alpha.decode 4 bytes
   let (legVerb, bytes) ← LegVerb.decode bytes
-  let (fillerMustBeSpaces, bytes) ← Alpha.decode 1 bytes
+  let (fillerX1, bytes) ← Alpha.decode 1 bytes
   let (legQuantityRatio, bytes) ← Alpha.decode 8 bytes
-  pure ({ legGroup, legInstrumentId, legVerb, fillerMustBeSpaces, legQuantityRatio }, bytes)
+  pure ({ legGroup, legInstrumentId, legVerb, fillerX1, legQuantityRatio }, bytes)
 
 @[simp] theorem encode_length (message : NewComplexOrderInstrumentAcknowledgementOccurrence) : (encode message).length = 16 := by
   unfold encode
@@ -2253,19 +2253,19 @@ end NewComplexOrderInstrumentAcknowledgement
 /-- Standard Acknowledgement: 10 bytes -/
 structure StandardAcknowledgement where
   traderId : Alpha 8
-  originalMessageTypeReRfRqRpGz : Alpha 2
+  originalMessageType : Alpha 2
   deriving DecidableEq, Repr
 
 namespace StandardAcknowledgement
 
 def encode (message : StandardAcknowledgement) : List UInt8 :=
   Alpha.encode message.traderId
-    ++ (Alpha.encode message.originalMessageTypeReRfRqRpGz)
+    ++ (Alpha.encode message.originalMessageType)
 
 def decode (bytes : List UInt8) : Option (StandardAcknowledgement × List UInt8) := do
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (originalMessageTypeReRfRqRpGz, bytes) ← Alpha.decode 2 bytes
-  pure ({ traderId, originalMessageTypeReRfRqRpGz }, bytes)
+  let (originalMessageType, bytes) ← Alpha.decode 2 bytes
+  pure ({ traderId, originalMessageType }, bytes)
 
 @[simp] theorem encode_length (message : StandardAcknowledgement) : (encode message).length = 10 := by
   unfold encode
@@ -2288,9 +2288,9 @@ end StandardAcknowledgement
 /-- Complex Order Auction Acknowledgement: 167 bytes -/
 structure ComplexOrderAuctionAcknowledgement where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
-  orderIdOrderId8 : Alpha 8
+  orderIdX8 : Alpha 8
   status : Status
   verbSide : VerbSide
   quantity : Alpha 8
@@ -2298,18 +2298,18 @@ structure ComplexOrderAuctionAcknowledgement where
   clearingData : ClearingData
   ownerData : OwnerData
   originalOrderId : Alpha 8
-  auctionId : Alpha 6
+  auctionIdOptional : Alpha 6
   additionalClientMemo : Alpha 16
-  fillerMustBeBlankString44 : Alpha 4
+  fillerX4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace ComplexOrderAuctionAcknowledgement
 
 def encode (message : ComplexOrderAuctionAcknowledgement) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.orderIdOrderId8
+    ++ (Alpha.encode message.orderIdX8
     ++ (Status.encode message.status
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantity
@@ -2317,15 +2317,15 @@ def encode (message : ComplexOrderAuctionAcknowledgement) : List UInt8 :=
     ++ (ClearingData.encode message.clearingData
     ++ (OwnerData.encode message.ownerData
     ++ (Alpha.encode message.originalOrderId
-    ++ (Alpha.encode message.auctionId
+    ++ (Alpha.encode message.auctionIdOptional
     ++ (Alpha.encode message.additionalClientMemo
-    ++ (Alpha.encode message.fillerMustBeBlankString44)))))))))))))
+    ++ (Alpha.encode message.fillerX4)))))))))))))
 
 def decode (bytes : List UInt8) : Option (ComplexOrderAuctionAcknowledgement × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (orderIdOrderId8, bytes) ← Alpha.decode 8 bytes
+  let (orderIdX8, bytes) ← Alpha.decode 8 bytes
   let (status, bytes) ← Status.decode bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantity, bytes) ← Alpha.decode 8 bytes
@@ -2333,10 +2333,10 @@ def decode (bytes : List UInt8) : Option (ComplexOrderAuctionAcknowledgement × 
   let (clearingData, bytes) ← ClearingData.decode bytes
   let (ownerData, bytes) ← OwnerData.decode bytes
   let (originalOrderId, bytes) ← Alpha.decode 8 bytes
-  let (auctionId, bytes) ← Alpha.decode 6 bytes
+  let (auctionIdOptional, bytes) ← Alpha.decode 6 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  let (fillerMustBeBlankString44, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, instrument, traderId, orderIdOrderId8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, auctionId, additionalClientMemo, fillerMustBeBlankString44 }, bytes)
+  let (fillerX4, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, instrumentOptional, traderId, orderIdX8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, auctionIdOptional, additionalClientMemo, fillerX4 }, bytes)
 
 @[simp] theorem encode_length (message : ComplexOrderAuctionAcknowledgement) : (encode message).length = 167 := by
   unfold encode
@@ -2383,9 +2383,9 @@ end ComplexOrderAuctionAcknowledgement
 /-- Auction Or Improvement Cancellation Acknowledgement: 147 bytes -/
 structure AuctionOrImprovementCancellationAcknowledgement where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
-  orderIdOrderId8 : Alpha 8
+  orderIdX8 : Alpha 8
   status : Status
   verbSide : VerbSide
   quantity : Alpha 8
@@ -2393,16 +2393,16 @@ structure AuctionOrImprovementCancellationAcknowledgement where
   clearingData : ClearingData
   ownerData : OwnerData
   originalOrderId : Alpha 8
-  auctionIdOnlyIfMessageTypeIsKiOrElseZeroes : Alpha 6
+  auctionId : Alpha 6
   deriving DecidableEq, Repr
 
 namespace AuctionOrImprovementCancellationAcknowledgement
 
 def encode (message : AuctionOrImprovementCancellationAcknowledgement) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.orderIdOrderId8
+    ++ (Alpha.encode message.orderIdX8
     ++ (Status.encode message.status
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantity
@@ -2410,13 +2410,13 @@ def encode (message : AuctionOrImprovementCancellationAcknowledgement) : List UI
     ++ (ClearingData.encode message.clearingData
     ++ (OwnerData.encode message.ownerData
     ++ (Alpha.encode message.originalOrderId
-    ++ (Alpha.encode message.auctionIdOnlyIfMessageTypeIsKiOrElseZeroes)))))))))))
+    ++ (Alpha.encode message.auctionId)))))))))))
 
 def decode (bytes : List UInt8) : Option (AuctionOrImprovementCancellationAcknowledgement × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (orderIdOrderId8, bytes) ← Alpha.decode 8 bytes
+  let (orderIdX8, bytes) ← Alpha.decode 8 bytes
   let (status, bytes) ← Status.decode bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantity, bytes) ← Alpha.decode 8 bytes
@@ -2424,8 +2424,8 @@ def decode (bytes : List UInt8) : Option (AuctionOrImprovementCancellationAcknow
   let (clearingData, bytes) ← ClearingData.decode bytes
   let (ownerData, bytes) ← OwnerData.decode bytes
   let (originalOrderId, bytes) ← Alpha.decode 8 bytes
-  let (auctionIdOnlyIfMessageTypeIsKiOrElseZeroes, bytes) ← Alpha.decode 6 bytes
-  pure ({ group, instrument, traderId, orderIdOrderId8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, auctionIdOnlyIfMessageTypeIsKiOrElseZeroes }, bytes)
+  let (auctionId, bytes) ← Alpha.decode 6 bytes
+  pure ({ group, instrumentOptional, traderId, orderIdX8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, auctionId }, bytes)
 
 @[simp] theorem encode_length (message : AuctionOrImprovementCancellationAcknowledgement) : (encode message).length = 147 := by
   unfold encode
@@ -2468,9 +2468,9 @@ end AuctionOrImprovementCancellationAcknowledgement
 /-- Order Cancellation Acknowledgement: 167 bytes -/
 structure OrderCancellationAcknowledgement where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
-  orderIdOrderId8 : Alpha 8
+  orderIdX8 : Alpha 8
   status : Status
   verbSide : VerbSide
   quantity : Alpha 8
@@ -2478,18 +2478,18 @@ structure OrderCancellationAcknowledgement where
   clearingData : ClearingData
   ownerData : OwnerData
   originalOrderId : Alpha 8
-  auctionIdOnlyIfMessageTypeIsKiOrElseZeroes : Alpha 6
+  auctionId : Alpha 6
   additionalClientMemo : Alpha 16
-  fillerMustBeBlankString44 : Alpha 4
+  fillerX4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace OrderCancellationAcknowledgement
 
 def encode (message : OrderCancellationAcknowledgement) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.orderIdOrderId8
+    ++ (Alpha.encode message.orderIdX8
     ++ (Status.encode message.status
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantity
@@ -2497,15 +2497,15 @@ def encode (message : OrderCancellationAcknowledgement) : List UInt8 :=
     ++ (ClearingData.encode message.clearingData
     ++ (OwnerData.encode message.ownerData
     ++ (Alpha.encode message.originalOrderId
-    ++ (Alpha.encode message.auctionIdOnlyIfMessageTypeIsKiOrElseZeroes
+    ++ (Alpha.encode message.auctionId
     ++ (Alpha.encode message.additionalClientMemo
-    ++ (Alpha.encode message.fillerMustBeBlankString44)))))))))))))
+    ++ (Alpha.encode message.fillerX4)))))))))))))
 
 def decode (bytes : List UInt8) : Option (OrderCancellationAcknowledgement × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (orderIdOrderId8, bytes) ← Alpha.decode 8 bytes
+  let (orderIdX8, bytes) ← Alpha.decode 8 bytes
   let (status, bytes) ← Status.decode bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantity, bytes) ← Alpha.decode 8 bytes
@@ -2513,10 +2513,10 @@ def decode (bytes : List UInt8) : Option (OrderCancellationAcknowledgement × Li
   let (clearingData, bytes) ← ClearingData.decode bytes
   let (ownerData, bytes) ← OwnerData.decode bytes
   let (originalOrderId, bytes) ← Alpha.decode 8 bytes
-  let (auctionIdOnlyIfMessageTypeIsKiOrElseZeroes, bytes) ← Alpha.decode 6 bytes
+  let (auctionId, bytes) ← Alpha.decode 6 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  let (fillerMustBeBlankString44, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, instrument, traderId, orderIdOrderId8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, auctionIdOnlyIfMessageTypeIsKiOrElseZeroes, additionalClientMemo, fillerMustBeBlankString44 }, bytes)
+  let (fillerX4, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, instrumentOptional, traderId, orderIdX8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, auctionId, additionalClientMemo, fillerX4 }, bytes)
 
 @[simp] theorem encode_length (message : OrderCancellationAcknowledgement) : (encode message).length = 167 := by
   unfold encode
@@ -2598,7 +2598,7 @@ end BulkQuoteAcknowledgementOccurrence
 /-- Bulk Quote Acknowledgement -/
 structure BulkQuoteAcknowledgement where
   group : Alpha 2
-  quoteIdIdentifiesTradersQuoteOnThisGroup : Alpha 8
+  quoteId : Alpha 8
   bulkQuoteAcknowledgementOccurrence : Digited 3 BulkQuoteAcknowledgementOccurrence
   deriving DecidableEq, Repr
 
@@ -2606,17 +2606,17 @@ namespace BulkQuoteAcknowledgement
 
 def encode (message : BulkQuoteAcknowledgement) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.quoteIdIdentifiesTradersQuoteOnThisGroup
+    ++ (Alpha.encode message.quoteId
     ++ (encodeDigits 3 message.bulkQuoteAcknowledgementOccurrence.val.length
     ++ (encodeMany BulkQuoteAcknowledgementOccurrence.encode message.bulkQuoteAcknowledgementOccurrence.val)))
 
 def decode (bytes : List UInt8) : Option (BulkQuoteAcknowledgement × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (quoteIdIdentifiesTradersQuoteOnThisGroup, bytes) ← Alpha.decode 8 bytes
+  let (quoteId, bytes) ← Alpha.decode 8 bytes
   let (numberOfQuotesInError, bytes) ← decodeDigits 3 bytes
   let (bulkQuoteAcknowledgementOccurrence_, bytes) ← decodeMany BulkQuoteAcknowledgementOccurrence.decode numberOfQuotesInError bytes
   if fits_bulkQuoteAcknowledgementOccurrence : bulkQuoteAcknowledgementOccurrence_.length < 10 ^ 3 then
-    pure ({ group, quoteIdIdentifiesTradersQuoteOnThisGroup, bulkQuoteAcknowledgementOccurrence := ⟨bulkQuoteAcknowledgementOccurrence_, fits_bulkQuoteAcknowledgementOccurrence⟩ }, bytes)
+    pure ({ group, quoteId, bulkQuoteAcknowledgementOccurrence := ⟨bulkQuoteAcknowledgementOccurrence_, fits_bulkQuoteAcknowledgementOccurrence⟩ }, bytes)
   else none
 
 theorem encode_length_pos (message : BulkQuoteAcknowledgement) : (encode message).length > 0 := by
@@ -2690,7 +2690,7 @@ end TraderStatus
 /-- Directed Order Cancellation Notice: 41 bytes -/
 structure DirectedOrderCancellationNotice where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
   verbSide : VerbSide
   quantity : Alpha 8
@@ -2702,7 +2702,7 @@ namespace DirectedOrderCancellationNotice
 
 def encode (message : DirectedOrderCancellationNotice) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantity
@@ -2711,13 +2711,13 @@ def encode (message : DirectedOrderCancellationNotice) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option (DirectedOrderCancellationNotice × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantity, bytes) ← Alpha.decode 8 bytes
   let (price, bytes) ← Alpha.decode 10 bytes
   let (referencedOrderId, bytes) ← Alpha.decode 8 bytes
-  pure ({ group, instrument, traderId, verbSide, quantity, price, referencedOrderId }, bytes)
+  pure ({ group, instrumentOptional, traderId, verbSide, quantity, price, referencedOrderId }, bytes)
 
 @[simp] theorem encode_length (message : DirectedOrderCancellationNotice) : (encode message).length = 41 := by
   unfold encode
@@ -2750,7 +2750,7 @@ end DirectedOrderCancellationNotice
 /-- Directed Order Notice: 41 bytes -/
 structure DirectedOrderNotice where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
   verbSide : VerbSide
   quantity : Alpha 8
@@ -2762,7 +2762,7 @@ namespace DirectedOrderNotice
 
 def encode (message : DirectedOrderNotice) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantity
@@ -2771,13 +2771,13 @@ def encode (message : DirectedOrderNotice) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option (DirectedOrderNotice × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantity, bytes) ← Alpha.decode 8 bytes
   let (price, bytes) ← Alpha.decode 10 bytes
   let (referencedOrderId, bytes) ← Alpha.decode 8 bytes
-  pure ({ group, instrument, traderId, verbSide, quantity, price, referencedOrderId }, bytes)
+  pure ({ group, instrumentOptional, traderId, verbSide, quantity, price, referencedOrderId }, bytes)
 
 @[simp] theorem encode_length (message : DirectedOrderNotice) : (encode message).length = 41 := by
   unfold encode
@@ -2810,31 +2810,31 @@ end DirectedOrderNotice
 /-- Excluded Instrument Notice: 22 bytes -/
 structure ExcludedInstrumentNotice where
   group : Alpha 2
-  fillerString22 : Alpha 2
+  fillerX2 : Alpha 2
   traderId : Alpha 8
-  filler2 : Alpha 2
+  filler2X2 : Alpha 2
   nbOfInstruments : Alpha 4
-  t1To9999OccurrencesInstrument : Alpha 4
+  instrument : Alpha 4
   deriving DecidableEq, Repr
 
 namespace ExcludedInstrumentNotice
 
 def encode (message : ExcludedInstrumentNotice) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.fillerString22
+    ++ (Alpha.encode message.fillerX2
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.filler2
+    ++ (Alpha.encode message.filler2X2
     ++ (Alpha.encode message.nbOfInstruments
-    ++ (Alpha.encode message.t1To9999OccurrencesInstrument)))))
+    ++ (Alpha.encode message.instrument)))))
 
 def decode (bytes : List UInt8) : Option (ExcludedInstrumentNotice × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (fillerString22, bytes) ← Alpha.decode 2 bytes
+  let (fillerX2, bytes) ← Alpha.decode 2 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (filler2, bytes) ← Alpha.decode 2 bytes
+  let (filler2X2, bytes) ← Alpha.decode 2 bytes
   let (nbOfInstruments, bytes) ← Alpha.decode 4 bytes
-  let (t1To9999OccurrencesInstrument, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, fillerString22, traderId, filler2, nbOfInstruments, t1To9999OccurrencesInstrument }, bytes)
+  let (instrument, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, fillerX2, traderId, filler2X2, nbOfInstruments, instrument }, bytes)
 
 @[simp] theorem encode_length (message : ExcludedInstrumentNotice) : (encode message).length = 22 := by
   unfold encode
@@ -2900,7 +2900,7 @@ end GroupStateChange
 /-- Leg Execution Notice: 257 bytes -/
 structure LegExecutionNotice where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
   referenceId : Alpha 8
   verbSide : VerbSide
@@ -2912,10 +2912,10 @@ structure LegExecutionNotice where
   specialTradeIndicator : SpecialTradeIndicator
   priceType : PriceType
   tradeType : TradeType
-  auctionId : Alpha 6
+  auctionIdOptional : Alpha 6
   tradeNumber : Alpha 8
-  tradeMemoString5050 : Alpha 50
-  originalReferenceIdOrderId8 : Alpha 8
+  tradeMemo : Alpha 50
+  originalReferenceId : Alpha 8
   idCodeForTheCounterpartParticipant : Alpha 4
   liquidityStatus : LiquidityStatus
   strategyGroup : Alpha 2
@@ -2925,15 +2925,15 @@ structure LegExecutionNotice where
   legNumber : Alpha 2
   counterpartAccountType : CounterpartAccountType
   additionalClientMemo : Alpha 16
-  fillerMustBeBlankString11 : Alpha 1
-  fillerZeroFilled : Alpha 4
+  fillerX1 : Alpha 1
+  filler2X4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace LegExecutionNotice
 
 def encode (message : LegExecutionNotice) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
     ++ (Alpha.encode message.referenceId
     ++ (VerbSide.encode message.verbSide
@@ -2945,10 +2945,10 @@ def encode (message : LegExecutionNotice) : List UInt8 :=
     ++ (SpecialTradeIndicator.encode message.specialTradeIndicator
     ++ (PriceType.encode message.priceType
     ++ (TradeType.encode message.tradeType
-    ++ (Alpha.encode message.auctionId
+    ++ (Alpha.encode message.auctionIdOptional
     ++ (Alpha.encode message.tradeNumber
-    ++ (Alpha.encode message.tradeMemoString5050
-    ++ (Alpha.encode message.originalReferenceIdOrderId8
+    ++ (Alpha.encode message.tradeMemo
+    ++ (Alpha.encode message.originalReferenceId
     ++ (Alpha.encode message.idCodeForTheCounterpartParticipant
     ++ (LiquidityStatus.encode message.liquidityStatus
     ++ (Alpha.encode message.strategyGroup
@@ -2958,14 +2958,14 @@ def encode (message : LegExecutionNotice) : List UInt8 :=
     ++ (Alpha.encode message.legNumber
     ++ (CounterpartAccountType.encode message.counterpartAccountType
     ++ (Alpha.encode message.additionalClientMemo
-    ++ (Alpha.encode message.fillerMustBeBlankString11
-    ++ (Alpha.encode message.fillerZeroFilled)))))))))))))))))))))))))))
+    ++ (Alpha.encode message.fillerX1
+    ++ (Alpha.encode message.filler2X4)))))))))))))))))))))))))))
 
 -- a long run of fields nests deeper than the elaborator's default limit
 set_option maxRecDepth 4096 in
 def decode (bytes : List UInt8) : Option (LegExecutionNotice × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
   let (referenceId, bytes) ← Alpha.decode 8 bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
@@ -2977,10 +2977,10 @@ def decode (bytes : List UInt8) : Option (LegExecutionNotice × List UInt8) := d
   let (specialTradeIndicator, bytes) ← SpecialTradeIndicator.decode bytes
   let (priceType, bytes) ← PriceType.decode bytes
   let (tradeType, bytes) ← TradeType.decode bytes
-  let (auctionId, bytes) ← Alpha.decode 6 bytes
+  let (auctionIdOptional, bytes) ← Alpha.decode 6 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
-  let (tradeMemoString5050, bytes) ← Alpha.decode 50 bytes
-  let (originalReferenceIdOrderId8, bytes) ← Alpha.decode 8 bytes
+  let (tradeMemo, bytes) ← Alpha.decode 50 bytes
+  let (originalReferenceId, bytes) ← Alpha.decode 8 bytes
   let (idCodeForTheCounterpartParticipant, bytes) ← Alpha.decode 4 bytes
   let (liquidityStatus, bytes) ← LiquidityStatus.decode bytes
   let (strategyGroup, bytes) ← Alpha.decode 2 bytes
@@ -2990,9 +2990,9 @@ def decode (bytes : List UInt8) : Option (LegExecutionNotice × List UInt8) := d
   let (legNumber, bytes) ← Alpha.decode 2 bytes
   let (counterpartAccountType, bytes) ← CounterpartAccountType.decode bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  let (fillerMustBeBlankString11, bytes) ← Alpha.decode 1 bytes
-  let (fillerZeroFilled, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, instrument, traderId, referenceId, verbSide, quantityTraded, tradePrice, timeTradeHhmmss, clearingData, ownerData, specialTradeIndicator, priceType, tradeType, auctionId, tradeNumber, tradeMemoString5050, originalReferenceIdOrderId8, idCodeForTheCounterpartParticipant, liquidityStatus, strategyGroup, strategyInstrumentId, strategyVerbSide, strategyTradeNumber, legNumber, counterpartAccountType, additionalClientMemo, fillerMustBeBlankString11, fillerZeroFilled }, bytes)
+  let (fillerX1, bytes) ← Alpha.decode 1 bytes
+  let (filler2X4, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, instrumentOptional, traderId, referenceId, verbSide, quantityTraded, tradePrice, timeTradeHhmmss, clearingData, ownerData, specialTradeIndicator, priceType, tradeType, auctionIdOptional, tradeNumber, tradeMemo, originalReferenceId, idCodeForTheCounterpartParticipant, liquidityStatus, strategyGroup, strategyInstrumentId, strategyVerbSide, strategyTradeNumber, legNumber, counterpartAccountType, additionalClientMemo, fillerX1, filler2X4 }, bytes)
 
 @[simp] theorem encode_length (message : LegExecutionNotice) : (encode message).length = 257 := by
   unfold encode
@@ -3068,7 +3068,7 @@ end LegExecutionNotice
 /-- Cancellation Of All Quotes Notices: 15 bytes -/
 structure CancellationOfAllQuotesNotices where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
   quoteCancelReason : QuoteCancelReason
   deriving DecidableEq, Repr
@@ -3077,16 +3077,16 @@ namespace CancellationOfAllQuotesNotices
 
 def encode (message : CancellationOfAllQuotesNotices) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
     ++ (QuoteCancelReason.encode message.quoteCancelReason)))
 
 def decode (bytes : List UInt8) : Option (CancellationOfAllQuotesNotices × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
   let (quoteCancelReason, bytes) ← QuoteCancelReason.decode bytes
-  pure ({ group, instrument, traderId, quoteCancelReason }, bytes)
+  pure ({ group, instrumentOptional, traderId, quoteCancelReason }, bytes)
 
 @[simp] theorem encode_length (message : CancellationOfAllQuotesNotices) : (encode message).length = 15 := by
   unfold encode
@@ -3113,9 +3113,9 @@ end CancellationOfAllQuotesNotices
 /-- Quality Market Maker Notification: 65 bytes -/
 structure QualityMarketMakerNotification where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
-  auctionId : Alpha 6
+  auctionIdOptional : Alpha 6
   verb : Verb
   auctionQuantity : Alpha 8
   auctionPrice : Alpha 10
@@ -3128,9 +3128,9 @@ namespace QualityMarketMakerNotification
 
 def encode (message : QualityMarketMakerNotification) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.auctionId
+    ++ (Alpha.encode message.auctionIdOptional
     ++ (Verb.encode message.verb
     ++ (Alpha.encode message.auctionQuantity
     ++ (Alpha.encode message.auctionPrice
@@ -3140,16 +3140,16 @@ def encode (message : QualityMarketMakerNotification) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option (QualityMarketMakerNotification × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (auctionId, bytes) ← Alpha.decode 6 bytes
+  let (auctionIdOptional, bytes) ← Alpha.decode 6 bytes
   let (verb, bytes) ← Verb.decode bytes
   let (auctionQuantity, bytes) ← Alpha.decode 8 bytes
   let (auctionPrice, bytes) ← Alpha.decode 10 bytes
   let (quoteQuantity, bytes) ← Alpha.decode 8 bytes
   let (quotePrice, bytes) ← Alpha.decode 10 bytes
   let (qualifiedQuantity, bytes) ← Alpha.decode 8 bytes
-  pure ({ group, instrument, traderId, auctionId, verb, auctionQuantity, auctionPrice, quoteQuantity, quotePrice, qualifiedQuantity }, bytes)
+  pure ({ group, instrumentOptional, traderId, auctionIdOptional, verb, auctionQuantity, auctionPrice, quoteQuantity, quotePrice, qualifiedQuantity }, bytes)
 
 @[simp] theorem encode_length (message : QualityMarketMakerNotification) : (encode message).length = 65 := by
   unfold encode
@@ -3188,9 +3188,9 @@ end QualityMarketMakerNotification
 /-- Execution Notice: 240 bytes -/
 structure ExecutionNotice where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
-  referenceIdOrderIdOrQuoteId : Alpha 8
+  referenceId : Alpha 8
   verbSide : VerbSide
   quantityTraded : Alpha 8
   tradePrice : Alpha 10
@@ -3200,25 +3200,25 @@ structure ExecutionNotice where
   specialTradeIndicator : SpecialTradeIndicator
   priceType : PriceType
   tradeType : TradeType
-  auctionId : Alpha 6
+  auctionIdOptional : Alpha 6
   tradeNumber : Alpha 8
-  tradeMemoTradeMemo50 : Alpha 50
-  originalReferenceIdOriginalReferenceId8 : Alpha 8
+  tradeMemo : Alpha 50
+  originalReferenceId : Alpha 8
   idCodeForTheCounterpartParticipant : Alpha 4
   liquidityStatus : LiquidityStatus
   counterpartAccountType : CounterpartAccountType
   additionalClientMemo : Alpha 16
-  fillerMustBeBlankString11 : Alpha 1
-  fillerZeroFilled : Alpha 4
+  fillerX1 : Alpha 1
+  filler2X4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace ExecutionNotice
 
 def encode (message : ExecutionNotice) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.referenceIdOrderIdOrQuoteId
+    ++ (Alpha.encode message.referenceId
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantityTraded
     ++ (Alpha.encode message.tradePrice
@@ -3228,22 +3228,22 @@ def encode (message : ExecutionNotice) : List UInt8 :=
     ++ (SpecialTradeIndicator.encode message.specialTradeIndicator
     ++ (PriceType.encode message.priceType
     ++ (TradeType.encode message.tradeType
-    ++ (Alpha.encode message.auctionId
+    ++ (Alpha.encode message.auctionIdOptional
     ++ (Alpha.encode message.tradeNumber
-    ++ (Alpha.encode message.tradeMemoTradeMemo50
-    ++ (Alpha.encode message.originalReferenceIdOriginalReferenceId8
+    ++ (Alpha.encode message.tradeMemo
+    ++ (Alpha.encode message.originalReferenceId
     ++ (Alpha.encode message.idCodeForTheCounterpartParticipant
     ++ (LiquidityStatus.encode message.liquidityStatus
     ++ (CounterpartAccountType.encode message.counterpartAccountType
     ++ (Alpha.encode message.additionalClientMemo
-    ++ (Alpha.encode message.fillerMustBeBlankString11
-    ++ (Alpha.encode message.fillerZeroFilled))))))))))))))))))))))
+    ++ (Alpha.encode message.fillerX1
+    ++ (Alpha.encode message.filler2X4))))))))))))))))))))))
 
 def decode (bytes : List UInt8) : Option (ExecutionNotice × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (referenceIdOrderIdOrQuoteId, bytes) ← Alpha.decode 8 bytes
+  let (referenceId, bytes) ← Alpha.decode 8 bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantityTraded, bytes) ← Alpha.decode 8 bytes
   let (tradePrice, bytes) ← Alpha.decode 10 bytes
@@ -3253,17 +3253,17 @@ def decode (bytes : List UInt8) : Option (ExecutionNotice × List UInt8) := do
   let (specialTradeIndicator, bytes) ← SpecialTradeIndicator.decode bytes
   let (priceType, bytes) ← PriceType.decode bytes
   let (tradeType, bytes) ← TradeType.decode bytes
-  let (auctionId, bytes) ← Alpha.decode 6 bytes
+  let (auctionIdOptional, bytes) ← Alpha.decode 6 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
-  let (tradeMemoTradeMemo50, bytes) ← Alpha.decode 50 bytes
-  let (originalReferenceIdOriginalReferenceId8, bytes) ← Alpha.decode 8 bytes
+  let (tradeMemo, bytes) ← Alpha.decode 50 bytes
+  let (originalReferenceId, bytes) ← Alpha.decode 8 bytes
   let (idCodeForTheCounterpartParticipant, bytes) ← Alpha.decode 4 bytes
   let (liquidityStatus, bytes) ← LiquidityStatus.decode bytes
   let (counterpartAccountType, bytes) ← CounterpartAccountType.decode bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  let (fillerMustBeBlankString11, bytes) ← Alpha.decode 1 bytes
-  let (fillerZeroFilled, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, instrument, traderId, referenceIdOrderIdOrQuoteId, verbSide, quantityTraded, tradePrice, timeOfTheTradeHhmmss, clearingData, ownerData, specialTradeIndicator, priceType, tradeType, auctionId, tradeNumber, tradeMemoTradeMemo50, originalReferenceIdOriginalReferenceId8, idCodeForTheCounterpartParticipant, liquidityStatus, counterpartAccountType, additionalClientMemo, fillerMustBeBlankString11, fillerZeroFilled }, bytes)
+  let (fillerX1, bytes) ← Alpha.decode 1 bytes
+  let (filler2X4, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, instrumentOptional, traderId, referenceId, verbSide, quantityTraded, tradePrice, timeOfTheTradeHhmmss, clearingData, ownerData, specialTradeIndicator, priceType, tradeType, auctionIdOptional, tradeNumber, tradeMemo, originalReferenceId, idCodeForTheCounterpartParticipant, liquidityStatus, counterpartAccountType, additionalClientMemo, fillerX1, filler2X4 }, bytes)
 
 @[simp] theorem encode_length (message : ExecutionNotice) : (encode message).length = 240 := by
   unfold encode
@@ -3328,7 +3328,7 @@ end ExecutionNotice
 /-- Quote Notice: 75 bytes -/
 structure QuoteNotice where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
   referenceIdQuote : Alpha 8
   verbSide : VerbSide
@@ -3338,7 +3338,7 @@ structure QuoteNotice where
   newPrice : Alpha 10
   previousQuantity : Alpha 8
   previousPrice : Alpha 10
-  auctionId : Alpha 6
+  auctionIdOptional : Alpha 6
   originalReferenceIdQuoteOrOrderId : Alpha 8
   deriving DecidableEq, Repr
 
@@ -3346,7 +3346,7 @@ namespace QuoteNotice
 
 def encode (message : QuoteNotice) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
     ++ (Alpha.encode message.referenceIdQuote
     ++ (VerbSide.encode message.verbSide
@@ -3356,12 +3356,12 @@ def encode (message : QuoteNotice) : List UInt8 :=
     ++ (Alpha.encode message.newPrice
     ++ (Alpha.encode message.previousQuantity
     ++ (Alpha.encode message.previousPrice
-    ++ (Alpha.encode message.auctionId
+    ++ (Alpha.encode message.auctionIdOptional
     ++ (Alpha.encode message.originalReferenceIdQuoteOrOrderId))))))))))))
 
 def decode (bytes : List UInt8) : Option (QuoteNotice × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
   let (referenceIdQuote, bytes) ← Alpha.decode 8 bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
@@ -3371,9 +3371,9 @@ def decode (bytes : List UInt8) : Option (QuoteNotice × List UInt8) := do
   let (newPrice, bytes) ← Alpha.decode 10 bytes
   let (previousQuantity, bytes) ← Alpha.decode 8 bytes
   let (previousPrice, bytes) ← Alpha.decode 10 bytes
-  let (auctionId, bytes) ← Alpha.decode 6 bytes
+  let (auctionIdOptional, bytes) ← Alpha.decode 6 bytes
   let (originalReferenceIdQuoteOrOrderId, bytes) ← Alpha.decode 8 bytes
-  pure ({ group, instrument, traderId, referenceIdQuote, verbSide, orderType, action, newQuantity, newPrice, previousQuantity, previousPrice, auctionId, originalReferenceIdQuoteOrOrderId }, bytes)
+  pure ({ group, instrumentOptional, traderId, referenceIdQuote, verbSide, orderType, action, newQuantity, newPrice, previousQuantity, previousPrice, auctionIdOptional, originalReferenceIdQuoteOrOrderId }, bytes)
 
 @[simp] theorem encode_length (message : QuoteNotice) : (encode message).length = 75 := by
   unfold encode
@@ -3418,9 +3418,9 @@ end QuoteNotice
 /-- Execution Cancellation Notice: 240 bytes -/
 structure ExecutionCancellationNotice where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
-  referenceIdOrderIdOrQuoteId : Alpha 8
+  referenceId : Alpha 8
   verbSide : VerbSide
   quantityTraded : Alpha 8
   tradePrice : Alpha 10
@@ -3430,25 +3430,25 @@ structure ExecutionCancellationNotice where
   specialTradeIndicator : SpecialTradeIndicator
   priceType : PriceType
   tradeType : TradeType
-  auctionId : Alpha 6
+  auctionIdOptional : Alpha 6
   tradeNumber : Alpha 8
-  tradeMemoTradeMemo50 : Alpha 50
-  originalReferenceIdOriginalReferenceId8 : Alpha 8
+  tradeMemo : Alpha 50
+  originalReferenceId : Alpha 8
   idCodeForTheCounterpartParticipant : Alpha 4
   liquidityStatus : LiquidityStatus
   counterpartAccountType : CounterpartAccountType
   additionalClientMemo : Alpha 16
-  fillerMustBeBlankString11 : Alpha 1
-  fillerZeroFilled : Alpha 4
+  fillerX1 : Alpha 1
+  filler2X4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace ExecutionCancellationNotice
 
 def encode (message : ExecutionCancellationNotice) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.referenceIdOrderIdOrQuoteId
+    ++ (Alpha.encode message.referenceId
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantityTraded
     ++ (Alpha.encode message.tradePrice
@@ -3458,22 +3458,22 @@ def encode (message : ExecutionCancellationNotice) : List UInt8 :=
     ++ (SpecialTradeIndicator.encode message.specialTradeIndicator
     ++ (PriceType.encode message.priceType
     ++ (TradeType.encode message.tradeType
-    ++ (Alpha.encode message.auctionId
+    ++ (Alpha.encode message.auctionIdOptional
     ++ (Alpha.encode message.tradeNumber
-    ++ (Alpha.encode message.tradeMemoTradeMemo50
-    ++ (Alpha.encode message.originalReferenceIdOriginalReferenceId8
+    ++ (Alpha.encode message.tradeMemo
+    ++ (Alpha.encode message.originalReferenceId
     ++ (Alpha.encode message.idCodeForTheCounterpartParticipant
     ++ (LiquidityStatus.encode message.liquidityStatus
     ++ (CounterpartAccountType.encode message.counterpartAccountType
     ++ (Alpha.encode message.additionalClientMemo
-    ++ (Alpha.encode message.fillerMustBeBlankString11
-    ++ (Alpha.encode message.fillerZeroFilled))))))))))))))))))))))
+    ++ (Alpha.encode message.fillerX1
+    ++ (Alpha.encode message.filler2X4))))))))))))))))))))))
 
 def decode (bytes : List UInt8) : Option (ExecutionCancellationNotice × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (referenceIdOrderIdOrQuoteId, bytes) ← Alpha.decode 8 bytes
+  let (referenceId, bytes) ← Alpha.decode 8 bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantityTraded, bytes) ← Alpha.decode 8 bytes
   let (tradePrice, bytes) ← Alpha.decode 10 bytes
@@ -3483,17 +3483,17 @@ def decode (bytes : List UInt8) : Option (ExecutionCancellationNotice × List UI
   let (specialTradeIndicator, bytes) ← SpecialTradeIndicator.decode bytes
   let (priceType, bytes) ← PriceType.decode bytes
   let (tradeType, bytes) ← TradeType.decode bytes
-  let (auctionId, bytes) ← Alpha.decode 6 bytes
+  let (auctionIdOptional, bytes) ← Alpha.decode 6 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
-  let (tradeMemoTradeMemo50, bytes) ← Alpha.decode 50 bytes
-  let (originalReferenceIdOriginalReferenceId8, bytes) ← Alpha.decode 8 bytes
+  let (tradeMemo, bytes) ← Alpha.decode 50 bytes
+  let (originalReferenceId, bytes) ← Alpha.decode 8 bytes
   let (idCodeForTheCounterpartParticipant, bytes) ← Alpha.decode 4 bytes
   let (liquidityStatus, bytes) ← LiquidityStatus.decode bytes
   let (counterpartAccountType, bytes) ← CounterpartAccountType.decode bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  let (fillerMustBeBlankString11, bytes) ← Alpha.decode 1 bytes
-  let (fillerZeroFilled, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, instrument, traderId, referenceIdOrderIdOrQuoteId, verbSide, quantityTraded, tradePrice, timeOfTheTradeHhmmss, clearingData, ownerData, specialTradeIndicator, priceType, tradeType, auctionId, tradeNumber, tradeMemoTradeMemo50, originalReferenceIdOriginalReferenceId8, idCodeForTheCounterpartParticipant, liquidityStatus, counterpartAccountType, additionalClientMemo, fillerMustBeBlankString11, fillerZeroFilled }, bytes)
+  let (fillerX1, bytes) ← Alpha.decode 1 bytes
+  let (filler2X4, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, instrumentOptional, traderId, referenceId, verbSide, quantityTraded, tradePrice, timeOfTheTradeHhmmss, clearingData, ownerData, specialTradeIndicator, priceType, tradeType, auctionIdOptional, tradeNumber, tradeMemo, originalReferenceId, idCodeForTheCounterpartParticipant, liquidityStatus, counterpartAccountType, additionalClientMemo, fillerX1, filler2X4 }, bytes)
 
 @[simp] theorem encode_length (message : ExecutionCancellationNotice) : (encode message).length = 240 := by
   unfold encode
@@ -3558,7 +3558,7 @@ end ExecutionCancellationNotice
 /-- Leg Execution Cancellation Notice: 257 bytes -/
 structure LegExecutionCancellationNotice where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
   referenceId : Alpha 8
   verbSide : VerbSide
@@ -3570,10 +3570,10 @@ structure LegExecutionCancellationNotice where
   specialTradeIndicator : SpecialTradeIndicator
   priceType : PriceType
   tradeType : TradeType
-  auctionId : Alpha 6
+  auctionIdOptional : Alpha 6
   tradeNumber : Alpha 8
-  tradeMemoString5050 : Alpha 50
-  originalReferenceIdOrderId8 : Alpha 8
+  tradeMemo : Alpha 50
+  originalReferenceId : Alpha 8
   idCodeForTheCounterpartParticipant : Alpha 4
   liquidityStatus : LiquidityStatus
   strategyGroup : Alpha 2
@@ -3583,15 +3583,15 @@ structure LegExecutionCancellationNotice where
   legNumber : Alpha 2
   counterpartAccountType : CounterpartAccountType
   additionalClientMemo : Alpha 16
-  fillerMustBeBlankString11 : Alpha 1
-  fillerZeroFilled : Alpha 4
+  fillerX1 : Alpha 1
+  filler2X4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace LegExecutionCancellationNotice
 
 def encode (message : LegExecutionCancellationNotice) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
     ++ (Alpha.encode message.referenceId
     ++ (VerbSide.encode message.verbSide
@@ -3603,10 +3603,10 @@ def encode (message : LegExecutionCancellationNotice) : List UInt8 :=
     ++ (SpecialTradeIndicator.encode message.specialTradeIndicator
     ++ (PriceType.encode message.priceType
     ++ (TradeType.encode message.tradeType
-    ++ (Alpha.encode message.auctionId
+    ++ (Alpha.encode message.auctionIdOptional
     ++ (Alpha.encode message.tradeNumber
-    ++ (Alpha.encode message.tradeMemoString5050
-    ++ (Alpha.encode message.originalReferenceIdOrderId8
+    ++ (Alpha.encode message.tradeMemo
+    ++ (Alpha.encode message.originalReferenceId
     ++ (Alpha.encode message.idCodeForTheCounterpartParticipant
     ++ (LiquidityStatus.encode message.liquidityStatus
     ++ (Alpha.encode message.strategyGroup
@@ -3616,14 +3616,14 @@ def encode (message : LegExecutionCancellationNotice) : List UInt8 :=
     ++ (Alpha.encode message.legNumber
     ++ (CounterpartAccountType.encode message.counterpartAccountType
     ++ (Alpha.encode message.additionalClientMemo
-    ++ (Alpha.encode message.fillerMustBeBlankString11
-    ++ (Alpha.encode message.fillerZeroFilled)))))))))))))))))))))))))))
+    ++ (Alpha.encode message.fillerX1
+    ++ (Alpha.encode message.filler2X4)))))))))))))))))))))))))))
 
 -- a long run of fields nests deeper than the elaborator's default limit
 set_option maxRecDepth 4096 in
 def decode (bytes : List UInt8) : Option (LegExecutionCancellationNotice × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
   let (referenceId, bytes) ← Alpha.decode 8 bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
@@ -3635,10 +3635,10 @@ def decode (bytes : List UInt8) : Option (LegExecutionCancellationNotice × List
   let (specialTradeIndicator, bytes) ← SpecialTradeIndicator.decode bytes
   let (priceType, bytes) ← PriceType.decode bytes
   let (tradeType, bytes) ← TradeType.decode bytes
-  let (auctionId, bytes) ← Alpha.decode 6 bytes
+  let (auctionIdOptional, bytes) ← Alpha.decode 6 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
-  let (tradeMemoString5050, bytes) ← Alpha.decode 50 bytes
-  let (originalReferenceIdOrderId8, bytes) ← Alpha.decode 8 bytes
+  let (tradeMemo, bytes) ← Alpha.decode 50 bytes
+  let (originalReferenceId, bytes) ← Alpha.decode 8 bytes
   let (idCodeForTheCounterpartParticipant, bytes) ← Alpha.decode 4 bytes
   let (liquidityStatus, bytes) ← LiquidityStatus.decode bytes
   let (strategyGroup, bytes) ← Alpha.decode 2 bytes
@@ -3648,9 +3648,9 @@ def decode (bytes : List UInt8) : Option (LegExecutionCancellationNotice × List
   let (legNumber, bytes) ← Alpha.decode 2 bytes
   let (counterpartAccountType, bytes) ← CounterpartAccountType.decode bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  let (fillerMustBeBlankString11, bytes) ← Alpha.decode 1 bytes
-  let (fillerZeroFilled, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, instrument, traderId, referenceId, verbSide, quantityTraded, tradePrice, timeTradeHhmmss, clearingData, ownerData, specialTradeIndicator, priceType, tradeType, auctionId, tradeNumber, tradeMemoString5050, originalReferenceIdOrderId8, idCodeForTheCounterpartParticipant, liquidityStatus, strategyGroup, strategyInstrumentId, strategyVerbSide, strategyTradeNumber, legNumber, counterpartAccountType, additionalClientMemo, fillerMustBeBlankString11, fillerZeroFilled }, bytes)
+  let (fillerX1, bytes) ← Alpha.decode 1 bytes
+  let (filler2X4, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, instrumentOptional, traderId, referenceId, verbSide, quantityTraded, tradePrice, timeTradeHhmmss, clearingData, ownerData, specialTradeIndicator, priceType, tradeType, auctionIdOptional, tradeNumber, tradeMemo, originalReferenceId, idCodeForTheCounterpartParticipant, liquidityStatus, strategyGroup, strategyInstrumentId, strategyVerbSide, strategyTradeNumber, legNumber, counterpartAccountType, additionalClientMemo, fillerX1, filler2X4 }, bytes)
 
 @[simp] theorem encode_length (message : LegExecutionCancellationNotice) : (encode message).length = 257 := by
   unfold encode
@@ -3726,9 +3726,9 @@ end LegExecutionCancellationNotice
 /-- Order Cancellation Notice By System: 167 bytes -/
 structure OrderCancellationNoticeBySystem where
   group : Alpha 2
-  instrument : Alpha 4
+  instrumentOptional : Alpha 4
   traderId : Alpha 8
-  orderIdOrderId8 : Alpha 8
+  orderIdX8 : Alpha 8
   status : Status
   verbSide : VerbSide
   quantity : Alpha 8
@@ -3736,18 +3736,18 @@ structure OrderCancellationNoticeBySystem where
   clearingData : ClearingData
   ownerData : OwnerData
   originalOrderId : Alpha 8
-  auctionIdOnlyIfMessageTypeIsKiOrElseZeroes : Alpha 6
+  auctionId : Alpha 6
   additionalClientMemo : Alpha 16
-  fillerMustBeBlankString44 : Alpha 4
+  fillerX4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace OrderCancellationNoticeBySystem
 
 def encode (message : OrderCancellationNoticeBySystem) : List UInt8 :=
   Alpha.encode message.group
-    ++ (Alpha.encode message.instrument
+    ++ (Alpha.encode message.instrumentOptional
     ++ (Alpha.encode message.traderId
-    ++ (Alpha.encode message.orderIdOrderId8
+    ++ (Alpha.encode message.orderIdX8
     ++ (Status.encode message.status
     ++ (VerbSide.encode message.verbSide
     ++ (Alpha.encode message.quantity
@@ -3755,15 +3755,15 @@ def encode (message : OrderCancellationNoticeBySystem) : List UInt8 :=
     ++ (ClearingData.encode message.clearingData
     ++ (OwnerData.encode message.ownerData
     ++ (Alpha.encode message.originalOrderId
-    ++ (Alpha.encode message.auctionIdOnlyIfMessageTypeIsKiOrElseZeroes
+    ++ (Alpha.encode message.auctionId
     ++ (Alpha.encode message.additionalClientMemo
-    ++ (Alpha.encode message.fillerMustBeBlankString44)))))))))))))
+    ++ (Alpha.encode message.fillerX4)))))))))))))
 
 def decode (bytes : List UInt8) : Option (OrderCancellationNoticeBySystem × List UInt8) := do
   let (group, bytes) ← Alpha.decode 2 bytes
-  let (instrument, bytes) ← Alpha.decode 4 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
   let (traderId, bytes) ← Alpha.decode 8 bytes
-  let (orderIdOrderId8, bytes) ← Alpha.decode 8 bytes
+  let (orderIdX8, bytes) ← Alpha.decode 8 bytes
   let (status, bytes) ← Status.decode bytes
   let (verbSide, bytes) ← VerbSide.decode bytes
   let (quantity, bytes) ← Alpha.decode 8 bytes
@@ -3771,10 +3771,10 @@ def decode (bytes : List UInt8) : Option (OrderCancellationNoticeBySystem × Lis
   let (clearingData, bytes) ← ClearingData.decode bytes
   let (ownerData, bytes) ← OwnerData.decode bytes
   let (originalOrderId, bytes) ← Alpha.decode 8 bytes
-  let (auctionIdOnlyIfMessageTypeIsKiOrElseZeroes, bytes) ← Alpha.decode 6 bytes
+  let (auctionId, bytes) ← Alpha.decode 6 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  let (fillerMustBeBlankString44, bytes) ← Alpha.decode 4 bytes
-  pure ({ group, instrument, traderId, orderIdOrderId8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, auctionIdOnlyIfMessageTypeIsKiOrElseZeroes, additionalClientMemo, fillerMustBeBlankString44 }, bytes)
+  let (fillerX4, bytes) ← Alpha.decode 4 bytes
+  pure ({ group, instrumentOptional, traderId, orderIdX8, status, verbSide, quantity, assignedPrice, clearingData, ownerData, originalOrderId, auctionId, additionalClientMemo, fillerX4 }, bytes)
 
 @[simp] theorem encode_length (message : OrderCancellationNoticeBySystem) : (encode message).length = 167 := by
   unfold encode

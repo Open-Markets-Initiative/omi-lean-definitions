@@ -140,13 +140,13 @@ end LogonRequestPacket
 
 /-- Limit Order Message -/
 structure LimitOrderMessage where
-  limitOrderPresenceBits : Masked 32 8190
+  limitOrderPresenceBits : Masked 32 8191
   clOrdId : BitVec 64
   orderQty : BitVec 32
   limitOrderBitFields : BitVec 32
   symbolId : BitVec 16
   price : BitVec 64
-  selfMatchScope : BitVec 8
+  limitOrderSelfMatchScope : Option (BitVec 8)
   limitOrderSelfMatchInstruction : Option (BitVec 8)
   limitOrderPriceSlideInstruction : Option (BitVec 8)
   limitOrderMinQty : Option (BitVec 32)
@@ -164,13 +164,13 @@ structure LimitOrderMessage where
 namespace LimitOrderMessage
 
 def encode (message : LimitOrderMessage) : List UInt8 :=
-  encodeUIntLE 4 (message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome)
+  encodeUIntLE 4 (message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome)
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 4 message.orderQty
     ++ (encodeUIntLE 4 message.limitOrderBitFields
     ++ (encodeUIntLE 2 message.symbolId
     ++ (encodeUIntLE 8 message.price
-    ++ (encodeUIntLE 1 message.selfMatchScope
+    ++ (encodeOptional (encodeUIntLE 1) message.limitOrderSelfMatchScope
     ++ (encodeOptional (encodeUIntLE 1) message.limitOrderSelfMatchInstruction
     ++ (encodeOptional (encodeUIntLE 1) message.limitOrderPriceSlideInstruction
     ++ (encodeOptional (encodeUIntLE 4) message.limitOrderMinQty
@@ -191,7 +191,7 @@ def decode (bytes : List UInt8) : Option (LimitOrderMessage × List UInt8) := do
   let (limitOrderBitFields, bytes) ← decodeUIntLE 4 bytes
   let (symbolId, bytes) ← decodeUIntLE 2 bytes
   let (price, bytes) ← decodeUIntLE 8 bytes
-  let (selfMatchScope, bytes) ← decodeUIntLE 1 bytes
+  let (limitOrderSelfMatchScope, bytes) ← decodeOptional (decodeUIntLE 1) (limitOrderPresenceBits_ &&& 1 != 0) bytes
   let (limitOrderSelfMatchInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (limitOrderPresenceBits_ &&& 2 != 0) bytes
   let (limitOrderPriceSlideInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (limitOrderPresenceBits_ &&& 4 != 0) bytes
   let (limitOrderMinQty, bytes) ← decodeOptional (decodeUIntLE 4) (limitOrderPresenceBits_ &&& 8 != 0) bytes
@@ -204,8 +204,8 @@ def decode (bytes : List UInt8) : Option (LimitOrderMessage × List UInt8) := do
   let (limitOrderMpid, bytes) ← decodeOptional (Alpha.decode 4) (limitOrderPresenceBits_ &&& 1024 != 0) bytes
   let (limitOrderMemberGroup, bytes) ← decodeOptional (Alpha.decode 2) (limitOrderPresenceBits_ &&& 2048 != 0) bytes
   let (limitOrderLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (limitOrderPresenceBits_ &&& 4096 != 0) bytes
-  if fits_limitOrderPresenceBits : (limitOrderPresenceBits_ &&& 4294959105) &&& 8190 = 0 then
-    pure ({ limitOrderPresenceBits := ⟨limitOrderPresenceBits_ &&& 4294959105, fits_limitOrderPresenceBits⟩, clOrdId, orderQty, limitOrderBitFields, symbolId, price, selfMatchScope, limitOrderSelfMatchInstruction, limitOrderPriceSlideInstruction, limitOrderMinQty, limitOrderMaxFloorQty, limitOrderMaxReplenishQtyRange, limitOrderMaxReplenishTimeRange, limitOrderReferencePriceTarget, limitOrderExpireTime, limitOrderUserData, limitOrderMpid, limitOrderMemberGroup, limitOrderLocateBroker }, bytes)
+  if fits_limitOrderPresenceBits : (limitOrderPresenceBits_ &&& 4294959104) &&& 8191 = 0 then
+    pure ({ limitOrderPresenceBits := ⟨limitOrderPresenceBits_ &&& 4294959104, fits_limitOrderPresenceBits⟩, clOrdId, orderQty, limitOrderBitFields, symbolId, price, limitOrderSelfMatchScope, limitOrderSelfMatchInstruction, limitOrderPriceSlideInstruction, limitOrderMinQty, limitOrderMaxFloorQty, limitOrderMaxReplenishQtyRange, limitOrderMaxReplenishTimeRange, limitOrderReferencePriceTarget, limitOrderExpireTime, limitOrderUserData, limitOrderMpid, limitOrderMemberGroup, limitOrderLocateBroker }, bytes)
   else none
 
 theorem encode_length_pos (message : LimitOrderMessage) : (encode message).length > 0 := by
@@ -216,55 +216,59 @@ theorem encode_length_pos (message : LimitOrderMessage) : (encode message).lengt
 @[simp] theorem decode_encode (message : LimitOrderMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_limitOrderSelfMatchInstruction : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 2 != 0) = message.limitOrderSelfMatchInstruction.isSome := by
+  have selected_limitOrderSelfMatchScope : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 1 != 0) = message.limitOrderSelfMatchScope.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderPriceSlideInstruction : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 4 != 0) = message.limitOrderPriceSlideInstruction.isSome := by
+  have selected_limitOrderSelfMatchInstruction : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 2 != 0) = message.limitOrderSelfMatchInstruction.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderMinQty : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 8 != 0) = message.limitOrderMinQty.isSome := by
+  have selected_limitOrderPriceSlideInstruction : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 4 != 0) = message.limitOrderPriceSlideInstruction.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderMaxFloorQty : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 16 != 0) = message.limitOrderMaxFloorQty.isSome := by
+  have selected_limitOrderMinQty : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 8 != 0) = message.limitOrderMinQty.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderMaxReplenishQtyRange : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 32 != 0) = message.limitOrderMaxReplenishQtyRange.isSome := by
+  have selected_limitOrderMaxFloorQty : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 16 != 0) = message.limitOrderMaxFloorQty.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderMaxReplenishTimeRange : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 64 != 0) = message.limitOrderMaxReplenishTimeRange.isSome := by
+  have selected_limitOrderMaxReplenishQtyRange : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 32 != 0) = message.limitOrderMaxReplenishQtyRange.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderReferencePriceTarget : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 128 != 0) = message.limitOrderReferencePriceTarget.isSome := by
+  have selected_limitOrderMaxReplenishTimeRange : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 64 != 0) = message.limitOrderMaxReplenishTimeRange.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderExpireTime : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 256 != 0) = message.limitOrderExpireTime.isSome := by
+  have selected_limitOrderReferencePriceTarget : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 128 != 0) = message.limitOrderReferencePriceTarget.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderUserData : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 512 != 0) = message.limitOrderUserData.isSome := by
+  have selected_limitOrderExpireTime : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 256 != 0) = message.limitOrderExpireTime.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderMpid : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 1024 != 0) = message.limitOrderMpid.isSome := by
+  have selected_limitOrderUserData : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 512 != 0) = message.limitOrderUserData.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderMemberGroup : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 2048 != 0) = message.limitOrderMemberGroup.isSome := by
+  have selected_limitOrderMpid : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 1024 != 0) = message.limitOrderMpid.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderLocateBroker : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 4096 != 0) = message.limitOrderLocateBroker.isSome := by
+  have selected_limitOrderMemberGroup : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 2048 != 0) = message.limitOrderMemberGroup.isSome := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_limitOrderPresenceBits : (message.limitOrderPresenceBits.val ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 4294959105 = message.limitOrderPresenceBits.val := by
+  have selected_limitOrderLocateBroker : ((message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 4096 != 0) = message.limitOrderLocateBroker.isSome := by
+    have clear := message.limitOrderPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_limitOrderPresenceBits : (message.limitOrderPresenceBits.val ||| presence (n := 32) 1 message.limitOrderSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderMinQty.isSome ||| presence (n := 32) 16 message.limitOrderMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderUserData.isSome ||| presence (n := 32) 1024 message.limitOrderMpid.isSome ||| presence (n := 32) 2048 message.limitOrderMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderLocateBroker.isSome) &&& 4294959104 = message.limitOrderPresenceBits.val := by
     have clear := message.limitOrderPresenceBits.property
     simp only [presence]
     bv_decide
@@ -280,7 +284,8 @@ theorem encode_length_pos (message : LimitOrderMessage) : (encode message).lengt
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_limitOrderSelfMatchScope]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_limitOrderSelfMatchInstruction]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
@@ -326,12 +331,12 @@ end LimitOrderMessage
 
 /-- Market Order Message -/
 structure MarketOrderMessage where
-  marketOrderPresenceBits : Masked 16 62
+  marketOrderPresenceBits : Masked 16 63
   clOrdId : BitVec 64
   orderQty : BitVec 32
   marketOrderBitFields : BitVec 16
   symbolId : BitVec 16
-  selfMatchScope : BitVec 8
+  marketOrderSelfMatchScope : Option (BitVec 8)
   marketOrderSelfMatchInstruction : Option (BitVec 8)
   marketOrderUserData : Option (BitVec 64)
   marketOrderMpid : Option (Alpha 4)
@@ -342,12 +347,12 @@ structure MarketOrderMessage where
 namespace MarketOrderMessage
 
 def encode (message : MarketOrderMessage) : List UInt8 :=
-  encodeUIntLE 2 (message.marketOrderPresenceBits.val ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome)
+  encodeUIntLE 2 (message.marketOrderPresenceBits.val ||| presence (n := 16) 1 message.marketOrderSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome)
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 4 message.orderQty
     ++ (encodeUIntLE 2 message.marketOrderBitFields
     ++ (encodeUIntLE 2 message.symbolId
-    ++ (encodeUIntLE 1 message.selfMatchScope
+    ++ (encodeOptional (encodeUIntLE 1) message.marketOrderSelfMatchScope
     ++ (encodeOptional (encodeUIntLE 1) message.marketOrderSelfMatchInstruction
     ++ (encodeOptional (encodeUIntLE 8) message.marketOrderUserData
     ++ (encodeOptional (Alpha.encode) message.marketOrderMpid
@@ -360,14 +365,14 @@ def decode (bytes : List UInt8) : Option (MarketOrderMessage × List UInt8) := d
   let (orderQty, bytes) ← decodeUIntLE 4 bytes
   let (marketOrderBitFields, bytes) ← decodeUIntLE 2 bytes
   let (symbolId, bytes) ← decodeUIntLE 2 bytes
-  let (selfMatchScope, bytes) ← decodeUIntLE 1 bytes
+  let (marketOrderSelfMatchScope, bytes) ← decodeOptional (decodeUIntLE 1) (marketOrderPresenceBits_ &&& 1 != 0) bytes
   let (marketOrderSelfMatchInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (marketOrderPresenceBits_ &&& 2 != 0) bytes
   let (marketOrderUserData, bytes) ← decodeOptional (decodeUIntLE 8) (marketOrderPresenceBits_ &&& 4 != 0) bytes
   let (marketOrderMpid, bytes) ← decodeOptional (Alpha.decode 4) (marketOrderPresenceBits_ &&& 8 != 0) bytes
   let (marketOrderMemberGroup, bytes) ← decodeOptional (Alpha.decode 2) (marketOrderPresenceBits_ &&& 16 != 0) bytes
   let (marketOrderLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (marketOrderPresenceBits_ &&& 32 != 0) bytes
-  if fits_marketOrderPresenceBits : (marketOrderPresenceBits_ &&& 65473) &&& 62 = 0 then
-    pure ({ marketOrderPresenceBits := ⟨marketOrderPresenceBits_ &&& 65473, fits_marketOrderPresenceBits⟩, clOrdId, orderQty, marketOrderBitFields, symbolId, selfMatchScope, marketOrderSelfMatchInstruction, marketOrderUserData, marketOrderMpid, marketOrderMemberGroup, marketOrderLocateBroker }, bytes)
+  if fits_marketOrderPresenceBits : (marketOrderPresenceBits_ &&& 65472) &&& 63 = 0 then
+    pure ({ marketOrderPresenceBits := ⟨marketOrderPresenceBits_ &&& 65472, fits_marketOrderPresenceBits⟩, clOrdId, orderQty, marketOrderBitFields, symbolId, marketOrderSelfMatchScope, marketOrderSelfMatchInstruction, marketOrderUserData, marketOrderMpid, marketOrderMemberGroup, marketOrderLocateBroker }, bytes)
   else none
 
 theorem encode_length_pos (message : MarketOrderMessage) : (encode message).length > 0 := by
@@ -378,27 +383,31 @@ theorem encode_length_pos (message : MarketOrderMessage) : (encode message).leng
 @[simp] theorem decode_encode (message : MarketOrderMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_marketOrderSelfMatchInstruction : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 2 != 0) = message.marketOrderSelfMatchInstruction.isSome := by
+  have selected_marketOrderSelfMatchScope : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 1 message.marketOrderSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 1 != 0) = message.marketOrderSelfMatchScope.isSome := by
     have clear := message.marketOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderUserData : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 4 != 0) = message.marketOrderUserData.isSome := by
+  have selected_marketOrderSelfMatchInstruction : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 1 message.marketOrderSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 2 != 0) = message.marketOrderSelfMatchInstruction.isSome := by
     have clear := message.marketOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderMpid : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 8 != 0) = message.marketOrderMpid.isSome := by
+  have selected_marketOrderUserData : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 1 message.marketOrderSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 4 != 0) = message.marketOrderUserData.isSome := by
     have clear := message.marketOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderMemberGroup : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 16 != 0) = message.marketOrderMemberGroup.isSome := by
+  have selected_marketOrderMpid : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 1 message.marketOrderSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 8 != 0) = message.marketOrderMpid.isSome := by
     have clear := message.marketOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderLocateBroker : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 32 != 0) = message.marketOrderLocateBroker.isSome := by
+  have selected_marketOrderMemberGroup : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 1 message.marketOrderSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 16 != 0) = message.marketOrderMemberGroup.isSome := by
     have clear := message.marketOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_marketOrderPresenceBits : (message.marketOrderPresenceBits.val ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 65473 = message.marketOrderPresenceBits.val := by
+  have selected_marketOrderLocateBroker : ((message.marketOrderPresenceBits.val ||| presence (n := 16) 1 message.marketOrderSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 32 != 0) = message.marketOrderLocateBroker.isSome := by
+    have clear := message.marketOrderPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_marketOrderPresenceBits : (message.marketOrderPresenceBits.val ||| presence (n := 16) 1 message.marketOrderSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderUserData.isSome ||| presence (n := 16) 8 message.marketOrderMpid.isSome ||| presence (n := 16) 16 message.marketOrderMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderLocateBroker.isSome) &&& 65472 = message.marketOrderPresenceBits.val := by
     have clear := message.marketOrderPresenceBits.property
     simp only [presence]
     bv_decide
@@ -412,7 +421,8 @@ theorem encode_length_pos (message : MarketOrderMessage) : (encode message).leng
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_marketOrderSelfMatchScope]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_marketOrderSelfMatchInstruction]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
@@ -467,22 +477,22 @@ end CancelOrderMessage
 
 /-- Modify Order Message -/
 structure ModifyOrderMessage where
-  modifyOrderPresenceBits : Masked 8 5
+  modifyOrderPresenceBits : Masked 8 7
   clOrdId : BitVec 64
   origClOrdId : BitVec 64
   modifyOrderOrderQty : Option (BitVec 32)
-  modifyOrderBitFields : BitVec 8
+  modifyOrderBitFields : Option (BitVec 8)
   modifyOrderLocateBroker : Option (Alpha 4)
   deriving DecidableEq, Repr
 
 namespace ModifyOrderMessage
 
 def encode (message : ModifyOrderMessage) : List UInt8 :=
-  encodeUIntLE 1 (message.modifyOrderPresenceBits.val ||| presence (n := 8) 1 message.modifyOrderOrderQty.isSome ||| presence (n := 8) 4 message.modifyOrderLocateBroker.isSome)
+  encodeUIntLE 1 (message.modifyOrderPresenceBits.val ||| presence (n := 8) 1 message.modifyOrderOrderQty.isSome ||| presence (n := 8) 2 message.modifyOrderBitFields.isSome ||| presence (n := 8) 4 message.modifyOrderLocateBroker.isSome)
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 8 message.origClOrdId
     ++ (encodeOptional (encodeUIntLE 4) message.modifyOrderOrderQty
-    ++ (encodeUIntLE 1 message.modifyOrderBitFields
+    ++ (encodeOptional (encodeUIntLE 1) message.modifyOrderBitFields
     ++ (encodeOptional (Alpha.encode) message.modifyOrderLocateBroker)))))
 
 def decode (bytes : List UInt8) : Option (ModifyOrderMessage × List UInt8) := do
@@ -490,10 +500,10 @@ def decode (bytes : List UInt8) : Option (ModifyOrderMessage × List UInt8) := d
   let (clOrdId, bytes) ← decodeUIntLE 8 bytes
   let (origClOrdId, bytes) ← decodeUIntLE 8 bytes
   let (modifyOrderOrderQty, bytes) ← decodeOptional (decodeUIntLE 4) (modifyOrderPresenceBits_ &&& 1 != 0) bytes
-  let (modifyOrderBitFields, bytes) ← decodeUIntLE 1 bytes
+  let (modifyOrderBitFields, bytes) ← decodeOptional (decodeUIntLE 1) (modifyOrderPresenceBits_ &&& 2 != 0) bytes
   let (modifyOrderLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (modifyOrderPresenceBits_ &&& 4 != 0) bytes
-  if fits_modifyOrderPresenceBits : (modifyOrderPresenceBits_ &&& 250) &&& 5 = 0 then
-    pure ({ modifyOrderPresenceBits := ⟨modifyOrderPresenceBits_ &&& 250, fits_modifyOrderPresenceBits⟩, clOrdId, origClOrdId, modifyOrderOrderQty, modifyOrderBitFields, modifyOrderLocateBroker }, bytes)
+  if fits_modifyOrderPresenceBits : (modifyOrderPresenceBits_ &&& 248) &&& 7 = 0 then
+    pure ({ modifyOrderPresenceBits := ⟨modifyOrderPresenceBits_ &&& 248, fits_modifyOrderPresenceBits⟩, clOrdId, origClOrdId, modifyOrderOrderQty, modifyOrderBitFields, modifyOrderLocateBroker }, bytes)
   else none
 
 theorem encode_length_pos (message : ModifyOrderMessage) : (encode message).length > 0 := by
@@ -504,15 +514,19 @@ theorem encode_length_pos (message : ModifyOrderMessage) : (encode message).leng
 @[simp] theorem decode_encode (message : ModifyOrderMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_modifyOrderOrderQty : ((message.modifyOrderPresenceBits.val ||| presence (n := 8) 1 message.modifyOrderOrderQty.isSome ||| presence (n := 8) 4 message.modifyOrderLocateBroker.isSome) &&& 1 != 0) = message.modifyOrderOrderQty.isSome := by
+  have selected_modifyOrderOrderQty : ((message.modifyOrderPresenceBits.val ||| presence (n := 8) 1 message.modifyOrderOrderQty.isSome ||| presence (n := 8) 2 message.modifyOrderBitFields.isSome ||| presence (n := 8) 4 message.modifyOrderLocateBroker.isSome) &&& 1 != 0) = message.modifyOrderOrderQty.isSome := by
     have clear := message.modifyOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_modifyOrderLocateBroker : ((message.modifyOrderPresenceBits.val ||| presence (n := 8) 1 message.modifyOrderOrderQty.isSome ||| presence (n := 8) 4 message.modifyOrderLocateBroker.isSome) &&& 4 != 0) = message.modifyOrderLocateBroker.isSome := by
+  have selected_modifyOrderBitFields : ((message.modifyOrderPresenceBits.val ||| presence (n := 8) 1 message.modifyOrderOrderQty.isSome ||| presence (n := 8) 2 message.modifyOrderBitFields.isSome ||| presence (n := 8) 4 message.modifyOrderLocateBroker.isSome) &&& 2 != 0) = message.modifyOrderBitFields.isSome := by
     have clear := message.modifyOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_modifyOrderPresenceBits : (message.modifyOrderPresenceBits.val ||| presence (n := 8) 1 message.modifyOrderOrderQty.isSome ||| presence (n := 8) 4 message.modifyOrderLocateBroker.isSome) &&& 250 = message.modifyOrderPresenceBits.val := by
+  have selected_modifyOrderLocateBroker : ((message.modifyOrderPresenceBits.val ||| presence (n := 8) 1 message.modifyOrderOrderQty.isSome ||| presence (n := 8) 2 message.modifyOrderBitFields.isSome ||| presence (n := 8) 4 message.modifyOrderLocateBroker.isSome) &&& 4 != 0) = message.modifyOrderLocateBroker.isSome := by
+    have clear := message.modifyOrderPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_modifyOrderPresenceBits : (message.modifyOrderPresenceBits.val ||| presence (n := 8) 1 message.modifyOrderOrderQty.isSome ||| presence (n := 8) 2 message.modifyOrderBitFields.isSome ||| presence (n := 8) 4 message.modifyOrderLocateBroker.isSome) &&& 248 = message.modifyOrderPresenceBits.val := by
     have clear := message.modifyOrderPresenceBits.property
     simp only [presence]
     bv_decide
@@ -525,7 +539,8 @@ theorem encode_length_pos (message : ModifyOrderMessage) : (encode message).leng
   rw [selected_modifyOrderOrderQty]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 4) (decodeUIntLE 4) (decodeUIntLE_encodeUIntLE 4), some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_modifyOrderBitFields]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_modifyOrderLocateBroker]
   rw [decodeOptional_encodeOptional (Alpha.encode) (Alpha.decode 4) (Alpha.decode_encode), some_bind]
@@ -538,14 +553,14 @@ end ModifyOrderMessage
 
 /-- Replace Order Message -/
 structure ReplaceOrderMessage where
-  replaceOrderPresenceBits : Masked 16 247
+  replaceOrderPresenceBits : Masked 16 255
   clOrdId : BitVec 64
   origClOrdId : BitVec 64
   replaceOrderBitFields : BitVec 16
   replaceOrderPrice : Option (BitVec 64)
   replaceOrderOrderQty : Option (BitVec 32)
   replaceOrderMaxFloorQty : Option (BitVec 32)
-  selfMatchScope : BitVec 8
+  replaceOrderSelfMatchScope : Option (BitVec 8)
   replaceOrderSelfMatchInstruction : Option (BitVec 8)
   replaceOrderPriceSlideInstruction : Option (BitVec 8)
   replaceOrderReferencePriceTarget : Option (BitVec 16)
@@ -555,14 +570,14 @@ structure ReplaceOrderMessage where
 namespace ReplaceOrderMessage
 
 def encode (message : ReplaceOrderMessage) : List UInt8 :=
-  encodeUIntLE 2 (message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome)
+  encodeUIntLE 2 (message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceOrderSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome)
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 8 message.origClOrdId
     ++ (encodeUIntLE 2 message.replaceOrderBitFields
     ++ (encodeOptional (encodeUIntLE 8) message.replaceOrderPrice
     ++ (encodeOptional (encodeUIntLE 4) message.replaceOrderOrderQty
     ++ (encodeOptional (encodeUIntLE 4) message.replaceOrderMaxFloorQty
-    ++ (encodeUIntLE 1 message.selfMatchScope
+    ++ (encodeOptional (encodeUIntLE 1) message.replaceOrderSelfMatchScope
     ++ (encodeOptional (encodeUIntLE 1) message.replaceOrderSelfMatchInstruction
     ++ (encodeOptional (encodeUIntLE 1) message.replaceOrderPriceSlideInstruction
     ++ (encodeOptional (encodeUIntLE 2) message.replaceOrderReferencePriceTarget
@@ -576,13 +591,13 @@ def decode (bytes : List UInt8) : Option (ReplaceOrderMessage × List UInt8) := 
   let (replaceOrderPrice, bytes) ← decodeOptional (decodeUIntLE 8) (replaceOrderPresenceBits_ &&& 1 != 0) bytes
   let (replaceOrderOrderQty, bytes) ← decodeOptional (decodeUIntLE 4) (replaceOrderPresenceBits_ &&& 2 != 0) bytes
   let (replaceOrderMaxFloorQty, bytes) ← decodeOptional (decodeUIntLE 4) (replaceOrderPresenceBits_ &&& 4 != 0) bytes
-  let (selfMatchScope, bytes) ← decodeUIntLE 1 bytes
+  let (replaceOrderSelfMatchScope, bytes) ← decodeOptional (decodeUIntLE 1) (replaceOrderPresenceBits_ &&& 8 != 0) bytes
   let (replaceOrderSelfMatchInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (replaceOrderPresenceBits_ &&& 16 != 0) bytes
   let (replaceOrderPriceSlideInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (replaceOrderPresenceBits_ &&& 32 != 0) bytes
   let (replaceOrderReferencePriceTarget, bytes) ← decodeOptional (decodeUIntLE 2) (replaceOrderPresenceBits_ &&& 64 != 0) bytes
   let (replaceOrderLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (replaceOrderPresenceBits_ &&& 128 != 0) bytes
-  if fits_replaceOrderPresenceBits : (replaceOrderPresenceBits_ &&& 65288) &&& 247 = 0 then
-    pure ({ replaceOrderPresenceBits := ⟨replaceOrderPresenceBits_ &&& 65288, fits_replaceOrderPresenceBits⟩, clOrdId, origClOrdId, replaceOrderBitFields, replaceOrderPrice, replaceOrderOrderQty, replaceOrderMaxFloorQty, selfMatchScope, replaceOrderSelfMatchInstruction, replaceOrderPriceSlideInstruction, replaceOrderReferencePriceTarget, replaceOrderLocateBroker }, bytes)
+  if fits_replaceOrderPresenceBits : (replaceOrderPresenceBits_ &&& 65280) &&& 255 = 0 then
+    pure ({ replaceOrderPresenceBits := ⟨replaceOrderPresenceBits_ &&& 65280, fits_replaceOrderPresenceBits⟩, clOrdId, origClOrdId, replaceOrderBitFields, replaceOrderPrice, replaceOrderOrderQty, replaceOrderMaxFloorQty, replaceOrderSelfMatchScope, replaceOrderSelfMatchInstruction, replaceOrderPriceSlideInstruction, replaceOrderReferencePriceTarget, replaceOrderLocateBroker }, bytes)
   else none
 
 theorem encode_length_pos (message : ReplaceOrderMessage) : (encode message).length > 0 := by
@@ -593,35 +608,39 @@ theorem encode_length_pos (message : ReplaceOrderMessage) : (encode message).len
 @[simp] theorem decode_encode (message : ReplaceOrderMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_replaceOrderPrice : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 1 != 0) = message.replaceOrderPrice.isSome := by
+  have selected_replaceOrderPrice : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceOrderSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 1 != 0) = message.replaceOrderPrice.isSome := by
     have clear := message.replaceOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceOrderOrderQty : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 2 != 0) = message.replaceOrderOrderQty.isSome := by
+  have selected_replaceOrderOrderQty : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceOrderSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 2 != 0) = message.replaceOrderOrderQty.isSome := by
     have clear := message.replaceOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceOrderMaxFloorQty : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 4 != 0) = message.replaceOrderMaxFloorQty.isSome := by
+  have selected_replaceOrderMaxFloorQty : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceOrderSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 4 != 0) = message.replaceOrderMaxFloorQty.isSome := by
     have clear := message.replaceOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceOrderSelfMatchInstruction : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 16 != 0) = message.replaceOrderSelfMatchInstruction.isSome := by
+  have selected_replaceOrderSelfMatchScope : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceOrderSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 8 != 0) = message.replaceOrderSelfMatchScope.isSome := by
     have clear := message.replaceOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceOrderPriceSlideInstruction : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 32 != 0) = message.replaceOrderPriceSlideInstruction.isSome := by
+  have selected_replaceOrderSelfMatchInstruction : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceOrderSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 16 != 0) = message.replaceOrderSelfMatchInstruction.isSome := by
     have clear := message.replaceOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceOrderReferencePriceTarget : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 64 != 0) = message.replaceOrderReferencePriceTarget.isSome := by
+  have selected_replaceOrderPriceSlideInstruction : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceOrderSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 32 != 0) = message.replaceOrderPriceSlideInstruction.isSome := by
     have clear := message.replaceOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceOrderLocateBroker : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 128 != 0) = message.replaceOrderLocateBroker.isSome := by
+  have selected_replaceOrderReferencePriceTarget : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceOrderSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 64 != 0) = message.replaceOrderReferencePriceTarget.isSome := by
     have clear := message.replaceOrderPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_replaceOrderPresenceBits : (message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 65288 = message.replaceOrderPresenceBits.val := by
+  have selected_replaceOrderLocateBroker : ((message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceOrderSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 128 != 0) = message.replaceOrderLocateBroker.isSome := by
+    have clear := message.replaceOrderPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_replaceOrderPresenceBits : (message.replaceOrderPresenceBits.val ||| presence (n := 16) 1 message.replaceOrderPrice.isSome ||| presence (n := 16) 2 message.replaceOrderOrderQty.isSome ||| presence (n := 16) 4 message.replaceOrderMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceOrderSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceOrderSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceOrderPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceOrderReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceOrderLocateBroker.isSome) &&& 65280 = message.replaceOrderPresenceBits.val := by
     have clear := message.replaceOrderPresenceBits.property
     simp only [presence]
     bv_decide
@@ -642,7 +661,8 @@ theorem encode_length_pos (message : ReplaceOrderMessage) : (encode message).len
   rw [selected_replaceOrderMaxFloorQty]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 4) (decodeUIntLE 4) (decodeUIntLE_encodeUIntLE 4), some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_replaceOrderSelfMatchScope]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_replaceOrderSelfMatchInstruction]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
@@ -1159,7 +1179,7 @@ end SymbolStatusMessage
 
 /-- Limit Order Accepted Message -/
 structure LimitOrderAcceptedMessage where
-  limitOrderAcceptedPresenceBits : Masked 32 32766
+  limitOrderAcceptedPresenceBits : Masked 32 32767
   transactTime : BitVec 64
   orderId : BitVec 64
   clOrdId : BitVec 64
@@ -1167,7 +1187,7 @@ structure LimitOrderAcceptedMessage where
   limitOrderAcceptedBitFields : BitVec 32
   symbolId : BitVec 16
   price : BitVec 64
-  selfMatchScope : BitVec 8
+  limitOrderAcceptedSelfMatchScope : Option (BitVec 8)
   limitOrderAcceptedSelfMatchInstruction : Option (BitVec 8)
   limitOrderAcceptedPriceSlideInstruction : Option (BitVec 8)
   limitOrderAcceptedMinQty : Option (BitVec 32)
@@ -1187,7 +1207,7 @@ structure LimitOrderAcceptedMessage where
 namespace LimitOrderAcceptedMessage
 
 def encode (message : LimitOrderAcceptedMessage) : List UInt8 :=
-  encodeUIntLE 4 (message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome)
+  encodeUIntLE 4 (message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome)
     ++ (encodeUIntLE 8 message.transactTime
     ++ (encodeUIntLE 8 message.orderId
     ++ (encodeUIntLE 8 message.clOrdId
@@ -1195,7 +1215,7 @@ def encode (message : LimitOrderAcceptedMessage) : List UInt8 :=
     ++ (encodeUIntLE 4 message.limitOrderAcceptedBitFields
     ++ (encodeUIntLE 2 message.symbolId
     ++ (encodeUIntLE 8 message.price
-    ++ (encodeUIntLE 1 message.selfMatchScope
+    ++ (encodeOptional (encodeUIntLE 1) message.limitOrderAcceptedSelfMatchScope
     ++ (encodeOptional (encodeUIntLE 1) message.limitOrderAcceptedSelfMatchInstruction
     ++ (encodeOptional (encodeUIntLE 1) message.limitOrderAcceptedPriceSlideInstruction
     ++ (encodeOptional (encodeUIntLE 4) message.limitOrderAcceptedMinQty
@@ -1220,7 +1240,7 @@ def decode (bytes : List UInt8) : Option (LimitOrderAcceptedMessage × List UInt
   let (limitOrderAcceptedBitFields, bytes) ← decodeUIntLE 4 bytes
   let (symbolId, bytes) ← decodeUIntLE 2 bytes
   let (price, bytes) ← decodeUIntLE 8 bytes
-  let (selfMatchScope, bytes) ← decodeUIntLE 1 bytes
+  let (limitOrderAcceptedSelfMatchScope, bytes) ← decodeOptional (decodeUIntLE 1) (limitOrderAcceptedPresenceBits_ &&& 1 != 0) bytes
   let (limitOrderAcceptedSelfMatchInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (limitOrderAcceptedPresenceBits_ &&& 2 != 0) bytes
   let (limitOrderAcceptedPriceSlideInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (limitOrderAcceptedPresenceBits_ &&& 4 != 0) bytes
   let (limitOrderAcceptedMinQty, bytes) ← decodeOptional (decodeUIntLE 4) (limitOrderAcceptedPresenceBits_ &&& 8 != 0) bytes
@@ -1235,8 +1255,8 @@ def decode (bytes : List UInt8) : Option (LimitOrderAcceptedMessage × List UInt
   let (limitOrderAcceptedLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (limitOrderAcceptedPresenceBits_ &&& 4096 != 0) bytes
   let (limitOrderAcceptedRankPrice, bytes) ← decodeOptional (decodeUIntLE 8) (limitOrderAcceptedPresenceBits_ &&& 8192 != 0) bytes
   let (limitOrderAcceptedDisplayPrice, bytes) ← decodeOptional (decodeUIntLE 8) (limitOrderAcceptedPresenceBits_ &&& 16384 != 0) bytes
-  if fits_limitOrderAcceptedPresenceBits : (limitOrderAcceptedPresenceBits_ &&& 4294934529) &&& 32766 = 0 then
-    pure ({ limitOrderAcceptedPresenceBits := ⟨limitOrderAcceptedPresenceBits_ &&& 4294934529, fits_limitOrderAcceptedPresenceBits⟩, transactTime, orderId, clOrdId, orderQty, limitOrderAcceptedBitFields, symbolId, price, selfMatchScope, limitOrderAcceptedSelfMatchInstruction, limitOrderAcceptedPriceSlideInstruction, limitOrderAcceptedMinQty, limitOrderAcceptedMaxFloorQty, limitOrderAcceptedMaxReplenishQtyRange, limitOrderAcceptedMaxReplenishTimeRange, limitOrderAcceptedReferencePriceTarget, limitOrderAcceptedExpireTime, limitOrderAcceptedUserData, limitOrderAcceptedMpid, limitOrderAcceptedMemberGroup, limitOrderAcceptedLocateBroker, limitOrderAcceptedRankPrice, limitOrderAcceptedDisplayPrice }, bytes)
+  if fits_limitOrderAcceptedPresenceBits : (limitOrderAcceptedPresenceBits_ &&& 4294934528) &&& 32767 = 0 then
+    pure ({ limitOrderAcceptedPresenceBits := ⟨limitOrderAcceptedPresenceBits_ &&& 4294934528, fits_limitOrderAcceptedPresenceBits⟩, transactTime, orderId, clOrdId, orderQty, limitOrderAcceptedBitFields, symbolId, price, limitOrderAcceptedSelfMatchScope, limitOrderAcceptedSelfMatchInstruction, limitOrderAcceptedPriceSlideInstruction, limitOrderAcceptedMinQty, limitOrderAcceptedMaxFloorQty, limitOrderAcceptedMaxReplenishQtyRange, limitOrderAcceptedMaxReplenishTimeRange, limitOrderAcceptedReferencePriceTarget, limitOrderAcceptedExpireTime, limitOrderAcceptedUserData, limitOrderAcceptedMpid, limitOrderAcceptedMemberGroup, limitOrderAcceptedLocateBroker, limitOrderAcceptedRankPrice, limitOrderAcceptedDisplayPrice }, bytes)
   else none
 
 theorem encode_length_pos (message : LimitOrderAcceptedMessage) : (encode message).length > 0 := by
@@ -1247,63 +1267,67 @@ theorem encode_length_pos (message : LimitOrderAcceptedMessage) : (encode messag
 @[simp] theorem decode_encode (message : LimitOrderAcceptedMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_limitOrderAcceptedSelfMatchInstruction : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 2 != 0) = message.limitOrderAcceptedSelfMatchInstruction.isSome := by
+  have selected_limitOrderAcceptedSelfMatchScope : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 1 != 0) = message.limitOrderAcceptedSelfMatchScope.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedPriceSlideInstruction : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 4 != 0) = message.limitOrderAcceptedPriceSlideInstruction.isSome := by
+  have selected_limitOrderAcceptedSelfMatchInstruction : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 2 != 0) = message.limitOrderAcceptedSelfMatchInstruction.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedMinQty : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 8 != 0) = message.limitOrderAcceptedMinQty.isSome := by
+  have selected_limitOrderAcceptedPriceSlideInstruction : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 4 != 0) = message.limitOrderAcceptedPriceSlideInstruction.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedMaxFloorQty : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 16 != 0) = message.limitOrderAcceptedMaxFloorQty.isSome := by
+  have selected_limitOrderAcceptedMinQty : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 8 != 0) = message.limitOrderAcceptedMinQty.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedMaxReplenishQtyRange : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 32 != 0) = message.limitOrderAcceptedMaxReplenishQtyRange.isSome := by
+  have selected_limitOrderAcceptedMaxFloorQty : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 16 != 0) = message.limitOrderAcceptedMaxFloorQty.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedMaxReplenishTimeRange : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 64 != 0) = message.limitOrderAcceptedMaxReplenishTimeRange.isSome := by
+  have selected_limitOrderAcceptedMaxReplenishQtyRange : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 32 != 0) = message.limitOrderAcceptedMaxReplenishQtyRange.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedReferencePriceTarget : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 128 != 0) = message.limitOrderAcceptedReferencePriceTarget.isSome := by
+  have selected_limitOrderAcceptedMaxReplenishTimeRange : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 64 != 0) = message.limitOrderAcceptedMaxReplenishTimeRange.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedExpireTime : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 256 != 0) = message.limitOrderAcceptedExpireTime.isSome := by
+  have selected_limitOrderAcceptedReferencePriceTarget : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 128 != 0) = message.limitOrderAcceptedReferencePriceTarget.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedUserData : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 512 != 0) = message.limitOrderAcceptedUserData.isSome := by
+  have selected_limitOrderAcceptedExpireTime : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 256 != 0) = message.limitOrderAcceptedExpireTime.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedMpid : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 1024 != 0) = message.limitOrderAcceptedMpid.isSome := by
+  have selected_limitOrderAcceptedUserData : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 512 != 0) = message.limitOrderAcceptedUserData.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedMemberGroup : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 2048 != 0) = message.limitOrderAcceptedMemberGroup.isSome := by
+  have selected_limitOrderAcceptedMpid : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 1024 != 0) = message.limitOrderAcceptedMpid.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedLocateBroker : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 4096 != 0) = message.limitOrderAcceptedLocateBroker.isSome := by
+  have selected_limitOrderAcceptedMemberGroup : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 2048 != 0) = message.limitOrderAcceptedMemberGroup.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedRankPrice : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 8192 != 0) = message.limitOrderAcceptedRankPrice.isSome := by
+  have selected_limitOrderAcceptedLocateBroker : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 4096 != 0) = message.limitOrderAcceptedLocateBroker.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderAcceptedDisplayPrice : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 16384 != 0) = message.limitOrderAcceptedDisplayPrice.isSome := by
+  have selected_limitOrderAcceptedRankPrice : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 8192 != 0) = message.limitOrderAcceptedRankPrice.isSome := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_limitOrderAcceptedPresenceBits : (message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 4294934529 = message.limitOrderAcceptedPresenceBits.val := by
+  have selected_limitOrderAcceptedDisplayPrice : ((message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 16384 != 0) = message.limitOrderAcceptedDisplayPrice.isSome := by
+    have clear := message.limitOrderAcceptedPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_limitOrderAcceptedPresenceBits : (message.limitOrderAcceptedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderAcceptedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderAcceptedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderAcceptedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderAcceptedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderAcceptedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderAcceptedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderAcceptedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderAcceptedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderAcceptedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderAcceptedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderAcceptedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderAcceptedLocateBroker.isSome ||| presence (n := 32) 8192 message.limitOrderAcceptedRankPrice.isSome ||| presence (n := 32) 16384 message.limitOrderAcceptedDisplayPrice.isSome) &&& 4294934528 = message.limitOrderAcceptedPresenceBits.val := by
     have clear := message.limitOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
@@ -1323,7 +1347,8 @@ theorem encode_length_pos (message : LimitOrderAcceptedMessage) : (encode messag
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_limitOrderAcceptedSelfMatchScope]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_limitOrderAcceptedSelfMatchInstruction]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
@@ -1375,7 +1400,7 @@ end LimitOrderAcceptedMessage
 
 /-- Limit Order Rejected Message -/
 structure LimitOrderRejectedMessage where
-  limitOrderRejectedPresenceBits : Masked 32 8190
+  limitOrderRejectedPresenceBits : Masked 32 8191
   transactTime : BitVec 64
   clOrdId : BitVec 64
   orderQty : BitVec 32
@@ -1383,7 +1408,7 @@ structure LimitOrderRejectedMessage where
   symbolId : BitVec 16
   price : BitVec 64
   limitOrderRejectedReason : BitVec 8
-  selfMatchScope : BitVec 8
+  limitOrderRejectedSelfMatchScope : Option (BitVec 8)
   limitOrderRejectedSelfMatchInstruction : Option (BitVec 8)
   limitOrderRejectedPriceSlideInstruction : Option (BitVec 8)
   limitOrderRejectedMinQty : Option (BitVec 32)
@@ -1401,7 +1426,7 @@ structure LimitOrderRejectedMessage where
 namespace LimitOrderRejectedMessage
 
 def encode (message : LimitOrderRejectedMessage) : List UInt8 :=
-  encodeUIntLE 4 (message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome)
+  encodeUIntLE 4 (message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome)
     ++ (encodeUIntLE 8 message.transactTime
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 4 message.orderQty
@@ -1409,7 +1434,7 @@ def encode (message : LimitOrderRejectedMessage) : List UInt8 :=
     ++ (encodeUIntLE 2 message.symbolId
     ++ (encodeUIntLE 8 message.price
     ++ (encodeUIntLE 1 message.limitOrderRejectedReason
-    ++ (encodeUIntLE 1 message.selfMatchScope
+    ++ (encodeOptional (encodeUIntLE 1) message.limitOrderRejectedSelfMatchScope
     ++ (encodeOptional (encodeUIntLE 1) message.limitOrderRejectedSelfMatchInstruction
     ++ (encodeOptional (encodeUIntLE 1) message.limitOrderRejectedPriceSlideInstruction
     ++ (encodeOptional (encodeUIntLE 4) message.limitOrderRejectedMinQty
@@ -1432,7 +1457,7 @@ def decode (bytes : List UInt8) : Option (LimitOrderRejectedMessage × List UInt
   let (symbolId, bytes) ← decodeUIntLE 2 bytes
   let (price, bytes) ← decodeUIntLE 8 bytes
   let (limitOrderRejectedReason, bytes) ← decodeUIntLE 1 bytes
-  let (selfMatchScope, bytes) ← decodeUIntLE 1 bytes
+  let (limitOrderRejectedSelfMatchScope, bytes) ← decodeOptional (decodeUIntLE 1) (limitOrderRejectedPresenceBits_ &&& 1 != 0) bytes
   let (limitOrderRejectedSelfMatchInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (limitOrderRejectedPresenceBits_ &&& 2 != 0) bytes
   let (limitOrderRejectedPriceSlideInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (limitOrderRejectedPresenceBits_ &&& 4 != 0) bytes
   let (limitOrderRejectedMinQty, bytes) ← decodeOptional (decodeUIntLE 4) (limitOrderRejectedPresenceBits_ &&& 8 != 0) bytes
@@ -1445,8 +1470,8 @@ def decode (bytes : List UInt8) : Option (LimitOrderRejectedMessage × List UInt
   let (limitOrderRejectedMpid, bytes) ← decodeOptional (Alpha.decode 4) (limitOrderRejectedPresenceBits_ &&& 1024 != 0) bytes
   let (limitOrderRejectedMemberGroup, bytes) ← decodeOptional (Alpha.decode 2) (limitOrderRejectedPresenceBits_ &&& 2048 != 0) bytes
   let (limitOrderRejectedLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (limitOrderRejectedPresenceBits_ &&& 4096 != 0) bytes
-  if fits_limitOrderRejectedPresenceBits : (limitOrderRejectedPresenceBits_ &&& 4294959105) &&& 8190 = 0 then
-    pure ({ limitOrderRejectedPresenceBits := ⟨limitOrderRejectedPresenceBits_ &&& 4294959105, fits_limitOrderRejectedPresenceBits⟩, transactTime, clOrdId, orderQty, limitOrderRejectedBitFields, symbolId, price, limitOrderRejectedReason, selfMatchScope, limitOrderRejectedSelfMatchInstruction, limitOrderRejectedPriceSlideInstruction, limitOrderRejectedMinQty, limitOrderRejectedMaxFloorQty, limitOrderRejectedMaxReplenishQtyRange, limitOrderRejectedMaxReplenishTimeRange, limitOrderRejectedReferencePriceTarget, limitOrderRejectedExpireTime, limitOrderRejectedUserData, limitOrderRejectedMpid, limitOrderRejectedMemberGroup, limitOrderRejectedLocateBroker }, bytes)
+  if fits_limitOrderRejectedPresenceBits : (limitOrderRejectedPresenceBits_ &&& 4294959104) &&& 8191 = 0 then
+    pure ({ limitOrderRejectedPresenceBits := ⟨limitOrderRejectedPresenceBits_ &&& 4294959104, fits_limitOrderRejectedPresenceBits⟩, transactTime, clOrdId, orderQty, limitOrderRejectedBitFields, symbolId, price, limitOrderRejectedReason, limitOrderRejectedSelfMatchScope, limitOrderRejectedSelfMatchInstruction, limitOrderRejectedPriceSlideInstruction, limitOrderRejectedMinQty, limitOrderRejectedMaxFloorQty, limitOrderRejectedMaxReplenishQtyRange, limitOrderRejectedMaxReplenishTimeRange, limitOrderRejectedReferencePriceTarget, limitOrderRejectedExpireTime, limitOrderRejectedUserData, limitOrderRejectedMpid, limitOrderRejectedMemberGroup, limitOrderRejectedLocateBroker }, bytes)
   else none
 
 theorem encode_length_pos (message : LimitOrderRejectedMessage) : (encode message).length > 0 := by
@@ -1457,55 +1482,59 @@ theorem encode_length_pos (message : LimitOrderRejectedMessage) : (encode messag
 @[simp] theorem decode_encode (message : LimitOrderRejectedMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_limitOrderRejectedSelfMatchInstruction : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 2 != 0) = message.limitOrderRejectedSelfMatchInstruction.isSome := by
+  have selected_limitOrderRejectedSelfMatchScope : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 1 != 0) = message.limitOrderRejectedSelfMatchScope.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedPriceSlideInstruction : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 4 != 0) = message.limitOrderRejectedPriceSlideInstruction.isSome := by
+  have selected_limitOrderRejectedSelfMatchInstruction : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 2 != 0) = message.limitOrderRejectedSelfMatchInstruction.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedMinQty : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 8 != 0) = message.limitOrderRejectedMinQty.isSome := by
+  have selected_limitOrderRejectedPriceSlideInstruction : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 4 != 0) = message.limitOrderRejectedPriceSlideInstruction.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedMaxFloorQty : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 16 != 0) = message.limitOrderRejectedMaxFloorQty.isSome := by
+  have selected_limitOrderRejectedMinQty : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 8 != 0) = message.limitOrderRejectedMinQty.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedMaxReplenishQtyRange : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 32 != 0) = message.limitOrderRejectedMaxReplenishQtyRange.isSome := by
+  have selected_limitOrderRejectedMaxFloorQty : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 16 != 0) = message.limitOrderRejectedMaxFloorQty.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedMaxReplenishTimeRange : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 64 != 0) = message.limitOrderRejectedMaxReplenishTimeRange.isSome := by
+  have selected_limitOrderRejectedMaxReplenishQtyRange : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 32 != 0) = message.limitOrderRejectedMaxReplenishQtyRange.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedReferencePriceTarget : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 128 != 0) = message.limitOrderRejectedReferencePriceTarget.isSome := by
+  have selected_limitOrderRejectedMaxReplenishTimeRange : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 64 != 0) = message.limitOrderRejectedMaxReplenishTimeRange.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedExpireTime : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 256 != 0) = message.limitOrderRejectedExpireTime.isSome := by
+  have selected_limitOrderRejectedReferencePriceTarget : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 128 != 0) = message.limitOrderRejectedReferencePriceTarget.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedUserData : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 512 != 0) = message.limitOrderRejectedUserData.isSome := by
+  have selected_limitOrderRejectedExpireTime : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 256 != 0) = message.limitOrderRejectedExpireTime.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedMpid : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 1024 != 0) = message.limitOrderRejectedMpid.isSome := by
+  have selected_limitOrderRejectedUserData : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 512 != 0) = message.limitOrderRejectedUserData.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedMemberGroup : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 2048 != 0) = message.limitOrderRejectedMemberGroup.isSome := by
+  have selected_limitOrderRejectedMpid : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 1024 != 0) = message.limitOrderRejectedMpid.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_limitOrderRejectedLocateBroker : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 4096 != 0) = message.limitOrderRejectedLocateBroker.isSome := by
+  have selected_limitOrderRejectedMemberGroup : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 2048 != 0) = message.limitOrderRejectedMemberGroup.isSome := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_limitOrderRejectedPresenceBits : (message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 4294959105 = message.limitOrderRejectedPresenceBits.val := by
+  have selected_limitOrderRejectedLocateBroker : ((message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 4096 != 0) = message.limitOrderRejectedLocateBroker.isSome := by
+    have clear := message.limitOrderRejectedPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_limitOrderRejectedPresenceBits : (message.limitOrderRejectedPresenceBits.val ||| presence (n := 32) 1 message.limitOrderRejectedSelfMatchScope.isSome ||| presence (n := 32) 2 message.limitOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 32) 4 message.limitOrderRejectedPriceSlideInstruction.isSome ||| presence (n := 32) 8 message.limitOrderRejectedMinQty.isSome ||| presence (n := 32) 16 message.limitOrderRejectedMaxFloorQty.isSome ||| presence (n := 32) 32 message.limitOrderRejectedMaxReplenishQtyRange.isSome ||| presence (n := 32) 64 message.limitOrderRejectedMaxReplenishTimeRange.isSome ||| presence (n := 32) 128 message.limitOrderRejectedReferencePriceTarget.isSome ||| presence (n := 32) 256 message.limitOrderRejectedExpireTime.isSome ||| presence (n := 32) 512 message.limitOrderRejectedUserData.isSome ||| presence (n := 32) 1024 message.limitOrderRejectedMpid.isSome ||| presence (n := 32) 2048 message.limitOrderRejectedMemberGroup.isSome ||| presence (n := 32) 4096 message.limitOrderRejectedLocateBroker.isSome) &&& 4294959104 = message.limitOrderRejectedPresenceBits.val := by
     have clear := message.limitOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
@@ -1525,7 +1554,8 @@ theorem encode_length_pos (message : LimitOrderRejectedMessage) : (encode messag
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_limitOrderRejectedSelfMatchScope]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_limitOrderRejectedSelfMatchInstruction]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
@@ -1571,14 +1601,14 @@ end LimitOrderRejectedMessage
 
 /-- Market Order Accepted Message -/
 structure MarketOrderAcceptedMessage where
-  marketOrderAcceptedPresenceBits : Masked 16 62
+  marketOrderAcceptedPresenceBits : Masked 16 63
   transactTime : BitVec 64
   orderId : BitVec 64
   clOrdId : BitVec 64
   orderQty : BitVec 32
   marketOrderAcceptedBitFields : BitVec 16
   symbolId : BitVec 16
-  selfMatchScope : BitVec 8
+  marketOrderAcceptedSelfMatchScope : Option (BitVec 8)
   marketOrderAcceptedSelfMatchInstruction : Option (BitVec 8)
   marketOrderAcceptedUserData : Option (BitVec 64)
   marketOrderAcceptedMpid : Option (Alpha 4)
@@ -1589,14 +1619,14 @@ structure MarketOrderAcceptedMessage where
 namespace MarketOrderAcceptedMessage
 
 def encode (message : MarketOrderAcceptedMessage) : List UInt8 :=
-  encodeUIntLE 2 (message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome)
+  encodeUIntLE 2 (message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderAcceptedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome)
     ++ (encodeUIntLE 8 message.transactTime
     ++ (encodeUIntLE 8 message.orderId
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 4 message.orderQty
     ++ (encodeUIntLE 2 message.marketOrderAcceptedBitFields
     ++ (encodeUIntLE 2 message.symbolId
-    ++ (encodeUIntLE 1 message.selfMatchScope
+    ++ (encodeOptional (encodeUIntLE 1) message.marketOrderAcceptedSelfMatchScope
     ++ (encodeOptional (encodeUIntLE 1) message.marketOrderAcceptedSelfMatchInstruction
     ++ (encodeOptional (encodeUIntLE 8) message.marketOrderAcceptedUserData
     ++ (encodeOptional (Alpha.encode) message.marketOrderAcceptedMpid
@@ -1611,14 +1641,14 @@ def decode (bytes : List UInt8) : Option (MarketOrderAcceptedMessage × List UIn
   let (orderQty, bytes) ← decodeUIntLE 4 bytes
   let (marketOrderAcceptedBitFields, bytes) ← decodeUIntLE 2 bytes
   let (symbolId, bytes) ← decodeUIntLE 2 bytes
-  let (selfMatchScope, bytes) ← decodeUIntLE 1 bytes
+  let (marketOrderAcceptedSelfMatchScope, bytes) ← decodeOptional (decodeUIntLE 1) (marketOrderAcceptedPresenceBits_ &&& 1 != 0) bytes
   let (marketOrderAcceptedSelfMatchInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (marketOrderAcceptedPresenceBits_ &&& 2 != 0) bytes
   let (marketOrderAcceptedUserData, bytes) ← decodeOptional (decodeUIntLE 8) (marketOrderAcceptedPresenceBits_ &&& 4 != 0) bytes
   let (marketOrderAcceptedMpid, bytes) ← decodeOptional (Alpha.decode 4) (marketOrderAcceptedPresenceBits_ &&& 8 != 0) bytes
   let (marketOrderAcceptedMemberGroup, bytes) ← decodeOptional (Alpha.decode 2) (marketOrderAcceptedPresenceBits_ &&& 16 != 0) bytes
   let (marketOrderAcceptedLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (marketOrderAcceptedPresenceBits_ &&& 32 != 0) bytes
-  if fits_marketOrderAcceptedPresenceBits : (marketOrderAcceptedPresenceBits_ &&& 65473) &&& 62 = 0 then
-    pure ({ marketOrderAcceptedPresenceBits := ⟨marketOrderAcceptedPresenceBits_ &&& 65473, fits_marketOrderAcceptedPresenceBits⟩, transactTime, orderId, clOrdId, orderQty, marketOrderAcceptedBitFields, symbolId, selfMatchScope, marketOrderAcceptedSelfMatchInstruction, marketOrderAcceptedUserData, marketOrderAcceptedMpid, marketOrderAcceptedMemberGroup, marketOrderAcceptedLocateBroker }, bytes)
+  if fits_marketOrderAcceptedPresenceBits : (marketOrderAcceptedPresenceBits_ &&& 65472) &&& 63 = 0 then
+    pure ({ marketOrderAcceptedPresenceBits := ⟨marketOrderAcceptedPresenceBits_ &&& 65472, fits_marketOrderAcceptedPresenceBits⟩, transactTime, orderId, clOrdId, orderQty, marketOrderAcceptedBitFields, symbolId, marketOrderAcceptedSelfMatchScope, marketOrderAcceptedSelfMatchInstruction, marketOrderAcceptedUserData, marketOrderAcceptedMpid, marketOrderAcceptedMemberGroup, marketOrderAcceptedLocateBroker }, bytes)
   else none
 
 theorem encode_length_pos (message : MarketOrderAcceptedMessage) : (encode message).length > 0 := by
@@ -1629,27 +1659,31 @@ theorem encode_length_pos (message : MarketOrderAcceptedMessage) : (encode messa
 @[simp] theorem decode_encode (message : MarketOrderAcceptedMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_marketOrderAcceptedSelfMatchInstruction : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 2 != 0) = message.marketOrderAcceptedSelfMatchInstruction.isSome := by
+  have selected_marketOrderAcceptedSelfMatchScope : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderAcceptedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 1 != 0) = message.marketOrderAcceptedSelfMatchScope.isSome := by
     have clear := message.marketOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderAcceptedUserData : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 4 != 0) = message.marketOrderAcceptedUserData.isSome := by
+  have selected_marketOrderAcceptedSelfMatchInstruction : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderAcceptedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 2 != 0) = message.marketOrderAcceptedSelfMatchInstruction.isSome := by
     have clear := message.marketOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderAcceptedMpid : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 8 != 0) = message.marketOrderAcceptedMpid.isSome := by
+  have selected_marketOrderAcceptedUserData : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderAcceptedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 4 != 0) = message.marketOrderAcceptedUserData.isSome := by
     have clear := message.marketOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderAcceptedMemberGroup : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 16 != 0) = message.marketOrderAcceptedMemberGroup.isSome := by
+  have selected_marketOrderAcceptedMpid : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderAcceptedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 8 != 0) = message.marketOrderAcceptedMpid.isSome := by
     have clear := message.marketOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderAcceptedLocateBroker : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 32 != 0) = message.marketOrderAcceptedLocateBroker.isSome := by
+  have selected_marketOrderAcceptedMemberGroup : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderAcceptedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 16 != 0) = message.marketOrderAcceptedMemberGroup.isSome := by
     have clear := message.marketOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_marketOrderAcceptedPresenceBits : (message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 65473 = message.marketOrderAcceptedPresenceBits.val := by
+  have selected_marketOrderAcceptedLocateBroker : ((message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderAcceptedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 32 != 0) = message.marketOrderAcceptedLocateBroker.isSome := by
+    have clear := message.marketOrderAcceptedPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_marketOrderAcceptedPresenceBits : (message.marketOrderAcceptedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderAcceptedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderAcceptedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderAcceptedUserData.isSome ||| presence (n := 16) 8 message.marketOrderAcceptedMpid.isSome ||| presence (n := 16) 16 message.marketOrderAcceptedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderAcceptedLocateBroker.isSome) &&& 65472 = message.marketOrderAcceptedPresenceBits.val := by
     have clear := message.marketOrderAcceptedPresenceBits.property
     simp only [presence]
     bv_decide
@@ -1667,7 +1701,8 @@ theorem encode_length_pos (message : MarketOrderAcceptedMessage) : (encode messa
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_marketOrderAcceptedSelfMatchScope]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_marketOrderAcceptedSelfMatchInstruction]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
@@ -1692,14 +1727,14 @@ end MarketOrderAcceptedMessage
 
 /-- Market Order Rejected Message -/
 structure MarketOrderRejectedMessage where
-  marketOrderRejectedPresenceBits : Masked 16 62
+  marketOrderRejectedPresenceBits : Masked 16 63
   transactTime : BitVec 64
   clOrdId : BitVec 64
   orderQty : BitVec 32
   marketOrderRejectedBitFields : BitVec 16
   symbolId : BitVec 16
   marketOrderRejectedReason : BitVec 8
-  selfMatchScope : BitVec 8
+  marketOrderRejectedSelfMatchScope : Option (BitVec 8)
   marketOrderRejectedSelfMatchInstruction : Option (BitVec 8)
   marketOrderRejectedUserData : Option (BitVec 64)
   marketOrderRejectedMpid : Option (Alpha 4)
@@ -1710,14 +1745,14 @@ structure MarketOrderRejectedMessage where
 namespace MarketOrderRejectedMessage
 
 def encode (message : MarketOrderRejectedMessage) : List UInt8 :=
-  encodeUIntLE 2 (message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome)
+  encodeUIntLE 2 (message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderRejectedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome)
     ++ (encodeUIntLE 8 message.transactTime
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 4 message.orderQty
     ++ (encodeUIntLE 2 message.marketOrderRejectedBitFields
     ++ (encodeUIntLE 2 message.symbolId
     ++ (encodeUIntLE 1 message.marketOrderRejectedReason
-    ++ (encodeUIntLE 1 message.selfMatchScope
+    ++ (encodeOptional (encodeUIntLE 1) message.marketOrderRejectedSelfMatchScope
     ++ (encodeOptional (encodeUIntLE 1) message.marketOrderRejectedSelfMatchInstruction
     ++ (encodeOptional (encodeUIntLE 8) message.marketOrderRejectedUserData
     ++ (encodeOptional (Alpha.encode) message.marketOrderRejectedMpid
@@ -1732,14 +1767,14 @@ def decode (bytes : List UInt8) : Option (MarketOrderRejectedMessage × List UIn
   let (marketOrderRejectedBitFields, bytes) ← decodeUIntLE 2 bytes
   let (symbolId, bytes) ← decodeUIntLE 2 bytes
   let (marketOrderRejectedReason, bytes) ← decodeUIntLE 1 bytes
-  let (selfMatchScope, bytes) ← decodeUIntLE 1 bytes
+  let (marketOrderRejectedSelfMatchScope, bytes) ← decodeOptional (decodeUIntLE 1) (marketOrderRejectedPresenceBits_ &&& 1 != 0) bytes
   let (marketOrderRejectedSelfMatchInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (marketOrderRejectedPresenceBits_ &&& 2 != 0) bytes
   let (marketOrderRejectedUserData, bytes) ← decodeOptional (decodeUIntLE 8) (marketOrderRejectedPresenceBits_ &&& 4 != 0) bytes
   let (marketOrderRejectedMpid, bytes) ← decodeOptional (Alpha.decode 4) (marketOrderRejectedPresenceBits_ &&& 8 != 0) bytes
   let (marketOrderRejectedMemberGroup, bytes) ← decodeOptional (Alpha.decode 2) (marketOrderRejectedPresenceBits_ &&& 16 != 0) bytes
   let (marketOrderRejectedLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (marketOrderRejectedPresenceBits_ &&& 32 != 0) bytes
-  if fits_marketOrderRejectedPresenceBits : (marketOrderRejectedPresenceBits_ &&& 65473) &&& 62 = 0 then
-    pure ({ marketOrderRejectedPresenceBits := ⟨marketOrderRejectedPresenceBits_ &&& 65473, fits_marketOrderRejectedPresenceBits⟩, transactTime, clOrdId, orderQty, marketOrderRejectedBitFields, symbolId, marketOrderRejectedReason, selfMatchScope, marketOrderRejectedSelfMatchInstruction, marketOrderRejectedUserData, marketOrderRejectedMpid, marketOrderRejectedMemberGroup, marketOrderRejectedLocateBroker }, bytes)
+  if fits_marketOrderRejectedPresenceBits : (marketOrderRejectedPresenceBits_ &&& 65472) &&& 63 = 0 then
+    pure ({ marketOrderRejectedPresenceBits := ⟨marketOrderRejectedPresenceBits_ &&& 65472, fits_marketOrderRejectedPresenceBits⟩, transactTime, clOrdId, orderQty, marketOrderRejectedBitFields, symbolId, marketOrderRejectedReason, marketOrderRejectedSelfMatchScope, marketOrderRejectedSelfMatchInstruction, marketOrderRejectedUserData, marketOrderRejectedMpid, marketOrderRejectedMemberGroup, marketOrderRejectedLocateBroker }, bytes)
   else none
 
 theorem encode_length_pos (message : MarketOrderRejectedMessage) : (encode message).length > 0 := by
@@ -1750,27 +1785,31 @@ theorem encode_length_pos (message : MarketOrderRejectedMessage) : (encode messa
 @[simp] theorem decode_encode (message : MarketOrderRejectedMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_marketOrderRejectedSelfMatchInstruction : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 2 != 0) = message.marketOrderRejectedSelfMatchInstruction.isSome := by
+  have selected_marketOrderRejectedSelfMatchScope : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderRejectedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 1 != 0) = message.marketOrderRejectedSelfMatchScope.isSome := by
     have clear := message.marketOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderRejectedUserData : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 4 != 0) = message.marketOrderRejectedUserData.isSome := by
+  have selected_marketOrderRejectedSelfMatchInstruction : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderRejectedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 2 != 0) = message.marketOrderRejectedSelfMatchInstruction.isSome := by
     have clear := message.marketOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderRejectedMpid : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 8 != 0) = message.marketOrderRejectedMpid.isSome := by
+  have selected_marketOrderRejectedUserData : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderRejectedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 4 != 0) = message.marketOrderRejectedUserData.isSome := by
     have clear := message.marketOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderRejectedMemberGroup : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 16 != 0) = message.marketOrderRejectedMemberGroup.isSome := by
+  have selected_marketOrderRejectedMpid : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderRejectedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 8 != 0) = message.marketOrderRejectedMpid.isSome := by
     have clear := message.marketOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_marketOrderRejectedLocateBroker : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 32 != 0) = message.marketOrderRejectedLocateBroker.isSome := by
+  have selected_marketOrderRejectedMemberGroup : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderRejectedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 16 != 0) = message.marketOrderRejectedMemberGroup.isSome := by
     have clear := message.marketOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_marketOrderRejectedPresenceBits : (message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 65473 = message.marketOrderRejectedPresenceBits.val := by
+  have selected_marketOrderRejectedLocateBroker : ((message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderRejectedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 32 != 0) = message.marketOrderRejectedLocateBroker.isSome := by
+    have clear := message.marketOrderRejectedPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_marketOrderRejectedPresenceBits : (message.marketOrderRejectedPresenceBits.val ||| presence (n := 16) 1 message.marketOrderRejectedSelfMatchScope.isSome ||| presence (n := 16) 2 message.marketOrderRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 4 message.marketOrderRejectedUserData.isSome ||| presence (n := 16) 8 message.marketOrderRejectedMpid.isSome ||| presence (n := 16) 16 message.marketOrderRejectedMemberGroup.isSome ||| presence (n := 16) 32 message.marketOrderRejectedLocateBroker.isSome) &&& 65472 = message.marketOrderRejectedPresenceBits.val := by
     have clear := message.marketOrderRejectedPresenceBits.property
     simp only [presence]
     bv_decide
@@ -1788,7 +1827,8 @@ theorem encode_length_pos (message : MarketOrderRejectedMessage) : (encode messa
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_marketOrderRejectedSelfMatchScope]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_marketOrderRejectedSelfMatchInstruction]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
@@ -1898,28 +1938,28 @@ end CancelRejectedMessage
 
 /-- Order Modified Message -/
 structure OrderModifiedMessage where
-  orderModifiedPresenceBits : Masked 8 5
+  orderModifiedPresenceBits : Masked 8 7
   transactTime : BitVec 64
   orderId : BitVec 64
   clOrdId : BitVec 64
   origClOrdId : BitVec 64
   leavesQty : BitVec 32
   orderModifiedOrderQty : Option (BitVec 32)
-  orderModifiedBitFields : BitVec 8
+  orderModifiedBitFields : Option (BitVec 8)
   orderModifiedLocateBroker : Option (Alpha 4)
   deriving DecidableEq, Repr
 
 namespace OrderModifiedMessage
 
 def encode (message : OrderModifiedMessage) : List UInt8 :=
-  encodeUIntLE 1 (message.orderModifiedPresenceBits.val ||| presence (n := 8) 1 message.orderModifiedOrderQty.isSome ||| presence (n := 8) 4 message.orderModifiedLocateBroker.isSome)
+  encodeUIntLE 1 (message.orderModifiedPresenceBits.val ||| presence (n := 8) 1 message.orderModifiedOrderQty.isSome ||| presence (n := 8) 2 message.orderModifiedBitFields.isSome ||| presence (n := 8) 4 message.orderModifiedLocateBroker.isSome)
     ++ (encodeUIntLE 8 message.transactTime
     ++ (encodeUIntLE 8 message.orderId
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 8 message.origClOrdId
     ++ (encodeUIntLE 4 message.leavesQty
     ++ (encodeOptional (encodeUIntLE 4) message.orderModifiedOrderQty
-    ++ (encodeUIntLE 1 message.orderModifiedBitFields
+    ++ (encodeOptional (encodeUIntLE 1) message.orderModifiedBitFields
     ++ (encodeOptional (Alpha.encode) message.orderModifiedLocateBroker))))))))
 
 def decode (bytes : List UInt8) : Option (OrderModifiedMessage × List UInt8) := do
@@ -1930,10 +1970,10 @@ def decode (bytes : List UInt8) : Option (OrderModifiedMessage × List UInt8) :=
   let (origClOrdId, bytes) ← decodeUIntLE 8 bytes
   let (leavesQty, bytes) ← decodeUIntLE 4 bytes
   let (orderModifiedOrderQty, bytes) ← decodeOptional (decodeUIntLE 4) (orderModifiedPresenceBits_ &&& 1 != 0) bytes
-  let (orderModifiedBitFields, bytes) ← decodeUIntLE 1 bytes
+  let (orderModifiedBitFields, bytes) ← decodeOptional (decodeUIntLE 1) (orderModifiedPresenceBits_ &&& 2 != 0) bytes
   let (orderModifiedLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (orderModifiedPresenceBits_ &&& 4 != 0) bytes
-  if fits_orderModifiedPresenceBits : (orderModifiedPresenceBits_ &&& 250) &&& 5 = 0 then
-    pure ({ orderModifiedPresenceBits := ⟨orderModifiedPresenceBits_ &&& 250, fits_orderModifiedPresenceBits⟩, transactTime, orderId, clOrdId, origClOrdId, leavesQty, orderModifiedOrderQty, orderModifiedBitFields, orderModifiedLocateBroker }, bytes)
+  if fits_orderModifiedPresenceBits : (orderModifiedPresenceBits_ &&& 248) &&& 7 = 0 then
+    pure ({ orderModifiedPresenceBits := ⟨orderModifiedPresenceBits_ &&& 248, fits_orderModifiedPresenceBits⟩, transactTime, orderId, clOrdId, origClOrdId, leavesQty, orderModifiedOrderQty, orderModifiedBitFields, orderModifiedLocateBroker }, bytes)
   else none
 
 theorem encode_length_pos (message : OrderModifiedMessage) : (encode message).length > 0 := by
@@ -1944,15 +1984,19 @@ theorem encode_length_pos (message : OrderModifiedMessage) : (encode message).le
 @[simp] theorem decode_encode (message : OrderModifiedMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_orderModifiedOrderQty : ((message.orderModifiedPresenceBits.val ||| presence (n := 8) 1 message.orderModifiedOrderQty.isSome ||| presence (n := 8) 4 message.orderModifiedLocateBroker.isSome) &&& 1 != 0) = message.orderModifiedOrderQty.isSome := by
+  have selected_orderModifiedOrderQty : ((message.orderModifiedPresenceBits.val ||| presence (n := 8) 1 message.orderModifiedOrderQty.isSome ||| presence (n := 8) 2 message.orderModifiedBitFields.isSome ||| presence (n := 8) 4 message.orderModifiedLocateBroker.isSome) &&& 1 != 0) = message.orderModifiedOrderQty.isSome := by
     have clear := message.orderModifiedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_orderModifiedLocateBroker : ((message.orderModifiedPresenceBits.val ||| presence (n := 8) 1 message.orderModifiedOrderQty.isSome ||| presence (n := 8) 4 message.orderModifiedLocateBroker.isSome) &&& 4 != 0) = message.orderModifiedLocateBroker.isSome := by
+  have selected_orderModifiedBitFields : ((message.orderModifiedPresenceBits.val ||| presence (n := 8) 1 message.orderModifiedOrderQty.isSome ||| presence (n := 8) 2 message.orderModifiedBitFields.isSome ||| presence (n := 8) 4 message.orderModifiedLocateBroker.isSome) &&& 2 != 0) = message.orderModifiedBitFields.isSome := by
     have clear := message.orderModifiedPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_orderModifiedPresenceBits : (message.orderModifiedPresenceBits.val ||| presence (n := 8) 1 message.orderModifiedOrderQty.isSome ||| presence (n := 8) 4 message.orderModifiedLocateBroker.isSome) &&& 250 = message.orderModifiedPresenceBits.val := by
+  have selected_orderModifiedLocateBroker : ((message.orderModifiedPresenceBits.val ||| presence (n := 8) 1 message.orderModifiedOrderQty.isSome ||| presence (n := 8) 2 message.orderModifiedBitFields.isSome ||| presence (n := 8) 4 message.orderModifiedLocateBroker.isSome) &&& 4 != 0) = message.orderModifiedLocateBroker.isSome := by
+    have clear := message.orderModifiedPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_orderModifiedPresenceBits : (message.orderModifiedPresenceBits.val ||| presence (n := 8) 1 message.orderModifiedOrderQty.isSome ||| presence (n := 8) 2 message.orderModifiedBitFields.isSome ||| presence (n := 8) 4 message.orderModifiedLocateBroker.isSome) &&& 248 = message.orderModifiedPresenceBits.val := by
     have clear := message.orderModifiedPresenceBits.property
     simp only [presence]
     bv_decide
@@ -1971,7 +2015,8 @@ theorem encode_length_pos (message : OrderModifiedMessage) : (encode message).le
   rw [selected_orderModifiedOrderQty]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 4) (decodeUIntLE 4) (decodeUIntLE_encodeUIntLE 4), some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_orderModifiedBitFields]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_orderModifiedLocateBroker]
   rw [decodeOptional_encodeOptional (Alpha.encode) (Alpha.decode 4) (Alpha.decode_encode), some_bind]
@@ -1984,26 +2029,26 @@ end OrderModifiedMessage
 
 /-- Modify Rejected Message -/
 structure ModifyRejectedMessage where
-  modifyRejectedPresenceBits : Masked 8 5
+  modifyRejectedPresenceBits : Masked 8 7
   transactTime : BitVec 64
   clOrdId : BitVec 64
   origClOrdId : BitVec 64
   modifyRejectedReason : BitVec 8
   modifyRejectedOrderQty : Option (BitVec 32)
-  modifyRejectedBitFields : BitVec 8
+  modifyRejectedBitFields : Option (BitVec 8)
   modifyRejectedLocateBroker : Option (Alpha 4)
   deriving DecidableEq, Repr
 
 namespace ModifyRejectedMessage
 
 def encode (message : ModifyRejectedMessage) : List UInt8 :=
-  encodeUIntLE 1 (message.modifyRejectedPresenceBits.val ||| presence (n := 8) 1 message.modifyRejectedOrderQty.isSome ||| presence (n := 8) 4 message.modifyRejectedLocateBroker.isSome)
+  encodeUIntLE 1 (message.modifyRejectedPresenceBits.val ||| presence (n := 8) 1 message.modifyRejectedOrderQty.isSome ||| presence (n := 8) 2 message.modifyRejectedBitFields.isSome ||| presence (n := 8) 4 message.modifyRejectedLocateBroker.isSome)
     ++ (encodeUIntLE 8 message.transactTime
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 8 message.origClOrdId
     ++ (encodeUIntLE 1 message.modifyRejectedReason
     ++ (encodeOptional (encodeUIntLE 4) message.modifyRejectedOrderQty
-    ++ (encodeUIntLE 1 message.modifyRejectedBitFields
+    ++ (encodeOptional (encodeUIntLE 1) message.modifyRejectedBitFields
     ++ (encodeOptional (Alpha.encode) message.modifyRejectedLocateBroker)))))))
 
 def decode (bytes : List UInt8) : Option (ModifyRejectedMessage × List UInt8) := do
@@ -2013,10 +2058,10 @@ def decode (bytes : List UInt8) : Option (ModifyRejectedMessage × List UInt8) :
   let (origClOrdId, bytes) ← decodeUIntLE 8 bytes
   let (modifyRejectedReason, bytes) ← decodeUIntLE 1 bytes
   let (modifyRejectedOrderQty, bytes) ← decodeOptional (decodeUIntLE 4) (modifyRejectedPresenceBits_ &&& 1 != 0) bytes
-  let (modifyRejectedBitFields, bytes) ← decodeUIntLE 1 bytes
+  let (modifyRejectedBitFields, bytes) ← decodeOptional (decodeUIntLE 1) (modifyRejectedPresenceBits_ &&& 2 != 0) bytes
   let (modifyRejectedLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (modifyRejectedPresenceBits_ &&& 4 != 0) bytes
-  if fits_modifyRejectedPresenceBits : (modifyRejectedPresenceBits_ &&& 250) &&& 5 = 0 then
-    pure ({ modifyRejectedPresenceBits := ⟨modifyRejectedPresenceBits_ &&& 250, fits_modifyRejectedPresenceBits⟩, transactTime, clOrdId, origClOrdId, modifyRejectedReason, modifyRejectedOrderQty, modifyRejectedBitFields, modifyRejectedLocateBroker }, bytes)
+  if fits_modifyRejectedPresenceBits : (modifyRejectedPresenceBits_ &&& 248) &&& 7 = 0 then
+    pure ({ modifyRejectedPresenceBits := ⟨modifyRejectedPresenceBits_ &&& 248, fits_modifyRejectedPresenceBits⟩, transactTime, clOrdId, origClOrdId, modifyRejectedReason, modifyRejectedOrderQty, modifyRejectedBitFields, modifyRejectedLocateBroker }, bytes)
   else none
 
 theorem encode_length_pos (message : ModifyRejectedMessage) : (encode message).length > 0 := by
@@ -2027,15 +2072,19 @@ theorem encode_length_pos (message : ModifyRejectedMessage) : (encode message).l
 @[simp] theorem decode_encode (message : ModifyRejectedMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_modifyRejectedOrderQty : ((message.modifyRejectedPresenceBits.val ||| presence (n := 8) 1 message.modifyRejectedOrderQty.isSome ||| presence (n := 8) 4 message.modifyRejectedLocateBroker.isSome) &&& 1 != 0) = message.modifyRejectedOrderQty.isSome := by
+  have selected_modifyRejectedOrderQty : ((message.modifyRejectedPresenceBits.val ||| presence (n := 8) 1 message.modifyRejectedOrderQty.isSome ||| presence (n := 8) 2 message.modifyRejectedBitFields.isSome ||| presence (n := 8) 4 message.modifyRejectedLocateBroker.isSome) &&& 1 != 0) = message.modifyRejectedOrderQty.isSome := by
     have clear := message.modifyRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_modifyRejectedLocateBroker : ((message.modifyRejectedPresenceBits.val ||| presence (n := 8) 1 message.modifyRejectedOrderQty.isSome ||| presence (n := 8) 4 message.modifyRejectedLocateBroker.isSome) &&& 4 != 0) = message.modifyRejectedLocateBroker.isSome := by
+  have selected_modifyRejectedBitFields : ((message.modifyRejectedPresenceBits.val ||| presence (n := 8) 1 message.modifyRejectedOrderQty.isSome ||| presence (n := 8) 2 message.modifyRejectedBitFields.isSome ||| presence (n := 8) 4 message.modifyRejectedLocateBroker.isSome) &&& 2 != 0) = message.modifyRejectedBitFields.isSome := by
     have clear := message.modifyRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_modifyRejectedPresenceBits : (message.modifyRejectedPresenceBits.val ||| presence (n := 8) 1 message.modifyRejectedOrderQty.isSome ||| presence (n := 8) 4 message.modifyRejectedLocateBroker.isSome) &&& 250 = message.modifyRejectedPresenceBits.val := by
+  have selected_modifyRejectedLocateBroker : ((message.modifyRejectedPresenceBits.val ||| presence (n := 8) 1 message.modifyRejectedOrderQty.isSome ||| presence (n := 8) 2 message.modifyRejectedBitFields.isSome ||| presence (n := 8) 4 message.modifyRejectedLocateBroker.isSome) &&& 4 != 0) = message.modifyRejectedLocateBroker.isSome := by
+    have clear := message.modifyRejectedPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_modifyRejectedPresenceBits : (message.modifyRejectedPresenceBits.val ||| presence (n := 8) 1 message.modifyRejectedOrderQty.isSome ||| presence (n := 8) 2 message.modifyRejectedBitFields.isSome ||| presence (n := 8) 4 message.modifyRejectedLocateBroker.isSome) &&& 248 = message.modifyRejectedPresenceBits.val := by
     have clear := message.modifyRejectedPresenceBits.property
     simp only [presence]
     bv_decide
@@ -2052,7 +2101,8 @@ theorem encode_length_pos (message : ModifyRejectedMessage) : (encode message).l
   rw [selected_modifyRejectedOrderQty]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 4) (decodeUIntLE 4) (decodeUIntLE_encodeUIntLE 4), some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_modifyRejectedBitFields]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_modifyRejectedLocateBroker]
   rw [decodeOptional_encodeOptional (Alpha.encode) (Alpha.decode 4) (Alpha.decode_encode), some_bind]
@@ -2065,7 +2115,7 @@ end ModifyRejectedMessage
 
 /-- Order Replaced Message -/
 structure OrderReplacedMessage where
-  orderReplacedPresenceBits : Masked 16 1015
+  orderReplacedPresenceBits : Masked 16 1023
   transactTime : BitVec 64
   orderId : BitVec 64
   clOrdId : BitVec 64
@@ -2075,7 +2125,7 @@ structure OrderReplacedMessage where
   orderReplacedPrice : Option (BitVec 64)
   orderReplacedOrderQty : Option (BitVec 32)
   orderReplacedMaxFloorQty : Option (BitVec 32)
-  selfMatchScope : BitVec 8
+  orderReplacedSelfMatchScope : Option (BitVec 8)
   orderReplacedSelfMatchInstruction : Option (BitVec 8)
   orderReplacedPriceSlideInstruction : Option (BitVec 8)
   orderReplacedReferencePriceTarget : Option (BitVec 16)
@@ -2087,7 +2137,7 @@ structure OrderReplacedMessage where
 namespace OrderReplacedMessage
 
 def encode (message : OrderReplacedMessage) : List UInt8 :=
-  encodeUIntLE 2 (message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome)
+  encodeUIntLE 2 (message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome)
     ++ (encodeUIntLE 8 message.transactTime
     ++ (encodeUIntLE 8 message.orderId
     ++ (encodeUIntLE 8 message.clOrdId
@@ -2097,7 +2147,7 @@ def encode (message : OrderReplacedMessage) : List UInt8 :=
     ++ (encodeOptional (encodeUIntLE 8) message.orderReplacedPrice
     ++ (encodeOptional (encodeUIntLE 4) message.orderReplacedOrderQty
     ++ (encodeOptional (encodeUIntLE 4) message.orderReplacedMaxFloorQty
-    ++ (encodeUIntLE 1 message.selfMatchScope
+    ++ (encodeOptional (encodeUIntLE 1) message.orderReplacedSelfMatchScope
     ++ (encodeOptional (encodeUIntLE 1) message.orderReplacedSelfMatchInstruction
     ++ (encodeOptional (encodeUIntLE 1) message.orderReplacedPriceSlideInstruction
     ++ (encodeOptional (encodeUIntLE 2) message.orderReplacedReferencePriceTarget
@@ -2116,15 +2166,15 @@ def decode (bytes : List UInt8) : Option (OrderReplacedMessage × List UInt8) :=
   let (orderReplacedPrice, bytes) ← decodeOptional (decodeUIntLE 8) (orderReplacedPresenceBits_ &&& 1 != 0) bytes
   let (orderReplacedOrderQty, bytes) ← decodeOptional (decodeUIntLE 4) (orderReplacedPresenceBits_ &&& 2 != 0) bytes
   let (orderReplacedMaxFloorQty, bytes) ← decodeOptional (decodeUIntLE 4) (orderReplacedPresenceBits_ &&& 4 != 0) bytes
-  let (selfMatchScope, bytes) ← decodeUIntLE 1 bytes
+  let (orderReplacedSelfMatchScope, bytes) ← decodeOptional (decodeUIntLE 1) (orderReplacedPresenceBits_ &&& 8 != 0) bytes
   let (orderReplacedSelfMatchInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (orderReplacedPresenceBits_ &&& 16 != 0) bytes
   let (orderReplacedPriceSlideInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (orderReplacedPresenceBits_ &&& 32 != 0) bytes
   let (orderReplacedReferencePriceTarget, bytes) ← decodeOptional (decodeUIntLE 2) (orderReplacedPresenceBits_ &&& 64 != 0) bytes
   let (orderReplacedLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (orderReplacedPresenceBits_ &&& 128 != 0) bytes
   let (orderReplacedRankPrice, bytes) ← decodeOptional (decodeUIntLE 8) (orderReplacedPresenceBits_ &&& 256 != 0) bytes
   let (orderReplacedDisplayPrice, bytes) ← decodeOptional (decodeUIntLE 8) (orderReplacedPresenceBits_ &&& 512 != 0) bytes
-  if fits_orderReplacedPresenceBits : (orderReplacedPresenceBits_ &&& 64520) &&& 1015 = 0 then
-    pure ({ orderReplacedPresenceBits := ⟨orderReplacedPresenceBits_ &&& 64520, fits_orderReplacedPresenceBits⟩, transactTime, orderId, clOrdId, origClOrdId, orderReplacedBitFields, leavesQty, orderReplacedPrice, orderReplacedOrderQty, orderReplacedMaxFloorQty, selfMatchScope, orderReplacedSelfMatchInstruction, orderReplacedPriceSlideInstruction, orderReplacedReferencePriceTarget, orderReplacedLocateBroker, orderReplacedRankPrice, orderReplacedDisplayPrice }, bytes)
+  if fits_orderReplacedPresenceBits : (orderReplacedPresenceBits_ &&& 64512) &&& 1023 = 0 then
+    pure ({ orderReplacedPresenceBits := ⟨orderReplacedPresenceBits_ &&& 64512, fits_orderReplacedPresenceBits⟩, transactTime, orderId, clOrdId, origClOrdId, orderReplacedBitFields, leavesQty, orderReplacedPrice, orderReplacedOrderQty, orderReplacedMaxFloorQty, orderReplacedSelfMatchScope, orderReplacedSelfMatchInstruction, orderReplacedPriceSlideInstruction, orderReplacedReferencePriceTarget, orderReplacedLocateBroker, orderReplacedRankPrice, orderReplacedDisplayPrice }, bytes)
   else none
 
 theorem encode_length_pos (message : OrderReplacedMessage) : (encode message).length > 0 := by
@@ -2135,43 +2185,47 @@ theorem encode_length_pos (message : OrderReplacedMessage) : (encode message).le
 @[simp] theorem decode_encode (message : OrderReplacedMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_orderReplacedPrice : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 1 != 0) = message.orderReplacedPrice.isSome := by
+  have selected_orderReplacedPrice : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 1 != 0) = message.orderReplacedPrice.isSome := by
     have clear := message.orderReplacedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_orderReplacedOrderQty : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 2 != 0) = message.orderReplacedOrderQty.isSome := by
+  have selected_orderReplacedOrderQty : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 2 != 0) = message.orderReplacedOrderQty.isSome := by
     have clear := message.orderReplacedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_orderReplacedMaxFloorQty : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 4 != 0) = message.orderReplacedMaxFloorQty.isSome := by
+  have selected_orderReplacedMaxFloorQty : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 4 != 0) = message.orderReplacedMaxFloorQty.isSome := by
     have clear := message.orderReplacedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_orderReplacedSelfMatchInstruction : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 16 != 0) = message.orderReplacedSelfMatchInstruction.isSome := by
+  have selected_orderReplacedSelfMatchScope : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 8 != 0) = message.orderReplacedSelfMatchScope.isSome := by
     have clear := message.orderReplacedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_orderReplacedPriceSlideInstruction : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 32 != 0) = message.orderReplacedPriceSlideInstruction.isSome := by
+  have selected_orderReplacedSelfMatchInstruction : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 16 != 0) = message.orderReplacedSelfMatchInstruction.isSome := by
     have clear := message.orderReplacedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_orderReplacedReferencePriceTarget : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 64 != 0) = message.orderReplacedReferencePriceTarget.isSome := by
+  have selected_orderReplacedPriceSlideInstruction : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 32 != 0) = message.orderReplacedPriceSlideInstruction.isSome := by
     have clear := message.orderReplacedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_orderReplacedLocateBroker : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 128 != 0) = message.orderReplacedLocateBroker.isSome := by
+  have selected_orderReplacedReferencePriceTarget : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 64 != 0) = message.orderReplacedReferencePriceTarget.isSome := by
     have clear := message.orderReplacedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_orderReplacedRankPrice : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 256 != 0) = message.orderReplacedRankPrice.isSome := by
+  have selected_orderReplacedLocateBroker : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 128 != 0) = message.orderReplacedLocateBroker.isSome := by
     have clear := message.orderReplacedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_orderReplacedDisplayPrice : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 512 != 0) = message.orderReplacedDisplayPrice.isSome := by
+  have selected_orderReplacedRankPrice : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 256 != 0) = message.orderReplacedRankPrice.isSome := by
     have clear := message.orderReplacedPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_orderReplacedPresenceBits : (message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 64520 = message.orderReplacedPresenceBits.val := by
+  have selected_orderReplacedDisplayPrice : ((message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 512 != 0) = message.orderReplacedDisplayPrice.isSome := by
+    have clear := message.orderReplacedPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_orderReplacedPresenceBits : (message.orderReplacedPresenceBits.val ||| presence (n := 16) 1 message.orderReplacedPrice.isSome ||| presence (n := 16) 2 message.orderReplacedOrderQty.isSome ||| presence (n := 16) 4 message.orderReplacedMaxFloorQty.isSome ||| presence (n := 16) 8 message.orderReplacedSelfMatchScope.isSome ||| presence (n := 16) 16 message.orderReplacedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.orderReplacedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.orderReplacedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.orderReplacedLocateBroker.isSome ||| presence (n := 16) 256 message.orderReplacedRankPrice.isSome ||| presence (n := 16) 512 message.orderReplacedDisplayPrice.isSome) &&& 64512 = message.orderReplacedPresenceBits.val := by
     have clear := message.orderReplacedPresenceBits.property
     simp only [presence]
     bv_decide
@@ -2198,7 +2252,8 @@ theorem encode_length_pos (message : OrderReplacedMessage) : (encode message).le
   rw [selected_orderReplacedMaxFloorQty]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 4) (decodeUIntLE 4) (decodeUIntLE_encodeUIntLE 4), some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_orderReplacedSelfMatchScope]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_orderReplacedSelfMatchInstruction]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
@@ -2226,7 +2281,7 @@ end OrderReplacedMessage
 
 /-- Replace Rejected Message -/
 structure ReplaceRejectedMessage where
-  replaceRejectedPresenceBits : Masked 16 247
+  replaceRejectedPresenceBits : Masked 16 255
   transactTime : BitVec 64
   clOrdId : BitVec 64
   origClOrdId : BitVec 64
@@ -2235,7 +2290,7 @@ structure ReplaceRejectedMessage where
   replaceRejectedPrice : Option (BitVec 64)
   replaceRejectedOrderQty : Option (BitVec 32)
   replaceRejectedMaxFloorQty : Option (BitVec 32)
-  selfMatchScope : BitVec 8
+  replaceRejectedSelfMatchScope : Option (BitVec 8)
   replaceRejectedSelfMatchInstruction : Option (BitVec 8)
   replaceRejectedPriceSlideInstruction : Option (BitVec 8)
   replaceRejectedReferencePriceTarget : Option (BitVec 16)
@@ -2245,7 +2300,7 @@ structure ReplaceRejectedMessage where
 namespace ReplaceRejectedMessage
 
 def encode (message : ReplaceRejectedMessage) : List UInt8 :=
-  encodeUIntLE 2 (message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome)
+  encodeUIntLE 2 (message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceRejectedSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome)
     ++ (encodeUIntLE 8 message.transactTime
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 8 message.origClOrdId
@@ -2254,7 +2309,7 @@ def encode (message : ReplaceRejectedMessage) : List UInt8 :=
     ++ (encodeOptional (encodeUIntLE 8) message.replaceRejectedPrice
     ++ (encodeOptional (encodeUIntLE 4) message.replaceRejectedOrderQty
     ++ (encodeOptional (encodeUIntLE 4) message.replaceRejectedMaxFloorQty
-    ++ (encodeUIntLE 1 message.selfMatchScope
+    ++ (encodeOptional (encodeUIntLE 1) message.replaceRejectedSelfMatchScope
     ++ (encodeOptional (encodeUIntLE 1) message.replaceRejectedSelfMatchInstruction
     ++ (encodeOptional (encodeUIntLE 1) message.replaceRejectedPriceSlideInstruction
     ++ (encodeOptional (encodeUIntLE 2) message.replaceRejectedReferencePriceTarget
@@ -2270,13 +2325,13 @@ def decode (bytes : List UInt8) : Option (ReplaceRejectedMessage × List UInt8) 
   let (replaceRejectedPrice, bytes) ← decodeOptional (decodeUIntLE 8) (replaceRejectedPresenceBits_ &&& 1 != 0) bytes
   let (replaceRejectedOrderQty, bytes) ← decodeOptional (decodeUIntLE 4) (replaceRejectedPresenceBits_ &&& 2 != 0) bytes
   let (replaceRejectedMaxFloorQty, bytes) ← decodeOptional (decodeUIntLE 4) (replaceRejectedPresenceBits_ &&& 4 != 0) bytes
-  let (selfMatchScope, bytes) ← decodeUIntLE 1 bytes
+  let (replaceRejectedSelfMatchScope, bytes) ← decodeOptional (decodeUIntLE 1) (replaceRejectedPresenceBits_ &&& 8 != 0) bytes
   let (replaceRejectedSelfMatchInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (replaceRejectedPresenceBits_ &&& 16 != 0) bytes
   let (replaceRejectedPriceSlideInstruction, bytes) ← decodeOptional (decodeUIntLE 1) (replaceRejectedPresenceBits_ &&& 32 != 0) bytes
   let (replaceRejectedReferencePriceTarget, bytes) ← decodeOptional (decodeUIntLE 2) (replaceRejectedPresenceBits_ &&& 64 != 0) bytes
   let (replaceRejectedLocateBroker, bytes) ← decodeOptional (Alpha.decode 4) (replaceRejectedPresenceBits_ &&& 128 != 0) bytes
-  if fits_replaceRejectedPresenceBits : (replaceRejectedPresenceBits_ &&& 65288) &&& 247 = 0 then
-    pure ({ replaceRejectedPresenceBits := ⟨replaceRejectedPresenceBits_ &&& 65288, fits_replaceRejectedPresenceBits⟩, transactTime, clOrdId, origClOrdId, replaceRejectedBitFields, replaceRejectedReason, replaceRejectedPrice, replaceRejectedOrderQty, replaceRejectedMaxFloorQty, selfMatchScope, replaceRejectedSelfMatchInstruction, replaceRejectedPriceSlideInstruction, replaceRejectedReferencePriceTarget, replaceRejectedLocateBroker }, bytes)
+  if fits_replaceRejectedPresenceBits : (replaceRejectedPresenceBits_ &&& 65280) &&& 255 = 0 then
+    pure ({ replaceRejectedPresenceBits := ⟨replaceRejectedPresenceBits_ &&& 65280, fits_replaceRejectedPresenceBits⟩, transactTime, clOrdId, origClOrdId, replaceRejectedBitFields, replaceRejectedReason, replaceRejectedPrice, replaceRejectedOrderQty, replaceRejectedMaxFloorQty, replaceRejectedSelfMatchScope, replaceRejectedSelfMatchInstruction, replaceRejectedPriceSlideInstruction, replaceRejectedReferencePriceTarget, replaceRejectedLocateBroker }, bytes)
   else none
 
 theorem encode_length_pos (message : ReplaceRejectedMessage) : (encode message).length > 0 := by
@@ -2287,35 +2342,39 @@ theorem encode_length_pos (message : ReplaceRejectedMessage) : (encode message).
 @[simp] theorem decode_encode (message : ReplaceRejectedMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_replaceRejectedPrice : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 1 != 0) = message.replaceRejectedPrice.isSome := by
+  have selected_replaceRejectedPrice : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceRejectedSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 1 != 0) = message.replaceRejectedPrice.isSome := by
     have clear := message.replaceRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceRejectedOrderQty : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 2 != 0) = message.replaceRejectedOrderQty.isSome := by
+  have selected_replaceRejectedOrderQty : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceRejectedSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 2 != 0) = message.replaceRejectedOrderQty.isSome := by
     have clear := message.replaceRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceRejectedMaxFloorQty : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 4 != 0) = message.replaceRejectedMaxFloorQty.isSome := by
+  have selected_replaceRejectedMaxFloorQty : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceRejectedSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 4 != 0) = message.replaceRejectedMaxFloorQty.isSome := by
     have clear := message.replaceRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceRejectedSelfMatchInstruction : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 16 != 0) = message.replaceRejectedSelfMatchInstruction.isSome := by
+  have selected_replaceRejectedSelfMatchScope : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceRejectedSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 8 != 0) = message.replaceRejectedSelfMatchScope.isSome := by
     have clear := message.replaceRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceRejectedPriceSlideInstruction : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 32 != 0) = message.replaceRejectedPriceSlideInstruction.isSome := by
+  have selected_replaceRejectedSelfMatchInstruction : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceRejectedSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 16 != 0) = message.replaceRejectedSelfMatchInstruction.isSome := by
     have clear := message.replaceRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceRejectedReferencePriceTarget : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 64 != 0) = message.replaceRejectedReferencePriceTarget.isSome := by
+  have selected_replaceRejectedPriceSlideInstruction : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceRejectedSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 32 != 0) = message.replaceRejectedPriceSlideInstruction.isSome := by
     have clear := message.replaceRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_replaceRejectedLocateBroker : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 128 != 0) = message.replaceRejectedLocateBroker.isSome := by
+  have selected_replaceRejectedReferencePriceTarget : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceRejectedSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 64 != 0) = message.replaceRejectedReferencePriceTarget.isSome := by
     have clear := message.replaceRejectedPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_replaceRejectedPresenceBits : (message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 65288 = message.replaceRejectedPresenceBits.val := by
+  have selected_replaceRejectedLocateBroker : ((message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceRejectedSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 128 != 0) = message.replaceRejectedLocateBroker.isSome := by
+    have clear := message.replaceRejectedPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_replaceRejectedPresenceBits : (message.replaceRejectedPresenceBits.val ||| presence (n := 16) 1 message.replaceRejectedPrice.isSome ||| presence (n := 16) 2 message.replaceRejectedOrderQty.isSome ||| presence (n := 16) 4 message.replaceRejectedMaxFloorQty.isSome ||| presence (n := 16) 8 message.replaceRejectedSelfMatchScope.isSome ||| presence (n := 16) 16 message.replaceRejectedSelfMatchInstruction.isSome ||| presence (n := 16) 32 message.replaceRejectedPriceSlideInstruction.isSome ||| presence (n := 16) 64 message.replaceRejectedReferencePriceTarget.isSome ||| presence (n := 16) 128 message.replaceRejectedLocateBroker.isSome) &&& 65280 = message.replaceRejectedPresenceBits.val := by
     have clear := message.replaceRejectedPresenceBits.property
     simp only [presence]
     bv_decide
@@ -2340,7 +2399,8 @@ theorem encode_length_pos (message : ReplaceRejectedMessage) : (encode message).
   rw [selected_replaceRejectedMaxFloorQty]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 4) (decodeUIntLE 4) (decodeUIntLE_encodeUIntLE 4), some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_replaceRejectedSelfMatchScope]
+  rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
   dsimp only
   rw [selected_replaceRejectedSelfMatchInstruction]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 1) (decodeUIntLE 1) (decodeUIntLE_encodeUIntLE 1), some_bind]
@@ -2427,27 +2487,27 @@ end OrderExecutedMessage
 
 /-- Order Restated Message -/
 structure OrderRestatedMessage where
-  orderRestatedPresenceBits : Masked 8 3
+  orderRestatedPresenceBits : Masked 8 7
   transactTime : BitVec 64
   orderId : BitVec 64
   clOrdId : BitVec 64
   restatementReason : BitVec 8
   orderRestatedRankPrice : Option (BitVec 64)
   orderRestatedDisplayPrice : Option (BitVec 64)
-  displayQty : BitVec 32
+  displayQty : Option (BitVec 32)
   deriving DecidableEq, Repr
 
 namespace OrderRestatedMessage
 
 def encode (message : OrderRestatedMessage) : List UInt8 :=
-  encodeUIntLE 1 (message.orderRestatedPresenceBits.val ||| presence (n := 8) 1 message.orderRestatedRankPrice.isSome ||| presence (n := 8) 2 message.orderRestatedDisplayPrice.isSome)
+  encodeUIntLE 1 (message.orderRestatedPresenceBits.val ||| presence (n := 8) 1 message.orderRestatedRankPrice.isSome ||| presence (n := 8) 2 message.orderRestatedDisplayPrice.isSome ||| presence (n := 8) 4 message.displayQty.isSome)
     ++ (encodeUIntLE 8 message.transactTime
     ++ (encodeUIntLE 8 message.orderId
     ++ (encodeUIntLE 8 message.clOrdId
     ++ (encodeUIntLE 1 message.restatementReason
     ++ (encodeOptional (encodeUIntLE 8) message.orderRestatedRankPrice
     ++ (encodeOptional (encodeUIntLE 8) message.orderRestatedDisplayPrice
-    ++ (encodeUIntLE 4 message.displayQty)))))))
+    ++ (encodeOptional (encodeUIntLE 4) message.displayQty)))))))
 
 def decode (bytes : List UInt8) : Option (OrderRestatedMessage × List UInt8) := do
   let (orderRestatedPresenceBits_, bytes) ← decodeUIntLE 1 bytes
@@ -2457,9 +2517,9 @@ def decode (bytes : List UInt8) : Option (OrderRestatedMessage × List UInt8) :=
   let (restatementReason, bytes) ← decodeUIntLE 1 bytes
   let (orderRestatedRankPrice, bytes) ← decodeOptional (decodeUIntLE 8) (orderRestatedPresenceBits_ &&& 1 != 0) bytes
   let (orderRestatedDisplayPrice, bytes) ← decodeOptional (decodeUIntLE 8) (orderRestatedPresenceBits_ &&& 2 != 0) bytes
-  let (displayQty, bytes) ← decodeUIntLE 4 bytes
-  if fits_orderRestatedPresenceBits : (orderRestatedPresenceBits_ &&& 252) &&& 3 = 0 then
-    pure ({ orderRestatedPresenceBits := ⟨orderRestatedPresenceBits_ &&& 252, fits_orderRestatedPresenceBits⟩, transactTime, orderId, clOrdId, restatementReason, orderRestatedRankPrice, orderRestatedDisplayPrice, displayQty }, bytes)
+  let (displayQty, bytes) ← decodeOptional (decodeUIntLE 4) (orderRestatedPresenceBits_ &&& 4 != 0) bytes
+  if fits_orderRestatedPresenceBits : (orderRestatedPresenceBits_ &&& 248) &&& 7 = 0 then
+    pure ({ orderRestatedPresenceBits := ⟨orderRestatedPresenceBits_ &&& 248, fits_orderRestatedPresenceBits⟩, transactTime, orderId, clOrdId, restatementReason, orderRestatedRankPrice, orderRestatedDisplayPrice, displayQty }, bytes)
   else none
 
 theorem encode_length_pos (message : OrderRestatedMessage) : (encode message).length > 0 := by
@@ -2470,15 +2530,19 @@ theorem encode_length_pos (message : OrderRestatedMessage) : (encode message).le
 @[simp] theorem decode_encode (message : OrderRestatedMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_orderRestatedRankPrice : ((message.orderRestatedPresenceBits.val ||| presence (n := 8) 1 message.orderRestatedRankPrice.isSome ||| presence (n := 8) 2 message.orderRestatedDisplayPrice.isSome) &&& 1 != 0) = message.orderRestatedRankPrice.isSome := by
+  have selected_orderRestatedRankPrice : ((message.orderRestatedPresenceBits.val ||| presence (n := 8) 1 message.orderRestatedRankPrice.isSome ||| presence (n := 8) 2 message.orderRestatedDisplayPrice.isSome ||| presence (n := 8) 4 message.displayQty.isSome) &&& 1 != 0) = message.orderRestatedRankPrice.isSome := by
     have clear := message.orderRestatedPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_orderRestatedDisplayPrice : ((message.orderRestatedPresenceBits.val ||| presence (n := 8) 1 message.orderRestatedRankPrice.isSome ||| presence (n := 8) 2 message.orderRestatedDisplayPrice.isSome) &&& 2 != 0) = message.orderRestatedDisplayPrice.isSome := by
+  have selected_orderRestatedDisplayPrice : ((message.orderRestatedPresenceBits.val ||| presence (n := 8) 1 message.orderRestatedRankPrice.isSome ||| presence (n := 8) 2 message.orderRestatedDisplayPrice.isSome ||| presence (n := 8) 4 message.displayQty.isSome) &&& 2 != 0) = message.orderRestatedDisplayPrice.isSome := by
     have clear := message.orderRestatedPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_orderRestatedPresenceBits : (message.orderRestatedPresenceBits.val ||| presence (n := 8) 1 message.orderRestatedRankPrice.isSome ||| presence (n := 8) 2 message.orderRestatedDisplayPrice.isSome) &&& 252 = message.orderRestatedPresenceBits.val := by
+  have selected_displayQty : ((message.orderRestatedPresenceBits.val ||| presence (n := 8) 1 message.orderRestatedRankPrice.isSome ||| presence (n := 8) 2 message.orderRestatedDisplayPrice.isSome ||| presence (n := 8) 4 message.displayQty.isSome) &&& 4 != 0) = message.displayQty.isSome := by
+    have clear := message.orderRestatedPresenceBits.property
+    simp only [presence]
+    bv_decide
+  have carried_orderRestatedPresenceBits : (message.orderRestatedPresenceBits.val ||| presence (n := 8) 1 message.orderRestatedRankPrice.isSome ||| presence (n := 8) 2 message.orderRestatedDisplayPrice.isSome ||| presence (n := 8) 4 message.displayQty.isSome) &&& 248 = message.orderRestatedPresenceBits.val := by
     have clear := message.orderRestatedPresenceBits.property
     simp only [presence]
     bv_decide
@@ -2498,7 +2562,8 @@ theorem encode_length_pos (message : OrderRestatedMessage) : (encode message).le
   rw [selected_orderRestatedDisplayPrice]
   rw [List.append_assoc, decodeOptional_encodeOptional (encodeUIntLE 8) (decodeUIntLE 8) (decodeUIntLE_encodeUIntLE 8), some_bind]
   dsimp only
-  rw [decodeUIntLE_encodeUIntLE, some_bind]
+  rw [selected_displayQty]
+  rw [decodeOptional_encodeOptional (encodeUIntLE 4) (decodeUIntLE 4) (decodeUIntLE_encodeUIntLE 4), some_bind]
   dsimp only
   rw [dite_eq_left (by rw [carried_orderRestatedPresenceBits]; exact message.orderRestatedPresenceBits.property)]
   simp only [carried_orderRestatedPresenceBits]

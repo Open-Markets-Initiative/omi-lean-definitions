@@ -329,7 +329,7 @@ theorem encode_length_pos (message : MdInstrumentEntryGrp) : (encode message).le
 
 end MdInstrumentEntryGrp
 
-/-- Instrument Summary Message: 408 bytes -/
+/-- Instrument Summary Message -/
 structure InstrumentSummaryMessage where
   securityId : BitVec 64
   lastUpdateTime : BitVec 64
@@ -338,11 +338,10 @@ structure InstrumentSummaryMessage where
   securityStatus : BitVec 8
   securityTradingStatus : BitVec 8
   fastMarketIndicator : BitVec 8
-  noMdEntries : BitVec 8
   tradeVolume : BitVec 64
   noOfTrades : BitVec 32
   pad4 : Alpha 4
-  mdInstrumentEntryGrp : Exact 15 MdInstrumentEntryGrp
+  mdInstrumentEntryGrp : Bounded 1 MdInstrumentEntryGrp
   deriving DecidableEq, Repr
 
 namespace InstrumentSummaryMessage
@@ -355,7 +354,7 @@ def encode (message : InstrumentSummaryMessage) : List UInt8 :=
     ++ (encodeUIntLE 1 message.securityStatus
     ++ (encodeUIntLE 1 message.securityTradingStatus
     ++ (encodeUIntLE 1 message.fastMarketIndicator
-    ++ (encodeUIntLE 1 message.noMdEntries
+    ++ (encodeUIntLE 1 (BitVec.ofNat (8 * 1) message.mdInstrumentEntryGrp.val.length)
     ++ (encodeUIntLE 8 message.tradeVolume
     ++ (encodeUIntLE 4 message.noOfTrades
     ++ (Alpha.encode message.pad4
@@ -373,18 +372,22 @@ def decode (bytes : List UInt8) : Option (InstrumentSummaryMessage × List UInt8
   let (tradeVolume, bytes) ← decodeUIntLE 8 bytes
   let (noOfTrades, bytes) ← decodeUIntLE 4 bytes
   let (pad4, bytes) ← Alpha.decode 4 bytes
-  let (mdInstrumentEntryGrp_, bytes) ← decodeMany MdInstrumentEntryGrp.decode 15 bytes
-  if fits_mdInstrumentEntryGrp : mdInstrumentEntryGrp_.length = 15 then
-    pure ({ securityId, lastUpdateTime, trdRegTsExecutionTime, totNoOrders, securityStatus, securityTradingStatus, fastMarketIndicator, noMdEntries, tradeVolume, noOfTrades, pad4, mdInstrumentEntryGrp := ⟨mdInstrumentEntryGrp_, fits_mdInstrumentEntryGrp⟩ }, bytes)
+  let (mdInstrumentEntryGrp_, bytes) ← decodeMany MdInstrumentEntryGrp.decode noMdEntries.toNat bytes
+  if fits_mdInstrumentEntryGrp : mdInstrumentEntryGrp_.length < 256 ^ 1 then
+    pure ({ securityId, lastUpdateTime, trdRegTsExecutionTime, totNoOrders, securityStatus, securityTradingStatus, fastMarketIndicator, tradeVolume, noOfTrades, pad4, mdInstrumentEntryGrp := ⟨mdInstrumentEntryGrp_, fits_mdInstrumentEntryGrp⟩ }, bytes)
   else none
 
-@[simp] theorem encode_length (message : InstrumentSummaryMessage) : (encode message).length = 408 := by
-  unfold encode
-  simp only [List.length_append, encodeUIntLE_length, Alpha.encode_length, encodeMany_length_const MdInstrumentEntryGrp.encode 24 MdInstrumentEntryGrp.encode_length, message.mdInstrumentEntryGrp.length_eq]
-
 theorem encode_length_pos (message : InstrumentSummaryMessage) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
+  unfold encode
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : InstrumentSummaryMessage) : (encode message).length ≤ 6168 := by
+  have bound_mdInstrumentEntryGrp := message.mdInstrumentEntryGrp.length_lt
+  unfold encode
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, Alpha.encode_length, encodeMany_length_const MdInstrumentEntryGrp.encode 24 MdInstrumentEntryGrp.encode_length]
+  omega
 
 @[simp] theorem decode_encode (message : InstrumentSummaryMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
@@ -411,9 +414,9 @@ theorem encode_length_pos (message : InstrumentSummaryMessage) : (encode message
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeMany_exact 15 MdInstrumentEntryGrp.encode MdInstrumentEntryGrp.decode MdInstrumentEntryGrp.decode_encode, some_bind]
+  rw [decodeMany_bounded 1 MdInstrumentEntryGrp.encode MdInstrumentEntryGrp.decode MdInstrumentEntryGrp.decode_encode, some_bind]
   dsimp only
-  rw [dite_eq_left message.mdInstrumentEntryGrp.length_eq]
+  rw [dite_eq_left message.mdInstrumentEntryGrp.length_lt]
   rfl
 
 end InstrumentSummaryMessage
@@ -963,7 +966,7 @@ theorem encode_length_pos (message : MdTradeEntryGrp) : (encode message).length 
 
 end MdTradeEntryGrp
 
-/-- Trade Reversal Message: 416 bytes -/
+/-- Trade Reversal Message -/
 structure TradeReversalMessage where
   securityId : BitVec 64
   transactTime : BitVec 64
@@ -972,9 +975,8 @@ structure TradeReversalMessage where
   lastQty : BitVec 64
   lastPx : BitVec 64
   trdRegTsExecutionTime : BitVec 64
-  noMdEntries : BitVec 8
   pad7 : Alpha 7
-  mdTradeEntryGrp : Exact 15 MdTradeEntryGrp
+  mdTradeEntryGrp : Bounded 1 MdTradeEntryGrp
   deriving DecidableEq, Repr
 
 namespace TradeReversalMessage
@@ -987,7 +989,7 @@ def encode (message : TradeReversalMessage) : List UInt8 :=
     ++ (encodeUIntLE 8 message.lastQty
     ++ (encodeUIntLE 8 message.lastPx
     ++ (encodeUIntLE 8 message.trdRegTsExecutionTime
-    ++ (encodeUIntLE 1 message.noMdEntries
+    ++ (encodeUIntLE 1 (BitVec.ofNat (8 * 1) message.mdTradeEntryGrp.val.length)
     ++ (Alpha.encode message.pad7
     ++ (encodeMany MdTradeEntryGrp.encode message.mdTradeEntryGrp.val)))))))))
 
@@ -1001,18 +1003,22 @@ def decode (bytes : List UInt8) : Option (TradeReversalMessage × List UInt8) :=
   let (trdRegTsExecutionTime, bytes) ← decodeUIntLE 8 bytes
   let (noMdEntries, bytes) ← decodeUIntLE 1 bytes
   let (pad7, bytes) ← Alpha.decode 7 bytes
-  let (mdTradeEntryGrp_, bytes) ← decodeMany MdTradeEntryGrp.decode 15 bytes
-  if fits_mdTradeEntryGrp : mdTradeEntryGrp_.length = 15 then
-    pure ({ securityId, transactTime, trdMatchId, pad4, lastQty, lastPx, trdRegTsExecutionTime, noMdEntries, pad7, mdTradeEntryGrp := ⟨mdTradeEntryGrp_, fits_mdTradeEntryGrp⟩ }, bytes)
+  let (mdTradeEntryGrp_, bytes) ← decodeMany MdTradeEntryGrp.decode noMdEntries.toNat bytes
+  if fits_mdTradeEntryGrp : mdTradeEntryGrp_.length < 256 ^ 1 then
+    pure ({ securityId, transactTime, trdMatchId, pad4, lastQty, lastPx, trdRegTsExecutionTime, pad7, mdTradeEntryGrp := ⟨mdTradeEntryGrp_, fits_mdTradeEntryGrp⟩ }, bytes)
   else none
 
-@[simp] theorem encode_length (message : TradeReversalMessage) : (encode message).length = 416 := by
-  unfold encode
-  simp only [List.length_append, encodeUIntLE_length, Alpha.encode_length, encodeMany_length_const MdTradeEntryGrp.encode 24 MdTradeEntryGrp.encode_length, message.mdTradeEntryGrp.length_eq]
-
 theorem encode_length_pos (message : TradeReversalMessage) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
+  unfold encode
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : TradeReversalMessage) : (encode message).length ≤ 6176 := by
+  have bound_mdTradeEntryGrp := message.mdTradeEntryGrp.length_lt
+  unfold encode
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, Alpha.encode_length, encodeMany_length_const MdTradeEntryGrp.encode 24 MdTradeEntryGrp.encode_length]
+  omega
 
 @[simp] theorem decode_encode (message : TradeReversalMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
@@ -1035,9 +1041,9 @@ theorem encode_length_pos (message : TradeReversalMessage) : (encode message).le
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeMany_exact 15 MdTradeEntryGrp.encode MdTradeEntryGrp.decode MdTradeEntryGrp.decode_encode, some_bind]
+  rw [decodeMany_bounded 1 MdTradeEntryGrp.encode MdTradeEntryGrp.decode MdTradeEntryGrp.decode_encode, some_bind]
   dsimp only
-  rw [dite_eq_left message.mdTradeEntryGrp.length_eq]
+  rw [dite_eq_left message.mdTradeEntryGrp.length_lt]
   rfl
 
 end TradeReversalMessage
@@ -1357,16 +1363,15 @@ theorem encode_length_pos (message : InstrmtLegGrp) : (encode message).length > 
 
 end InstrmtLegGrp
 
-/-- Add Complex Instrument Message: 104 bytes -/
+/-- Add Complex Instrument Message -/
 structure AddComplexInstrumentMessage where
   securityId : BitVec 64
   transactTime : BitVec 64
   securitySubType : BitVec 32
   productComplex : BitVec 8
   impliedMarketIndicator : BitVec 8
-  noLegs : BitVec 8
   pad1 : Alpha 1
-  instrmtLegGrp : Exact 5 InstrmtLegGrp
+  instrmtLegGrp : Bounded 1 InstrmtLegGrp
   deriving DecidableEq, Repr
 
 namespace AddComplexInstrumentMessage
@@ -1377,7 +1382,7 @@ def encode (message : AddComplexInstrumentMessage) : List UInt8 :=
     ++ (encodeUIntLE 4 message.securitySubType
     ++ (encodeUIntLE 1 message.productComplex
     ++ (encodeUIntLE 1 message.impliedMarketIndicator
-    ++ (encodeUIntLE 1 message.noLegs
+    ++ (encodeUIntLE 1 (BitVec.ofNat (8 * 1) message.instrmtLegGrp.val.length)
     ++ (Alpha.encode message.pad1
     ++ (encodeMany InstrmtLegGrp.encode message.instrmtLegGrp.val)))))))
 
@@ -1389,18 +1394,22 @@ def decode (bytes : List UInt8) : Option (AddComplexInstrumentMessage × List UI
   let (impliedMarketIndicator, bytes) ← decodeUIntLE 1 bytes
   let (noLegs, bytes) ← decodeUIntLE 1 bytes
   let (pad1, bytes) ← Alpha.decode 1 bytes
-  let (instrmtLegGrp_, bytes) ← decodeMany InstrmtLegGrp.decode 5 bytes
-  if fits_instrmtLegGrp : instrmtLegGrp_.length = 5 then
-    pure ({ securityId, transactTime, securitySubType, productComplex, impliedMarketIndicator, noLegs, pad1, instrmtLegGrp := ⟨instrmtLegGrp_, fits_instrmtLegGrp⟩ }, bytes)
+  let (instrmtLegGrp_, bytes) ← decodeMany InstrmtLegGrp.decode noLegs.toNat bytes
+  if fits_instrmtLegGrp : instrmtLegGrp_.length < 256 ^ 1 then
+    pure ({ securityId, transactTime, securitySubType, productComplex, impliedMarketIndicator, pad1, instrmtLegGrp := ⟨instrmtLegGrp_, fits_instrmtLegGrp⟩ }, bytes)
   else none
 
-@[simp] theorem encode_length (message : AddComplexInstrumentMessage) : (encode message).length = 104 := by
-  unfold encode
-  simp only [List.length_append, encodeUIntLE_length, Alpha.encode_length, encodeMany_length_const InstrmtLegGrp.encode 16 InstrmtLegGrp.encode_length, message.instrmtLegGrp.length_eq]
-
 theorem encode_length_pos (message : AddComplexInstrumentMessage) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
+  unfold encode
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : AddComplexInstrumentMessage) : (encode message).length ≤ 4104 := by
+  have bound_instrmtLegGrp := message.instrmtLegGrp.length_lt
+  unfold encode
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, Alpha.encode_length, encodeMany_length_const InstrmtLegGrp.encode 16 InstrmtLegGrp.encode_length]
+  omega
 
 @[simp] theorem decode_encode (message : AddComplexInstrumentMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
@@ -1419,9 +1428,9 @@ theorem encode_length_pos (message : AddComplexInstrumentMessage) : (encode mess
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [decodeMany_exact 5 InstrmtLegGrp.encode InstrmtLegGrp.decode InstrmtLegGrp.decode_encode, some_bind]
+  rw [decodeMany_bounded 1 InstrmtLegGrp.encode InstrmtLegGrp.decode InstrmtLegGrp.decode_encode, some_bind]
   dsimp only
-  rw [dite_eq_left message.instrmtLegGrp.length_eq]
+  rw [dite_eq_left message.instrmtLegGrp.length_lt]
   rfl
 
 end AddComplexInstrumentMessage
@@ -1501,7 +1510,7 @@ def encode : Payload → List UInt8
   | .addComplexInstrumentMessage message => AddComplexInstrumentMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : Payload) : (encode message).length ≤ 416 := by
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 6176 := by
   cases message with
   | heartbeatMessage inner =>
     simp only [encode, HeartbeatMessage.encode_length]
@@ -1513,7 +1522,8 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 416 :
     simp only [encode, SnapshotOrderMessage.encode_length]
     omega
   | instrumentSummaryMessage inner =>
-    simp only [encode, InstrumentSummaryMessage.encode_length]
+    have bound_inner := InstrumentSummaryMessage.encode_length_le inner
+    simp only [encode]
     omega
   | auctionBestBidOfferMessage inner =>
     simp only [encode, AuctionBestBidOfferMessage.encode_length]
@@ -1546,7 +1556,8 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 416 :
     simp only [encode, FullOrderExecutionMessage.encode_length]
     omega
   | tradeReversalMessage inner =>
-    simp only [encode, TradeReversalMessage.encode_length]
+    have bound_inner := TradeReversalMessage.encode_length_le inner
+    simp only [encode]
     omega
   | executionSummaryMessage inner =>
     simp only [encode, ExecutionSummaryMessage.encode_length]
@@ -1564,7 +1575,8 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 416 :
     simp only [encode, InstrumentStateChangeMessage.encode_length]
     omega
   | addComplexInstrumentMessage inner =>
-    simp only [encode, AddComplexInstrumentMessage.encode_length]
+    have bound_inner := AddComplexInstrumentMessage.encode_length_le inner
+    simp only [encode]
     omega
 
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
@@ -1640,7 +1652,8 @@ theorem encodeBody_length_lt (message : Message) : (encodeBody message).length +
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, SnapshotOrderMessage.encode_length]
     omega
   | instrumentSummaryMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, InstrumentSummaryMessage.encode_length]
+    have bound_inner := InstrumentSummaryMessage.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
     omega
   | auctionBestBidOfferMessage inner =>
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, AuctionBestBidOfferMessage.encode_length]
@@ -1673,7 +1686,8 @@ theorem encodeBody_length_lt (message : Message) : (encodeBody message).length +
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, FullOrderExecutionMessage.encode_length]
     omega
   | tradeReversalMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, TradeReversalMessage.encode_length]
+    have bound_inner := TradeReversalMessage.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
     omega
   | executionSummaryMessage inner =>
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, ExecutionSummaryMessage.encode_length]
@@ -1691,7 +1705,8 @@ theorem encodeBody_length_lt (message : Message) : (encodeBody message).length +
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, InstrumentStateChangeMessage.encode_length]
     omega
   | addComplexInstrumentMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, AddComplexInstrumentMessage.encode_length]
+    have bound_inner := AddComplexInstrumentMessage.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
     omega
 
 /-- Size rule: Body Len counts the bytes after it plus 2, so it is written from the body and checked on decode -/

@@ -36,8 +36,8 @@
 [BruceAts.BruceEquities.LastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BruceAts/Protocols/BruceEquities/LastSale.md "Last Sale"
 
 [BruceAts.BruceEquities.BestBidAndOffer.Itch.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/bruceats/bestbidandoffer/BruceEquities_BestBidAndOffer_v1_0.lean "BruceAts BestBidAndOffer Itch v1.0 Lean Definition"
-[BruceAts.BruceEquities.BestBidAndOffer.Itch.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BruceAts/Specifications/Equities/BestBidAndOffer/Bruce.Equities.BestBidAndOffer.Itch.v1.0.pdf "Bruce ATS 1.0 Pdf"
+[BruceAts.BruceEquities.BestBidAndOffer.Itch.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BruceAts/Specifications/Bbo/Bruce%20Best%20Bid%20and%20Offer.pdf "Bruce ATS 1.0 Pdf"
 [BruceAts.BruceEquities.DepthOfBook.Itch.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/bruceats/depthofbook/BruceEquities_DepthOfBook_v1_0.lean "BruceAts DepthOfBook Itch v1.0 Lean Definition"
-[BruceAts.BruceEquities.DepthOfBook.Itch.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BruceAts/Specifications/Equities/DepthOfBook/Bruce.Equities.DepthOfBook.Itch.v1.0.pdf "Bruce ATS 1.0 Pdf"
+[BruceAts.BruceEquities.DepthOfBook.Itch.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BruceAts/Specifications/DepthOfBook/Bruce%20Depth%20of%20Book.pdf "Bruce ATS 1.0 Pdf"
 [BruceAts.BruceEquities.LastSale.Itch.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/bruceats/lastsale/BruceEquities_LastSale_v1_0.lean "BruceAts LastSale Itch v1.0 Lean Definition"
-[BruceAts.BruceEquities.LastSale.Itch.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BruceAts/Specifications/Equities/LastSale/Bruce.Equities.LastSale.Itch.v1.0.pdf "Bruce ATS 1.0 Pdf"
+[BruceAts.BruceEquities.LastSale.Itch.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BruceAts/Specifications/LastSale/Bruce%20Last%20Sale.pdf "Bruce ATS 1.0 Pdf"

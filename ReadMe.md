@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 785 | 2556378 |
+| 860 | 2711723 |
 
 ## Testing
 
@@ -43,11 +43,11 @@ Other generated code can be found at [Omi Projects](https://github.com/Open-Mark
 
 ## Exchanges
 
-> [24XEquities][24XEquities.Exchange] · [A2XEquities][A2XEquities.Exchange] · [AquisEquities][AquisEquities.Exchange] · [AsxDerivatives][AsxDerivatives.Exchange] · [AsxSecurities][AsxSecurities.Exchange] · [B3Derivatives][B3Derivatives.Exchange] · [BivaEquities][BivaEquities.Exchange] · [BlueEquities][BlueEquities.Ats] · [BorsaIstanbul][BorsaIstanbul.Exchange] · [BoxOptions][BoxOptions.Exchange] · [BruceEquities][BruceEquities.Ats] · [BseIndia][BseIndia.Exchange] · [CanadaEquities][CanadaEquities.Exchange] · [CoinbaseDerivatives][CoinbaseDerivatives.Exchange] · [Deribit][Deribit.Exchange] · [EmeraldOptions][EmeraldOptions.Exchange] · [FseEquities][FseEquities.Exchange] · [GemxOptions][GemxOptions.Exchange] · [IexEquities][IexEquities.Exchange] · [IntelligentCross][IntelligentCross.Ats] · [IseOptions][IseOptions.Exchange] · [MiaxOptions][MiaxOptions.Exchange] · [MrxOptions][MrxOptions.Exchange] · [Mx][Mx.Exchange] · [NfxFutures][NfxFutures.Exchange] · [NomOptions][NomOptions.Exchange] · [NordicDerivatives][NordicDerivatives.Exchange] · [NordicEquities][NordicEquities.Exchange] · [NseCd][NseCd.Exchange] · [NseCm][NseCm.Exchange] · [NseCom][NseCom.Exchange] · [NseEquities][NseEquities.Exchange] · [NseFo][NseFo.Exchange] · [NsmEquities][NsmEquities.Exchange] · [NtxEquities][NtxEquities.Exchange] · [NtxOptions][NtxOptions.Exchange] · [OnyxFutures][OnyxFutures.Exchange] · [OseDerivatives][OseDerivatives.Exchange] · [PearlEquities][PearlEquities.Exchange] · [PearlOptions][PearlOptions.Exchange] · [PhlxOptions][PhlxOptions.Exchange] · [PsxEquities][PsxEquities.Exchange] · [SapphireOptions][SapphireOptions.Exchange] · [SmallFutures][SmallFutures.Exchange] · [SseEquities][SseEquities.Exchange] · [TseEquities][TseEquities.Exchange] · [Tsx][Tsx.Exchange] · [TsxAlpha][TsxAlpha.Exchange] · [TxseEquities][TxseEquities.Exchange]
+> [24XEquities][24XEquities.Exchange] · [A2XEquities][A2XEquities.Exchange] · [AquisEquities][AquisEquities.Exchange] · [AsxDerivatives][AsxDerivatives.Exchange] · [AsxSecurities][AsxSecurities.Exchange] · [B3Derivatives][B3Derivatives.Exchange] · [BivaEquities][BivaEquities.Exchange] · [BlueEquities][BlueEquities.Ats] · [BorsaIstanbul][BorsaIstanbul.Exchange] · [BoxOptions][BoxOptions.Exchange] · [BruceEquities][BruceEquities.Ats] · [BseIndia][BseIndia.Exchange] · [CoinbaseDerivatives][CoinbaseDerivatives.Exchange] · [Deribit][Deribit.Exchange] · [EmeraldOptions][EmeraldOptions.Exchange] · [FseEquities][FseEquities.Exchange] · [GemxOptions][GemxOptions.Exchange] · [IexEquities][IexEquities.Exchange] · [IntelligentCross][IntelligentCross.Ats] · [IseOptions][IseOptions.Exchange] · [MiaxOptions][MiaxOptions.Exchange] · [MrxOptions][MrxOptions.Exchange] · [Mx][Mx.Exchange] · [NasdaqCanada][NasdaqCanada.Exchange] · [NfxFutures][NfxFutures.Exchange] · [NomOptions][NomOptions.Exchange] · [NordicDerivatives][NordicDerivatives.Exchange] · [NordicEquities][NordicEquities.Exchange] · [NseCd][NseCd.Exchange] · [NseCm][NseCm.Exchange] · [NseCom][NseCom.Exchange] · [NseEquities][NseEquities.Exchange] · [NseFo][NseFo.Exchange] · [NsmEquities][NsmEquities.Exchange] · [NtxEquities][NtxEquities.Exchange] · [NtxOptions][NtxOptions.Exchange] · [OnyxFutures][OnyxFutures.Exchange] · [OseDerivatives][OseDerivatives.Exchange] · [PearlEquities][PearlEquities.Exchange] · [PearlOptions][PearlOptions.Exchange] · [PhlxOptions][PhlxOptions.Exchange] · [PsxEquities][PsxEquities.Exchange] · [SapphireOptions][SapphireOptions.Exchange] · [SmallFutures][SmallFutures.Exchange] · [SseEquities][SseEquities.Exchange] · [TseEquities][TseEquities.Exchange] · [Tsx][Tsx.Exchange] · [TsxAlpha][TsxAlpha.Exchange] · [TxseEquities][TxseEquities.Exchange]
 
 ## Platforms
 
-> [CixAts CixAspen][CixAspen.Platform] · [Cme Globex][Globex.Platform] · [Euronext Optiq][Optiq.Platform] · [Eurex T7][T7.Platform] · [Sgx TitanDt][TitanDt.Platform] · [Nasdaq UsOptions][UsOptions.Platform]
+> [CixAts CixAspen][CixAspen.Platform] · [Cme Globex][Globex.Platform] · [Euronext Optiq][Optiq.Platform] · [Eurex T7][T7.Platform] · [Sgx TitanDt][TitanDt.Platform]
 
 ## Consolidators
 
@@ -101,10 +101,10 @@ Enjoy.
 [Omi.Encoding.Fei]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Fei.md "Fei Encoding"
 [Omi.Encoding.Meo]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Meo.md "Meo Encoding"
 [Omi.Encoding.ESesM]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/ESesM.md "ESesM Encoding"
+[Omi.Encoding.Sqf]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Sqf.md "Sqf Encoding"
 [Omi.Encoding.GeniumAmd]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/GeniumAmd.md "GeniumAmd Encoding"
 [Omi.Encoding.Binary]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Binary.md "Binary Encoding"
 [Omi.Encoding.Utp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Utp.md "Utp Encoding"
-[Omi.Encoding.Sqf]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Sqf.md "Sqf Encoding"
 [Omi.Encoding.NnfTrimmed]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/NnfTrimmed.md "NnfTrimmed Encoding"
 [Omi.Encoding.Xmt]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Xmt.md "Xmt Encoding"
 [Omi.Encoding.Rake]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Rake.md "Rake Encoding"
@@ -201,16 +201,19 @@ Enjoy.
 [Miax.SapphireOptions.ComplexTopOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Miax/Protocols/SapphireOptions/ComplexTopOfMarket.md "Complex Top of Market"
 [Miax.SapphireOptions.LiquidityFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Miax/Protocols/SapphireOptions/LiquidityFeed.md "Liquidity Feed"
 [Miax.SapphireOptions.TopOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Miax/Protocols/SapphireOptions/TopOfMarket.md "Top of Market"
-[Nasdaq.CanadaEquities.Chixmd]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/CanadaEquities/Chixmd.md "CHIXMD Market Data"
-[Nasdaq.CanadaEquities.Chixmmd]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/CanadaEquities/Chixmmd.md "CHIXMMD Multicast Market Data"
-[Nasdaq.CanadaEquities.OrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/CanadaEquities/OrderEntry.md "Nasdaq Canada Order Entry"
+[Nasdaq.GemxOptions.Cti]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/GemxOptions/Cti.md "Clearing Trade Interface"
 [Nasdaq.GemxOptions.DepthOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/GemxOptions/DepthOfMarket.md "Depth Of Market"
 [Nasdaq.GemxOptions.OrderFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/GemxOptions/OrderFeed.md "Order Feed"
+[Nasdaq.GemxOptions.Otto]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/GemxOptions/Otto.md "Ouch to Trade Options"
+[Nasdaq.GemxOptions.Quoting]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/GemxOptions/Quoting.md "Specialized Quote Interface"
 [Nasdaq.GemxOptions.TopOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/GemxOptions/TopOfMarket.md "Top Of Market"
 [Nasdaq.GemxOptions.TradeFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/GemxOptions/TradeFeed.md "Trade Feed"
+[Nasdaq.IseOptions.Cti]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/Cti.md "Clearing Trade Interface"
 [Nasdaq.IseOptions.DepthOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/DepthOfMarket.md "Depth Of Market"
 [Nasdaq.IseOptions.OrderComboFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/OrderComboFeed.md "Ise Order Combo Market Data Feed"
 [Nasdaq.IseOptions.OrderFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/OrderFeed.md "Ise Order Feed Market Data"
+[Nasdaq.IseOptions.Otto]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/Otto.md "Ouch to Trade Options"
+[Nasdaq.IseOptions.Quoting]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/Quoting.md "Specialized Quote Interface"
 [Nasdaq.IseOptions.SpreadDepthOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/SpreadDepthOfMarket.md "Phlx Options Spread Depth"
 [Nasdaq.IseOptions.SpreadOrders]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/SpreadOrders.md "Phlx Options Spread Orders"
 [Nasdaq.IseOptions.SpreadTopOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/SpreadTopOfMarket.md "Phlx Options Spread Top Of Market"
@@ -218,17 +221,26 @@ Enjoy.
 [Nasdaq.IseOptions.TopComboQuoteFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/TopComboQuoteFeed.md "Ise Top Combo Quote Feed"
 [Nasdaq.IseOptions.TopOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/TopOfMarket.md "Top Of Market"
 [Nasdaq.IseOptions.TradeFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/IseOptions/TradeFeed.md "Trade Feed"
+[Nasdaq.MrxOptions.Cti]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/Cti.md "Clearing Trade Interface"
 [Nasdaq.MrxOptions.DepthOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/DepthOfMarket.md "Depth Of Market"
 [Nasdaq.MrxOptions.OrderFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/OrderFeed.md "Order Feed"
+[Nasdaq.MrxOptions.Otto]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/Otto.md "Ouch to Trade Options"
+[Nasdaq.MrxOptions.Quoting]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/Quoting.md "Specialized Quote Interface"
 [Nasdaq.MrxOptions.SpreadDepthOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/SpreadDepthOfMarket.md "Phlx Options Spread Depth"
 [Nasdaq.MrxOptions.SpreadOrders]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/SpreadOrders.md "Phlx Options Spread Orders"
 [Nasdaq.MrxOptions.SpreadTopOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/SpreadTopOfMarket.md "Phlx Options Spread Top Of Market"
 [Nasdaq.MrxOptions.SpreadTradeFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/SpreadTradeFeed.md "Phlx Options Spread Trade Feed"
 [Nasdaq.MrxOptions.TopOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/TopOfMarket.md "Top Of Market"
 [Nasdaq.MrxOptions.TradeFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/MrxOptions/TradeFeed.md "Trade Feed"
+[Nasdaq.NasdaqCanada.Chixmd]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NasdaqCanada/Chixmd.md "CHIXMD Market Data"
+[Nasdaq.NasdaqCanada.Chixmmd]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NasdaqCanada/Chixmmd.md "CHIXMMD Multicast Market Data"
+[Nasdaq.NasdaqCanada.OrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NasdaqCanada/OrderEntry.md "Nasdaq Canada Order Entry"
 [Nasdaq.NfxFutures.MarketData]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NfxFutures/MarketData.md "Genium INET Auxiliary Market Data"
 [Nasdaq.NomOptions.Bono]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NomOptions/Bono.md "Nom Binary Order Entry"
+[Nasdaq.NomOptions.Cti]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NomOptions/Cti.md "Clearing Trade Interface"
 [Nasdaq.NomOptions.Itto]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NomOptions/Itto.md "Itch To Trade Options"
+[Nasdaq.NomOptions.Otto]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NomOptions/Otto.md "Ouch to Trade Options"
+[Nasdaq.NomOptions.Quoting]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NomOptions/Quoting.md "Specialized Quote Interface"
 [Nasdaq.NordicDerivatives.DepthOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NordicDerivatives/DepthOfBook.md "Genium INET Depth Of Book"
 [Nasdaq.NordicDerivatives.MarketData]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NordicDerivatives/MarketData.md "Genium INET Auxiliary Market Data"
 [Nasdaq.NordicEquities.LastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NordicEquities/LastSale.md "Nordic Equity Last Sale"
@@ -236,6 +248,7 @@ Enjoy.
 [Nasdaq.NordicEquities.RiskControl]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NordicEquities/RiskControl.md "Nordic Pre-Trade Risk Management"
 [Nasdaq.NordicEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NordicEquities/TotalView.md "Nordic Equity TotalView"
 [Nasdaq.NsmEquities.Aggregated]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NsmEquities/Aggregated.md "TotalView Aggregated"
+[Nasdaq.NsmEquities.BasicPlus]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NsmEquities/BasicPlus.md "Basic Plus"
 [Nasdaq.NsmEquities.Level2]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NsmEquities/Level2.md "Level 2"
 [Nasdaq.NsmEquities.NlsPlus]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NsmEquities/NlsPlus.md "Last Sale Plus"
 [Nasdaq.NsmEquities.Nois]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NsmEquities/Nois.md "Net Order Imbalance Snapshot"
@@ -243,14 +256,21 @@ Enjoy.
 [Nasdaq.NsmEquities.Orders]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NsmEquities/Orders.md "Orders"
 [Nasdaq.NsmEquities.Qbbo]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NsmEquities/Qbbo.md "Quoted Best Bid And Offer"
 [Nasdaq.NsmEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NsmEquities/TotalView.md "TotalView Itch"
+[Nasdaq.NsmEquities.TotalViewPlus]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NsmEquities/TotalViewPlus.md "TotalView Plus"
+[Nasdaq.NtxEquities.MatchView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxEquities/MatchView.md "Match View"
 [Nasdaq.NtxEquities.Orders]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxEquities/Orders.md "BX Orders"
 [Nasdaq.NtxEquities.Qbbo]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxEquities/Qbbo.md "Quoted Best Bid And Offer"
 [Nasdaq.NtxEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxEquities/TotalView.md "TX TotalView Itch"
+[Nasdaq.NtxOptions.Cti]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxOptions/Cti.md "Clearing Trade Interface"
 [Nasdaq.NtxOptions.DepthOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxOptions/DepthOfMarket.md "Depth Of Market"
+[Nasdaq.NtxOptions.Quoting]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxOptions/Quoting.md "Specialized Quote Interface"
 [Nasdaq.NtxOptions.TopOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxOptions/TopOfMarket.md "Top Of Market"
 [Nasdaq.NtxOptions.TradeFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/NtxOptions/TradeFeed.md "Trade Feed"
+[Nasdaq.PhlxOptions.Cti]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PhlxOptions/Cti.md "Clearing Trade Interface"
 [Nasdaq.PhlxOptions.DepthOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PhlxOptions/DepthOfMarket.md "Depth Of Market"
 [Nasdaq.PhlxOptions.Orders]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PhlxOptions/Orders.md "PHLX Orders"
+[Nasdaq.PhlxOptions.Otto]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PhlxOptions/Otto.md "Ouch to Trade Options"
+[Nasdaq.PhlxOptions.Quoting]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PhlxOptions/Quoting.md "Specialized Quote Interface"
 [Nasdaq.PhlxOptions.SpreadDepthOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PhlxOptions/SpreadDepthOfMarket.md "Spread Depth"
 [Nasdaq.PhlxOptions.SpreadOrders]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PhlxOptions/SpreadOrders.md "Spread Orders"
 [Nasdaq.PhlxOptions.SpreadTopOfMarket]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PhlxOptions/SpreadTopOfMarket.md "Spread Top Of Market"
@@ -262,8 +282,6 @@ Enjoy.
 [Nasdaq.PsxEquities.Orders]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PsxEquities/Orders.md "Orders"
 [Nasdaq.PsxEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/PsxEquities/TotalView.md "TotalView Itch"
 [Nasdaq.Uqdf.Output]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/Uqdf/Output.md "Output"
-[Nasdaq.UsOptions.Otto]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/UsOptions/Otto.md "Ouch to Trade Options"
-[Nasdaq.UsOptions.Quoting]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/UsOptions/Quoting.md "Specialized Quote Interface"
 [Nasdaq.Utdf.Output]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/Utdf/Output.md "Output"
 [Nasdaq.Utp.Input]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/Utp/Input.md ""
 [Nasdaq.Utp.Snapshot]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/Utp/Snapshot.md "Snapshot"
@@ -333,7 +351,6 @@ Enjoy.
 [BoxOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/box/boxoptions "BOX Options Exchange"
 [BruceEquities.Ats]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/bruceats "Bruce ATS Equities"
 [BseIndia.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/bse/bseindia "BSE India"
-[CanadaEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/canadaequities "Nasdaq Canada Equities"
 [CixAspen.Platform]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/cixats "CIX Aspen"
 [CoinbaseDerivatives.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/coinbase/coinbasederivatives "Coinbase Derivatives"
 [Deribit.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/coinbase/deribit "Deribit"
@@ -347,6 +364,7 @@ Enjoy.
 [MiaxOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/miax/miaxoptions "MIAX Options"
 [MrxOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/mrxoptions "Nasdaq MRX"
 [Mx.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/tmx/mx "Montreal Exchange"
+[NasdaqCanada.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/nasdaqcanada "Nasdaq Canada"
 [NfxFutures.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/nfxfutures "Nasdaq Futures"
 [NomOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/nomoptions "Nasdaq Options Market"
 [NordicDerivatives.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/nordicderivatives "Nasdaq Nordic Derivatives"
@@ -376,7 +394,6 @@ Enjoy.
 [TsxAlpha.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/tmx/tsxalpha "TSX Alpha Exchange"
 [TxseEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/txse/txseequities "Txse Equities"
 [Uqdf.Consolidator]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/uqdf "Nasdaq UTP Quote Data Feed"
-[UsOptions.Platform]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/usoptions "Nasdaq US Options Platform"
 [Utdf.Consolidator]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/utdf "Nasdaq UTP Trade Data Feed"
 [Utp.Consolidator]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/tree/main/nasdaq/utp "Nasdaq Unlisted Trading Privileges Plan"
 

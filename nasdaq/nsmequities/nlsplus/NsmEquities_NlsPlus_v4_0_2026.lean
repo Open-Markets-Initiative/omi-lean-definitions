@@ -1,7 +1,7 @@
 import Omi.Wire
 
 /-!
-# National Association of Securities Dealers Automated Quotations (Nasdaq) Last Sale Plus v4.0
+# National Association of Securities Dealers Automated Quotations (Nasdaq) Last Sale Plus v4.0.2026
 
 Generated from the binary model, with the proofs the model's rules call for: every record
 decodes back to what was encoded; a message dispatch selects the message its type names;
@@ -16,7 +16,7 @@ Text fields are kept byte for byte, padding included, so what is decoded encodes
 Prices with implied decimals are proven as the integers on the wire.
 -/
 
-namespace Omi.NasdaqNsmequitiesNlsplusItchV40
+namespace Omi.NasdaqNsmequitiesNlsplusItchV402026
 
 /-- Event Code: one byte code -/
 def EventCode.codes : List UInt8 :=
@@ -142,7 +142,7 @@ end OriginatingMarketCenterIdentifier
 
 /-- Security Class: one byte code -/
 def SecurityClass.codes : List UInt8 :=
-  [0x51, 0x4E, 0x41, 0x50, 0x4D, 0x5A, 0x56]
+  [0x51, 0x4E, 0x41, 0x50, 0x4D, 0x5A, 0x56, 0x46]
 
 inductive SecurityClass where
   | nasdaq -- Nasdaq
@@ -152,6 +152,7 @@ inductive SecurityClass where
   | nyseTexas -- Nyse Texas
   | bats -- Bats
   | iex -- Iex
+  | texasStockExchange -- Texas Stock Exchange
   | unlisted (byte : { byte : UInt8 // byte ∉ SecurityClass.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -165,6 +166,7 @@ def toByte : SecurityClass → UInt8
   | .nyseTexas => 0x4D
   | .bats => 0x5A
   | .iex => 0x56
+  | .texasStockExchange => 0x46
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -175,7 +177,8 @@ def listed (byte : UInt8) : SecurityClass :=
   else if byte = 0x50 then .nyseArca
   else if byte = 0x4D then .nyseTexas
   else if byte = 0x5A then .bats
-  else .iex
+  else if byte = 0x56 then .iex
+  else .texasStockExchange
 
 def ofByte (byte : UInt8) : SecurityClass :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -189,6 +192,7 @@ theorem ofByte_toByte (value : SecurityClass) : ofByte value.toByte = value := b
   | nyseTexas => decide
   | bats => decide
   | iex => decide
+  | texasStockExchange => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : SecurityClass) : List UInt8 :=
@@ -2306,4 +2310,4 @@ theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
 
 end Packet
 
-end Omi.NasdaqNsmequitiesNlsplusItchV40
+end Omi.NasdaqNsmequitiesNlsplusItchV402026

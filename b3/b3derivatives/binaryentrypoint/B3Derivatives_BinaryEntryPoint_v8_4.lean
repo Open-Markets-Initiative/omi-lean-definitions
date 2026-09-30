@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Brasil, Bolsa, Balcão Binary Entry Point v8.4

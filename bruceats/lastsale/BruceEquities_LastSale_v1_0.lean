@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Bruce ATS Last Sale v1.0

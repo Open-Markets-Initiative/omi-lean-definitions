@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Bruce ATS Best Bid And Offer v1.0

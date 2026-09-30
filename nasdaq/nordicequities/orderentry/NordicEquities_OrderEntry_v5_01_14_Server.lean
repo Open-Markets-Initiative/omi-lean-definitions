@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # National Association of Securities Dealers Automated Quotations (Nasdaq) Nordic Ouch 5 Order Entry v5.01.14

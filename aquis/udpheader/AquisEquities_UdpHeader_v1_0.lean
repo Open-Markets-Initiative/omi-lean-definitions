@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Aquis Exchange Udp Headers v1.0

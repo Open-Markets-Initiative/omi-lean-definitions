@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Investors Exchange Depth Of Book v1.06

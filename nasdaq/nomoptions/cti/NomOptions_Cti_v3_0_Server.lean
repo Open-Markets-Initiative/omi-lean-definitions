@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # National Association of Securities Dealers Automated Quotations (Nasdaq) Clearing Trade Interface v3.0

@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Euronext Order Entry Gateway v6.65

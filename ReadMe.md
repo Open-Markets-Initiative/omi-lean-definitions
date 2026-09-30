@@ -8,7 +8,7 @@ Omi [Lean](https://lean-lang.org/ "The Lean theorem prover and programming langu
 These definitions are checked with the Lean toolchain: [lake](https://lean-lang.org/doc/reference/latest/ "The Lean language reference")
 ## Usage
 
-Each .lean file is a self contained module for one protocol version: a structure per message, an inductive per coded field, a sum type dispatching on the message type, and the theorems relating each decoder to its encoder. The shared `Omi/Wire.lean` holds the field kinds (big and little endian integers, fixed width text, counted repetition) and their lemmas. Check every proof with lake:
+Each .lean file is a self contained module for one protocol version: a structure per message, an inductive per coded field, a sum type dispatching on the message type, and the theorems relating each decoder to its encoder. The shared `Wire.lean` holds the field kinds (big and little endian integers, fixed width text, counted repetition) and their lemmas. Check every proof with lake:
 
 ```
 lake build
@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 860 | 2711723 |
+| 860 | 2711727 |
 
 ## Testing
 
@@ -36,7 +36,7 @@ Please report any parsing errors as an [issue](https://github.com/Open-Markets-I
 
 [![Omi](https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/About/Images/Logo.png)](https://github.com/Open-Markets-Initiative/Directory)  The Open Markets Initiative (Omi) is a group of technologists dedicated to enhancing the stability of electronic financial markets using modern development methods.
 
-Other generated code can be found at [Omi Projects](https://github.com/Open-Markets-Initiative/Directory/tree/main/Projects "Open Markets Initiative Projects"); for Omi rules and regulations, see [Omi Directory](https://github.com/Open-Markets-Initiative/Directory "Open Markets Initiative Directory").
+Other generated code can be found at [Omi Repositories](https://github.com/Open-Markets-Initiative/Directory/tree/main/Repositories "Open Markets Initiative Repositories"); for Omi rules and regulations, see [Omi Directory](https://github.com/Open-Markets-Initiative/Directory "Open Markets Initiative Directory").
 ## Organizations
 
 > [24X][24X.Directory] · [A2X][A2X.Directory] · [Aquis][Aquis.Directory] · [Asx][Asx.Directory] · [B3][B3.Directory] · [Bist][Bist.Directory] · [Biva][Biva.Directory] · [BlueOceanAts][BlueOceanAts.Directory] · [Box][Box.Directory] · [BruceAts][BruceAts.Directory] · [Bse][Bse.Directory] · [CixAts][CixAts.Directory] · [Cme][Cme.Directory] · [Coinbase][Coinbase.Directory] · [Eurex][Eurex.Directory] · [Euronext][Euronext.Directory] · [Iex][Iex.Directory] · [Imperative][Imperative.Directory] · [Jpx][Jpx.Directory] · [Miax][Miax.Directory] · [Nasdaq][Nasdaq.Directory] · [Nse][Nse.Directory] · [Sgx][Sgx.Directory] · [SmallX][SmallX.Directory] · [Tmx][Tmx.Directory] · [Txse][Txse.Directory]
@@ -70,7 +70,7 @@ Any similarities between existing people, places and/or protocols is purely inci
 
 Enjoy.
 
-[Omi Projects]: https://github.com/Open-Markets-Initiative/Directory/tree/main/Projects "Open Markets Initiative Projects"
+[Omi Repositories]: https://github.com/Open-Markets-Initiative/Directory/tree/main/Repositories "Open Markets Initiative Repositories"
 [Omi Rules and Regulations]: https://github.com/Open-Markets-Initiative/Directory/tree/main/License "Open Markets Initiative Rules and Regulations"
 
 [Omi.Glossary.Testing]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Protocol Testing Status"

@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # CIX Trading Inc. CIX Market Data Feed v1.4

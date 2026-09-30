@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Miami International Holdings Liquidity Feed v1.2

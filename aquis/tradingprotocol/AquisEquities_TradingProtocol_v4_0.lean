@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Aquis Exchange Aquis Trading Protocol v4.0

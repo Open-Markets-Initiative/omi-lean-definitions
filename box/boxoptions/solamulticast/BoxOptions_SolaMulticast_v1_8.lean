@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Box Options Market Sola Multicast v1.8

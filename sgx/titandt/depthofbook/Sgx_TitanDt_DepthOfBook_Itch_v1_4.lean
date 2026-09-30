@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Singapore Exchange Depth Of Book v1.4

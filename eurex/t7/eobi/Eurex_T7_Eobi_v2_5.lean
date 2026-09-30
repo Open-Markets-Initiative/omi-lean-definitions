@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Eurex Exchange Enhanced Order Book Interface v2.5

@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # National Stock Exchange of India Ltd Mtbt Tick Data Recovery v7.1

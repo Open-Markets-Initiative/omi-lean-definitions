@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Bolsa Institucional de Valores Last Sale v1.12

@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # A2X Markets Real Time Market Data Feed v1.3.2

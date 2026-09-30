@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Aquis Exchange Real Time Market Data Feed v4.0

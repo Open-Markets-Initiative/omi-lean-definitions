@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # National Association of Securities Dealers Automated Quotations (Nasdaq) CHIXMMD Multicast Market Data v1.1.3
@@ -118,7 +118,7 @@ end TradeAttribute
 
 /-- Cross Type: one byte code -/
 def CrossType.codes : List UInt8 :=
-  [0x49, 0x42, 0x43, 0x56, 0x58, 0x44]
+  [0x49, 0x42, 0x43, 0x56, 0x58, 0x44, 0x4E]
 
 inductive CrossType where
   | internal -- Internal
@@ -127,6 +127,7 @@ inductive CrossType where
   | vwap -- Vwap
   | intentionalCross -- Intentional Cross
   | derivativeRelated -- Derivative Related
+  | netAssetValue -- Net Asset Value
   | unlisted (byte : { byte : UInt8 // byte ∉ CrossType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -139,6 +140,7 @@ def toByte : CrossType → UInt8
   | .vwap => 0x56
   | .intentionalCross => 0x58
   | .derivativeRelated => 0x44
+  | .netAssetValue => 0x4E
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -148,7 +150,8 @@ def listed (byte : UInt8) : CrossType :=
   else if byte = 0x43 then .contingent
   else if byte = 0x56 then .vwap
   else if byte = 0x58 then .intentionalCross
-  else .derivativeRelated
+  else if byte = 0x44 then .derivativeRelated
+  else .netAssetValue
 
 def ofByte (byte : UInt8) : CrossType :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -161,6 +164,7 @@ theorem ofByte_toByte (value : CrossType) : ofByte value.toByte = value := by
   | vwap => decide
   | intentionalCross => decide
   | derivativeRelated => decide
+  | netAssetValue => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : CrossType) : List UInt8 :=

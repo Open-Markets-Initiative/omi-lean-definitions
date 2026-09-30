@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # National Association of Securities Dealers Automated Quotations (Nasdaq) Net Order Imbalance View v3.0.2023

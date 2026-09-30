@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Investors Exchange Top Of Book v1.56

@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # National Association of Securities Dealers Automated Quotations (Nasdaq) Ise Order Combo Market Data Feed v1.1

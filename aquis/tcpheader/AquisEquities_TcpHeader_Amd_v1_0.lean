@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Aquis Exchange Tcp Headers v1.0

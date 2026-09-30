@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Blue Ocean Technologies Common Header v1.1

@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Brasil, Bolsa, Balcão Binary Unified Market Data Feed v1.9

@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Bolsa Institucional de Valores Basic v1.12

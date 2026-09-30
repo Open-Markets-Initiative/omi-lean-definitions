@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # BSE Limited Enhanced Order Book Interface v1.4

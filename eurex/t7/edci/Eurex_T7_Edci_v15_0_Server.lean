@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Eurex Exchange Extended Derivatives Clearing Interface v15.0

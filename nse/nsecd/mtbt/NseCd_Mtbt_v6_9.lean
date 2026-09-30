@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # National Stock Exchange of India Ltd Multicast Tick By Tick v6.9

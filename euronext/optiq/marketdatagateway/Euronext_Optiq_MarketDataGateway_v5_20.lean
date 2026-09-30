@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 import Std.Tactic.BVDecide
 
 /-!

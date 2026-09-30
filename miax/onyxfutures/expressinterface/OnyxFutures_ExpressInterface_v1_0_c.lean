@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Miami International Holdings Express Interface v1.0.c

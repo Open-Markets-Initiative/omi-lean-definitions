@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Coinbase Market Data Api v1.3

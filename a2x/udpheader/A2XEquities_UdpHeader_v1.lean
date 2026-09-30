@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # A2X Markets Udp Headers v1

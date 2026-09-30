@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Australian Securities Exchange Asx Trade v3.1

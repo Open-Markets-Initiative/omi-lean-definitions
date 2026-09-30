@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # CME Group Ebs Spectrum Market Data v12.0

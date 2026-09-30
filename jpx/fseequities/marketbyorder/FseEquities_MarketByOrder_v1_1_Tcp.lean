@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Japan Exchange Group Market By Order v1.1

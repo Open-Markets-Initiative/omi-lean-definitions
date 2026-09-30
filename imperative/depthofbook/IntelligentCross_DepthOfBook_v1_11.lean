@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Imperative Execution Depth Of Book v1.11

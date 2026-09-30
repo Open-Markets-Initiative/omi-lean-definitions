@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # CME Group Market Data Platform 3 v1.6

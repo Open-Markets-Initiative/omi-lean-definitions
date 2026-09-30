@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # The Small Exchange Order Book Feed v2.2

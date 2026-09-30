@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Australian Securities Exchange 24 Itch v1.13

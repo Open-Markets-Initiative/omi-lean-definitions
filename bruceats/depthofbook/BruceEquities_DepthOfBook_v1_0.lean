@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Bruce ATS Depth Of Book v1.0

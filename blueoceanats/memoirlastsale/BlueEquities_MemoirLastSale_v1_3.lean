@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Blue Ocean Technologies Member Order Information Record Last Sale v1.3

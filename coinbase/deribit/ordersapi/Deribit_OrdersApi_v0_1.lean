@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Coinbase Orders Api v0.1

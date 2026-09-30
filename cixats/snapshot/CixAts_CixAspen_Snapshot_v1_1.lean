@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # CIX Trading Inc. CIX Tcp Snapshot v1.1

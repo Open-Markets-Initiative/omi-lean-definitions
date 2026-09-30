@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Investors Exchange DeepPlus v1.05

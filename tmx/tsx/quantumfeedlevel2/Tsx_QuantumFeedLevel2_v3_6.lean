@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # TMX Group Quantum Feed Level 2 v3.6

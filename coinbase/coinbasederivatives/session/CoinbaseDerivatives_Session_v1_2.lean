@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Coinbase Session Layer v1.2

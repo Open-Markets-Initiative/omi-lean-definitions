@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # CME Group iLink 3 v8.6

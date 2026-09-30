@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Miami International Holdings Complex Top Of Market v1.1

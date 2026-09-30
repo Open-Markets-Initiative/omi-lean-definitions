@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # National Stock Exchange of India Ltd Order Entry v9.50

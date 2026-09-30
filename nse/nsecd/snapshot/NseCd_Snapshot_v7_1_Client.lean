@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # National Stock Exchange of India Ltd Mtbt Order Book Snapshot Recovery v7.1

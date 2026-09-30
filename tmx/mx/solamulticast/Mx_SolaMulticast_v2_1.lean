@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # TMX Group Sola Multicast v2.1

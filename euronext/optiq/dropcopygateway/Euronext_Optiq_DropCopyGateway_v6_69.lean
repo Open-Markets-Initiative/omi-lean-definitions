@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Euronext Drop Copy Gateway v6.69

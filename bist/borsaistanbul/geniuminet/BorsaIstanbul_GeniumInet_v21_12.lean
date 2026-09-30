@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Borsa İstanbul A.Ş. Genium Inet v21.12

@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # CME Group Streamlined Market Data v5.9

@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Texas Stock Exchange  v1.0

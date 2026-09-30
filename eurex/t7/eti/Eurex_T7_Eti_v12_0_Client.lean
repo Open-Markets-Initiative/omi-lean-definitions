@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Eurex Exchange Enhanced Trading Interface v12.0

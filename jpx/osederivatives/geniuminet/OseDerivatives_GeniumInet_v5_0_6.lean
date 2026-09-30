@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Japan Exchange Group Genium Inet v5.0.6

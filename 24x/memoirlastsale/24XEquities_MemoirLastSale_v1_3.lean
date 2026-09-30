@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # 24 National Exchange Member Order Information Record Last Sale v1.3

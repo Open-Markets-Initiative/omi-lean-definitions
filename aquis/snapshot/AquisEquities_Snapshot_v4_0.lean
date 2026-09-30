@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # Aquis Exchange Aquis Market Data Snapshot v4.0

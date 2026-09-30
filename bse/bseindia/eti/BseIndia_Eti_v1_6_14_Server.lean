@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # BSE Limited Enhanced Trading Interface v1.6.14

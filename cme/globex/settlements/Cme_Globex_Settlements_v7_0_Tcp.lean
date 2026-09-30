@@ -1,4 +1,4 @@
-import Omi.Wire
+import Wire
 
 /-!
 # CME Group Settlements v7.0

@@ -1079,12 +1079,12 @@ theorem decodeBody_encodeBody (message : Packet) (rest : List UInt8) :
   rw [dite_eq_left message.body.length_lt]
   rfl
 
-/-- Size rule: Message Length counts the bytes after it plus 10, so it is written from the body; the body has no bound the prefix must fit, so it is read by its content and the prefix is not checked; Start Of Frame, Protocol Name, Protocol Version are read ahead of it -/
+/-- Size rule: Message Length counts the bytes after it, so it is written from the body; the body has no bound the prefix must fit, so it is read by its content and the prefix is not checked; Start Of Frame, Protocol Name, Protocol Version are read ahead of it -/
 def encode (message : Packet) : List UInt8 :=
   encodeUInt 1 message.startOfFrame
     ++ (ProtocolName.encode message.protocolName
     ++ (Alpha.encode message.protocolVersion
-    ++ (encodeUIntLE 2 (BitVec.ofNat (8 * 2) ((encodeBody message).length + 10)) ++ encodeBody message)))
+    ++ (encodeUIntLE 2 (BitVec.ofNat (8 * 2) ((encodeBody message).length + 0)) ++ encodeBody message)))
 
 def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (startOfFrame, bytes) ← decodeUInt 1 bytes

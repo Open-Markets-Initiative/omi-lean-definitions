@@ -1356,13 +1356,18 @@ theorem encode_length_pos (message : QuotationMessage) : (encode message).length
 
 end QuotationMessage
 
-/-- Next Shares Quotation Message: 21 bytes -/
+/-- Next Shares Quotation Message: 41 bytes -/
 structure NextSharesQuotationMessage where
   trackingNumber : BitVec 16
   timestamp : BitVec 48
   nextSharesSymbol : Alpha 8
   securityClass : SecurityClass
-  nasdaqBestBid : BitVec 32
+  nasdaqBestBidProxyPrice : BitVec 32
+  nasdaqBestBidSize : BitVec 32
+  nasdaqBestBidNavPremiumDiscountAmount : BitVec 32
+  nasdaqBestOfferProxyPrice : BitVec 32
+  nasdaqBestOfferSize : BitVec 32
+  nasdaqBestOfferNavPremiumDiscountAmount : BitVec 32
   deriving DecidableEq, Repr
 
 namespace NextSharesQuotationMessage
@@ -1372,17 +1377,27 @@ def encode (message : NextSharesQuotationMessage) : List UInt8 :=
     ++ (encodeUInt 6 message.timestamp
     ++ (Alpha.encode message.nextSharesSymbol
     ++ (SecurityClass.encode message.securityClass
-    ++ (encodeUInt 4 message.nasdaqBestBid))))
+    ++ (encodeUInt 4 message.nasdaqBestBidProxyPrice
+    ++ (encodeUInt 4 message.nasdaqBestBidSize
+    ++ (encodeUInt 4 message.nasdaqBestBidNavPremiumDiscountAmount
+    ++ (encodeUInt 4 message.nasdaqBestOfferProxyPrice
+    ++ (encodeUInt 4 message.nasdaqBestOfferSize
+    ++ (encodeUInt 4 message.nasdaqBestOfferNavPremiumDiscountAmount)))))))))
 
 def decode (bytes : List UInt8) : Option (NextSharesQuotationMessage × List UInt8) := do
   let (trackingNumber, bytes) ← decodeUInt 2 bytes
   let (timestamp, bytes) ← decodeUInt 6 bytes
   let (nextSharesSymbol, bytes) ← Alpha.decode 8 bytes
   let (securityClass, bytes) ← SecurityClass.decode bytes
-  let (nasdaqBestBid, bytes) ← decodeUInt 4 bytes
-  pure ({ trackingNumber, timestamp, nextSharesSymbol, securityClass, nasdaqBestBid }, bytes)
+  let (nasdaqBestBidProxyPrice, bytes) ← decodeUInt 4 bytes
+  let (nasdaqBestBidSize, bytes) ← decodeUInt 4 bytes
+  let (nasdaqBestBidNavPremiumDiscountAmount, bytes) ← decodeUInt 4 bytes
+  let (nasdaqBestOfferProxyPrice, bytes) ← decodeUInt 4 bytes
+  let (nasdaqBestOfferSize, bytes) ← decodeUInt 4 bytes
+  let (nasdaqBestOfferNavPremiumDiscountAmount, bytes) ← decodeUInt 4 bytes
+  pure ({ trackingNumber, timestamp, nextSharesSymbol, securityClass, nasdaqBestBidProxyPrice, nasdaqBestBidSize, nasdaqBestBidNavPremiumDiscountAmount, nasdaqBestOfferProxyPrice, nasdaqBestOfferSize, nasdaqBestOfferNavPremiumDiscountAmount }, bytes)
 
-@[simp] theorem encode_length (message : NextSharesQuotationMessage) : (encode message).length = 21 := by
+@[simp] theorem encode_length (message : NextSharesQuotationMessage) : (encode message).length = 41 := by
   unfold encode
   simp only [List.length_append, encodeUInt_length, Alpha.encode_length, SecurityClass.encode_length]
 
@@ -1400,6 +1415,16 @@ theorem encode_length_pos (message : NextSharesQuotationMessage) : (encode messa
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, SecurityClass.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [decodeUInt_encodeUInt, some_bind]
   rfl
@@ -1445,7 +1470,7 @@ def encode : Payload → List UInt8
   | .nextSharesQuotationMessage message => NextSharesQuotationMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : Payload) : (encode message).length ≤ 36 := by
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 41 := by
   cases message with
   | systemEventMessage inner =>
     simp only [encode, SystemEventMessage.encode_length]

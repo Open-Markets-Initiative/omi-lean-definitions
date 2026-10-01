@@ -83,7 +83,7 @@ end EventCode
 
 /-- Market Category: one byte code -/
 def MarketCategory.codes : List UInt8 :=
-  [0x51, 0x47, 0x53, 0x4E, 0x41, 0x50, 0x4D, 0x5A, 0x56, 0x20]
+  [0x51, 0x47, 0x53, 0x4E, 0x41, 0x50, 0x4D, 0x5A, 0x56, 0x46, 0x20]
 
 inductive MarketCategory where
   | nasdaqGlobalSelectMarket -- Nasdaq Global Select Market
@@ -95,6 +95,7 @@ inductive MarketCategory where
   | nyseTexas -- Nyse Texas
   | batsZ -- Bats Z
   | investorsExchange -- Investors Exchange
+  | texasExchange -- Texas Exchange
   | notAvailable -- Not Available
   | unlisted (byte : { byte : UInt8 // byte ∉ MarketCategory.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
@@ -111,6 +112,7 @@ def toByte : MarketCategory → UInt8
   | .nyseTexas => 0x4D
   | .batsZ => 0x5A
   | .investorsExchange => 0x56
+  | .texasExchange => 0x46
   | .notAvailable => 0x20
   | .unlisted byte => byte.val
 
@@ -125,6 +127,7 @@ def listed (byte : UInt8) : MarketCategory :=
   else if byte = 0x4D then .nyseTexas
   else if byte = 0x5A then .batsZ
   else if byte = 0x56 then .investorsExchange
+  else if byte = 0x46 then .texasExchange
   else .notAvailable
 
 def ofByte (byte : UInt8) : MarketCategory :=
@@ -141,6 +144,7 @@ theorem ofByte_toByte (value : MarketCategory) : ofByte value.toByte = value := 
   | nyseTexas => decide
   | batsZ => decide
   | investorsExchange => decide
+  | texasExchange => decide
   | notAvailable => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 

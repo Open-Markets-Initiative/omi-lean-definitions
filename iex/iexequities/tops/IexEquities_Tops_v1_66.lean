@@ -943,7 +943,7 @@ structure AuctionInformationMessage where
   indicativeClearingPrice : BitVec 64
   imbalanceShares : BitVec 32
   imbalanceSide : ImbalanceSide
-  extensionNumber : Alpha 1
+  extensionNumber : BitVec 8
   scheduledAuctionTime : BitVec 32
   auctionBookClearingPrice : BitVec 64
   collarReferencePrice : BitVec 64
@@ -962,7 +962,7 @@ def encode (message : AuctionInformationMessage) : List UInt8 :=
     ++ (encodeUIntLE 8 message.indicativeClearingPrice
     ++ (encodeUIntLE 4 message.imbalanceShares
     ++ (ImbalanceSide.encode message.imbalanceSide
-    ++ (Alpha.encode message.extensionNumber
+    ++ (encodeUInt 1 message.extensionNumber
     ++ (encodeUIntLE 4 message.scheduledAuctionTime
     ++ (encodeUIntLE 8 message.auctionBookClearingPrice
     ++ (encodeUIntLE 8 message.collarReferencePrice
@@ -978,7 +978,7 @@ def decode (bytes : List UInt8) : Option (AuctionInformationMessage × List UInt
   let (indicativeClearingPrice, bytes) ← decodeUIntLE 8 bytes
   let (imbalanceShares, bytes) ← decodeUIntLE 4 bytes
   let (imbalanceSide, bytes) ← ImbalanceSide.decode bytes
-  let (extensionNumber, bytes) ← Alpha.decode 1 bytes
+  let (extensionNumber, bytes) ← decodeUInt 1 bytes
   let (scheduledAuctionTime, bytes) ← decodeUIntLE 4 bytes
   let (auctionBookClearingPrice, bytes) ← decodeUIntLE 8 bytes
   let (collarReferencePrice, bytes) ← decodeUIntLE 8 bytes
@@ -988,7 +988,7 @@ def decode (bytes : List UInt8) : Option (AuctionInformationMessage × List UInt
 
 @[simp] theorem encode_length (message : AuctionInformationMessage) : (encode message).length = 79 := by
   unfold encode
-  simp only [List.length_append, AuctionType.encode_length, encodeUIntLE_length, Alpha.encode_length, ImbalanceSide.encode_length]
+  simp only [List.length_append, AuctionType.encode_length, encodeUIntLE_length, Alpha.encode_length, ImbalanceSide.encode_length, encodeUInt_length]
 
 theorem encode_length_pos (message : AuctionInformationMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1013,7 +1013,7 @@ theorem encode_length_pos (message : AuctionInformationMessage) : (encode messag
   dsimp only
   rw [List.append_assoc, ImbalanceSide.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only

@@ -1,4 +1,4 @@
-import nasdaq.psxequities.totalview.PsxEquities_TotalView_v5_0
+import nasdaq.psxequities.totalview.PsxEquities_TotalView_Itch_v5_0
 
 /-!
 # National Association of Securities Dealers Automated Quotations (Nasdaq) TotalView Itch tests

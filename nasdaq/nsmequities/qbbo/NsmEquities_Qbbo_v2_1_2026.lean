@@ -1,7 +1,7 @@
 import Wire
 
 /-!
-# National Association of Securities Dealers Automated Quotations (Nasdaq) Quoted Best Bid And Offer v2.1.2026
+# National Association of Securities Dealers Automated Quotations (Nasdaq) Best Bid And Offer v2.1.2026
 
 Generated from the binary model, with the proofs the model's rules call for: every record
 decodes back to what was encoded; a message dispatch selects the message its type names;

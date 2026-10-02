@@ -1,7 +1,7 @@
 import nasdaq.nsmequities.qbbo.NsmEquities_Qbbo_v2_1
 
 /-!
-# National Association of Securities Dealers Automated Quotations (Nasdaq) Quoted Best Bid And Offer tests
+# National Association of Securities Dealers Automated Quotations (Nasdaq) Best Bid And Offer tests
 
 Payloads captured in omi-data-packets, decoded by the generated definition: udp datagrams as they
 are, tcp segments reassembled into the stream each side sent. Each must decode and leave nothing

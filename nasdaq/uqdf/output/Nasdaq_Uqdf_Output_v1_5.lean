@@ -3152,7 +3152,7 @@ end Message
 /-- Packet -/
 structure Packet where
   session : Alpha 10
-  sequence : BitVec 64
+  sequenceNumber : BitVec 64
   message : Bounded 2 Message
   deriving DecidableEq, Repr
 
@@ -3160,17 +3160,17 @@ namespace Packet
 
 def encode (message : Packet) : List UInt8 :=
   Alpha.encode message.session
-    ++ (encodeUInt 8 message.sequence
+    ++ (encodeUInt 8 message.sequenceNumber
     ++ (encodeUInt 2 (BitVec.ofNat (8 * 2) message.message.val.length)
     ++ (encodeMany Message.encode message.message.val)))
 
 def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (session, bytes) ← Alpha.decode 10 bytes
-  let (sequence, bytes) ← decodeUInt 8 bytes
-  let (count, bytes) ← decodeUInt 2 bytes
-  let (message_, bytes) ← decodeMany Message.decode count.toNat bytes
+  let (sequenceNumber, bytes) ← decodeUInt 8 bytes
+  let (messageCount, bytes) ← decodeUInt 2 bytes
+  let (message_, bytes) ← decodeMany Message.decode messageCount.toNat bytes
   if fits_message : message_.length < 256 ^ 2 then
-    pure ({ session, sequence, message := ⟨message_, fits_message⟩ }, bytes)
+    pure ({ session, sequenceNumber, message := ⟨message_, fits_message⟩ }, bytes)
   else none
 
 theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by

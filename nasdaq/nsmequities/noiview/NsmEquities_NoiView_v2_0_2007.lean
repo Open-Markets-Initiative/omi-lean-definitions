@@ -8,15 +8,15 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: a Count of 0 marks Heartbeat and carries no messages; the decoder reads it as a count and the encoder never writes it.
+Note: a Message Count of 0 marks Heartbeat and carries no messages; the decoder reads it as a count and the encoder never writes it.
 
-Note: a Count of 65535 marks End Of Session and carries no messages; the decoder reads it as a count and the encoder never writes it.
+Note: a Message Count of 65535 marks End Of Session and carries no messages; the decoder reads it as a count and the encoder never writes it.
 
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/
 
-namespace Omi.NasdaqNsmequitiesNoiviewItchV202007
+namespace Omi.NasdaqNsmequitiesNoiviewAsciiitchV202007
 
 /-- Event Code: one byte code -/
 def EventCode.codes : List UInt8 :=
@@ -802,7 +802,7 @@ theorem encodeBody_length_lt (message : Message) : (encodeBody message).length +
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, Alpha.encode_length, encodeUInt_length, NoiiMessage.encode_length]
     omega
 
-/-- Size rule: Length counts the bytes after it, so it is written from the body and checked on decode -/
+/-- Size rule: Message Length counts the bytes after it, so it is written from the body and checked on decode -/
 def encode : Message → List UInt8 :=
   encodeFramed 2 0 encodeBody
 
@@ -823,7 +823,7 @@ end Message
 /-- Packet -/
 structure Packet where
   session : Alpha 10
-  sequence : BitVec 32
+  sequenceNumber : BitVec 32
   message : Bounded 2 Message
   deriving DecidableEq, Repr
 
@@ -831,17 +831,17 @@ namespace Packet
 
 def encode (message : Packet) : List UInt8 :=
   Alpha.encode message.session
-    ++ (encodeUInt 4 message.sequence
+    ++ (encodeUInt 4 message.sequenceNumber
     ++ (encodeUIntLE 2 (BitVec.ofNat (8 * 2) message.message.val.length)
     ++ (encodeMany Message.encode message.message.val)))
 
 def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (session, bytes) ← Alpha.decode 10 bytes
-  let (sequence, bytes) ← decodeUInt 4 bytes
-  let (count, bytes) ← decodeUIntLE 2 bytes
-  let (message_, bytes) ← decodeMany Message.decode count.toNat bytes
+  let (sequenceNumber, bytes) ← decodeUInt 4 bytes
+  let (messageCount, bytes) ← decodeUIntLE 2 bytes
+  let (message_, bytes) ← decodeMany Message.decode messageCount.toNat bytes
   if fits_message : message_.length < 256 ^ 2 then
-    pure ({ session, sequence, message := ⟨message_, fits_message⟩ }, bytes)
+    pure ({ session, sequenceNumber, message := ⟨message_, fits_message⟩ }, bytes)
   else none
 
 theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
@@ -865,4 +865,4 @@ theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
 
 end Packet
 
-end Omi.NasdaqNsmequitiesNoiviewItchV202007
+end Omi.NasdaqNsmequitiesNoiviewAsciiitchV202007

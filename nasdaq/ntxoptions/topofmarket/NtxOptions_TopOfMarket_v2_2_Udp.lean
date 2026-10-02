@@ -1231,26 +1231,26 @@ end Message
 
 /-- Packet -/
 structure Packet where
-  udpSession : Alpha 10
-  udpSequenceNumber : BitVec 64
+  session : Alpha 10
+  sequenceNumber : BitVec 64
   message : Bounded 2 Message
   deriving DecidableEq, Repr
 
 namespace Packet
 
 def encode (message : Packet) : List UInt8 :=
-  Alpha.encode message.udpSession
-    ++ (encodeUInt 8 message.udpSequenceNumber
+  Alpha.encode message.session
+    ++ (encodeUInt 8 message.sequenceNumber
     ++ (encodeUInt 2 (BitVec.ofNat (8 * 2) message.message.val.length)
     ++ (encodeMany Message.encode message.message.val)))
 
 def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
-  let (udpSession, bytes) ← Alpha.decode 10 bytes
-  let (udpSequenceNumber, bytes) ← decodeUInt 8 bytes
+  let (session, bytes) ← Alpha.decode 10 bytes
+  let (sequenceNumber, bytes) ← decodeUInt 8 bytes
   let (messageCount, bytes) ← decodeUInt 2 bytes
   let (message_, bytes) ← decodeMany Message.decode messageCount.toNat bytes
   if fits_message : message_.length < 256 ^ 2 then
-    pure ({ udpSession, udpSequenceNumber, message := ⟨message_, fits_message⟩ }, bytes)
+    pure ({ session, sequenceNumber, message := ⟨message_, fits_message⟩ }, bytes)
   else none
 
 theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by

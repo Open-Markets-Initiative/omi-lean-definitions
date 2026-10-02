@@ -775,7 +775,7 @@ end StockDirectoryMessage
 structure StockTradingActionMessage where
   stock : Alpha 8
   tradingState : TradingState
-  reserved : Alpha 1
+  reserved1 : Alpha 1
   reason : Alpha 4
   deriving DecidableEq, Repr
 
@@ -784,15 +784,15 @@ namespace StockTradingActionMessage
 def encode (message : StockTradingActionMessage) : List UInt8 :=
   Alpha.encode message.stock
     ++ (TradingState.encode message.tradingState
-    ++ (Alpha.encode message.reserved
+    ++ (Alpha.encode message.reserved1
     ++ (Alpha.encode message.reason)))
 
 def decode (bytes : List UInt8) : Option (StockTradingActionMessage × List UInt8) := do
   let (stock, bytes) ← Alpha.decode 8 bytes
   let (tradingState, bytes) ← TradingState.decode bytes
-  let (reserved, bytes) ← Alpha.decode 1 bytes
+  let (reserved1, bytes) ← Alpha.decode 1 bytes
   let (reason, bytes) ← Alpha.decode 4 bytes
-  pure ({ stock, tradingState, reserved, reason }, bytes)
+  pure ({ stock, tradingState, reserved1, reason }, bytes)
 
 @[simp] theorem encode_length (message : StockTradingActionMessage) : (encode message).length = 14 := by
   unfold encode

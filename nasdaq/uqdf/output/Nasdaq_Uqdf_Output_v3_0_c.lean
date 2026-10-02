@@ -4316,44 +4316,44 @@ theorem encode_length_le (message : Message) : (encode message).length ≤ 21627
 
 end Message
 
-/-- Mold Udp 64 Packet -/
-structure MoldUdp64Packet where
-  udpSession : Alpha 10
-  udpSequenceNumber : BitVec 64
+/-- Packet -/
+structure Packet where
+  session : Alpha 10
+  sequenceNumber : BitVec 64
   message : Bounded 2 Message
   deriving DecidableEq, Repr
 
-namespace MoldUdp64Packet
+namespace Packet
 
-def encode (message : MoldUdp64Packet) : List UInt8 :=
-  Alpha.encode message.udpSession
-    ++ (encodeUInt 8 message.udpSequenceNumber
+def encode (message : Packet) : List UInt8 :=
+  Alpha.encode message.session
+    ++ (encodeUInt 8 message.sequenceNumber
     ++ (encodeUInt 2 (BitVec.ofNat (8 * 2) message.message.val.length)
     ++ (encodeMany Message.encode message.message.val)))
 
-def decode (bytes : List UInt8) : Option (MoldUdp64Packet × List UInt8) := do
-  let (udpSession, bytes) ← Alpha.decode 10 bytes
-  let (udpSequenceNumber, bytes) ← decodeUInt 8 bytes
+def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
+  let (session, bytes) ← Alpha.decode 10 bytes
+  let (sequenceNumber, bytes) ← decodeUInt 8 bytes
   let (messageCount, bytes) ← decodeUInt 2 bytes
   let (message_, bytes) ← decodeMany Message.decode messageCount.toNat bytes
   if fits_message : message_.length < 256 ^ 2 then
-    pure ({ udpSession, udpSequenceNumber, message := ⟨message_, fits_message⟩ }, bytes)
+    pure ({ session, sequenceNumber, message := ⟨message_, fits_message⟩ }, bytes)
   else none
 
-theorem encode_length_pos (message : MoldUdp64Packet) : (encode message).length > 0 := by
+theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
   unfold encode
   simp only [Alpha.encode_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : MoldUdp64Packet) : (encode message).length ≤ 141734772710 := by
+theorem encode_length_le (message : Packet) : (encode message).length ≤ 141734772710 := by
   have bound_message := message.message.length_lt
   have bound_message_items := encodeMany_length_le Message.encode 2162734 Message.encode_length_le message.message.val
   unfold encode
   simp only [List.length_append, ← Nat.add_assoc, Alpha.encode_length, encodeUInt_length]
   omega
 
-@[simp] theorem decode_encode (message : MoldUdp64Packet) (rest : List UInt8) :
+@[simp] theorem decode_encode (message : Packet) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
@@ -4367,6 +4367,6 @@ theorem encode_length_le (message : MoldUdp64Packet) : (encode message).length �
   rw [dite_eq_left message.message.length_lt]
   rfl
 
-end MoldUdp64Packet
+end Packet
 
 end Omi.NasdaqUqdfOutputUtpV30C

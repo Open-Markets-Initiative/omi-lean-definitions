@@ -12,7 +12,7 @@ Text fields are kept byte for byte, padding included, so what is decoded encodes
 Prices with implied decimals are proven as the integers on the wire.
 -/
 
-namespace Omi.NasdaqNsmequitiesTotalviewItchV20Client
+namespace Omi.NasdaqNsmequitiesTotalviewAsciiitchV20Client
 
 /-- Debug Packet: 1 bytes -/
 structure DebugPacket where
@@ -194,4 +194,4 @@ theorem decode_encode (message : ClientPacket) : decode (encode message) = some 
 
 end ClientPacket
 
-end Omi.NasdaqNsmequitiesTotalviewItchV20Client
+end Omi.NasdaqNsmequitiesTotalviewAsciiitchV20Client

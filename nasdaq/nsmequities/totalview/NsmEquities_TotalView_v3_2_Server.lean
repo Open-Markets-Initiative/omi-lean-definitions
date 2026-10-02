@@ -12,7 +12,7 @@ Text fields are kept byte for byte, padding included, so what is decoded encodes
 Prices with implied decimals are proven as the integers on the wire.
 -/
 
-namespace Omi.NasdaqNsmequitiesTotalviewItchV32Server
+namespace Omi.NasdaqNsmequitiesTotalviewAsciiitchV32Server
 
 /-- Event Code: one byte code -/
 def EventCode.codes : List UInt8 :=
@@ -1142,7 +1142,7 @@ end StockDirectoryMessage
 structure StockTradingActionMessage where
   stockAlpha8 : Alpha 8
   tradingState : TradingState
-  reserved : Alpha 1
+  reserved1 : Alpha 1
   reason : Alpha 4
   deriving DecidableEq, Repr
 
@@ -1151,15 +1151,15 @@ namespace StockTradingActionMessage
 def encode (message : StockTradingActionMessage) : List UInt8 :=
   Alpha.encode message.stockAlpha8
     ++ (TradingState.encode message.tradingState
-    ++ (Alpha.encode message.reserved
+    ++ (Alpha.encode message.reserved1
     ++ (Alpha.encode message.reason)))
 
 def decode (bytes : List UInt8) : Option (StockTradingActionMessage × List UInt8) := do
   let (stockAlpha8, bytes) ← Alpha.decode 8 bytes
   let (tradingState, bytes) ← TradingState.decode bytes
-  let (reserved, bytes) ← Alpha.decode 1 bytes
+  let (reserved1, bytes) ← Alpha.decode 1 bytes
   let (reason, bytes) ← Alpha.decode 4 bytes
-  pure ({ stockAlpha8, tradingState, reserved, reason }, bytes)
+  pure ({ stockAlpha8, tradingState, reserved1, reason }, bytes)
 
 @[simp] theorem encode_length (message : StockTradingActionMessage) : (encode message).length = 14 := by
   unfold encode
@@ -2170,4 +2170,4 @@ theorem encode_length_le (message : ServerPacket) : (encode message).length ≤ 
 
 end ServerPacket
 
-end Omi.NasdaqNsmequitiesTotalviewItchV32Server
+end Omi.NasdaqNsmequitiesTotalviewAsciiitchV32Server

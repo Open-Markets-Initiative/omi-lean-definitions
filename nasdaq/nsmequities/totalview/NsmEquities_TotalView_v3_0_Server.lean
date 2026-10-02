@@ -12,7 +12,7 @@ Text fields are kept byte for byte, padding included, so what is decoded encodes
 Prices with implied decimals are proven as the integers on the wire.
 -/
 
-namespace Omi.NasdaqNsmequitiesTotalviewItchV30Server
+namespace Omi.NasdaqNsmequitiesTotalviewAsciiitchV30Server
 
 /-- Event Code: one byte code -/
 def EventCode.codes : List UInt8 :=
@@ -819,26 +819,26 @@ theorem encode_length_pos (message : DebugPacket) : (encode message).length > 0 
 
 end DebugPacket
 
-/-- Login Accepted Packet: 20 bytes -/
+/-- Login Accepted Packet: 14 bytes -/
 structure LoginAcceptedPacket where
   session : Alpha 10
-  sequenceNumber : Alpha 10
+  sequenceNumber : BitVec 32
   deriving DecidableEq, Repr
 
 namespace LoginAcceptedPacket
 
 def encode (message : LoginAcceptedPacket) : List UInt8 :=
   Alpha.encode message.session
-    ++ (Alpha.encode message.sequenceNumber)
+    ++ (encodeUInt 4 message.sequenceNumber)
 
 def decode (bytes : List UInt8) : Option (LoginAcceptedPacket × List UInt8) := do
   let (session, bytes) ← Alpha.decode 10 bytes
-  let (sequenceNumber, bytes) ← Alpha.decode 10 bytes
+  let (sequenceNumber, bytes) ← decodeUInt 4 bytes
   pure ({ session, sequenceNumber }, bytes)
 
-@[simp] theorem encode_length (message : LoginAcceptedPacket) : (encode message).length = 20 := by
+@[simp] theorem encode_length (message : LoginAcceptedPacket) : (encode message).length = 14 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length]
+  simp only [List.length_append, Alpha.encode_length, encodeUInt_length]
 
 theorem encode_length_pos (message : LoginAcceptedPacket) : (encode message).length > 0 := by
   rw [encode_length]
@@ -849,7 +849,7 @@ theorem encode_length_pos (message : LoginAcceptedPacket) : (encode message).len
   unfold decode encode
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, some_bind]
+  rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
 end LoginAcceptedPacket
@@ -1028,7 +1028,7 @@ end StockDirectoryMessage
 structure StockTradingActionMessage where
   stockAlphanumeric6 : Alpha 6
   tradingState : TradingState
-  reserved : Alpha 1
+  reserved1 : Alpha 1
   reason : Alpha 4
   deriving DecidableEq, Repr
 
@@ -1037,15 +1037,15 @@ namespace StockTradingActionMessage
 def encode (message : StockTradingActionMessage) : List UInt8 :=
   Alpha.encode message.stockAlphanumeric6
     ++ (TradingState.encode message.tradingState
-    ++ (Alpha.encode message.reserved
+    ++ (Alpha.encode message.reserved1
     ++ (Alpha.encode message.reason)))
 
 def decode (bytes : List UInt8) : Option (StockTradingActionMessage × List UInt8) := do
   let (stockAlphanumeric6, bytes) ← Alpha.decode 6 bytes
   let (tradingState, bytes) ← TradingState.decode bytes
-  let (reserved, bytes) ← Alpha.decode 1 bytes
+  let (reserved1, bytes) ← Alpha.decode 1 bytes
   let (reason, bytes) ← Alpha.decode 4 bytes
-  pure ({ stockAlphanumeric6, tradingState, reserved, reason }, bytes)
+  pure ({ stockAlphanumeric6, tradingState, reserved1, reason }, bytes)
 
 @[simp] theorem encode_length (message : StockTradingActionMessage) : (encode message).length = 12 := by
   unfold encode
@@ -1911,4 +1911,4 @@ theorem encode_length_le (message : ServerPacket) : (encode message).length ≤ 
 
 end ServerPacket
 
-end Omi.NasdaqNsmequitiesTotalviewItchV30Server
+end Omi.NasdaqNsmequitiesTotalviewAsciiitchV30Server

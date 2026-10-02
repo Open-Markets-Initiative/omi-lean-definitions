@@ -16,6 +16,8 @@ Note: Number Of Legs counts New Complex Order Instrument Occurrence in ascii dig
 
 Note: Nb Legs counts Complex Order Auction Entry Occurrence in ascii digits: it is written from the list as its digits, and a list of more than 99 could not be written.
 
+Note: Number Of Quotes counts Bulk Quote Occurrence in ascii digits: it is written from the list as its digits, and a list of more than 999 could not be written.
+
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/
@@ -2605,6 +2607,118 @@ theorem encode_length_le (message : ComplexOrderAuctionEntry) : (encode message)
 
 end ComplexOrderAuctionEntry
 
+/-- Bulk Quote Occurrence: 26 bytes -/
+structure BulkQuoteOccurrence where
+  group : Alpha 2
+  instrumentOptional : Alpha 4
+  verbSide : VerbSide
+  quantitySign : Alpha 1
+  quantity : Alpha 8
+  price : Alpha 10
+  deriving DecidableEq, Repr
+
+namespace BulkQuoteOccurrence
+
+def encode (message : BulkQuoteOccurrence) : List UInt8 :=
+  Alpha.encode message.group
+    ++ (Alpha.encode message.instrumentOptional
+    ++ (VerbSide.encode message.verbSide
+    ++ (Alpha.encode message.quantitySign
+    ++ (Alpha.encode message.quantity
+    ++ (Alpha.encode message.price)))))
+
+def decode (bytes : List UInt8) : Option (BulkQuoteOccurrence × List UInt8) := do
+  let (group, bytes) ← Alpha.decode 2 bytes
+  let (instrumentOptional, bytes) ← Alpha.decode 4 bytes
+  let (verbSide, bytes) ← VerbSide.decode bytes
+  let (quantitySign, bytes) ← Alpha.decode 1 bytes
+  let (quantity, bytes) ← Alpha.decode 8 bytes
+  let (price, bytes) ← Alpha.decode 10 bytes
+  pure ({ group, instrumentOptional, verbSide, quantitySign, quantity, price }, bytes)
+
+@[simp] theorem encode_length (message : BulkQuoteOccurrence) : (encode message).length = 26 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, VerbSide.encode_length]
+
+theorem encode_length_pos (message : BulkQuoteOccurrence) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : BulkQuoteOccurrence) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, VerbSide.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [Alpha.decode_encode, some_bind]
+  rfl
+
+end BulkQuoteOccurrence
+
+/-- Bulk Quote -/
+structure BulkQuote where
+  group : Alpha 2
+  quoteId : Alpha 8
+  mmCatUserTime : Alpha 8
+  bulkQuoteOccurrence : Digited 3 BulkQuoteOccurrence
+  deriving DecidableEq, Repr
+
+namespace BulkQuote
+
+def encode (message : BulkQuote) : List UInt8 :=
+  Alpha.encode message.group
+    ++ (Alpha.encode message.quoteId
+    ++ (Alpha.encode message.mmCatUserTime
+    ++ (encodeDigits 3 message.bulkQuoteOccurrence.val.length
+    ++ (encodeMany BulkQuoteOccurrence.encode message.bulkQuoteOccurrence.val))))
+
+def decode (bytes : List UInt8) : Option (BulkQuote × List UInt8) := do
+  let (group, bytes) ← Alpha.decode 2 bytes
+  let (quoteId, bytes) ← Alpha.decode 8 bytes
+  let (mmCatUserTime, bytes) ← Alpha.decode 8 bytes
+  let (numberOfQuotes, bytes) ← decodeDigits 3 bytes
+  let (bulkQuoteOccurrence_, bytes) ← decodeMany BulkQuoteOccurrence.decode numberOfQuotes bytes
+  if fits_bulkQuoteOccurrence : bulkQuoteOccurrence_.length < 10 ^ 3 then
+    pure ({ group, quoteId, mmCatUserTime, bulkQuoteOccurrence := ⟨bulkQuoteOccurrence_, fits_bulkQuoteOccurrence⟩ }, bytes)
+  else none
+
+theorem encode_length_pos (message : BulkQuote) : (encode message).length > 0 := by
+  unfold encode
+  simp only [Alpha.encode_length, List.length_append, ← Nat.add_assoc]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : BulkQuote) : (encode message).length ≤ 25995 := by
+  have bound_bulkQuoteOccurrence := message.bulkQuoteOccurrence.length_lt
+  unfold encode
+  simp only [List.length_append, ← Nat.add_assoc, Alpha.encode_length, encodeDigits_length, encodeMany_length_const BulkQuoteOccurrence.encode 26 BulkQuoteOccurrence.encode_length]
+  omega
+
+@[simp] theorem decode_encode (message : BulkQuote) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeDigits_encodeDigits _ _ message.bulkQuoteOccurrence.length_lt, some_bind]
+  dsimp only
+  rw [decodeMany_encodeMany BulkQuoteOccurrence.encode BulkQuoteOccurrence.decode BulkQuoteOccurrence.decode_encode, some_bind]
+  dsimp only
+  rw [dite_eq_left message.bulkQuoteOccurrence.length_lt]
+  rfl
+
+end BulkQuote
+
 /-- Executing Participant Connection: 0 bytes -/
 structure ExecutingParticipantConnection where
   deriving DecidableEq, Repr
@@ -2819,6 +2933,7 @@ inductive FirmMessage where
   | orderModification (message : OrderModification) -- "OM" 0x4F4D
   | newComplexOrderInstrument (message : NewComplexOrderInstrument) -- "ON" 0x4F4E
   | complexOrderAuctionEntry (message : ComplexOrderAuctionEntry) -- "OT" 0x4F54
+  | bulkQuote (message : BulkQuote) -- "QP" 0x5150
   | executingParticipantConnection (message : ExecutingParticipantConnection) -- "RE" 0x5245
   | executingParticipantDisconnection (message : ExecutingParticipantDisconnection) -- "RF" 0x5246
   | marketMakerProtectionSubscription (message : MarketMakerProtectionSubscription) -- "RP" 0x5250
@@ -2846,6 +2961,7 @@ def tag : FirmMessage → BitVec 16
   | .orderModification _ => 20301
   | .newComplexOrderInstrument _ => 20302
   | .complexOrderAuctionEntry _ => 20308
+  | .bulkQuote _ => 20816
   | .executingParticipantConnection _ => 21061
   | .executingParticipantDisconnection _ => 21062
   | .marketMakerProtectionSubscription _ => 21072
@@ -2869,6 +2985,7 @@ def encode : FirmMessage → List UInt8
   | .orderModification message => OrderModification.encode message
   | .newComplexOrderInstrument message => NewComplexOrderInstrument.encode message
   | .complexOrderAuctionEntry message => ComplexOrderAuctionEntry.encode message
+  | .bulkQuote message => BulkQuote.encode message
   | .executingParticipantConnection message => ExecutingParticipantConnection.encode message
   | .executingParticipantDisconnection message => ExecutingParticipantDisconnection.encode message
   | .marketMakerProtectionSubscription message => MarketMakerProtectionSubscription.encode message
@@ -2877,7 +2994,7 @@ def encode : FirmMessage → List UInt8
   | .improvementOrderCancellation message => ImprovementOrderCancellation.encode message
 
 /-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : FirmMessage) : (encode message).length ≤ 1950 := by
+theorem encode_length_le (message : FirmMessage) : (encode message).length ≤ 25995 := by
   cases message with
   | userConnection inner =>
     have bound_inner := UserConnection.encode_length_le inner
@@ -2928,6 +3045,10 @@ theorem encode_length_le (message : FirmMessage) : (encode message).length ≤ 1
     have bound_inner := ComplexOrderAuctionEntry.encode_length_le inner
     simp only [encode]
     omega
+  | bulkQuote inner =>
+    have bound_inner := BulkQuote.encode_length_le inner
+    simp only [encode]
+    omega
   | executingParticipantConnection inner =>
     simp only [encode, ExecutingParticipantConnection.encode_length]
     omega
@@ -2963,6 +3084,7 @@ def decode (tag : BitVec 16) (bytes : List UInt8) : Option (FirmMessage × List 
   else if tag = 20301 then (OrderModification.decode bytes).map fun (message, rest) => (.orderModification message, rest)
   else if tag = 20302 then (NewComplexOrderInstrument.decode bytes).map fun (message, rest) => (.newComplexOrderInstrument message, rest)
   else if tag = 20308 then (ComplexOrderAuctionEntry.decode bytes).map fun (message, rest) => (.complexOrderAuctionEntry message, rest)
+  else if tag = 20816 then (BulkQuote.decode bytes).map fun (message, rest) => (.bulkQuote message, rest)
   else if tag = 21061 then (ExecutingParticipantConnection.decode bytes).map fun (message, rest) => (.executingParticipantConnection message, rest)
   else if tag = 21062 then (ExecutingParticipantDisconnection.decode bytes).map fun (message, rest) => (.executingParticipantDisconnection message, rest)
   else if tag = 21072 then (MarketMakerProtectionSubscription.decode bytes).map fun (message, rest) => (.marketMakerProtectionSubscription message, rest)
@@ -3014,7 +3136,7 @@ theorem encode_length_pos (message : FirmPacket) : (encode message).length > 0 :
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : FirmPacket) : (encode message).length ≤ 1979 := by
+theorem encode_length_le (message : FirmPacket) : (encode message).length ≤ 26024 := by
   unfold encode
   cases message.firmMessage with
   | userConnection inner =>
@@ -3064,6 +3186,10 @@ theorem encode_length_le (message : FirmPacket) : (encode message).length ≤ 19
     omega
   | complexOrderAuctionEntry inner =>
     have bound_inner := ComplexOrderAuctionEntry.encode_length_le inner
+    simp only [FirmMessage.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
+    omega
+  | bulkQuote inner =>
+    have bound_inner := BulkQuote.encode_length_le inner
     simp only [FirmMessage.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
     omega
   | executingParticipantConnection inner =>

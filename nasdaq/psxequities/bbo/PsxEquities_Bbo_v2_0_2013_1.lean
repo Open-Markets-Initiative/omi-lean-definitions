@@ -291,7 +291,7 @@ inductive IssueClassification where
   | bond -- Bond
   | commonStock -- Common Stock
   | depositoryReceipt -- Depository Receipt
-  | t144A -- 144 A
+  | sec144A -- Sec 144 A
   | limitedPartnership -- Limited Partnership
   | notes -- Notes
   | ordinaryShare -- Ordinary Share
@@ -313,7 +313,7 @@ def toByte : IssueClassification → UInt8
   | .bond => 0x42
   | .commonStock => 0x43
   | .depositoryReceipt => 0x46
-  | .t144A => 0x49
+  | .sec144A => 0x49
   | .limitedPartnership => 0x4C
   | .notes => 0x4E
   | .ordinaryShare => 0x4F
@@ -333,7 +333,7 @@ def listed (byte : UInt8) : IssueClassification :=
   else if byte = 0x42 then .bond
   else if byte = 0x43 then .commonStock
   else if byte = 0x46 then .depositoryReceipt
-  else if byte = 0x49 then .t144A
+  else if byte = 0x49 then .sec144A
   else if byte = 0x4C then .limitedPartnership
   else if byte = 0x4E then .notes
   else if byte = 0x4F then .ordinaryShare
@@ -355,7 +355,7 @@ theorem ofByte_toByte (value : IssueClassification) : ofByte value.toByte = valu
   | bond => decide
   | commonStock => decide
   | depositoryReceipt => decide
-  | t144A => decide
+  | sec144A => decide
   | limitedPartnership => decide
   | notes => decide
   | ordinaryShare => decide

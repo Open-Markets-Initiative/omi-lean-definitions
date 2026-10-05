@@ -158,6 +158,327 @@ def decode : List UInt8 → Option (ExpiryMonth × List UInt8)
 
 end ExpiryMonth
 
+/-- Strike Price Fraction Indicator: one byte code -/
+def StrikePriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive StrikePriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ StrikePriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace StrikePriceFractionIndicator
+
+def toByte : StrikePriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : StrikePriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : StrikePriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : StrikePriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : StrikePriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (StrikePriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : StrikePriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : StrikePriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end StrikePriceFractionIndicator
+
+/-- Trade Price Fraction Indicator: one byte code -/
+def TradePriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive TradePriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ TradePriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace TradePriceFractionIndicator
+
+def toByte : TradePriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : TradePriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : TradePriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : TradePriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : TradePriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (TradePriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : TradePriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : TradePriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end TradePriceFractionIndicator
+
+/-- Net Change Fraction Indicator: one byte code -/
+def NetChangeFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive NetChangeFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ NetChangeFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace NetChangeFractionIndicator
+
+def toByte : NetChangeFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : NetChangeFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : NetChangeFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : NetChangeFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : NetChangeFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (NetChangeFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : NetChangeFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : NetChangeFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end NetChangeFractionIndicator
+
 /-- Call Put Code: one byte code -/
 def CallPutCode.codes : List UInt8 :=
   [0x43, 0x50]
@@ -256,6 +577,648 @@ def decode : List UInt8 → Option (RequestedMarketSide × List UInt8)
 
 end RequestedMarketSide
 
+/-- Bid Price Fraction Indicator: one byte code -/
+def BidPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive BidPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ BidPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace BidPriceFractionIndicator
+
+def toByte : BidPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : BidPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : BidPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : BidPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : BidPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (BidPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : BidPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : BidPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end BidPriceFractionIndicator
+
+/-- Ask Price Fraction Indicator: one byte code -/
+def AskPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive AskPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ AskPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace AskPriceFractionIndicator
+
+def toByte : AskPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : AskPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : AskPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : AskPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : AskPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (AskPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : AskPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : AskPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end AskPriceFractionIndicator
+
+/-- Price Fraction Indicator: one byte code -/
+def PriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive PriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ PriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace PriceFractionIndicator
+
+def toByte : PriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : PriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : PriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : PriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : PriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (PriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : PriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : PriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end PriceFractionIndicator
+
+/-- Maximum Threshold Price Fraction Indicator: one byte code -/
+def MaximumThresholdPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive MaximumThresholdPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ MaximumThresholdPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace MaximumThresholdPriceFractionIndicator
+
+def toByte : MaximumThresholdPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : MaximumThresholdPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : MaximumThresholdPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : MaximumThresholdPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : MaximumThresholdPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (MaximumThresholdPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : MaximumThresholdPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : MaximumThresholdPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end MaximumThresholdPriceFractionIndicator
+
+/-- Minimum Threshold Price Fraction Indicator: one byte code -/
+def MinimumThresholdPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive MinimumThresholdPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ MinimumThresholdPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace MinimumThresholdPriceFractionIndicator
+
+def toByte : MinimumThresholdPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : MinimumThresholdPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : MinimumThresholdPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : MinimumThresholdPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : MinimumThresholdPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (MinimumThresholdPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : MinimumThresholdPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : MinimumThresholdPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end MinimumThresholdPriceFractionIndicator
+
+/-- Tick Increment Fraction Indicator: one byte code -/
+def TickIncrementFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive TickIncrementFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ TickIncrementFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace TickIncrementFractionIndicator
+
+def toByte : TickIncrementFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : TickIncrementFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : TickIncrementFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : TickIncrementFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : TickIncrementFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (TickIncrementFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : TickIncrementFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : TickIncrementFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end TickIncrementFractionIndicator
+
 /-- Option Type: one byte code -/
 def OptionType.codes : List UInt8 :=
   [0x41, 0x45]
@@ -302,6 +1265,113 @@ def decode : List UInt8 → Option (OptionType × List UInt8)
   simp [decode, encode, ofByte_toByte]
 
 end OptionType
+
+/-- Tick Value Fraction Indicator: one byte code -/
+def TickValueFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive TickValueFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ TickValueFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace TickValueFractionIndicator
+
+def toByte : TickValueFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : TickValueFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : TickValueFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : TickValueFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : TickValueFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (TickValueFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : TickValueFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : TickValueFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end TickValueFractionIndicator
 
 /-- Delivery Type: one byte code -/
 def DeliveryType.codes : List UInt8 :=
@@ -452,6 +1522,327 @@ def decode : List UInt8 → Option (StrategyType × List UInt8)
 
 end StrategyType
 
+/-- Leg Ratio Or Delta Fraction Indicator: one byte code -/
+def LegRatioOrDeltaFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive LegRatioOrDeltaFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ LegRatioOrDeltaFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace LegRatioOrDeltaFractionIndicator
+
+def toByte : LegRatioOrDeltaFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : LegRatioOrDeltaFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : LegRatioOrDeltaFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : LegRatioOrDeltaFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : LegRatioOrDeltaFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (LegRatioOrDeltaFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : LegRatioOrDeltaFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : LegRatioOrDeltaFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end LegRatioOrDeltaFractionIndicator
+
+/-- Leg Price Fraction Indicator: one byte code -/
+def LegPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive LegPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ LegPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace LegPriceFractionIndicator
+
+def toByte : LegPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : LegPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : LegPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : LegPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : LegPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (LegPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : LegPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : LegPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end LegPriceFractionIndicator
+
+/-- Last Price Fraction Indicator: one byte code -/
+def LastPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive LastPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ LastPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace LastPriceFractionIndicator
+
+def toByte : LastPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : LastPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : LastPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : LastPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : LastPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (LastPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : LastPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : LastPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end LastPriceFractionIndicator
+
 /-- Tick: one byte code -/
 def Tick.codes : List UInt8 :=
   [0x2B, 0x2D]
@@ -498,6 +1889,541 @@ def decode : List UInt8 → Option (Tick × List UInt8)
   simp [decode, encode, ofByte_toByte]
 
 end Tick
+
+/-- Open Price Fraction Indicator: one byte code -/
+def OpenPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive OpenPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ OpenPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace OpenPriceFractionIndicator
+
+def toByte : OpenPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : OpenPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : OpenPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : OpenPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : OpenPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (OpenPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : OpenPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : OpenPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end OpenPriceFractionIndicator
+
+/-- High Price Fraction Indicator: one byte code -/
+def HighPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive HighPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ HighPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace HighPriceFractionIndicator
+
+def toByte : HighPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : HighPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : HighPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : HighPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : HighPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (HighPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : HighPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : HighPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end HighPriceFractionIndicator
+
+/-- Low Price Fraction Indicator: one byte code -/
+def LowPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive LowPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ LowPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace LowPriceFractionIndicator
+
+def toByte : LowPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : LowPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : LowPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : LowPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : LowPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (LowPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : LowPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : LowPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end LowPriceFractionIndicator
+
+/-- Settlement Price Fraction Indicator: one byte code -/
+def SettlementPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive SettlementPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ SettlementPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace SettlementPriceFractionIndicator
+
+def toByte : SettlementPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : SettlementPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : SettlementPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : SettlementPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : SettlementPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (SettlementPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : SettlementPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : SettlementPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end SettlementPriceFractionIndicator
+
+/-- Previous Settlement Price Fraction Indicator: one byte code -/
+def PreviousSettlementPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive PreviousSettlementPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ PreviousSettlementPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace PreviousSettlementPriceFractionIndicator
+
+def toByte : PreviousSettlementPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : PreviousSettlementPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : PreviousSettlementPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : PreviousSettlementPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : PreviousSettlementPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (PreviousSettlementPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : PreviousSettlementPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : PreviousSettlementPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end PreviousSettlementPriceFractionIndicator
 
 /-- Reason: one byte code -/
 def Reason.codes : List UInt8 :=
@@ -554,12 +2480,761 @@ def decode : List UInt8 → Option (Reason × List UInt8)
 
 end Reason
 
+/-- Opening Price Fraction Indicator: one byte code -/
+def OpeningPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive OpeningPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ OpeningPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace OpeningPriceFractionIndicator
+
+def toByte : OpeningPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : OpeningPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : OpeningPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : OpeningPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : OpeningPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (OpeningPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : OpeningPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : OpeningPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end OpeningPriceFractionIndicator
+
+/-- Previous Settlement Fraction Indicator: one byte code -/
+def PreviousSettlementFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive PreviousSettlementFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ PreviousSettlementFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace PreviousSettlementFractionIndicator
+
+def toByte : PreviousSettlementFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : PreviousSettlementFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : PreviousSettlementFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : PreviousSettlementFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : PreviousSettlementFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (PreviousSettlementFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : PreviousSettlementFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : PreviousSettlementFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end PreviousSettlementFractionIndicator
+
+/-- External Price Fraction Indicator: one byte code -/
+def ExternalPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive ExternalPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ ExternalPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace ExternalPriceFractionIndicator
+
+def toByte : ExternalPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : ExternalPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : ExternalPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : ExternalPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : ExternalPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (ExternalPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : ExternalPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : ExternalPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end ExternalPriceFractionIndicator
+
+/-- Coupon Fraction Indicator: one byte code -/
+def CouponFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive CouponFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ CouponFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace CouponFractionIndicator
+
+def toByte : CouponFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : CouponFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : CouponFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : CouponFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : CouponFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (CouponFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : CouponFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : CouponFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end CouponFractionIndicator
+
+/-- Conversion Factor Fraction Indicator: one byte code -/
+def ConversionFactorFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive ConversionFactorFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ ConversionFactorFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace ConversionFactorFractionIndicator
+
+def toByte : ConversionFactorFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : ConversionFactorFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : ConversionFactorFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : ConversionFactorFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : ConversionFactorFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (ConversionFactorFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : ConversionFactorFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : ConversionFactorFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end ConversionFactorFractionIndicator
+
+/-- Min Price Fraction Indicator: one byte code -/
+def MinPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive MinPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ MinPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace MinPriceFractionIndicator
+
+def toByte : MinPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : MinPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : MinPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : MinPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : MinPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (MinPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : MinPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : MinPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end MinPriceFractionIndicator
+
+/-- Tick Price Fraction Indicator: one byte code -/
+def TickPriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive TickPriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ TickPriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace TickPriceFractionIndicator
+
+def toByte : TickPriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : TickPriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : TickPriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : TickPriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : TickPriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (TickPriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : TickPriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : TickPriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end TickPriceFractionIndicator
+
 /-- Option Symbol: 19 bytes -/
 structure OptionSymbol where
   root : Alpha 6
   expiryMonth : ExpiryMonth
   strikePrice : Alpha 7
-  strikePriceFractionIndicator : Alpha 1
+  strikePriceFractionIndicator : StrikePriceFractionIndicator
   expiryYear : Alpha 2
   expiryDay : Alpha 2
   deriving DecidableEq, Repr
@@ -570,7 +3245,7 @@ def encode (message : OptionSymbol) : List UInt8 :=
   Alpha.encode message.root
     ++ (ExpiryMonth.encode message.expiryMonth
     ++ (Alpha.encode message.strikePrice
-    ++ (Alpha.encode message.strikePriceFractionIndicator
+    ++ (StrikePriceFractionIndicator.encode message.strikePriceFractionIndicator
     ++ (Alpha.encode message.expiryYear
     ++ (Alpha.encode message.expiryDay)))))
 
@@ -578,14 +3253,14 @@ def decode (bytes : List UInt8) : Option (OptionSymbol × List UInt8) := do
   let (root, bytes) ← Alpha.decode 6 bytes
   let (expiryMonth, bytes) ← ExpiryMonth.decode bytes
   let (strikePrice, bytes) ← Alpha.decode 7 bytes
-  let (strikePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (strikePriceFractionIndicator, bytes) ← StrikePriceFractionIndicator.decode bytes
   let (expiryYear, bytes) ← Alpha.decode 2 bytes
   let (expiryDay, bytes) ← Alpha.decode 2 bytes
   pure ({ root, expiryMonth, strikePrice, strikePriceFractionIndicator, expiryYear, expiryDay }, bytes)
 
 @[simp] theorem encode_length (message : OptionSymbol) : (encode message).length = 19 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, ExpiryMonth.encode_length]
+  simp only [List.length_append, Alpha.encode_length, ExpiryMonth.encode_length, StrikePriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : OptionSymbol) : (encode message).length > 0 := by
   rw [encode_length]
@@ -600,7 +3275,7 @@ theorem encode_length_pos (message : OptionSymbol) : (encode message).length > 0
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, StrikePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -615,10 +3290,10 @@ structure OptionTradeMessage where
   optionSymbol : OptionSymbol
   volume : Alpha 8
   tradePrice : Alpha 7
-  tradePriceFractionIndicator : Alpha 1
+  tradePriceFractionIndicator : TradePriceFractionIndicator
   netChangeSign : Alpha 1
   netChange : Alpha 7
-  netChangeFractionIndicator : Alpha 1
+  netChangeFractionIndicator : NetChangeFractionIndicator
   priceIndicatorMarker : Alpha 1
   tradeNumber : Alpha 8
   deriving DecidableEq, Repr
@@ -630,10 +3305,10 @@ def encode (message : OptionTradeMessage) : List UInt8 :=
     ++ (OptionSymbol.encode message.optionSymbol
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.tradePrice
-    ++ (Alpha.encode message.tradePriceFractionIndicator
+    ++ (TradePriceFractionIndicator.encode message.tradePriceFractionIndicator
     ++ (Alpha.encode message.netChangeSign
     ++ (Alpha.encode message.netChange
-    ++ (Alpha.encode message.netChangeFractionIndicator
+    ++ (NetChangeFractionIndicator.encode message.netChangeFractionIndicator
     ++ (Alpha.encode message.priceIndicatorMarker
     ++ (Alpha.encode message.tradeNumber)))))))))
 
@@ -642,17 +3317,17 @@ def decode (bytes : List UInt8) : Option (OptionTradeMessage × List UInt8) := d
   let (optionSymbol, bytes) ← OptionSymbol.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (tradePrice, bytes) ← Alpha.decode 7 bytes
-  let (tradePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tradePriceFractionIndicator, bytes) ← TradePriceFractionIndicator.decode bytes
   let (netChangeSign, bytes) ← Alpha.decode 1 bytes
   let (netChange, bytes) ← Alpha.decode 7 bytes
-  let (netChangeFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (netChangeFractionIndicator, bytes) ← NetChangeFractionIndicator.decode bytes
   let (priceIndicatorMarker, bytes) ← Alpha.decode 1 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
   pure ({ exchangeId, optionSymbol, volume, tradePrice, tradePriceFractionIndicator, netChangeSign, netChange, netChangeFractionIndicator, priceIndicatorMarker, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : OptionTradeMessage) : (encode message).length = 54 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, OptionSymbol.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, OptionSymbol.encode_length, Alpha.encode_length, TradePriceFractionIndicator.encode_length, NetChangeFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : OptionTradeMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -669,13 +3344,13 @@ theorem encode_length_pos (message : OptionTradeMessage) : (encode message).leng
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TradePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, NetChangeFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -692,7 +3367,7 @@ structure FutureOptionSymbol where
   expiryDay : Alpha 2
   callPutCode : CallPutCode
   strikePrice : Alpha 7
-  strikePriceFractionIndicator : Alpha 1
+  strikePriceFractionIndicator : StrikePriceFractionIndicator
   deriving DecidableEq, Repr
 
 namespace FutureOptionSymbol
@@ -704,7 +3379,7 @@ def encode (message : FutureOptionSymbol) : List UInt8 :=
     ++ (Alpha.encode message.expiryDay
     ++ (CallPutCode.encode message.callPutCode
     ++ (Alpha.encode message.strikePrice
-    ++ (Alpha.encode message.strikePriceFractionIndicator))))))
+    ++ (StrikePriceFractionIndicator.encode message.strikePriceFractionIndicator))))))
 
 def decode (bytes : List UInt8) : Option (FutureOptionSymbol × List UInt8) := do
   let (root, bytes) ← Alpha.decode 6 bytes
@@ -713,12 +3388,12 @@ def decode (bytes : List UInt8) : Option (FutureOptionSymbol × List UInt8) := d
   let (expiryDay, bytes) ← Alpha.decode 2 bytes
   let (callPutCode, bytes) ← CallPutCode.decode bytes
   let (strikePrice, bytes) ← Alpha.decode 7 bytes
-  let (strikePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (strikePriceFractionIndicator, bytes) ← StrikePriceFractionIndicator.decode bytes
   pure ({ root, symbolMonth, symbolYear, expiryDay, callPutCode, strikePrice, strikePriceFractionIndicator }, bytes)
 
 @[simp] theorem encode_length (message : FutureOptionSymbol) : (encode message).length = 20 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, CallPutCode.encode_length]
+  simp only [List.length_append, Alpha.encode_length, CallPutCode.encode_length, StrikePriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FutureOptionSymbol) : (encode message).length > 0 := by
   rw [encode_length]
@@ -739,7 +3414,7 @@ theorem encode_length_pos (message : FutureOptionSymbol) : (encode message).leng
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, some_bind]
+  rw [StrikePriceFractionIndicator.decode_encode, some_bind]
   rfl
 
 end FutureOptionSymbol
@@ -750,11 +3425,11 @@ structure FutureOptionsTradeMessage where
   futureOptionSymbol : FutureOptionSymbol
   volume : Alpha 8
   tradePrice : Alpha 7
-  tradePriceFractionIndicator : Alpha 1
+  tradePriceFractionIndicator : TradePriceFractionIndicator
   priceIndicatorMarker : Alpha 1
   netChangeSign : Alpha 1
   netChange : Alpha 7
-  netChangeFractionIndicator : Alpha 1
+  netChangeFractionIndicator : NetChangeFractionIndicator
   tradeNumber : Alpha 8
   deriving DecidableEq, Repr
 
@@ -765,11 +3440,11 @@ def encode (message : FutureOptionsTradeMessage) : List UInt8 :=
     ++ (FutureOptionSymbol.encode message.futureOptionSymbol
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.tradePrice
-    ++ (Alpha.encode message.tradePriceFractionIndicator
+    ++ (TradePriceFractionIndicator.encode message.tradePriceFractionIndicator
     ++ (Alpha.encode message.priceIndicatorMarker
     ++ (Alpha.encode message.netChangeSign
     ++ (Alpha.encode message.netChange
-    ++ (Alpha.encode message.netChangeFractionIndicator
+    ++ (NetChangeFractionIndicator.encode message.netChangeFractionIndicator
     ++ (Alpha.encode message.tradeNumber)))))))))
 
 def decode (bytes : List UInt8) : Option (FutureOptionsTradeMessage × List UInt8) := do
@@ -777,17 +3452,17 @@ def decode (bytes : List UInt8) : Option (FutureOptionsTradeMessage × List UInt
   let (futureOptionSymbol, bytes) ← FutureOptionSymbol.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (tradePrice, bytes) ← Alpha.decode 7 bytes
-  let (tradePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tradePriceFractionIndicator, bytes) ← TradePriceFractionIndicator.decode bytes
   let (priceIndicatorMarker, bytes) ← Alpha.decode 1 bytes
   let (netChangeSign, bytes) ← Alpha.decode 1 bytes
   let (netChange, bytes) ← Alpha.decode 7 bytes
-  let (netChangeFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (netChangeFractionIndicator, bytes) ← NetChangeFractionIndicator.decode bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
   pure ({ exchangeId, futureOptionSymbol, volume, tradePrice, tradePriceFractionIndicator, priceIndicatorMarker, netChangeSign, netChange, netChangeFractionIndicator, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : FutureOptionsTradeMessage) : (encode message).length = 55 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureOptionSymbol.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureOptionSymbol.encode_length, Alpha.encode_length, TradePriceFractionIndicator.encode_length, NetChangeFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FutureOptionsTradeMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -804,7 +3479,7 @@ theorem encode_length_pos (message : FutureOptionsTradeMessage) : (encode messag
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TradePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -812,7 +3487,7 @@ theorem encode_length_pos (message : FutureOptionsTradeMessage) : (encode messag
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, NetChangeFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [Alpha.decode_encode, some_bind]
   rfl
@@ -870,10 +3545,10 @@ structure FuturesTradeMessage where
   futureProduct : FutureProduct
   volume : Alpha 8
   tradePrice : Alpha 7
-  tradePriceFractionIndicator : Alpha 1
+  tradePriceFractionIndicator : TradePriceFractionIndicator
   netChangeSign : Alpha 1
   netChange : Alpha 7
-  netChangeFractionIndicator : Alpha 1
+  netChangeFractionIndicator : NetChangeFractionIndicator
   priceIndicatorMarker : Alpha 1
   tradeNumber : Alpha 8
   deriving DecidableEq, Repr
@@ -885,10 +3560,10 @@ def encode (message : FuturesTradeMessage) : List UInt8 :=
     ++ (FutureProduct.encode message.futureProduct
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.tradePrice
-    ++ (Alpha.encode message.tradePriceFractionIndicator
+    ++ (TradePriceFractionIndicator.encode message.tradePriceFractionIndicator
     ++ (Alpha.encode message.netChangeSign
     ++ (Alpha.encode message.netChange
-    ++ (Alpha.encode message.netChangeFractionIndicator
+    ++ (NetChangeFractionIndicator.encode message.netChangeFractionIndicator
     ++ (Alpha.encode message.priceIndicatorMarker
     ++ (Alpha.encode message.tradeNumber)))))))))
 
@@ -897,17 +3572,17 @@ def decode (bytes : List UInt8) : Option (FuturesTradeMessage × List UInt8) := 
   let (futureProduct, bytes) ← FutureProduct.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (tradePrice, bytes) ← Alpha.decode 7 bytes
-  let (tradePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tradePriceFractionIndicator, bytes) ← TradePriceFractionIndicator.decode bytes
   let (netChangeSign, bytes) ← Alpha.decode 1 bytes
   let (netChange, bytes) ← Alpha.decode 7 bytes
-  let (netChangeFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (netChangeFractionIndicator, bytes) ← NetChangeFractionIndicator.decode bytes
   let (priceIndicatorMarker, bytes) ← Alpha.decode 1 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
   pure ({ exchangeId, futureProduct, volume, tradePrice, tradePriceFractionIndicator, netChangeSign, netChange, netChangeFractionIndicator, priceIndicatorMarker, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : FuturesTradeMessage) : (encode message).length = 46 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length, TradePriceFractionIndicator.encode_length, NetChangeFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FuturesTradeMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -924,13 +3599,13 @@ theorem encode_length_pos (message : FuturesTradeMessage) : (encode message).len
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TradePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, NetChangeFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -946,10 +3621,10 @@ structure StrategyTradeMessage where
   volume : Alpha 8
   tradePriceSign : Alpha 1
   tradePrice : Alpha 7
-  tradePriceFractionIndicator : Alpha 1
+  tradePriceFractionIndicator : TradePriceFractionIndicator
   netChangeSign : Alpha 1
   netChange : Alpha 7
-  netChangeFractionIndicator : Alpha 1
+  netChangeFractionIndicator : NetChangeFractionIndicator
   priceIndicatorMarker : Alpha 1
   tradeNumber : Alpha 8
   deriving DecidableEq, Repr
@@ -962,10 +3637,10 @@ def encode (message : StrategyTradeMessage) : List UInt8 :=
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.tradePriceSign
     ++ (Alpha.encode message.tradePrice
-    ++ (Alpha.encode message.tradePriceFractionIndicator
+    ++ (TradePriceFractionIndicator.encode message.tradePriceFractionIndicator
     ++ (Alpha.encode message.netChangeSign
     ++ (Alpha.encode message.netChange
-    ++ (Alpha.encode message.netChangeFractionIndicator
+    ++ (NetChangeFractionIndicator.encode message.netChangeFractionIndicator
     ++ (Alpha.encode message.priceIndicatorMarker
     ++ (Alpha.encode message.tradeNumber))))))))))
 
@@ -975,17 +3650,17 @@ def decode (bytes : List UInt8) : Option (StrategyTradeMessage × List UInt8) :=
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (tradePriceSign, bytes) ← Alpha.decode 1 bytes
   let (tradePrice, bytes) ← Alpha.decode 7 bytes
-  let (tradePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tradePriceFractionIndicator, bytes) ← TradePriceFractionIndicator.decode bytes
   let (netChangeSign, bytes) ← Alpha.decode 1 bytes
   let (netChange, bytes) ← Alpha.decode 7 bytes
-  let (netChangeFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (netChangeFractionIndicator, bytes) ← NetChangeFractionIndicator.decode bytes
   let (priceIndicatorMarker, bytes) ← Alpha.decode 1 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
   pure ({ exchangeId, symbolStrategy, volume, tradePriceSign, tradePrice, tradePriceFractionIndicator, netChangeSign, netChange, netChangeFractionIndicator, priceIndicatorMarker, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : StrategyTradeMessage) : (encode message).length = 66 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, Alpha.encode_length, TradePriceFractionIndicator.encode_length, NetChangeFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : StrategyTradeMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1004,13 +3679,13 @@ theorem encode_length_pos (message : StrategyTradeMessage) : (encode message).le
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TradePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, NetChangeFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1384,10 +4059,10 @@ structure OptionQuoteMessage where
   exchangeId : ExchangeId
   optionSymbol : OptionSymbol
   bidPriceQuote : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   askPriceQuote : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   instrumentStatusMarker : Alpha 1
   deriving DecidableEq, Repr
@@ -1398,10 +4073,10 @@ def encode (message : OptionQuoteMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
     ++ (OptionSymbol.encode message.optionSymbol
     ++ (Alpha.encode message.bidPriceQuote
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.askPriceQuote
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.instrumentStatusMarker))))))))
 
@@ -1409,17 +4084,17 @@ def decode (bytes : List UInt8) : Option (OptionQuoteMessage × List UInt8) := d
   let (exchangeId, bytes) ← ExchangeId.decode bytes
   let (optionSymbol, bytes) ← OptionSymbol.decode bytes
   let (bidPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (askPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (instrumentStatusMarker, bytes) ← Alpha.decode 1 bytes
   pure ({ exchangeId, optionSymbol, bidPriceQuote, bidPriceFractionIndicator, bidSize, askPriceQuote, askPriceFractionIndicator, askSize, instrumentStatusMarker }, bytes)
 
 @[simp] theorem encode_length (message : OptionQuoteMessage) : (encode message).length = 47 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, OptionSymbol.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, OptionSymbol.encode_length, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : OptionQuoteMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1434,13 +4109,13 @@ theorem encode_length_pos (message : OptionQuoteMessage) : (encode message).leng
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1454,10 +4129,10 @@ structure FutureOptionsQuoteMessage where
   exchangeId : ExchangeId
   futureOptionSymbol : FutureOptionSymbol
   bidPriceQuote : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   askPriceQuote : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   instrumentStatusMarker : Alpha 1
   deriving DecidableEq, Repr
@@ -1468,10 +4143,10 @@ def encode (message : FutureOptionsQuoteMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
     ++ (FutureOptionSymbol.encode message.futureOptionSymbol
     ++ (Alpha.encode message.bidPriceQuote
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.askPriceQuote
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.instrumentStatusMarker))))))))
 
@@ -1479,17 +4154,17 @@ def decode (bytes : List UInt8) : Option (FutureOptionsQuoteMessage × List UInt
   let (exchangeId, bytes) ← ExchangeId.decode bytes
   let (futureOptionSymbol, bytes) ← FutureOptionSymbol.decode bytes
   let (bidPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (askPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (instrumentStatusMarker, bytes) ← Alpha.decode 1 bytes
   pure ({ exchangeId, futureOptionSymbol, bidPriceQuote, bidPriceFractionIndicator, bidSize, askPriceQuote, askPriceFractionIndicator, askSize, instrumentStatusMarker }, bytes)
 
 @[simp] theorem encode_length (message : FutureOptionsQuoteMessage) : (encode message).length = 48 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureOptionSymbol.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureOptionSymbol.encode_length, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FutureOptionsQuoteMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1504,13 +4179,13 @@ theorem encode_length_pos (message : FutureOptionsQuoteMessage) : (encode messag
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1524,10 +4199,10 @@ structure FuturesQuoteMessage where
   exchangeId : ExchangeId
   futureProduct : FutureProduct
   bidPriceQuote : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   askPriceQuote : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   instrumentStatusMarker : Alpha 1
   deriving DecidableEq, Repr
@@ -1538,10 +4213,10 @@ def encode (message : FuturesQuoteMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
     ++ (FutureProduct.encode message.futureProduct
     ++ (Alpha.encode message.bidPriceQuote
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.askPriceQuote
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.instrumentStatusMarker))))))))
 
@@ -1549,17 +4224,17 @@ def decode (bytes : List UInt8) : Option (FuturesQuoteMessage × List UInt8) := 
   let (exchangeId, bytes) ← ExchangeId.decode bytes
   let (futureProduct, bytes) ← FutureProduct.decode bytes
   let (bidPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (askPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (instrumentStatusMarker, bytes) ← Alpha.decode 1 bytes
   pure ({ exchangeId, futureProduct, bidPriceQuote, bidPriceFractionIndicator, bidSize, askPriceQuote, askPriceFractionIndicator, askSize, instrumentStatusMarker }, bytes)
 
 @[simp] theorem encode_length (message : FuturesQuoteMessage) : (encode message).length = 39 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FuturesQuoteMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1574,13 +4249,13 @@ theorem encode_length_pos (message : FuturesQuoteMessage) : (encode message).len
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1595,11 +4270,11 @@ structure StrategyQuoteMessage where
   symbolStrategy : Alpha 30
   bidPriceSign : Alpha 1
   bidPriceQuote : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   askPriceSign : Alpha 1
   askPriceQuote : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   instrumentStatusMarker : Alpha 1
   deriving DecidableEq, Repr
@@ -1611,11 +4286,11 @@ def encode (message : StrategyQuoteMessage) : List UInt8 :=
     ++ (Alpha.encode message.symbolStrategy
     ++ (Alpha.encode message.bidPriceSign
     ++ (Alpha.encode message.bidPriceQuote
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.askPriceSign
     ++ (Alpha.encode message.askPriceQuote
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.instrumentStatusMarker))))))))))
 
@@ -1624,18 +4299,18 @@ def decode (bytes : List UInt8) : Option (StrategyQuoteMessage × List UInt8) :=
   let (symbolStrategy, bytes) ← Alpha.decode 30 bytes
   let (bidPriceSign, bytes) ← Alpha.decode 1 bytes
   let (bidPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (askPriceSign, bytes) ← Alpha.decode 1 bytes
   let (askPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (instrumentStatusMarker, bytes) ← Alpha.decode 1 bytes
   pure ({ exchangeId, symbolStrategy, bidPriceSign, bidPriceQuote, bidPriceFractionIndicator, bidSize, askPriceSign, askPriceQuote, askPriceFractionIndicator, askSize, instrumentStatusMarker }, bytes)
 
 @[simp] theorem encode_length (message : StrategyQuoteMessage) : (encode message).length = 60 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : StrategyQuoteMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1652,7 +4327,7 @@ theorem encode_length_pos (message : StrategyQuoteMessage) : (encode message).le
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1660,7 +4335,7 @@ theorem encode_length_pos (message : StrategyQuoteMessage) : (encode message).le
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1673,11 +4348,11 @@ end StrategyQuoteMessage
 structure OptionMarketDepthLevel where
   levelOfMarketDepth : Alpha 1
   bidPriceQuote : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   numberOfBidOrders : Alpha 2
   askPriceQuote : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   numberOfAskOrders : Alpha 2
   deriving DecidableEq, Repr
@@ -1687,29 +4362,29 @@ namespace OptionMarketDepthLevel
 def encode (message : OptionMarketDepthLevel) : List UInt8 :=
   Alpha.encode message.levelOfMarketDepth
     ++ (Alpha.encode message.bidPriceQuote
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.numberOfBidOrders
     ++ (Alpha.encode message.askPriceQuote
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.numberOfAskOrders))))))))
 
 def decode (bytes : List UInt8) : Option (OptionMarketDepthLevel × List UInt8) := do
   let (levelOfMarketDepth, bytes) ← Alpha.decode 1 bytes
   let (bidPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (numberOfBidOrders, bytes) ← Alpha.decode 2 bytes
   let (askPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (numberOfAskOrders, bytes) ← Alpha.decode 2 bytes
   pure ({ levelOfMarketDepth, bidPriceQuote, bidPriceFractionIndicator, bidSize, numberOfBidOrders, askPriceQuote, askPriceFractionIndicator, askSize, numberOfAskOrders }, bytes)
 
 @[simp] theorem encode_length (message : OptionMarketDepthLevel) : (encode message).length = 31 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length]
+  simp only [List.length_append, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : OptionMarketDepthLevel) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1722,7 +4397,7 @@ theorem encode_length_pos (message : OptionMarketDepthLevel) : (encode message).
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1730,7 +4405,7 @@ theorem encode_length_pos (message : OptionMarketDepthLevel) : (encode message).
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1800,11 +4475,11 @@ end OptionMarketDepthMessage
 structure FutureOptionsMarketDepthTradingInstrument where
   levelOfMarketDepth : Alpha 1
   bidPriceQuote : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   numberOfBidOrders : Alpha 2
   askPriceQuote : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   numberOfAskOrders : Alpha 2
   deriving DecidableEq, Repr
@@ -1814,29 +4489,29 @@ namespace FutureOptionsMarketDepthTradingInstrument
 def encode (message : FutureOptionsMarketDepthTradingInstrument) : List UInt8 :=
   Alpha.encode message.levelOfMarketDepth
     ++ (Alpha.encode message.bidPriceQuote
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.numberOfBidOrders
     ++ (Alpha.encode message.askPriceQuote
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.numberOfAskOrders))))))))
 
 def decode (bytes : List UInt8) : Option (FutureOptionsMarketDepthTradingInstrument × List UInt8) := do
   let (levelOfMarketDepth, bytes) ← Alpha.decode 1 bytes
   let (bidPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (numberOfBidOrders, bytes) ← Alpha.decode 2 bytes
   let (askPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (numberOfAskOrders, bytes) ← Alpha.decode 2 bytes
   pure ({ levelOfMarketDepth, bidPriceQuote, bidPriceFractionIndicator, bidSize, numberOfBidOrders, askPriceQuote, askPriceFractionIndicator, askSize, numberOfAskOrders }, bytes)
 
 @[simp] theorem encode_length (message : FutureOptionsMarketDepthTradingInstrument) : (encode message).length = 31 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length]
+  simp only [List.length_append, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FutureOptionsMarketDepthTradingInstrument) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1849,7 +4524,7 @@ theorem encode_length_pos (message : FutureOptionsMarketDepthTradingInstrument) 
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1857,7 +4532,7 @@ theorem encode_length_pos (message : FutureOptionsMarketDepthTradingInstrument) 
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1927,11 +4602,11 @@ end FutureOptionsMarketDepthMessage
 structure FuturesMarketDepthTradingInstrument where
   levelOfMarketDepth : Alpha 1
   bidPriceQuote : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   numberOfBidOrders : Alpha 2
   askPriceQuote : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   numberOfAskOrders : Alpha 2
   deriving DecidableEq, Repr
@@ -1941,29 +4616,29 @@ namespace FuturesMarketDepthTradingInstrument
 def encode (message : FuturesMarketDepthTradingInstrument) : List UInt8 :=
   Alpha.encode message.levelOfMarketDepth
     ++ (Alpha.encode message.bidPriceQuote
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.numberOfBidOrders
     ++ (Alpha.encode message.askPriceQuote
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.numberOfAskOrders))))))))
 
 def decode (bytes : List UInt8) : Option (FuturesMarketDepthTradingInstrument × List UInt8) := do
   let (levelOfMarketDepth, bytes) ← Alpha.decode 1 bytes
   let (bidPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (numberOfBidOrders, bytes) ← Alpha.decode 2 bytes
   let (askPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (numberOfAskOrders, bytes) ← Alpha.decode 2 bytes
   pure ({ levelOfMarketDepth, bidPriceQuote, bidPriceFractionIndicator, bidSize, numberOfBidOrders, askPriceQuote, askPriceFractionIndicator, askSize, numberOfAskOrders }, bytes)
 
 @[simp] theorem encode_length (message : FuturesMarketDepthTradingInstrument) : (encode message).length = 31 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length]
+  simp only [List.length_append, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FuturesMarketDepthTradingInstrument) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1976,7 +4651,7 @@ theorem encode_length_pos (message : FuturesMarketDepthTradingInstrument) : (enc
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -1984,7 +4659,7 @@ theorem encode_length_pos (message : FuturesMarketDepthTradingInstrument) : (enc
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2055,12 +4730,12 @@ structure StrategyMarketDepthTradingInstrument where
   levelOfMarketDepth : Alpha 1
   bidPriceSign : Alpha 1
   bidPriceQuote : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   numberOfBidOrders : Alpha 2
   askPriceSign : Alpha 1
   askPriceQuote : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   numberOfAskOrders : Alpha 2
   deriving DecidableEq, Repr
@@ -2071,12 +4746,12 @@ def encode (message : StrategyMarketDepthTradingInstrument) : List UInt8 :=
   Alpha.encode message.levelOfMarketDepth
     ++ (Alpha.encode message.bidPriceSign
     ++ (Alpha.encode message.bidPriceQuote
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.numberOfBidOrders
     ++ (Alpha.encode message.askPriceSign
     ++ (Alpha.encode message.askPriceQuote
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.numberOfAskOrders))))))))))
 
@@ -2084,19 +4759,19 @@ def decode (bytes : List UInt8) : Option (StrategyMarketDepthTradingInstrument �
   let (levelOfMarketDepth, bytes) ← Alpha.decode 1 bytes
   let (bidPriceSign, bytes) ← Alpha.decode 1 bytes
   let (bidPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (numberOfBidOrders, bytes) ← Alpha.decode 2 bytes
   let (askPriceSign, bytes) ← Alpha.decode 1 bytes
   let (askPriceQuote, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (numberOfAskOrders, bytes) ← Alpha.decode 2 bytes
   pure ({ levelOfMarketDepth, bidPriceSign, bidPriceQuote, bidPriceFractionIndicator, bidSize, numberOfBidOrders, askPriceSign, askPriceQuote, askPriceFractionIndicator, askSize, numberOfAskOrders }, bytes)
 
 @[simp] theorem encode_length (message : StrategyMarketDepthTradingInstrument) : (encode message).length = 33 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length]
+  simp only [List.length_append, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : StrategyMarketDepthTradingInstrument) : (encode message).length > 0 := by
   rw [encode_length]
@@ -2111,7 +4786,7 @@ theorem encode_length_pos (message : StrategyMarketDepthTradingInstrument) : (en
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2121,7 +4796,7 @@ theorem encode_length_pos (message : StrategyMarketDepthTradingInstrument) : (en
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2193,7 +4868,7 @@ structure OptionTradeCancellationMessage where
   optionSymbol : OptionSymbol
   volume : Alpha 8
   tradePrice : Alpha 7
-  tradePriceFractionIndicator : Alpha 1
+  tradePriceFractionIndicator : TradePriceFractionIndicator
   priceIndicatorMarker : Alpha 1
   tradeNumber : Alpha 8
   deriving DecidableEq, Repr
@@ -2205,7 +4880,7 @@ def encode (message : OptionTradeCancellationMessage) : List UInt8 :=
     ++ (OptionSymbol.encode message.optionSymbol
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.tradePrice
-    ++ (Alpha.encode message.tradePriceFractionIndicator
+    ++ (TradePriceFractionIndicator.encode message.tradePriceFractionIndicator
     ++ (Alpha.encode message.priceIndicatorMarker
     ++ (Alpha.encode message.tradeNumber))))))
 
@@ -2214,14 +4889,14 @@ def decode (bytes : List UInt8) : Option (OptionTradeCancellationMessage × List
   let (optionSymbol, bytes) ← OptionSymbol.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (tradePrice, bytes) ← Alpha.decode 7 bytes
-  let (tradePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tradePriceFractionIndicator, bytes) ← TradePriceFractionIndicator.decode bytes
   let (priceIndicatorMarker, bytes) ← Alpha.decode 1 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
   pure ({ exchangeId, optionSymbol, volume, tradePrice, tradePriceFractionIndicator, priceIndicatorMarker, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : OptionTradeCancellationMessage) : (encode message).length = 45 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, OptionSymbol.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, OptionSymbol.encode_length, Alpha.encode_length, TradePriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : OptionTradeCancellationMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -2238,7 +4913,7 @@ theorem encode_length_pos (message : OptionTradeCancellationMessage) : (encode m
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TradePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2253,7 +4928,7 @@ structure FutureOptionsTradeCancellationMessage where
   futureOptionSymbol : FutureOptionSymbol
   volume : Alpha 8
   price : Alpha 7
-  priceFractionIndicator : Alpha 1
+  priceFractionIndicator : PriceFractionIndicator
   priceIndicatorMarker : Alpha 1
   tradeNumber : Alpha 8
   deriving DecidableEq, Repr
@@ -2265,7 +4940,7 @@ def encode (message : FutureOptionsTradeCancellationMessage) : List UInt8 :=
     ++ (FutureOptionSymbol.encode message.futureOptionSymbol
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.price
-    ++ (Alpha.encode message.priceFractionIndicator
+    ++ (PriceFractionIndicator.encode message.priceFractionIndicator
     ++ (Alpha.encode message.priceIndicatorMarker
     ++ (Alpha.encode message.tradeNumber))))))
 
@@ -2274,14 +4949,14 @@ def decode (bytes : List UInt8) : Option (FutureOptionsTradeCancellationMessage 
   let (futureOptionSymbol, bytes) ← FutureOptionSymbol.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (price, bytes) ← Alpha.decode 7 bytes
-  let (priceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (priceFractionIndicator, bytes) ← PriceFractionIndicator.decode bytes
   let (priceIndicatorMarker, bytes) ← Alpha.decode 1 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
   pure ({ exchangeId, futureOptionSymbol, volume, price, priceFractionIndicator, priceIndicatorMarker, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : FutureOptionsTradeCancellationMessage) : (encode message).length = 46 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureOptionSymbol.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureOptionSymbol.encode_length, Alpha.encode_length, PriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FutureOptionsTradeCancellationMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -2298,7 +4973,7 @@ theorem encode_length_pos (message : FutureOptionsTradeCancellationMessage) : (e
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, PriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2313,7 +4988,7 @@ structure FutureTradeCancellationMessage where
   futureProduct : FutureProduct
   volume : Alpha 8
   tradePrice : Alpha 7
-  tradePriceFractionIndicator : Alpha 1
+  tradePriceFractionIndicator : TradePriceFractionIndicator
   priceIndicatorMarker : Alpha 1
   tradeNumber : Alpha 8
   deriving DecidableEq, Repr
@@ -2325,7 +5000,7 @@ def encode (message : FutureTradeCancellationMessage) : List UInt8 :=
     ++ (FutureProduct.encode message.futureProduct
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.tradePrice
-    ++ (Alpha.encode message.tradePriceFractionIndicator
+    ++ (TradePriceFractionIndicator.encode message.tradePriceFractionIndicator
     ++ (Alpha.encode message.priceIndicatorMarker
     ++ (Alpha.encode message.tradeNumber))))))
 
@@ -2334,14 +5009,14 @@ def decode (bytes : List UInt8) : Option (FutureTradeCancellationMessage × List
   let (futureProduct, bytes) ← FutureProduct.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (tradePrice, bytes) ← Alpha.decode 7 bytes
-  let (tradePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tradePriceFractionIndicator, bytes) ← TradePriceFractionIndicator.decode bytes
   let (priceIndicatorMarker, bytes) ← Alpha.decode 1 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
   pure ({ exchangeId, futureProduct, volume, tradePrice, tradePriceFractionIndicator, priceIndicatorMarker, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : FutureTradeCancellationMessage) : (encode message).length = 37 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length, TradePriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FutureTradeCancellationMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -2358,7 +5033,7 @@ theorem encode_length_pos (message : FutureTradeCancellationMessage) : (encode m
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TradePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2374,7 +5049,7 @@ structure StrategyTradeCancellationMessage where
   volume : Alpha 8
   tradePriceSign : Alpha 1
   tradePrice : Alpha 7
-  tradePriceFractionIndicator : Alpha 1
+  tradePriceFractionIndicator : TradePriceFractionIndicator
   tradeNumber : Alpha 8
   deriving DecidableEq, Repr
 
@@ -2386,7 +5061,7 @@ def encode (message : StrategyTradeCancellationMessage) : List UInt8 :=
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.tradePriceSign
     ++ (Alpha.encode message.tradePrice
-    ++ (Alpha.encode message.tradePriceFractionIndicator
+    ++ (TradePriceFractionIndicator.encode message.tradePriceFractionIndicator
     ++ (Alpha.encode message.tradeNumber))))))
 
 def decode (bytes : List UInt8) : Option (StrategyTradeCancellationMessage × List UInt8) := do
@@ -2395,13 +5070,13 @@ def decode (bytes : List UInt8) : Option (StrategyTradeCancellationMessage × Li
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (tradePriceSign, bytes) ← Alpha.decode 1 bytes
   let (tradePrice, bytes) ← Alpha.decode 7 bytes
-  let (tradePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tradePriceFractionIndicator, bytes) ← TradePriceFractionIndicator.decode bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
   pure ({ exchangeId, symbolStrategy, volume, tradePriceSign, tradePrice, tradePriceFractionIndicator, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : StrategyTradeCancellationMessage) : (encode message).length = 56 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, Alpha.encode_length, TradePriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : StrategyTradeCancellationMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -2420,7 +5095,7 @@ theorem encode_length_pos (message : StrategyTradeCancellationMessage) : (encode
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TradePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [Alpha.decode_encode, some_bind]
   rfl
@@ -2435,11 +5110,11 @@ structure OptionInstrumentKeysMessage where
   maximumNumberOfContractsPerOrder : Alpha 6
   minimumNumberOfContractsPerOrder : Alpha 6
   maximumThresholdPriceOptions : Alpha 7
-  maximumThresholdPriceFractionIndicator : Alpha 1
+  maximumThresholdPriceFractionIndicator : MaximumThresholdPriceFractionIndicator
   minimumThresholdPriceOptions : Alpha 7
-  minimumThresholdPriceFractionIndicator : Alpha 1
+  minimumThresholdPriceFractionIndicator : MinimumThresholdPriceFractionIndicator
   tickIncrement : Alpha 7
-  tickIncrementFractionIndicator : Alpha 1
+  tickIncrementFractionIndicator : TickIncrementFractionIndicator
   optionType : OptionType
   marketFlowIndicator : Alpha 2
   groupInstrument : Alpha 2
@@ -2449,7 +5124,7 @@ structure OptionInstrumentKeysMessage where
   underlyingSymbolRoot : Alpha 12
   contractSize : Alpha 8
   tickValue : Alpha 7
-  tickValueFractionIndicator : Alpha 1
+  tickValueFractionIndicator : TickValueFractionIndicator
   currency : Alpha 3
   deliveryType : DeliveryType
   lastTradingDatetime : Alpha 14
@@ -2464,11 +5139,11 @@ def encode (message : OptionInstrumentKeysMessage) : List UInt8 :=
     ++ (Alpha.encode message.maximumNumberOfContractsPerOrder
     ++ (Alpha.encode message.minimumNumberOfContractsPerOrder
     ++ (Alpha.encode message.maximumThresholdPriceOptions
-    ++ (Alpha.encode message.maximumThresholdPriceFractionIndicator
+    ++ (MaximumThresholdPriceFractionIndicator.encode message.maximumThresholdPriceFractionIndicator
     ++ (Alpha.encode message.minimumThresholdPriceOptions
-    ++ (Alpha.encode message.minimumThresholdPriceFractionIndicator
+    ++ (MinimumThresholdPriceFractionIndicator.encode message.minimumThresholdPriceFractionIndicator
     ++ (Alpha.encode message.tickIncrement
-    ++ (Alpha.encode message.tickIncrementFractionIndicator
+    ++ (TickIncrementFractionIndicator.encode message.tickIncrementFractionIndicator
     ++ (OptionType.encode message.optionType
     ++ (Alpha.encode message.marketFlowIndicator
     ++ (Alpha.encode message.groupInstrument
@@ -2478,7 +5153,7 @@ def encode (message : OptionInstrumentKeysMessage) : List UInt8 :=
     ++ (Alpha.encode message.underlyingSymbolRoot
     ++ (Alpha.encode message.contractSize
     ++ (Alpha.encode message.tickValue
-    ++ (Alpha.encode message.tickValueFractionIndicator
+    ++ (TickValueFractionIndicator.encode message.tickValueFractionIndicator
     ++ (Alpha.encode message.currency
     ++ (DeliveryType.encode message.deliveryType
     ++ (Alpha.encode message.lastTradingDatetime)))))))))))))))))))))))
@@ -2490,11 +5165,11 @@ def decode (bytes : List UInt8) : Option (OptionInstrumentKeysMessage × List UI
   let (maximumNumberOfContractsPerOrder, bytes) ← Alpha.decode 6 bytes
   let (minimumNumberOfContractsPerOrder, bytes) ← Alpha.decode 6 bytes
   let (maximumThresholdPriceOptions, bytes) ← Alpha.decode 7 bytes
-  let (maximumThresholdPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (maximumThresholdPriceFractionIndicator, bytes) ← MaximumThresholdPriceFractionIndicator.decode bytes
   let (minimumThresholdPriceOptions, bytes) ← Alpha.decode 7 bytes
-  let (minimumThresholdPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (minimumThresholdPriceFractionIndicator, bytes) ← MinimumThresholdPriceFractionIndicator.decode bytes
   let (tickIncrement, bytes) ← Alpha.decode 7 bytes
-  let (tickIncrementFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tickIncrementFractionIndicator, bytes) ← TickIncrementFractionIndicator.decode bytes
   let (optionType, bytes) ← OptionType.decode bytes
   let (marketFlowIndicator, bytes) ← Alpha.decode 2 bytes
   let (groupInstrument, bytes) ← Alpha.decode 2 bytes
@@ -2504,7 +5179,7 @@ def decode (bytes : List UInt8) : Option (OptionInstrumentKeysMessage × List UI
   let (underlyingSymbolRoot, bytes) ← Alpha.decode 12 bytes
   let (contractSize, bytes) ← Alpha.decode 8 bytes
   let (tickValue, bytes) ← Alpha.decode 7 bytes
-  let (tickValueFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tickValueFractionIndicator, bytes) ← TickValueFractionIndicator.decode bytes
   let (currency, bytes) ← Alpha.decode 3 bytes
   let (deliveryType, bytes) ← DeliveryType.decode bytes
   let (lastTradingDatetime, bytes) ← Alpha.decode 14 bytes
@@ -2512,7 +5187,7 @@ def decode (bytes : List UInt8) : Option (OptionInstrumentKeysMessage × List UI
 
 @[simp] theorem encode_length (message : OptionInstrumentKeysMessage) : (encode message).length = 146 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, OptionSymbol.encode_length, Alpha.encode_length, OptionType.encode_length, DeliveryType.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, OptionSymbol.encode_length, Alpha.encode_length, MaximumThresholdPriceFractionIndicator.encode_length, MinimumThresholdPriceFractionIndicator.encode_length, TickIncrementFractionIndicator.encode_length, OptionType.encode_length, TickValueFractionIndicator.encode_length, DeliveryType.encode_length]
 
 theorem encode_length_pos (message : OptionInstrumentKeysMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -2533,15 +5208,15 @@ theorem encode_length_pos (message : OptionInstrumentKeysMessage) : (encode mess
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, MaximumThresholdPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, MinimumThresholdPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TickIncrementFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, OptionType.decode_encode, some_bind]
   dsimp only
@@ -2561,7 +5236,7 @@ theorem encode_length_pos (message : OptionInstrumentKeysMessage) : (encode mess
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TickValueFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2572,26 +5247,27 @@ theorem encode_length_pos (message : OptionInstrumentKeysMessage) : (encode mess
 
 end OptionInstrumentKeysMessage
 
-/-- Future Options Instrument Keys Message: 141 bytes -/
+/-- Future Options Instrument Keys Message: 147 bytes -/
 structure FutureOptionsInstrumentKeysMessage where
   exchangeId : ExchangeId
   futureOptionSymbol : FutureOptionSymbol
+  expiryDate : Alpha 6
   strikePriceCurrency : Alpha 3
   maximumNumberOfContractsPerOrder : Alpha 6
   minimumNumberOfContractsPerOrder : Alpha 6
   maximumThresholdPriceOptions : Alpha 7
-  maximumThresholdPriceFractionIndicator : Alpha 1
+  maximumThresholdPriceFractionIndicator : MaximumThresholdPriceFractionIndicator
   minimumThresholdPriceOptions : Alpha 7
-  minimumThresholdPriceFractionIndicator : Alpha 1
+  minimumThresholdPriceFractionIndicator : MinimumThresholdPriceFractionIndicator
   tickIncrement : Alpha 7
-  tickIncrementFractionIndicator : Alpha 1
+  tickIncrementFractionIndicator : TickIncrementFractionIndicator
   marketFlowIndicator : Alpha 2
   groupInstrument : Alpha 2
   instrument : Alpha 4
   instrumentExternalCode : Alpha 30
   contractSize : Alpha 8
   tickValue : Alpha 7
-  tickValueFractionIndicator : Alpha 1
+  tickValueFractionIndicator : TickValueFractionIndicator
   currency : Alpha 3
   deliveryType : DeliveryType
   underlyingRootSymbol : Alpha 6
@@ -2605,64 +5281,69 @@ namespace FutureOptionsInstrumentKeysMessage
 def encode (message : FutureOptionsInstrumentKeysMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
     ++ (FutureOptionSymbol.encode message.futureOptionSymbol
+    ++ (Alpha.encode message.expiryDate
     ++ (Alpha.encode message.strikePriceCurrency
     ++ (Alpha.encode message.maximumNumberOfContractsPerOrder
     ++ (Alpha.encode message.minimumNumberOfContractsPerOrder
     ++ (Alpha.encode message.maximumThresholdPriceOptions
-    ++ (Alpha.encode message.maximumThresholdPriceFractionIndicator
+    ++ (MaximumThresholdPriceFractionIndicator.encode message.maximumThresholdPriceFractionIndicator
     ++ (Alpha.encode message.minimumThresholdPriceOptions
-    ++ (Alpha.encode message.minimumThresholdPriceFractionIndicator
+    ++ (MinimumThresholdPriceFractionIndicator.encode message.minimumThresholdPriceFractionIndicator
     ++ (Alpha.encode message.tickIncrement
-    ++ (Alpha.encode message.tickIncrementFractionIndicator
+    ++ (TickIncrementFractionIndicator.encode message.tickIncrementFractionIndicator
     ++ (Alpha.encode message.marketFlowIndicator
     ++ (Alpha.encode message.groupInstrument
     ++ (Alpha.encode message.instrument
     ++ (Alpha.encode message.instrumentExternalCode
     ++ (Alpha.encode message.contractSize
     ++ (Alpha.encode message.tickValue
-    ++ (Alpha.encode message.tickValueFractionIndicator
+    ++ (TickValueFractionIndicator.encode message.tickValueFractionIndicator
     ++ (Alpha.encode message.currency
     ++ (DeliveryType.encode message.deliveryType
     ++ (Alpha.encode message.underlyingRootSymbol
     ++ (Alpha.encode message.underlyingSymbolMonth
     ++ (Alpha.encode message.underlyingSymbolYear
-    ++ (Alpha.encode message.lastTradingDatetime)))))))))))))))))))))))
+    ++ (Alpha.encode message.lastTradingDatetime))))))))))))))))))))))))
 
+-- a long run of fields nests deeper than the elaborator's default limit
+set_option maxRecDepth 4096 in
 def decode (bytes : List UInt8) : Option (FutureOptionsInstrumentKeysMessage × List UInt8) := do
   let (exchangeId, bytes) ← ExchangeId.decode bytes
   let (futureOptionSymbol, bytes) ← FutureOptionSymbol.decode bytes
+  let (expiryDate, bytes) ← Alpha.decode 6 bytes
   let (strikePriceCurrency, bytes) ← Alpha.decode 3 bytes
   let (maximumNumberOfContractsPerOrder, bytes) ← Alpha.decode 6 bytes
   let (minimumNumberOfContractsPerOrder, bytes) ← Alpha.decode 6 bytes
   let (maximumThresholdPriceOptions, bytes) ← Alpha.decode 7 bytes
-  let (maximumThresholdPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (maximumThresholdPriceFractionIndicator, bytes) ← MaximumThresholdPriceFractionIndicator.decode bytes
   let (minimumThresholdPriceOptions, bytes) ← Alpha.decode 7 bytes
-  let (minimumThresholdPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (minimumThresholdPriceFractionIndicator, bytes) ← MinimumThresholdPriceFractionIndicator.decode bytes
   let (tickIncrement, bytes) ← Alpha.decode 7 bytes
-  let (tickIncrementFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tickIncrementFractionIndicator, bytes) ← TickIncrementFractionIndicator.decode bytes
   let (marketFlowIndicator, bytes) ← Alpha.decode 2 bytes
   let (groupInstrument, bytes) ← Alpha.decode 2 bytes
   let (instrument, bytes) ← Alpha.decode 4 bytes
   let (instrumentExternalCode, bytes) ← Alpha.decode 30 bytes
   let (contractSize, bytes) ← Alpha.decode 8 bytes
   let (tickValue, bytes) ← Alpha.decode 7 bytes
-  let (tickValueFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tickValueFractionIndicator, bytes) ← TickValueFractionIndicator.decode bytes
   let (currency, bytes) ← Alpha.decode 3 bytes
   let (deliveryType, bytes) ← DeliveryType.decode bytes
   let (underlyingRootSymbol, bytes) ← Alpha.decode 6 bytes
   let (underlyingSymbolMonth, bytes) ← Alpha.decode 1 bytes
   let (underlyingSymbolYear, bytes) ← Alpha.decode 2 bytes
   let (lastTradingDatetime, bytes) ← Alpha.decode 14 bytes
-  pure ({ exchangeId, futureOptionSymbol, strikePriceCurrency, maximumNumberOfContractsPerOrder, minimumNumberOfContractsPerOrder, maximumThresholdPriceOptions, maximumThresholdPriceFractionIndicator, minimumThresholdPriceOptions, minimumThresholdPriceFractionIndicator, tickIncrement, tickIncrementFractionIndicator, marketFlowIndicator, groupInstrument, instrument, instrumentExternalCode, contractSize, tickValue, tickValueFractionIndicator, currency, deliveryType, underlyingRootSymbol, underlyingSymbolMonth, underlyingSymbolYear, lastTradingDatetime }, bytes)
+  pure ({ exchangeId, futureOptionSymbol, expiryDate, strikePriceCurrency, maximumNumberOfContractsPerOrder, minimumNumberOfContractsPerOrder, maximumThresholdPriceOptions, maximumThresholdPriceFractionIndicator, minimumThresholdPriceOptions, minimumThresholdPriceFractionIndicator, tickIncrement, tickIncrementFractionIndicator, marketFlowIndicator, groupInstrument, instrument, instrumentExternalCode, contractSize, tickValue, tickValueFractionIndicator, currency, deliveryType, underlyingRootSymbol, underlyingSymbolMonth, underlyingSymbolYear, lastTradingDatetime }, bytes)
 
-@[simp] theorem encode_length (message : FutureOptionsInstrumentKeysMessage) : (encode message).length = 141 := by
+@[simp] theorem encode_length (message : FutureOptionsInstrumentKeysMessage) : (encode message).length = 147 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureOptionSymbol.encode_length, Alpha.encode_length, DeliveryType.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureOptionSymbol.encode_length, Alpha.encode_length, MaximumThresholdPriceFractionIndicator.encode_length, MinimumThresholdPriceFractionIndicator.encode_length, TickIncrementFractionIndicator.encode_length, TickValueFractionIndicator.encode_length, DeliveryType.encode_length]
 
 theorem encode_length_pos (message : FutureOptionsInstrumentKeysMessage) : (encode message).length > 0 := by
   rw [encode_length]
   decide
 
+set_option maxRecDepth 4096 in
 @[simp] theorem decode_encode (message : FutureOptionsInstrumentKeysMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
@@ -2680,7 +5361,15 @@ theorem encode_length_pos (message : FutureOptionsInstrumentKeysMessage) : (enco
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
+  rw [List.append_assoc, MaximumThresholdPriceFractionIndicator.decode_encode, some_bind]
+  dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, MinimumThresholdPriceFractionIndicator.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, TickIncrementFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2694,13 +5383,7 @@ theorem encode_length_pos (message : FutureOptionsInstrumentKeysMessage) : (enco
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TickValueFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2807,7 +5490,7 @@ theorem encode_length_pos (message : AssociatedProduct) : (encode message).lengt
 
 end AssociatedProduct
 
-/-- Futures Instrument Keys Message: 135 bytes -/
+/-- Futures Instrument Keys Message: 149 bytes -/
 structure FuturesInstrumentKeysMessage where
   exchangeId : ExchangeId
   futureProduct : FutureProduct
@@ -2815,22 +5498,23 @@ structure FuturesInstrumentKeysMessage where
   maximumNumberOfContractsPerOrder : Alpha 6
   minimumNumberOfContractsPerOrder : Alpha 6
   maximumThresholdPriceFutures : Alpha 7
-  maximumThresholdPriceFractionIndicator : Alpha 1
+  maximumThresholdPriceFractionIndicator : MaximumThresholdPriceFractionIndicator
   minimumThresholdPriceFutures : Alpha 7
-  minimumThresholdPriceFractionIndicator : Alpha 1
+  minimumThresholdPriceFractionIndicator : MinimumThresholdPriceFractionIndicator
   tickIncrement : Alpha 7
-  tickIncrementFractionIndicator : Alpha 1
+  tickIncrementFractionIndicator : TickIncrementFractionIndicator
   marketFlowIndicator : Alpha 2
   groupInstrument : Alpha 2
   instrument : Alpha 4
   instrumentExternalCode : Alpha 30
   contractSize : Alpha 8
   tickValue : Alpha 7
-  tickValueFractionIndicator : Alpha 1
+  tickValueFractionIndicator : TickValueFractionIndicator
   currency : Alpha 3
   underlyingSymbol : Alpha 12
   deliveryType : DeliveryType
   associatedProduct : AssociatedProduct
+  lastTradingDatetime : Alpha 14
   deriving DecidableEq, Repr
 
 namespace FuturesInstrumentKeysMessage
@@ -2842,22 +5526,23 @@ def encode (message : FuturesInstrumentKeysMessage) : List UInt8 :=
     ++ (Alpha.encode message.maximumNumberOfContractsPerOrder
     ++ (Alpha.encode message.minimumNumberOfContractsPerOrder
     ++ (Alpha.encode message.maximumThresholdPriceFutures
-    ++ (Alpha.encode message.maximumThresholdPriceFractionIndicator
+    ++ (MaximumThresholdPriceFractionIndicator.encode message.maximumThresholdPriceFractionIndicator
     ++ (Alpha.encode message.minimumThresholdPriceFutures
-    ++ (Alpha.encode message.minimumThresholdPriceFractionIndicator
+    ++ (MinimumThresholdPriceFractionIndicator.encode message.minimumThresholdPriceFractionIndicator
     ++ (Alpha.encode message.tickIncrement
-    ++ (Alpha.encode message.tickIncrementFractionIndicator
+    ++ (TickIncrementFractionIndicator.encode message.tickIncrementFractionIndicator
     ++ (Alpha.encode message.marketFlowIndicator
     ++ (Alpha.encode message.groupInstrument
     ++ (Alpha.encode message.instrument
     ++ (Alpha.encode message.instrumentExternalCode
     ++ (Alpha.encode message.contractSize
     ++ (Alpha.encode message.tickValue
-    ++ (Alpha.encode message.tickValueFractionIndicator
+    ++ (TickValueFractionIndicator.encode message.tickValueFractionIndicator
     ++ (Alpha.encode message.currency
     ++ (Alpha.encode message.underlyingSymbol
     ++ (DeliveryType.encode message.deliveryType
-    ++ (AssociatedProduct.encode message.associatedProduct)))))))))))))))))))))
+    ++ (AssociatedProduct.encode message.associatedProduct
+    ++ (Alpha.encode message.lastTradingDatetime))))))))))))))))))))))
 
 def decode (bytes : List UInt8) : Option (FuturesInstrumentKeysMessage × List UInt8) := do
   let (exchangeId, bytes) ← ExchangeId.decode bytes
@@ -2866,27 +5551,28 @@ def decode (bytes : List UInt8) : Option (FuturesInstrumentKeysMessage × List U
   let (maximumNumberOfContractsPerOrder, bytes) ← Alpha.decode 6 bytes
   let (minimumNumberOfContractsPerOrder, bytes) ← Alpha.decode 6 bytes
   let (maximumThresholdPriceFutures, bytes) ← Alpha.decode 7 bytes
-  let (maximumThresholdPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (maximumThresholdPriceFractionIndicator, bytes) ← MaximumThresholdPriceFractionIndicator.decode bytes
   let (minimumThresholdPriceFutures, bytes) ← Alpha.decode 7 bytes
-  let (minimumThresholdPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (minimumThresholdPriceFractionIndicator, bytes) ← MinimumThresholdPriceFractionIndicator.decode bytes
   let (tickIncrement, bytes) ← Alpha.decode 7 bytes
-  let (tickIncrementFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tickIncrementFractionIndicator, bytes) ← TickIncrementFractionIndicator.decode bytes
   let (marketFlowIndicator, bytes) ← Alpha.decode 2 bytes
   let (groupInstrument, bytes) ← Alpha.decode 2 bytes
   let (instrument, bytes) ← Alpha.decode 4 bytes
   let (instrumentExternalCode, bytes) ← Alpha.decode 30 bytes
   let (contractSize, bytes) ← Alpha.decode 8 bytes
   let (tickValue, bytes) ← Alpha.decode 7 bytes
-  let (tickValueFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tickValueFractionIndicator, bytes) ← TickValueFractionIndicator.decode bytes
   let (currency, bytes) ← Alpha.decode 3 bytes
   let (underlyingSymbol, bytes) ← Alpha.decode 12 bytes
   let (deliveryType, bytes) ← DeliveryType.decode bytes
   let (associatedProduct, bytes) ← AssociatedProduct.decode bytes
-  pure ({ exchangeId, futureProduct, expiryDate, maximumNumberOfContractsPerOrder, minimumNumberOfContractsPerOrder, maximumThresholdPriceFutures, maximumThresholdPriceFractionIndicator, minimumThresholdPriceFutures, minimumThresholdPriceFractionIndicator, tickIncrement, tickIncrementFractionIndicator, marketFlowIndicator, groupInstrument, instrument, instrumentExternalCode, contractSize, tickValue, tickValueFractionIndicator, currency, underlyingSymbol, deliveryType, associatedProduct }, bytes)
+  let (lastTradingDatetime, bytes) ← Alpha.decode 14 bytes
+  pure ({ exchangeId, futureProduct, expiryDate, maximumNumberOfContractsPerOrder, minimumNumberOfContractsPerOrder, maximumThresholdPriceFutures, maximumThresholdPriceFractionIndicator, minimumThresholdPriceFutures, minimumThresholdPriceFractionIndicator, tickIncrement, tickIncrementFractionIndicator, marketFlowIndicator, groupInstrument, instrument, instrumentExternalCode, contractSize, tickValue, tickValueFractionIndicator, currency, underlyingSymbol, deliveryType, associatedProduct, lastTradingDatetime }, bytes)
 
-@[simp] theorem encode_length (message : FuturesInstrumentKeysMessage) : (encode message).length = 135 := by
+@[simp] theorem encode_length (message : FuturesInstrumentKeysMessage) : (encode message).length = 149 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length, DeliveryType.encode_length, AssociatedProduct.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length, MaximumThresholdPriceFractionIndicator.encode_length, MinimumThresholdPriceFractionIndicator.encode_length, TickIncrementFractionIndicator.encode_length, TickValueFractionIndicator.encode_length, DeliveryType.encode_length, AssociatedProduct.encode_length]
 
 theorem encode_length_pos (message : FuturesInstrumentKeysMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -2907,7 +5593,15 @@ theorem encode_length_pos (message : FuturesInstrumentKeysMessage) : (encode mes
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
+  rw [List.append_assoc, MaximumThresholdPriceFractionIndicator.decode_encode, some_bind]
+  dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, MinimumThresholdPriceFractionIndicator.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, TickIncrementFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2921,15 +5615,7 @@ theorem encode_length_pos (message : FuturesInstrumentKeysMessage) : (encode mes
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TickValueFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2937,7 +5623,9 @@ theorem encode_length_pos (message : FuturesInstrumentKeysMessage) : (encode mes
   dsimp only
   rw [List.append_assoc, DeliveryType.decode_encode, some_bind]
   dsimp only
-  rw [AssociatedProduct.decode_encode, some_bind]
+  rw [List.append_assoc, AssociatedProduct.decode_encode, some_bind]
+  dsimp only
+  rw [Alpha.decode_encode, some_bind]
   rfl
 
 end FuturesInstrumentKeysMessage
@@ -2947,9 +5635,9 @@ structure StrategyInstrumentLeg where
   legGroupInstrument : Alpha 2
   legInstrument : Alpha 4
   legRatioOrDelta : Alpha 4
-  legRatioOrDeltaFractionIndicator : Alpha 1
+  legRatioOrDeltaFractionIndicator : LegRatioOrDeltaFractionIndicator
   legPrice : Alpha 7
-  legPriceFractionIndicator : Alpha 1
+  legPriceFractionIndicator : LegPriceFractionIndicator
   deriving DecidableEq, Repr
 
 namespace StrategyInstrumentLeg
@@ -2958,22 +5646,22 @@ def encode (message : StrategyInstrumentLeg) : List UInt8 :=
   Alpha.encode message.legGroupInstrument
     ++ (Alpha.encode message.legInstrument
     ++ (Alpha.encode message.legRatioOrDelta
-    ++ (Alpha.encode message.legRatioOrDeltaFractionIndicator
+    ++ (LegRatioOrDeltaFractionIndicator.encode message.legRatioOrDeltaFractionIndicator
     ++ (Alpha.encode message.legPrice
-    ++ (Alpha.encode message.legPriceFractionIndicator)))))
+    ++ (LegPriceFractionIndicator.encode message.legPriceFractionIndicator)))))
 
 def decode (bytes : List UInt8) : Option (StrategyInstrumentLeg × List UInt8) := do
   let (legGroupInstrument, bytes) ← Alpha.decode 2 bytes
   let (legInstrument, bytes) ← Alpha.decode 4 bytes
   let (legRatioOrDelta, bytes) ← Alpha.decode 4 bytes
-  let (legRatioOrDeltaFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (legRatioOrDeltaFractionIndicator, bytes) ← LegRatioOrDeltaFractionIndicator.decode bytes
   let (legPrice, bytes) ← Alpha.decode 7 bytes
-  let (legPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (legPriceFractionIndicator, bytes) ← LegPriceFractionIndicator.decode bytes
   pure ({ legGroupInstrument, legInstrument, legRatioOrDelta, legRatioOrDeltaFractionIndicator, legPrice, legPriceFractionIndicator }, bytes)
 
 @[simp] theorem encode_length (message : StrategyInstrumentLeg) : (encode message).length = 19 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length]
+  simp only [List.length_append, Alpha.encode_length, LegRatioOrDeltaFractionIndicator.encode_length, LegPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : StrategyInstrumentLeg) : (encode message).length > 0 := by
   rw [encode_length]
@@ -2988,11 +5676,11 @@ theorem encode_length_pos (message : StrategyInstrumentLeg) : (encode message).l
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, LegRatioOrDeltaFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, some_bind]
+  rw [LegPriceFractionIndicator.decode_encode, some_bind]
   rfl
 
 end StrategyInstrumentLeg
@@ -3007,11 +5695,11 @@ structure StrategyInstrumentKeysMessage where
   maximumNumberOfContractsPerOrder : Alpha 6
   minimumNumberOfContractsPerOrder : Alpha 6
   maximumThresholdPriceOptions : Alpha 7
-  maximumThresholdPriceFractionIndicator : Alpha 1
+  maximumThresholdPriceFractionIndicator : MaximumThresholdPriceFractionIndicator
   minimumThresholdPriceOptions : Alpha 7
-  minimumThresholdPriceFractionIndicator : Alpha 1
+  minimumThresholdPriceFractionIndicator : MinimumThresholdPriceFractionIndicator
   tickIncrement : Alpha 7
-  tickIncrementFractionIndicator : Alpha 1
+  tickIncrementFractionIndicator : TickIncrementFractionIndicator
   marketFlowIndicator : Alpha 2
   groupInstrument : Alpha 2
   instrument : Alpha 4
@@ -3034,11 +5722,11 @@ def encode (message : StrategyInstrumentKeysMessage) : List UInt8 :=
     ++ (Alpha.encode message.maximumNumberOfContractsPerOrder
     ++ (Alpha.encode message.minimumNumberOfContractsPerOrder
     ++ (Alpha.encode message.maximumThresholdPriceOptions
-    ++ (Alpha.encode message.maximumThresholdPriceFractionIndicator
+    ++ (MaximumThresholdPriceFractionIndicator.encode message.maximumThresholdPriceFractionIndicator
     ++ (Alpha.encode message.minimumThresholdPriceOptions
-    ++ (Alpha.encode message.minimumThresholdPriceFractionIndicator
+    ++ (MinimumThresholdPriceFractionIndicator.encode message.minimumThresholdPriceFractionIndicator
     ++ (Alpha.encode message.tickIncrement
-    ++ (Alpha.encode message.tickIncrementFractionIndicator
+    ++ (TickIncrementFractionIndicator.encode message.tickIncrementFractionIndicator
     ++ (Alpha.encode message.marketFlowIndicator
     ++ (Alpha.encode message.groupInstrument
     ++ (Alpha.encode message.instrument
@@ -3059,11 +5747,11 @@ def decode (bytes : List UInt8) : Option (StrategyInstrumentKeysMessage × List 
   let (maximumNumberOfContractsPerOrder, bytes) ← Alpha.decode 6 bytes
   let (minimumNumberOfContractsPerOrder, bytes) ← Alpha.decode 6 bytes
   let (maximumThresholdPriceOptions, bytes) ← Alpha.decode 7 bytes
-  let (maximumThresholdPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (maximumThresholdPriceFractionIndicator, bytes) ← MaximumThresholdPriceFractionIndicator.decode bytes
   let (minimumThresholdPriceOptions, bytes) ← Alpha.decode 7 bytes
-  let (minimumThresholdPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (minimumThresholdPriceFractionIndicator, bytes) ← MinimumThresholdPriceFractionIndicator.decode bytes
   let (tickIncrement, bytes) ← Alpha.decode 7 bytes
-  let (tickIncrementFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tickIncrementFractionIndicator, bytes) ← TickIncrementFractionIndicator.decode bytes
   let (marketFlowIndicator, bytes) ← Alpha.decode 2 bytes
   let (groupInstrument, bytes) ← Alpha.decode 2 bytes
   let (instrument, bytes) ← Alpha.decode 4 bytes
@@ -3087,7 +5775,7 @@ theorem encode_length_pos (message : StrategyInstrumentKeysMessage) : (encode me
 theorem encode_length_le (message : StrategyInstrumentKeysMessage) : (encode message).length ≤ 2011 := by
   have bound_strategyInstrumentLeg := message.strategyInstrumentLeg.length_lt
   unfold encode
-  simp only [List.length_append, ← Nat.add_assoc, ExchangeId.encode_length, Alpha.encode_length, StrategyAllowImplied.encode_length, StrategyType.encode_length, encodeDigits_length, encodeMany_length_const StrategyInstrumentLeg.encode 19 StrategyInstrumentLeg.encode_length]
+  simp only [List.length_append, ← Nat.add_assoc, ExchangeId.encode_length, Alpha.encode_length, MaximumThresholdPriceFractionIndicator.encode_length, MinimumThresholdPriceFractionIndicator.encode_length, TickIncrementFractionIndicator.encode_length, StrategyAllowImplied.encode_length, StrategyType.encode_length, encodeDigits_length, encodeMany_length_const StrategyInstrumentLeg.encode 19 StrategyInstrumentLeg.encode_length]
   omega
 
 @[simp] theorem decode_encode (message : StrategyInstrumentKeysMessage) (rest : List UInt8) :
@@ -3109,15 +5797,15 @@ theorem encode_length_le (message : StrategyInstrumentKeysMessage) : (encode mes
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, MaximumThresholdPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, MinimumThresholdPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TickIncrementFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -3149,31 +5837,31 @@ structure OptionSummaryMessage where
   exchangeId : ExchangeId
   optionSymbol : OptionSymbol
   bidPriceSummary : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   askPriceSummary : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   lastPrice : Alpha 7
-  lastPriceFractionIndicator : Alpha 1
+  lastPriceFractionIndicator : LastPriceFractionIndicator
   openInterest : Alpha 7
   openInterestDate : Alpha 6
   tick : Tick
   volume : Alpha 8
   netChangeSign : Alpha 1
   netChange : Alpha 7
-  netChangeFractionIndicator : Alpha 1
+  netChangeFractionIndicator : NetChangeFractionIndicator
   openPrice : Alpha 7
-  openPriceFractionIndicator : Alpha 1
+  openPriceFractionIndicator : OpenPriceFractionIndicator
   highPrice : Alpha 7
-  highPriceFractionIndicator : Alpha 1
+  highPriceFractionIndicator : HighPriceFractionIndicator
   lowPrice : Alpha 7
-  lowPriceFractionIndicator : Alpha 1
+  lowPriceFractionIndicator : LowPriceFractionIndicator
   optionMarker : Alpha 2
   settlementPrice : Alpha 7
-  settlementPriceFractionIndicatorOptions : Alpha 1
+  settlementPriceFractionIndicator : SettlementPriceFractionIndicator
   previousSettlementPrice : Alpha 7
-  previousSettlementPriceFractionIndicator : Alpha 1
+  previousSettlementPriceFractionIndicator : PreviousSettlementPriceFractionIndicator
   reason : Reason
   deriving DecidableEq, Repr
 
@@ -3183,31 +5871,31 @@ def encode (message : OptionSummaryMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
     ++ (OptionSymbol.encode message.optionSymbol
     ++ (Alpha.encode message.bidPriceSummary
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.askPriceSummary
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.lastPrice
-    ++ (Alpha.encode message.lastPriceFractionIndicator
+    ++ (LastPriceFractionIndicator.encode message.lastPriceFractionIndicator
     ++ (Alpha.encode message.openInterest
     ++ (Alpha.encode message.openInterestDate
     ++ (Tick.encode message.tick
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.netChangeSign
     ++ (Alpha.encode message.netChange
-    ++ (Alpha.encode message.netChangeFractionIndicator
+    ++ (NetChangeFractionIndicator.encode message.netChangeFractionIndicator
     ++ (Alpha.encode message.openPrice
-    ++ (Alpha.encode message.openPriceFractionIndicator
+    ++ (OpenPriceFractionIndicator.encode message.openPriceFractionIndicator
     ++ (Alpha.encode message.highPrice
-    ++ (Alpha.encode message.highPriceFractionIndicator
+    ++ (HighPriceFractionIndicator.encode message.highPriceFractionIndicator
     ++ (Alpha.encode message.lowPrice
-    ++ (Alpha.encode message.lowPriceFractionIndicator
+    ++ (LowPriceFractionIndicator.encode message.lowPriceFractionIndicator
     ++ (Alpha.encode message.optionMarker
     ++ (Alpha.encode message.settlementPrice
-    ++ (Alpha.encode message.settlementPriceFractionIndicatorOptions
+    ++ (SettlementPriceFractionIndicator.encode message.settlementPriceFractionIndicator
     ++ (Alpha.encode message.previousSettlementPrice
-    ++ (Alpha.encode message.previousSettlementPriceFractionIndicator
+    ++ (PreviousSettlementPriceFractionIndicator.encode message.previousSettlementPriceFractionIndicator
     ++ (Reason.encode message.reason))))))))))))))))))))))))))))
 
 -- a long run of fields nests deeper than the elaborator's default limit
@@ -3216,37 +5904,37 @@ def decode (bytes : List UInt8) : Option (OptionSummaryMessage × List UInt8) :=
   let (exchangeId, bytes) ← ExchangeId.decode bytes
   let (optionSymbol, bytes) ← OptionSymbol.decode bytes
   let (bidPriceSummary, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (askPriceSummary, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (lastPrice, bytes) ← Alpha.decode 7 bytes
-  let (lastPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (lastPriceFractionIndicator, bytes) ← LastPriceFractionIndicator.decode bytes
   let (openInterest, bytes) ← Alpha.decode 7 bytes
   let (openInterestDate, bytes) ← Alpha.decode 6 bytes
   let (tick, bytes) ← Tick.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (netChangeSign, bytes) ← Alpha.decode 1 bytes
   let (netChange, bytes) ← Alpha.decode 7 bytes
-  let (netChangeFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (netChangeFractionIndicator, bytes) ← NetChangeFractionIndicator.decode bytes
   let (openPrice, bytes) ← Alpha.decode 7 bytes
-  let (openPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (openPriceFractionIndicator, bytes) ← OpenPriceFractionIndicator.decode bytes
   let (highPrice, bytes) ← Alpha.decode 7 bytes
-  let (highPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (highPriceFractionIndicator, bytes) ← HighPriceFractionIndicator.decode bytes
   let (lowPrice, bytes) ← Alpha.decode 7 bytes
-  let (lowPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (lowPriceFractionIndicator, bytes) ← LowPriceFractionIndicator.decode bytes
   let (optionMarker, bytes) ← Alpha.decode 2 bytes
   let (settlementPrice, bytes) ← Alpha.decode 7 bytes
-  let (settlementPriceFractionIndicatorOptions, bytes) ← Alpha.decode 1 bytes
+  let (settlementPriceFractionIndicator, bytes) ← SettlementPriceFractionIndicator.decode bytes
   let (previousSettlementPrice, bytes) ← Alpha.decode 7 bytes
-  let (previousSettlementPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (previousSettlementPriceFractionIndicator, bytes) ← PreviousSettlementPriceFractionIndicator.decode bytes
   let (reason, bytes) ← Reason.decode bytes
-  pure ({ exchangeId, optionSymbol, bidPriceSummary, bidPriceFractionIndicator, bidSize, askPriceSummary, askPriceFractionIndicator, askSize, lastPrice, lastPriceFractionIndicator, openInterest, openInterestDate, tick, volume, netChangeSign, netChange, netChangeFractionIndicator, openPrice, openPriceFractionIndicator, highPrice, highPriceFractionIndicator, lowPrice, lowPriceFractionIndicator, optionMarker, settlementPrice, settlementPriceFractionIndicatorOptions, previousSettlementPrice, previousSettlementPriceFractionIndicator, reason }, bytes)
+  pure ({ exchangeId, optionSymbol, bidPriceSummary, bidPriceFractionIndicator, bidSize, askPriceSummary, askPriceFractionIndicator, askSize, lastPrice, lastPriceFractionIndicator, openInterest, openInterestDate, tick, volume, netChangeSign, netChange, netChangeFractionIndicator, openPrice, openPriceFractionIndicator, highPrice, highPriceFractionIndicator, lowPrice, lowPriceFractionIndicator, optionMarker, settlementPrice, settlementPriceFractionIndicator, previousSettlementPrice, previousSettlementPriceFractionIndicator, reason }, bytes)
 
 @[simp] theorem encode_length (message : OptionSummaryMessage) : (encode message).length = 128 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, OptionSymbol.encode_length, Alpha.encode_length, Tick.encode_length, Reason.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, OptionSymbol.encode_length, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length, LastPriceFractionIndicator.encode_length, Tick.encode_length, NetChangeFractionIndicator.encode_length, OpenPriceFractionIndicator.encode_length, HighPriceFractionIndicator.encode_length, LowPriceFractionIndicator.encode_length, SettlementPriceFractionIndicator.encode_length, PreviousSettlementPriceFractionIndicator.encode_length, Reason.encode_length]
 
 theorem encode_length_pos (message : OptionSummaryMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -3262,19 +5950,19 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, LastPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -3288,63 +5976,64 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
+  rw [List.append_assoc, NetChangeFractionIndicator.decode_encode, some_bind]
+  dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, OpenPriceFractionIndicator.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, HighPriceFractionIndicator.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, LowPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, SettlementPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, PreviousSettlementPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [Reason.decode_encode, some_bind]
   rfl
 
 end OptionSummaryMessage
 
-/-- Future Options Summary Message: 126 bytes -/
+/-- Future Options Summary Message: 127 bytes -/
 structure FutureOptionsSummaryMessage where
   exchangeId : ExchangeId
   futureOptionSymbol : FutureOptionSymbol
   bidPriceSummary : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   askPriceSummary : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   lastPrice : Alpha 7
+  lastPriceFractionIndicator : LastPriceFractionIndicator
   openInterest : Alpha 7
   openInterestDate : Alpha 6
   tick : Tick
   volume : Alpha 8
   netChangeSign : Alpha 1
   netChange : Alpha 7
-  netChangeFractionIndicator : Alpha 1
+  netChangeFractionIndicator : NetChangeFractionIndicator
   openingPrice : Alpha 7
-  openingPriceFractionIndicator : Alpha 1
+  openingPriceFractionIndicator : OpeningPriceFractionIndicator
   highPrice : Alpha 7
-  highPriceFractionIndicator : Alpha 1
+  highPriceFractionIndicator : HighPriceFractionIndicator
   lowPrice : Alpha 7
-  lowPriceFractionIndicator : Alpha 1
+  lowPriceFractionIndicator : LowPriceFractionIndicator
   settlementPrice : Alpha 7
-  settlementPriceFractionIndicatorFutures : Alpha 1
+  settlementPriceFractionIndicator : SettlementPriceFractionIndicator
   previousSettlementPrice : Alpha 7
-  previousSettlementPriceFractionIndicator : Alpha 1
+  previousSettlementPriceFractionIndicator : PreviousSettlementPriceFractionIndicator
   reason : Reason
   deriving DecidableEq, Repr
 
@@ -3354,30 +6043,31 @@ def encode (message : FutureOptionsSummaryMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
     ++ (FutureOptionSymbol.encode message.futureOptionSymbol
     ++ (Alpha.encode message.bidPriceSummary
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.askPriceSummary
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.lastPrice
+    ++ (LastPriceFractionIndicator.encode message.lastPriceFractionIndicator
     ++ (Alpha.encode message.openInterest
     ++ (Alpha.encode message.openInterestDate
     ++ (Tick.encode message.tick
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.netChangeSign
     ++ (Alpha.encode message.netChange
-    ++ (Alpha.encode message.netChangeFractionIndicator
+    ++ (NetChangeFractionIndicator.encode message.netChangeFractionIndicator
     ++ (Alpha.encode message.openingPrice
-    ++ (Alpha.encode message.openingPriceFractionIndicator
+    ++ (OpeningPriceFractionIndicator.encode message.openingPriceFractionIndicator
     ++ (Alpha.encode message.highPrice
-    ++ (Alpha.encode message.highPriceFractionIndicator
+    ++ (HighPriceFractionIndicator.encode message.highPriceFractionIndicator
     ++ (Alpha.encode message.lowPrice
-    ++ (Alpha.encode message.lowPriceFractionIndicator
+    ++ (LowPriceFractionIndicator.encode message.lowPriceFractionIndicator
     ++ (Alpha.encode message.settlementPrice
-    ++ (Alpha.encode message.settlementPriceFractionIndicatorFutures
+    ++ (SettlementPriceFractionIndicator.encode message.settlementPriceFractionIndicator
     ++ (Alpha.encode message.previousSettlementPrice
-    ++ (Alpha.encode message.previousSettlementPriceFractionIndicator
-    ++ (Reason.encode message.reason))))))))))))))))))))))))))
+    ++ (PreviousSettlementPriceFractionIndicator.encode message.previousSettlementPriceFractionIndicator
+    ++ (Reason.encode message.reason)))))))))))))))))))))))))))
 
 -- a long run of fields nests deeper than the elaborator's default limit
 set_option maxRecDepth 4096 in
@@ -3385,35 +6075,36 @@ def decode (bytes : List UInt8) : Option (FutureOptionsSummaryMessage × List UI
   let (exchangeId, bytes) ← ExchangeId.decode bytes
   let (futureOptionSymbol, bytes) ← FutureOptionSymbol.decode bytes
   let (bidPriceSummary, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (askPriceSummary, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (lastPrice, bytes) ← Alpha.decode 7 bytes
+  let (lastPriceFractionIndicator, bytes) ← LastPriceFractionIndicator.decode bytes
   let (openInterest, bytes) ← Alpha.decode 7 bytes
   let (openInterestDate, bytes) ← Alpha.decode 6 bytes
   let (tick, bytes) ← Tick.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (netChangeSign, bytes) ← Alpha.decode 1 bytes
   let (netChange, bytes) ← Alpha.decode 7 bytes
-  let (netChangeFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (netChangeFractionIndicator, bytes) ← NetChangeFractionIndicator.decode bytes
   let (openingPrice, bytes) ← Alpha.decode 7 bytes
-  let (openingPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (openingPriceFractionIndicator, bytes) ← OpeningPriceFractionIndicator.decode bytes
   let (highPrice, bytes) ← Alpha.decode 7 bytes
-  let (highPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (highPriceFractionIndicator, bytes) ← HighPriceFractionIndicator.decode bytes
   let (lowPrice, bytes) ← Alpha.decode 7 bytes
-  let (lowPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (lowPriceFractionIndicator, bytes) ← LowPriceFractionIndicator.decode bytes
   let (settlementPrice, bytes) ← Alpha.decode 7 bytes
-  let (settlementPriceFractionIndicatorFutures, bytes) ← Alpha.decode 1 bytes
+  let (settlementPriceFractionIndicator, bytes) ← SettlementPriceFractionIndicator.decode bytes
   let (previousSettlementPrice, bytes) ← Alpha.decode 7 bytes
-  let (previousSettlementPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (previousSettlementPriceFractionIndicator, bytes) ← PreviousSettlementPriceFractionIndicator.decode bytes
   let (reason, bytes) ← Reason.decode bytes
-  pure ({ exchangeId, futureOptionSymbol, bidPriceSummary, bidPriceFractionIndicator, bidSize, askPriceSummary, askPriceFractionIndicator, askSize, lastPrice, openInterest, openInterestDate, tick, volume, netChangeSign, netChange, netChangeFractionIndicator, openingPrice, openingPriceFractionIndicator, highPrice, highPriceFractionIndicator, lowPrice, lowPriceFractionIndicator, settlementPrice, settlementPriceFractionIndicatorFutures, previousSettlementPrice, previousSettlementPriceFractionIndicator, reason }, bytes)
+  pure ({ exchangeId, futureOptionSymbol, bidPriceSummary, bidPriceFractionIndicator, bidSize, askPriceSummary, askPriceFractionIndicator, askSize, lastPrice, lastPriceFractionIndicator, openInterest, openInterestDate, tick, volume, netChangeSign, netChange, netChangeFractionIndicator, openingPrice, openingPriceFractionIndicator, highPrice, highPriceFractionIndicator, lowPrice, lowPriceFractionIndicator, settlementPrice, settlementPriceFractionIndicator, previousSettlementPrice, previousSettlementPriceFractionIndicator, reason }, bytes)
 
-@[simp] theorem encode_length (message : FutureOptionsSummaryMessage) : (encode message).length = 126 := by
+@[simp] theorem encode_length (message : FutureOptionsSummaryMessage) : (encode message).length = 127 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureOptionSymbol.encode_length, Alpha.encode_length, Tick.encode_length, Reason.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureOptionSymbol.encode_length, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length, LastPriceFractionIndicator.encode_length, Tick.encode_length, NetChangeFractionIndicator.encode_length, OpeningPriceFractionIndicator.encode_length, HighPriceFractionIndicator.encode_length, LowPriceFractionIndicator.encode_length, SettlementPriceFractionIndicator.encode_length, PreviousSettlementPriceFractionIndicator.encode_length, Reason.encode_length]
 
 theorem encode_length_pos (message : FutureOptionsSummaryMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -3429,17 +6120,19 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, LastPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -3453,27 +6146,27 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, NetChangeFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, OpeningPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, HighPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, LowPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, SettlementPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, PreviousSettlementPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [Reason.decode_encode, some_bind]
   rfl
@@ -3485,32 +6178,32 @@ structure FuturesSummaryMessage where
   exchangeId : ExchangeId
   futureProduct : FutureProduct
   bidPriceSummary : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   askPriceSummary : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   lastPrice : Alpha 7
-  lastPriceFractionIndicator : Alpha 1
+  lastPriceFractionIndicator : LastPriceFractionIndicator
   openPrice : Alpha 7
-  openPriceFractionIndicator : Alpha 1
+  openPriceFractionIndicator : OpenPriceFractionIndicator
   highPrice : Alpha 7
-  highPriceFractionIndicator : Alpha 1
+  highPriceFractionIndicator : HighPriceFractionIndicator
   lowPrice : Alpha 7
-  lowPriceFractionIndicator : Alpha 1
+  lowPriceFractionIndicator : LowPriceFractionIndicator
   settlementPrice : Alpha 7
-  settlementPriceFractionIndicatorFutures : Alpha 1
+  settlementPriceFractionIndicator : SettlementPriceFractionIndicator
   netChangeSign : Alpha 1
   netChange : Alpha 7
-  netChangeFractionIndicator : Alpha 1
+  netChangeFractionIndicator : NetChangeFractionIndicator
   volume : Alpha 8
   previousSettlement : Alpha 7
-  previousSettlementFractionIndicator : Alpha 1
+  previousSettlementFractionIndicator : PreviousSettlementFractionIndicator
   openInterest : Alpha 7
   openInterestDate : Alpha 6
   reason : Reason
   externalPriceAtSource : Alpha 7
-  externalPriceFractionIndicator : Alpha 1
+  externalPriceFractionIndicator : ExternalPriceFractionIndicator
   deriving DecidableEq, Repr
 
 namespace FuturesSummaryMessage
@@ -3519,32 +6212,32 @@ def encode (message : FuturesSummaryMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
     ++ (FutureProduct.encode message.futureProduct
     ++ (Alpha.encode message.bidPriceSummary
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.askPriceSummary
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.lastPrice
-    ++ (Alpha.encode message.lastPriceFractionIndicator
+    ++ (LastPriceFractionIndicator.encode message.lastPriceFractionIndicator
     ++ (Alpha.encode message.openPrice
-    ++ (Alpha.encode message.openPriceFractionIndicator
+    ++ (OpenPriceFractionIndicator.encode message.openPriceFractionIndicator
     ++ (Alpha.encode message.highPrice
-    ++ (Alpha.encode message.highPriceFractionIndicator
+    ++ (HighPriceFractionIndicator.encode message.highPriceFractionIndicator
     ++ (Alpha.encode message.lowPrice
-    ++ (Alpha.encode message.lowPriceFractionIndicator
+    ++ (LowPriceFractionIndicator.encode message.lowPriceFractionIndicator
     ++ (Alpha.encode message.settlementPrice
-    ++ (Alpha.encode message.settlementPriceFractionIndicatorFutures
+    ++ (SettlementPriceFractionIndicator.encode message.settlementPriceFractionIndicator
     ++ (Alpha.encode message.netChangeSign
     ++ (Alpha.encode message.netChange
-    ++ (Alpha.encode message.netChangeFractionIndicator
+    ++ (NetChangeFractionIndicator.encode message.netChangeFractionIndicator
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.previousSettlement
-    ++ (Alpha.encode message.previousSettlementFractionIndicator
+    ++ (PreviousSettlementFractionIndicator.encode message.previousSettlementFractionIndicator
     ++ (Alpha.encode message.openInterest
     ++ (Alpha.encode message.openInterestDate
     ++ (Reason.encode message.reason
     ++ (Alpha.encode message.externalPriceAtSource
-    ++ (Alpha.encode message.externalPriceFractionIndicator))))))))))))))))))))))))))))
+    ++ (ExternalPriceFractionIndicator.encode message.externalPriceFractionIndicator))))))))))))))))))))))))))))
 
 -- a long run of fields nests deeper than the elaborator's default limit
 set_option maxRecDepth 4096 in
@@ -3552,37 +6245,37 @@ def decode (bytes : List UInt8) : Option (FuturesSummaryMessage × List UInt8) :
   let (exchangeId, bytes) ← ExchangeId.decode bytes
   let (futureProduct, bytes) ← FutureProduct.decode bytes
   let (bidPriceSummary, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (askPriceSummary, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (lastPrice, bytes) ← Alpha.decode 7 bytes
-  let (lastPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (lastPriceFractionIndicator, bytes) ← LastPriceFractionIndicator.decode bytes
   let (openPrice, bytes) ← Alpha.decode 7 bytes
-  let (openPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (openPriceFractionIndicator, bytes) ← OpenPriceFractionIndicator.decode bytes
   let (highPrice, bytes) ← Alpha.decode 7 bytes
-  let (highPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (highPriceFractionIndicator, bytes) ← HighPriceFractionIndicator.decode bytes
   let (lowPrice, bytes) ← Alpha.decode 7 bytes
-  let (lowPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (lowPriceFractionIndicator, bytes) ← LowPriceFractionIndicator.decode bytes
   let (settlementPrice, bytes) ← Alpha.decode 7 bytes
-  let (settlementPriceFractionIndicatorFutures, bytes) ← Alpha.decode 1 bytes
+  let (settlementPriceFractionIndicator, bytes) ← SettlementPriceFractionIndicator.decode bytes
   let (netChangeSign, bytes) ← Alpha.decode 1 bytes
   let (netChange, bytes) ← Alpha.decode 7 bytes
-  let (netChangeFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (netChangeFractionIndicator, bytes) ← NetChangeFractionIndicator.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (previousSettlement, bytes) ← Alpha.decode 7 bytes
-  let (previousSettlementFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (previousSettlementFractionIndicator, bytes) ← PreviousSettlementFractionIndicator.decode bytes
   let (openInterest, bytes) ← Alpha.decode 7 bytes
   let (openInterestDate, bytes) ← Alpha.decode 6 bytes
   let (reason, bytes) ← Reason.decode bytes
   let (externalPriceAtSource, bytes) ← Alpha.decode 7 bytes
-  let (externalPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
-  pure ({ exchangeId, futureProduct, bidPriceSummary, bidPriceFractionIndicator, bidSize, askPriceSummary, askPriceFractionIndicator, askSize, lastPrice, lastPriceFractionIndicator, openPrice, openPriceFractionIndicator, highPrice, highPriceFractionIndicator, lowPrice, lowPriceFractionIndicator, settlementPrice, settlementPriceFractionIndicatorFutures, netChangeSign, netChange, netChangeFractionIndicator, volume, previousSettlement, previousSettlementFractionIndicator, openInterest, openInterestDate, reason, externalPriceAtSource, externalPriceFractionIndicator }, bytes)
+  let (externalPriceFractionIndicator, bytes) ← ExternalPriceFractionIndicator.decode bytes
+  pure ({ exchangeId, futureProduct, bidPriceSummary, bidPriceFractionIndicator, bidSize, askPriceSummary, askPriceFractionIndicator, askSize, lastPrice, lastPriceFractionIndicator, openPrice, openPriceFractionIndicator, highPrice, highPriceFractionIndicator, lowPrice, lowPriceFractionIndicator, settlementPrice, settlementPriceFractionIndicator, netChangeSign, netChange, netChangeFractionIndicator, volume, previousSettlement, previousSettlementFractionIndicator, openInterest, openInterestDate, reason, externalPriceAtSource, externalPriceFractionIndicator }, bytes)
 
 @[simp] theorem encode_length (message : FuturesSummaryMessage) : (encode message).length = 125 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length, Reason.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length, LastPriceFractionIndicator.encode_length, OpenPriceFractionIndicator.encode_length, HighPriceFractionIndicator.encode_length, LowPriceFractionIndicator.encode_length, SettlementPriceFractionIndicator.encode_length, NetChangeFractionIndicator.encode_length, PreviousSettlementFractionIndicator.encode_length, Reason.encode_length, ExternalPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FuturesSummaryMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -3598,47 +6291,47 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
+  rw [List.append_assoc, LastPriceFractionIndicator.decode_encode, some_bind]
+  dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, OpenPriceFractionIndicator.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, HighPriceFractionIndicator.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, LowPriceFractionIndicator.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, SettlementPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, NetChangeFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, PreviousSettlementFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -3648,7 +6341,7 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, some_bind]
+  rw [ExternalPriceFractionIndicator.decode_encode, some_bind]
   rfl
 
 end FuturesSummaryMessage
@@ -3659,27 +6352,27 @@ structure StrategySummaryMessage where
   strategySymbol : Alpha 30
   bidPriceSign : Alpha 1
   bidPriceSummary : Alpha 7
-  bidPriceFractionIndicator : Alpha 1
+  bidPriceFractionIndicator : BidPriceFractionIndicator
   bidSize : Alpha 5
   askPriceSign : Alpha 1
   askPriceSummary : Alpha 7
-  askPriceFractionIndicator : Alpha 1
+  askPriceFractionIndicator : AskPriceFractionIndicator
   askSize : Alpha 5
   lastPriceSign : Alpha 1
   lastPrice : Alpha 7
-  lastPriceFractionIndicator : Alpha 1
+  lastPriceFractionIndicator : LastPriceFractionIndicator
   openPriceSign : Alpha 1
   openPrice : Alpha 7
-  openPriceFractionIndicator : Alpha 1
+  openPriceFractionIndicator : OpenPriceFractionIndicator
   highPriceSign : Alpha 1
   highPrice : Alpha 7
-  highPriceFractionIndicator : Alpha 1
+  highPriceFractionIndicator : HighPriceFractionIndicator
   lowPriceSign : Alpha 1
   lowPrice : Alpha 7
-  lowPriceFractionIndicator : Alpha 1
+  lowPriceFractionIndicator : LowPriceFractionIndicator
   netChangeSign : Alpha 1
   netChange : Alpha 7
-  netChangeFractionIndicator : Alpha 1
+  netChangeFractionIndicator : NetChangeFractionIndicator
   volume : Alpha 8
   reason : Reason
   deriving DecidableEq, Repr
@@ -3691,27 +6384,27 @@ def encode (message : StrategySummaryMessage) : List UInt8 :=
     ++ (Alpha.encode message.strategySymbol
     ++ (Alpha.encode message.bidPriceSign
     ++ (Alpha.encode message.bidPriceSummary
-    ++ (Alpha.encode message.bidPriceFractionIndicator
+    ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
     ++ (Alpha.encode message.bidSize
     ++ (Alpha.encode message.askPriceSign
     ++ (Alpha.encode message.askPriceSummary
-    ++ (Alpha.encode message.askPriceFractionIndicator
+    ++ (AskPriceFractionIndicator.encode message.askPriceFractionIndicator
     ++ (Alpha.encode message.askSize
     ++ (Alpha.encode message.lastPriceSign
     ++ (Alpha.encode message.lastPrice
-    ++ (Alpha.encode message.lastPriceFractionIndicator
+    ++ (LastPriceFractionIndicator.encode message.lastPriceFractionIndicator
     ++ (Alpha.encode message.openPriceSign
     ++ (Alpha.encode message.openPrice
-    ++ (Alpha.encode message.openPriceFractionIndicator
+    ++ (OpenPriceFractionIndicator.encode message.openPriceFractionIndicator
     ++ (Alpha.encode message.highPriceSign
     ++ (Alpha.encode message.highPrice
-    ++ (Alpha.encode message.highPriceFractionIndicator
+    ++ (HighPriceFractionIndicator.encode message.highPriceFractionIndicator
     ++ (Alpha.encode message.lowPriceSign
     ++ (Alpha.encode message.lowPrice
-    ++ (Alpha.encode message.lowPriceFractionIndicator
+    ++ (LowPriceFractionIndicator.encode message.lowPriceFractionIndicator
     ++ (Alpha.encode message.netChangeSign
     ++ (Alpha.encode message.netChange
-    ++ (Alpha.encode message.netChangeFractionIndicator
+    ++ (NetChangeFractionIndicator.encode message.netChangeFractionIndicator
     ++ (Alpha.encode message.volume
     ++ (Reason.encode message.reason))))))))))))))))))))))))))
 
@@ -3722,34 +6415,34 @@ def decode (bytes : List UInt8) : Option (StrategySummaryMessage × List UInt8) 
   let (strategySymbol, bytes) ← Alpha.decode 30 bytes
   let (bidPriceSign, bytes) ← Alpha.decode 1 bytes
   let (bidPriceSummary, bytes) ← Alpha.decode 7 bytes
-  let (bidPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
   let (bidSize, bytes) ← Alpha.decode 5 bytes
   let (askPriceSign, bytes) ← Alpha.decode 1 bytes
   let (askPriceSummary, bytes) ← Alpha.decode 7 bytes
-  let (askPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (lastPriceSign, bytes) ← Alpha.decode 1 bytes
   let (lastPrice, bytes) ← Alpha.decode 7 bytes
-  let (lastPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (lastPriceFractionIndicator, bytes) ← LastPriceFractionIndicator.decode bytes
   let (openPriceSign, bytes) ← Alpha.decode 1 bytes
   let (openPrice, bytes) ← Alpha.decode 7 bytes
-  let (openPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (openPriceFractionIndicator, bytes) ← OpenPriceFractionIndicator.decode bytes
   let (highPriceSign, bytes) ← Alpha.decode 1 bytes
   let (highPrice, bytes) ← Alpha.decode 7 bytes
-  let (highPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (highPriceFractionIndicator, bytes) ← HighPriceFractionIndicator.decode bytes
   let (lowPriceSign, bytes) ← Alpha.decode 1 bytes
   let (lowPrice, bytes) ← Alpha.decode 7 bytes
-  let (lowPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (lowPriceFractionIndicator, bytes) ← LowPriceFractionIndicator.decode bytes
   let (netChangeSign, bytes) ← Alpha.decode 1 bytes
   let (netChange, bytes) ← Alpha.decode 7 bytes
-  let (netChangeFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (netChangeFractionIndicator, bytes) ← NetChangeFractionIndicator.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (reason, bytes) ← Reason.decode bytes
   pure ({ exchangeId, strategySymbol, bidPriceSign, bidPriceSummary, bidPriceFractionIndicator, bidSize, askPriceSign, askPriceSummary, askPriceFractionIndicator, askSize, lastPriceSign, lastPrice, lastPriceFractionIndicator, openPriceSign, openPrice, openPriceFractionIndicator, highPriceSign, highPrice, highPriceFractionIndicator, lowPriceSign, lowPrice, lowPriceFractionIndicator, netChangeSign, netChange, netChangeFractionIndicator, volume, reason }, bytes)
 
 @[simp] theorem encode_length (message : StrategySummaryMessage) : (encode message).length = 113 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, Alpha.encode_length, Reason.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, Alpha.encode_length, BidPriceFractionIndicator.encode_length, AskPriceFractionIndicator.encode_length, LastPriceFractionIndicator.encode_length, OpenPriceFractionIndicator.encode_length, HighPriceFractionIndicator.encode_length, LowPriceFractionIndicator.encode_length, NetChangeFractionIndicator.encode_length, Reason.encode_length]
 
 theorem encode_length_pos (message : StrategySummaryMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -3767,7 +6460,7 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, BidPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -3775,7 +6468,7 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, AskPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -3783,31 +6476,31 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, LastPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, OpenPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, HighPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, LowPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, NetChangeFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -3942,10 +6635,10 @@ structure FuturesTradeCorrectionMessage where
   futureProduct : FutureProduct
   volume : Alpha 8
   tradePrice : Alpha 7
-  tradePriceFractionIndicator : Alpha 1
+  tradePriceFractionIndicator : TradePriceFractionIndicator
   netChangeSign : Alpha 1
   netChange : Alpha 7
-  netChangeFractionIndicator : Alpha 1
+  netChangeFractionIndicator : NetChangeFractionIndicator
   priceIndicatorMarker : Alpha 1
   tradeNumber : Alpha 8
   deriving DecidableEq, Repr
@@ -3957,10 +6650,10 @@ def encode (message : FuturesTradeCorrectionMessage) : List UInt8 :=
     ++ (FutureProduct.encode message.futureProduct
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.tradePrice
-    ++ (Alpha.encode message.tradePriceFractionIndicator
+    ++ (TradePriceFractionIndicator.encode message.tradePriceFractionIndicator
     ++ (Alpha.encode message.netChangeSign
     ++ (Alpha.encode message.netChange
-    ++ (Alpha.encode message.netChangeFractionIndicator
+    ++ (NetChangeFractionIndicator.encode message.netChangeFractionIndicator
     ++ (Alpha.encode message.priceIndicatorMarker
     ++ (Alpha.encode message.tradeNumber)))))))))
 
@@ -3969,17 +6662,17 @@ def decode (bytes : List UInt8) : Option (FuturesTradeCorrectionMessage × List 
   let (futureProduct, bytes) ← FutureProduct.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (tradePrice, bytes) ← Alpha.decode 7 bytes
-  let (tradePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tradePriceFractionIndicator, bytes) ← TradePriceFractionIndicator.decode bytes
   let (netChangeSign, bytes) ← Alpha.decode 1 bytes
   let (netChange, bytes) ← Alpha.decode 7 bytes
-  let (netChangeFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (netChangeFractionIndicator, bytes) ← NetChangeFractionIndicator.decode bytes
   let (priceIndicatorMarker, bytes) ← Alpha.decode 1 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
   pure ({ exchangeId, futureProduct, volume, tradePrice, tradePriceFractionIndicator, netChangeSign, netChange, netChangeFractionIndicator, priceIndicatorMarker, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : FuturesTradeCorrectionMessage) : (encode message).length = 46 := by
   unfold encode
-  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length]
+  simp only [List.length_append, ExchangeId.encode_length, FutureProduct.encode_length, Alpha.encode_length, TradePriceFractionIndicator.encode_length, NetChangeFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : FuturesTradeCorrectionMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -3996,13 +6689,13 @@ theorem encode_length_pos (message : FuturesTradeCorrectionMessage) : (encode me
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, TradePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, NetChangeFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -4095,10 +6788,10 @@ end GroupStatusStrategiesMessage
 structure BondDefinition where
   maturityDate : Alpha 8
   coupon : Alpha 7
-  couponFractionIndicator : Alpha 1
+  couponFractionIndicator : CouponFractionIndicator
   outstandingBondValue : Alpha 8
   conversionFactor : Alpha 7
-  conversionFactorFractionIndicator : Alpha 1
+  conversionFactorFractionIndicator : ConversionFactorFractionIndicator
   deriving DecidableEq, Repr
 
 namespace BondDefinition
@@ -4106,23 +6799,23 @@ namespace BondDefinition
 def encode (message : BondDefinition) : List UInt8 :=
   Alpha.encode message.maturityDate
     ++ (Alpha.encode message.coupon
-    ++ (Alpha.encode message.couponFractionIndicator
+    ++ (CouponFractionIndicator.encode message.couponFractionIndicator
     ++ (Alpha.encode message.outstandingBondValue
     ++ (Alpha.encode message.conversionFactor
-    ++ (Alpha.encode message.conversionFactorFractionIndicator)))))
+    ++ (ConversionFactorFractionIndicator.encode message.conversionFactorFractionIndicator)))))
 
 def decode (bytes : List UInt8) : Option (BondDefinition × List UInt8) := do
   let (maturityDate, bytes) ← Alpha.decode 8 bytes
   let (coupon, bytes) ← Alpha.decode 7 bytes
-  let (couponFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (couponFractionIndicator, bytes) ← CouponFractionIndicator.decode bytes
   let (outstandingBondValue, bytes) ← Alpha.decode 8 bytes
   let (conversionFactor, bytes) ← Alpha.decode 7 bytes
-  let (conversionFactorFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (conversionFactorFractionIndicator, bytes) ← ConversionFactorFractionIndicator.decode bytes
   pure ({ maturityDate, coupon, couponFractionIndicator, outstandingBondValue, conversionFactor, conversionFactorFractionIndicator }, bytes)
 
 @[simp] theorem encode_length (message : BondDefinition) : (encode message).length = 32 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length]
+  simp only [List.length_append, Alpha.encode_length, CouponFractionIndicator.encode_length, ConversionFactorFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : BondDefinition) : (encode message).length > 0 := by
   rw [encode_length]
@@ -4135,13 +6828,13 @@ theorem encode_length_pos (message : BondDefinition) : (encode message).length >
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, CouponFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, some_bind]
+  rw [ConversionFactorFractionIndicator.decode_encode, some_bind]
   rfl
 
 end BondDefinition
@@ -4396,29 +7089,29 @@ end EndOfSalesMessage
 /-- Tick Entry: 16 bytes -/
 structure TickEntry where
   minPrice : Alpha 7
-  minPriceFractionIndicator : Alpha 1
+  minPriceFractionIndicator : MinPriceFractionIndicator
   tickPrice : Alpha 7
-  tickPriceFractionIndicator : Alpha 1
+  tickPriceFractionIndicator : TickPriceFractionIndicator
   deriving DecidableEq, Repr
 
 namespace TickEntry
 
 def encode (message : TickEntry) : List UInt8 :=
   Alpha.encode message.minPrice
-    ++ (Alpha.encode message.minPriceFractionIndicator
+    ++ (MinPriceFractionIndicator.encode message.minPriceFractionIndicator
     ++ (Alpha.encode message.tickPrice
-    ++ (Alpha.encode message.tickPriceFractionIndicator)))
+    ++ (TickPriceFractionIndicator.encode message.tickPriceFractionIndicator)))
 
 def decode (bytes : List UInt8) : Option (TickEntry × List UInt8) := do
   let (minPrice, bytes) ← Alpha.decode 7 bytes
-  let (minPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (minPriceFractionIndicator, bytes) ← MinPriceFractionIndicator.decode bytes
   let (tickPrice, bytes) ← Alpha.decode 7 bytes
-  let (tickPriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (tickPriceFractionIndicator, bytes) ← TickPriceFractionIndicator.decode bytes
   pure ({ minPrice, minPriceFractionIndicator, tickPrice, tickPriceFractionIndicator }, bytes)
 
 @[simp] theorem encode_length (message : TickEntry) : (encode message).length = 16 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length]
+  simp only [List.length_append, Alpha.encode_length, MinPriceFractionIndicator.encode_length, TickPriceFractionIndicator.encode_length]
 
 theorem encode_length_pos (message : TickEntry) : (encode message).length > 0 := by
   rw [encode_length]
@@ -4429,11 +7122,11 @@ theorem encode_length_pos (message : TickEntry) : (encode message).length > 0 :=
   unfold decode encode
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, MinPriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [Alpha.decode_encode, some_bind]
+  rw [TickPriceFractionIndicator.decode_encode, some_bind]
   rfl
 
 end TickEntry

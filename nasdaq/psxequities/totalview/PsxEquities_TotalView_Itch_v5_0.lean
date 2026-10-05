@@ -1864,7 +1864,7 @@ structure AddOrderNoMpidAttributionMessage where
   timestamp : BitVec 48
   orderReferenceNumber : BitVec 64
   buySellIndicator : BuySellIndicator
-  sharesInteger4 : BitVec 32
+  shares : BitVec 32
   stock : Alpha 8
   price : BitVec 32
   deriving DecidableEq, Repr
@@ -1877,7 +1877,7 @@ def encode (message : AddOrderNoMpidAttributionMessage) : List UInt8 :=
     ++ (encodeUInt 6 message.timestamp
     ++ (encodeUInt 8 message.orderReferenceNumber
     ++ (BuySellIndicator.encode message.buySellIndicator
-    ++ (encodeUInt 4 message.sharesInteger4
+    ++ (encodeUInt 4 message.shares
     ++ (Alpha.encode message.stock
     ++ (encodeUInt 4 message.price)))))))
 
@@ -1887,10 +1887,10 @@ def decode (bytes : List UInt8) : Option (AddOrderNoMpidAttributionMessage × Li
   let (timestamp, bytes) ← decodeUInt 6 bytes
   let (orderReferenceNumber, bytes) ← decodeUInt 8 bytes
   let (buySellIndicator, bytes) ← BuySellIndicator.decode bytes
-  let (sharesInteger4, bytes) ← decodeUInt 4 bytes
+  let (shares, bytes) ← decodeUInt 4 bytes
   let (stock, bytes) ← Alpha.decode 8 bytes
   let (price, bytes) ← decodeUInt 4 bytes
-  pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber, buySellIndicator, sharesInteger4, stock, price }, bytes)
+  pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber, buySellIndicator, shares, stock, price }, bytes)
 
 @[simp] theorem encode_length (message : AddOrderNoMpidAttributionMessage) : (encode message).length = 35 := by
   unfold encode
@@ -1929,7 +1929,7 @@ structure AddOrderWithMpidAttributionMessage where
   timestamp : BitVec 48
   orderReferenceNumber : BitVec 64
   buySellIndicator : BuySellIndicator
-  sharesInteger4 : BitVec 32
+  shares : BitVec 32
   stock : Alpha 8
   price : BitVec 32
   attribution : Alpha 4
@@ -1943,7 +1943,7 @@ def encode (message : AddOrderWithMpidAttributionMessage) : List UInt8 :=
     ++ (encodeUInt 6 message.timestamp
     ++ (encodeUInt 8 message.orderReferenceNumber
     ++ (BuySellIndicator.encode message.buySellIndicator
-    ++ (encodeUInt 4 message.sharesInteger4
+    ++ (encodeUInt 4 message.shares
     ++ (Alpha.encode message.stock
     ++ (encodeUInt 4 message.price
     ++ (Alpha.encode message.attribution))))))))
@@ -1954,11 +1954,11 @@ def decode (bytes : List UInt8) : Option (AddOrderWithMpidAttributionMessage × 
   let (timestamp, bytes) ← decodeUInt 6 bytes
   let (orderReferenceNumber, bytes) ← decodeUInt 8 bytes
   let (buySellIndicator, bytes) ← BuySellIndicator.decode bytes
-  let (sharesInteger4, bytes) ← decodeUInt 4 bytes
+  let (shares, bytes) ← decodeUInt 4 bytes
   let (stock, bytes) ← Alpha.decode 8 bytes
   let (price, bytes) ← decodeUInt 4 bytes
   let (attribution, bytes) ← Alpha.decode 4 bytes
-  pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber, buySellIndicator, sharesInteger4, stock, price, attribution }, bytes)
+  pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber, buySellIndicator, shares, stock, price, attribution }, bytes)
 
 @[simp] theorem encode_length (message : AddOrderWithMpidAttributionMessage) : (encode message).length = 39 := by
   unfold encode
@@ -2214,7 +2214,7 @@ structure OrderReplaceMessage where
   timestamp : BitVec 48
   originalOrderReferenceNumber : BitVec 64
   newOrderReferenceNumber : BitVec 64
-  sharesInteger4 : BitVec 32
+  shares : BitVec 32
   price : BitVec 32
   deriving DecidableEq, Repr
 
@@ -2226,7 +2226,7 @@ def encode (message : OrderReplaceMessage) : List UInt8 :=
     ++ (encodeUInt 6 message.timestamp
     ++ (encodeUInt 8 message.originalOrderReferenceNumber
     ++ (encodeUInt 8 message.newOrderReferenceNumber
-    ++ (encodeUInt 4 message.sharesInteger4
+    ++ (encodeUInt 4 message.shares
     ++ (encodeUInt 4 message.price))))))
 
 def decode (bytes : List UInt8) : Option (OrderReplaceMessage × List UInt8) := do
@@ -2235,9 +2235,9 @@ def decode (bytes : List UInt8) : Option (OrderReplaceMessage × List UInt8) := 
   let (timestamp, bytes) ← decodeUInt 6 bytes
   let (originalOrderReferenceNumber, bytes) ← decodeUInt 8 bytes
   let (newOrderReferenceNumber, bytes) ← decodeUInt 8 bytes
-  let (sharesInteger4, bytes) ← decodeUInt 4 bytes
+  let (shares, bytes) ← decodeUInt 4 bytes
   let (price, bytes) ← decodeUInt 4 bytes
-  pure ({ stockLocate, trackingNumber, timestamp, originalOrderReferenceNumber, newOrderReferenceNumber, sharesInteger4, price }, bytes)
+  pure ({ stockLocate, trackingNumber, timestamp, originalOrderReferenceNumber, newOrderReferenceNumber, shares, price }, bytes)
 
 @[simp] theorem encode_length (message : OrderReplaceMessage) : (encode message).length = 34 := by
   unfold encode
@@ -2274,7 +2274,7 @@ structure TradeMessageNonCross where
   timestamp : BitVec 48
   orderReferenceNumber : BitVec 64
   buySellIndicator : BuySellIndicator
-  sharesInteger4 : BitVec 32
+  shares : BitVec 32
   stock : Alpha 8
   price : BitVec 32
   matchNumber : BitVec 64
@@ -2288,7 +2288,7 @@ def encode (message : TradeMessageNonCross) : List UInt8 :=
     ++ (encodeUInt 6 message.timestamp
     ++ (encodeUInt 8 message.orderReferenceNumber
     ++ (BuySellIndicator.encode message.buySellIndicator
-    ++ (encodeUInt 4 message.sharesInteger4
+    ++ (encodeUInt 4 message.shares
     ++ (Alpha.encode message.stock
     ++ (encodeUInt 4 message.price
     ++ (encodeUInt 8 message.matchNumber))))))))
@@ -2299,11 +2299,11 @@ def decode (bytes : List UInt8) : Option (TradeMessageNonCross × List UInt8) :=
   let (timestamp, bytes) ← decodeUInt 6 bytes
   let (orderReferenceNumber, bytes) ← decodeUInt 8 bytes
   let (buySellIndicator, bytes) ← BuySellIndicator.decode bytes
-  let (sharesInteger4, bytes) ← decodeUInt 4 bytes
+  let (shares, bytes) ← decodeUInt 4 bytes
   let (stock, bytes) ← Alpha.decode 8 bytes
   let (price, bytes) ← decodeUInt 4 bytes
   let (matchNumber, bytes) ← decodeUInt 8 bytes
-  pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber, buySellIndicator, sharesInteger4, stock, price, matchNumber }, bytes)
+  pure ({ stockLocate, trackingNumber, timestamp, orderReferenceNumber, buySellIndicator, shares, stock, price, matchNumber }, bytes)
 
 @[simp] theorem encode_length (message : TradeMessageNonCross) : (encode message).length = 43 := by
   unfold encode
@@ -2342,7 +2342,7 @@ structure CrossTradeMessage where
   stockLocate : BitVec 16
   trackingNumber : BitVec 16
   timestamp : BitVec 48
-  sharesInteger8 : BitVec 64
+  crossShares : BitVec 64
   stock : Alpha 8
   crossPrice : BitVec 32
   matchNumber : BitVec 64
@@ -2355,7 +2355,7 @@ def encode (message : CrossTradeMessage) : List UInt8 :=
   encodeUInt 2 message.stockLocate
     ++ (encodeUInt 2 message.trackingNumber
     ++ (encodeUInt 6 message.timestamp
-    ++ (encodeUInt 8 message.sharesInteger8
+    ++ (encodeUInt 8 message.crossShares
     ++ (Alpha.encode message.stock
     ++ (encodeUInt 4 message.crossPrice
     ++ (encodeUInt 8 message.matchNumber
@@ -2365,12 +2365,12 @@ def decode (bytes : List UInt8) : Option (CrossTradeMessage × List UInt8) := do
   let (stockLocate, bytes) ← decodeUInt 2 bytes
   let (trackingNumber, bytes) ← decodeUInt 2 bytes
   let (timestamp, bytes) ← decodeUInt 6 bytes
-  let (sharesInteger8, bytes) ← decodeUInt 8 bytes
+  let (crossShares, bytes) ← decodeUInt 8 bytes
   let (stock, bytes) ← Alpha.decode 8 bytes
   let (crossPrice, bytes) ← decodeUInt 4 bytes
   let (matchNumber, bytes) ← decodeUInt 8 bytes
   let (crossType, bytes) ← CrossType.decode bytes
-  pure ({ stockLocate, trackingNumber, timestamp, sharesInteger8, stock, crossPrice, matchNumber, crossType }, bytes)
+  pure ({ stockLocate, trackingNumber, timestamp, crossShares, stock, crossPrice, matchNumber, crossType }, bytes)
 
 @[simp] theorem encode_length (message : CrossTradeMessage) : (encode message).length = 39 := by
   unfold encode

@@ -16,49 +16,6 @@ Prices with implied decimals are proven as the integers on the wire.
 
 namespace Omi.TmxTsxQuantumfeedlevel2XmtV21
 
-/-- Protocol Name: one byte code -/
-def ProtocolName.codes : List UInt8 :=
-  [0x58]
-
-inductive ProtocolName where
-  | xmt -- Xmt
-  | unlisted (byte : { byte : UInt8 // byte ∉ ProtocolName.codes }) -- any other code, kept as it is
-  deriving DecidableEq, Repr
-
-namespace ProtocolName
-
-def toByte : ProtocolName → UInt8
-  | .xmt => 0x58
-  | .unlisted byte => byte.val
-
-/-- The constructor of a listed code -/
-def listed (_ : UInt8) : ProtocolName :=
-  .xmt
-
-def ofByte (byte : UInt8) : ProtocolName :=
-  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
-
-theorem ofByte_toByte (value : ProtocolName) : ofByte value.toByte = value := by
-  cases value with
-  | xmt => decide
-  | unlisted byte => simp [ofByte, toByte, byte.property]
-
-def encode (value : ProtocolName) : List UInt8 :=
-  [value.toByte]
-
-def decode : List UInt8 → Option (ProtocolName × List UInt8)
-  | byte :: rest => some (ofByte byte, rest)
-  | [] => none
-
-@[simp] theorem encode_length (value : ProtocolName) : (encode value).length = 1 :=
-  rfl
-
-@[simp] theorem decode_encode (value : ProtocolName) (rest : List UInt8) :
-    decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte_toByte]
-
-end ProtocolName
-
 /-- Ack Required Poss Dup: one byte code -/
 def AckRequiredPossDup.codes : List UInt8 :=
   [0x30]
@@ -2921,7 +2878,7 @@ end Body
 /-- Packet -/
 structure Packet where
   startOfFrame : BitVec 8
-  protocolName : ProtocolName
+  protocolName : Alpha 1
   protocolVersion : Alpha 1
   sessionId : BitVec 32
   ackRequiredPossDup : AckRequiredPossDup
@@ -2936,7 +2893,7 @@ def encodeBody (message : Packet) : List UInt8 :=
     ++ (encodeUInt 1 (BitVec.ofNat (8 * 1) message.body.val.length)
     ++ (encodeMany Body.encode message.body.val)))
 
-def decodeBody (startOfFrame : BitVec 8) (protocolName : ProtocolName) (protocolVersion : Alpha 1) (bytes : List UInt8) : Option (Packet × List UInt8) := do
+def decodeBody (startOfFrame : BitVec 8) (protocolName : Alpha 1) (protocolVersion : Alpha 1) (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (sessionId, bytes) ← decodeUIntLE 4 bytes
   let (ackRequiredPossDup, bytes) ← AckRequiredPossDup.decode bytes
   let (numBody, bytes) ← decodeUInt 1 bytes
@@ -2962,13 +2919,13 @@ theorem decodeBody_encodeBody (message : Packet) (rest : List UInt8) :
 /-- Size rule: Message Length counts the bytes after it, so it is written from the body; the body has no bound the prefix must fit, so it is read by its content and the prefix is not checked; Start Of Frame, Protocol Name, Protocol Version are read ahead of it -/
 def encode (message : Packet) : List UInt8 :=
   encodeUInt 1 message.startOfFrame
-    ++ (ProtocolName.encode message.protocolName
+    ++ (Alpha.encode message.protocolName
     ++ (Alpha.encode message.protocolVersion
     ++ (encodeUIntLE 2 (BitVec.ofNat (8 * 2) ((encodeBody message).length + 0)) ++ encodeBody message)))
 
 def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (startOfFrame, bytes) ← decodeUInt 1 bytes
-  let (protocolName, bytes) ← ProtocolName.decode bytes
+  let (protocolName, bytes) ← Alpha.decode 1 bytes
   let (protocolVersion, bytes) ← Alpha.decode 1 bytes
   let (_, bytes) ← decodeUIntLE 2 bytes
   (decodeBody startOfFrame protocolName protocolVersion) bytes
@@ -2978,7 +2935,7 @@ def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   unfold decode encode
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [List.append_assoc, ProtocolName.decode_encode, some_bind]
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
@@ -2987,7 +2944,7 @@ def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
 
 theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
   unfold encode
-  simp only [encodeUInt_length, ProtocolName.encode_length, Alpha.encode_length, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+  simp only [encodeUInt_length, Alpha.encode_length, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
   omega
 
 end Packet

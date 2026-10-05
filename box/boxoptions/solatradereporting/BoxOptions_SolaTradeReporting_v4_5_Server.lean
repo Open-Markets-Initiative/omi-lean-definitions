@@ -108,6 +108,113 @@ def decode : List UInt8 → Option (TransactionType × List UInt8)
 
 end TransactionType
 
+/-- Strike Price Fraction Indicator: one byte code -/
+def StrikePriceFractionIndicator.codes : List UInt8 :=
+  [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]
+
+inductive StrikePriceFractionIndicator where
+  | whole -- Whole
+  | ten -- Ten
+  | hundred -- Hundred
+  | thousand -- Thousand
+  | tenThousand -- Ten Thousand
+  | hundredThousand -- Hundred Thousand
+  | million -- Million
+  | tenMillion -- Ten Million
+  | hundredMillion -- Hundred Million
+  | billion -- Billion
+  | negativeWhole -- Negative Whole
+  | negativeTen -- Negative Ten
+  | negativeHundred -- Negative Hundred
+  | negativeThousand -- Negative Thousand
+  | negativeTenThousand -- Negative Ten Thousand
+  | negativeHundredThousand -- Negative Hundred Thousand
+  | negativeMillion -- Negative Million
+  | unlisted (byte : { byte : UInt8 // byte ∉ StrikePriceFractionIndicator.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace StrikePriceFractionIndicator
+
+def toByte : StrikePriceFractionIndicator → UInt8
+  | .whole => 0x30
+  | .ten => 0x31
+  | .hundred => 0x32
+  | .thousand => 0x33
+  | .tenThousand => 0x34
+  | .hundredThousand => 0x35
+  | .million => 0x36
+  | .tenMillion => 0x37
+  | .hundredMillion => 0x38
+  | .billion => 0x39
+  | .negativeWhole => 0x41
+  | .negativeTen => 0x42
+  | .negativeHundred => 0x43
+  | .negativeThousand => 0x44
+  | .negativeTenThousand => 0x45
+  | .negativeHundredThousand => 0x46
+  | .negativeMillion => 0x47
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : StrikePriceFractionIndicator :=
+  if byte = 0x30 then .whole
+  else if byte = 0x31 then .ten
+  else if byte = 0x32 then .hundred
+  else if byte = 0x33 then .thousand
+  else if byte = 0x34 then .tenThousand
+  else if byte = 0x35 then .hundredThousand
+  else if byte = 0x36 then .million
+  else if byte = 0x37 then .tenMillion
+  else if byte = 0x38 then .hundredMillion
+  else if byte = 0x39 then .billion
+  else if byte = 0x41 then .negativeWhole
+  else if byte = 0x42 then .negativeTen
+  else if byte = 0x43 then .negativeHundred
+  else if byte = 0x44 then .negativeThousand
+  else if byte = 0x45 then .negativeTenThousand
+  else if byte = 0x46 then .negativeHundredThousand
+  else .negativeMillion
+
+def ofByte (byte : UInt8) : StrikePriceFractionIndicator :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : StrikePriceFractionIndicator) : ofByte value.toByte = value := by
+  cases value with
+  | whole => decide
+  | ten => decide
+  | hundred => decide
+  | thousand => decide
+  | tenThousand => decide
+  | hundredThousand => decide
+  | million => decide
+  | tenMillion => decide
+  | hundredMillion => decide
+  | billion => decide
+  | negativeWhole => decide
+  | negativeTen => decide
+  | negativeHundred => decide
+  | negativeThousand => decide
+  | negativeTenThousand => decide
+  | negativeHundredThousand => decide
+  | negativeMillion => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : StrikePriceFractionIndicator) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (StrikePriceFractionIndicator × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : StrikePriceFractionIndicator) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : StrikePriceFractionIndicator) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end StrikePriceFractionIndicator
+
 /-- Option Type: one byte code -/
 def OptionType.codes : List UInt8 :=
   [0x43, 0x50]
@@ -604,10 +711,10 @@ structure Trade where
   symbol : Alpha 30
   expirationDate : Alpha 6
   strikePrice : Alpha 8
-  strikePriceFractionIndicator : Alpha 1
+  strikePriceFractionIndicator : StrikePriceFractionIndicator
   optionType : OptionType
   volume : Alpha 8
-  priceX10000 : Alpha 8
+  price : Alpha 8
   cmtaBroker : Alpha 4
   accountType : AccountType
   subtraderId : Alpha 3
@@ -635,10 +742,10 @@ def encode (message : Trade) : List UInt8 :=
     ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.expirationDate
     ++ (Alpha.encode message.strikePrice
-    ++ (Alpha.encode message.strikePriceFractionIndicator
+    ++ (StrikePriceFractionIndicator.encode message.strikePriceFractionIndicator
     ++ (OptionType.encode message.optionType
     ++ (Alpha.encode message.volume
-    ++ (Alpha.encode message.priceX10000
+    ++ (Alpha.encode message.price
     ++ (Alpha.encode message.cmtaBroker
     ++ (AccountType.encode message.accountType
     ++ (Alpha.encode message.subtraderId
@@ -665,10 +772,10 @@ def decode (bytes : List UInt8) : Option (Trade × List UInt8) := do
   let (symbol, bytes) ← Alpha.decode 30 bytes
   let (expirationDate, bytes) ← Alpha.decode 6 bytes
   let (strikePrice, bytes) ← Alpha.decode 8 bytes
-  let (strikePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (strikePriceFractionIndicator, bytes) ← StrikePriceFractionIndicator.decode bytes
   let (optionType, bytes) ← OptionType.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
-  let (priceX10000, bytes) ← Alpha.decode 8 bytes
+  let (price, bytes) ← Alpha.decode 8 bytes
   let (cmtaBroker, bytes) ← Alpha.decode 4 bytes
   let (accountType, bytes) ← AccountType.decode bytes
   let (subtraderId, bytes) ← Alpha.decode 3 bytes
@@ -685,11 +792,11 @@ def decode (bytes : List UInt8) : Option (Trade × List UInt8) := do
   let (parentTransactionId, bytes) ← Alpha.decode 10 bytes
   let (oppositeExecutingBroker, bytes) ← Alpha.decode 4 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, priceX10000, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
+  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, price, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
 
 @[simp] theorem encode_length (message : Trade) : (encode message).length = 200 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
+  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, StrikePriceFractionIndicator.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
 
 theorem encode_length_pos (message : Trade) : (encode message).length > 0 := by
   rw [encode_length]
@@ -711,7 +818,7 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, StrikePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, OptionType.decode_encode, some_bind]
   dsimp only
@@ -762,10 +869,10 @@ structure TradeCancel where
   symbol : Alpha 30
   expirationDate : Alpha 6
   strikePrice : Alpha 8
-  strikePriceFractionIndicator : Alpha 1
+  strikePriceFractionIndicator : StrikePriceFractionIndicator
   optionType : OptionType
   volume : Alpha 8
-  priceX10000 : Alpha 8
+  price : Alpha 8
   cmtaBroker : Alpha 4
   accountType : AccountType
   subtraderId : Alpha 3
@@ -793,10 +900,10 @@ def encode (message : TradeCancel) : List UInt8 :=
     ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.expirationDate
     ++ (Alpha.encode message.strikePrice
-    ++ (Alpha.encode message.strikePriceFractionIndicator
+    ++ (StrikePriceFractionIndicator.encode message.strikePriceFractionIndicator
     ++ (OptionType.encode message.optionType
     ++ (Alpha.encode message.volume
-    ++ (Alpha.encode message.priceX10000
+    ++ (Alpha.encode message.price
     ++ (Alpha.encode message.cmtaBroker
     ++ (AccountType.encode message.accountType
     ++ (Alpha.encode message.subtraderId
@@ -823,10 +930,10 @@ def decode (bytes : List UInt8) : Option (TradeCancel × List UInt8) := do
   let (symbol, bytes) ← Alpha.decode 30 bytes
   let (expirationDate, bytes) ← Alpha.decode 6 bytes
   let (strikePrice, bytes) ← Alpha.decode 8 bytes
-  let (strikePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (strikePriceFractionIndicator, bytes) ← StrikePriceFractionIndicator.decode bytes
   let (optionType, bytes) ← OptionType.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
-  let (priceX10000, bytes) ← Alpha.decode 8 bytes
+  let (price, bytes) ← Alpha.decode 8 bytes
   let (cmtaBroker, bytes) ← Alpha.decode 4 bytes
   let (accountType, bytes) ← AccountType.decode bytes
   let (subtraderId, bytes) ← Alpha.decode 3 bytes
@@ -843,11 +950,11 @@ def decode (bytes : List UInt8) : Option (TradeCancel × List UInt8) := do
   let (parentTransactionId, bytes) ← Alpha.decode 10 bytes
   let (oppositeExecutingBroker, bytes) ← Alpha.decode 4 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, priceX10000, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
+  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, price, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
 
 @[simp] theorem encode_length (message : TradeCancel) : (encode message).length = 200 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
+  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, StrikePriceFractionIndicator.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
 
 theorem encode_length_pos (message : TradeCancel) : (encode message).length > 0 := by
   rw [encode_length]
@@ -869,7 +976,7 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, StrikePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, OptionType.decode_encode, some_bind]
   dsimp only
@@ -920,10 +1027,10 @@ structure Allocation where
   symbol : Alpha 30
   expirationDate : Alpha 6
   strikePrice : Alpha 8
-  strikePriceFractionIndicator : Alpha 1
+  strikePriceFractionIndicator : StrikePriceFractionIndicator
   optionType : OptionType
   volume : Alpha 8
-  priceX10000 : Alpha 8
+  price : Alpha 8
   cmtaBroker : Alpha 4
   accountType : AccountType
   subtraderId : Alpha 3
@@ -951,10 +1058,10 @@ def encode (message : Allocation) : List UInt8 :=
     ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.expirationDate
     ++ (Alpha.encode message.strikePrice
-    ++ (Alpha.encode message.strikePriceFractionIndicator
+    ++ (StrikePriceFractionIndicator.encode message.strikePriceFractionIndicator
     ++ (OptionType.encode message.optionType
     ++ (Alpha.encode message.volume
-    ++ (Alpha.encode message.priceX10000
+    ++ (Alpha.encode message.price
     ++ (Alpha.encode message.cmtaBroker
     ++ (AccountType.encode message.accountType
     ++ (Alpha.encode message.subtraderId
@@ -981,10 +1088,10 @@ def decode (bytes : List UInt8) : Option (Allocation × List UInt8) := do
   let (symbol, bytes) ← Alpha.decode 30 bytes
   let (expirationDate, bytes) ← Alpha.decode 6 bytes
   let (strikePrice, bytes) ← Alpha.decode 8 bytes
-  let (strikePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (strikePriceFractionIndicator, bytes) ← StrikePriceFractionIndicator.decode bytes
   let (optionType, bytes) ← OptionType.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
-  let (priceX10000, bytes) ← Alpha.decode 8 bytes
+  let (price, bytes) ← Alpha.decode 8 bytes
   let (cmtaBroker, bytes) ← Alpha.decode 4 bytes
   let (accountType, bytes) ← AccountType.decode bytes
   let (subtraderId, bytes) ← Alpha.decode 3 bytes
@@ -1001,11 +1108,11 @@ def decode (bytes : List UInt8) : Option (Allocation × List UInt8) := do
   let (parentTransactionId, bytes) ← Alpha.decode 10 bytes
   let (oppositeExecutingBroker, bytes) ← Alpha.decode 4 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, priceX10000, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
+  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, price, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
 
 @[simp] theorem encode_length (message : Allocation) : (encode message).length = 200 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
+  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, StrikePriceFractionIndicator.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
 
 theorem encode_length_pos (message : Allocation) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1027,7 +1134,7 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, StrikePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, OptionType.decode_encode, some_bind]
   dsimp only
@@ -1078,10 +1185,10 @@ structure AllocationCancel where
   symbol : Alpha 30
   expirationDate : Alpha 6
   strikePrice : Alpha 8
-  strikePriceFractionIndicator : Alpha 1
+  strikePriceFractionIndicator : StrikePriceFractionIndicator
   optionType : OptionType
   volume : Alpha 8
-  priceX10000 : Alpha 8
+  price : Alpha 8
   cmtaBroker : Alpha 4
   accountType : AccountType
   subtraderId : Alpha 3
@@ -1109,10 +1216,10 @@ def encode (message : AllocationCancel) : List UInt8 :=
     ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.expirationDate
     ++ (Alpha.encode message.strikePrice
-    ++ (Alpha.encode message.strikePriceFractionIndicator
+    ++ (StrikePriceFractionIndicator.encode message.strikePriceFractionIndicator
     ++ (OptionType.encode message.optionType
     ++ (Alpha.encode message.volume
-    ++ (Alpha.encode message.priceX10000
+    ++ (Alpha.encode message.price
     ++ (Alpha.encode message.cmtaBroker
     ++ (AccountType.encode message.accountType
     ++ (Alpha.encode message.subtraderId
@@ -1139,10 +1246,10 @@ def decode (bytes : List UInt8) : Option (AllocationCancel × List UInt8) := do
   let (symbol, bytes) ← Alpha.decode 30 bytes
   let (expirationDate, bytes) ← Alpha.decode 6 bytes
   let (strikePrice, bytes) ← Alpha.decode 8 bytes
-  let (strikePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (strikePriceFractionIndicator, bytes) ← StrikePriceFractionIndicator.decode bytes
   let (optionType, bytes) ← OptionType.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
-  let (priceX10000, bytes) ← Alpha.decode 8 bytes
+  let (price, bytes) ← Alpha.decode 8 bytes
   let (cmtaBroker, bytes) ← Alpha.decode 4 bytes
   let (accountType, bytes) ← AccountType.decode bytes
   let (subtraderId, bytes) ← Alpha.decode 3 bytes
@@ -1159,11 +1266,11 @@ def decode (bytes : List UInt8) : Option (AllocationCancel × List UInt8) := do
   let (parentTransactionId, bytes) ← Alpha.decode 10 bytes
   let (oppositeExecutingBroker, bytes) ← Alpha.decode 4 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, priceX10000, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
+  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, price, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
 
 @[simp] theorem encode_length (message : AllocationCancel) : (encode message).length = 200 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
+  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, StrikePriceFractionIndicator.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
 
 theorem encode_length_pos (message : AllocationCancel) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1185,7 +1292,7 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, StrikePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, OptionType.decode_encode, some_bind]
   dsimp only
@@ -1236,10 +1343,10 @@ structure GiveUp where
   symbol : Alpha 30
   expirationDate : Alpha 6
   strikePrice : Alpha 8
-  strikePriceFractionIndicator : Alpha 1
+  strikePriceFractionIndicator : StrikePriceFractionIndicator
   optionType : OptionType
   volume : Alpha 8
-  priceX10000 : Alpha 8
+  price : Alpha 8
   cmtaBroker : Alpha 4
   accountType : AccountType
   subtraderId : Alpha 3
@@ -1269,10 +1376,10 @@ def encode (message : GiveUp) : List UInt8 :=
     ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.expirationDate
     ++ (Alpha.encode message.strikePrice
-    ++ (Alpha.encode message.strikePriceFractionIndicator
+    ++ (StrikePriceFractionIndicator.encode message.strikePriceFractionIndicator
     ++ (OptionType.encode message.optionType
     ++ (Alpha.encode message.volume
-    ++ (Alpha.encode message.priceX10000
+    ++ (Alpha.encode message.price
     ++ (Alpha.encode message.cmtaBroker
     ++ (AccountType.encode message.accountType
     ++ (Alpha.encode message.subtraderId
@@ -1301,10 +1408,10 @@ def decode (bytes : List UInt8) : Option (GiveUp × List UInt8) := do
   let (symbol, bytes) ← Alpha.decode 30 bytes
   let (expirationDate, bytes) ← Alpha.decode 6 bytes
   let (strikePrice, bytes) ← Alpha.decode 8 bytes
-  let (strikePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (strikePriceFractionIndicator, bytes) ← StrikePriceFractionIndicator.decode bytes
   let (optionType, bytes) ← OptionType.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
-  let (priceX10000, bytes) ← Alpha.decode 8 bytes
+  let (price, bytes) ← Alpha.decode 8 bytes
   let (cmtaBroker, bytes) ← Alpha.decode 4 bytes
   let (accountType, bytes) ← AccountType.decode bytes
   let (subtraderId, bytes) ← Alpha.decode 3 bytes
@@ -1323,11 +1430,11 @@ def decode (bytes : List UInt8) : Option (GiveUp × List UInt8) := do
   let (parentTransactionId, bytes) ← Alpha.decode 10 bytes
   let (oppositeExecutingBroker, bytes) ← Alpha.decode 4 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, priceX10000, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, giveUpSource, giveUpDestination, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
+  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, price, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, giveUpSource, giveUpDestination, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
 
 @[simp] theorem encode_length (message : GiveUp) : (encode message).length = 208 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
+  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, StrikePriceFractionIndicator.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
 
 theorem encode_length_pos (message : GiveUp) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1349,7 +1456,7 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, StrikePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, OptionType.decode_encode, some_bind]
   dsimp only
@@ -1404,10 +1511,10 @@ structure GiveUpCancel where
   symbol : Alpha 30
   expirationDate : Alpha 6
   strikePrice : Alpha 8
-  strikePriceFractionIndicator : Alpha 1
+  strikePriceFractionIndicator : StrikePriceFractionIndicator
   optionType : OptionType
   volume : Alpha 8
-  priceX10000 : Alpha 8
+  price : Alpha 8
   cmtaBroker : Alpha 4
   accountType : AccountType
   subtraderId : Alpha 3
@@ -1437,10 +1544,10 @@ def encode (message : GiveUpCancel) : List UInt8 :=
     ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.expirationDate
     ++ (Alpha.encode message.strikePrice
-    ++ (Alpha.encode message.strikePriceFractionIndicator
+    ++ (StrikePriceFractionIndicator.encode message.strikePriceFractionIndicator
     ++ (OptionType.encode message.optionType
     ++ (Alpha.encode message.volume
-    ++ (Alpha.encode message.priceX10000
+    ++ (Alpha.encode message.price
     ++ (Alpha.encode message.cmtaBroker
     ++ (AccountType.encode message.accountType
     ++ (Alpha.encode message.subtraderId
@@ -1469,10 +1576,10 @@ def decode (bytes : List UInt8) : Option (GiveUpCancel × List UInt8) := do
   let (symbol, bytes) ← Alpha.decode 30 bytes
   let (expirationDate, bytes) ← Alpha.decode 6 bytes
   let (strikePrice, bytes) ← Alpha.decode 8 bytes
-  let (strikePriceFractionIndicator, bytes) ← Alpha.decode 1 bytes
+  let (strikePriceFractionIndicator, bytes) ← StrikePriceFractionIndicator.decode bytes
   let (optionType, bytes) ← OptionType.decode bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
-  let (priceX10000, bytes) ← Alpha.decode 8 bytes
+  let (price, bytes) ← Alpha.decode 8 bytes
   let (cmtaBroker, bytes) ← Alpha.decode 4 bytes
   let (accountType, bytes) ← AccountType.decode bytes
   let (subtraderId, bytes) ← Alpha.decode 3 bytes
@@ -1491,11 +1598,11 @@ def decode (bytes : List UInt8) : Option (GiveUpCancel × List UInt8) := do
   let (parentTransactionId, bytes) ← Alpha.decode 10 bytes
   let (oppositeExecutingBroker, bytes) ← Alpha.decode 4 bytes
   let (additionalClientMemo, bytes) ← Alpha.decode 16 bytes
-  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, priceX10000, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, giveUpSource, giveUpDestination, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
+  pure ({ tradeNumber, transactionType, timestamp, symbol, expirationDate, strikePrice, strikePriceFractionIndicator, optionType, volume, price, cmtaBroker, accountType, subtraderId, openClose, executingBroker, clientAccountNumber, clientOrderId, clientMemo, liquidityStatus, tradeType, oppositeAccountType, giveUpSource, giveUpDestination, participantSessionName, uniqueTransactionId, parentTransactionId, oppositeExecutingBroker, additionalClientMemo }, bytes)
 
 @[simp] theorem encode_length (message : GiveUpCancel) : (encode message).length = 208 := by
   unfold encode
-  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
+  simp only [List.length_append, Alpha.encode_length, TransactionType.encode_length, StrikePriceFractionIndicator.encode_length, OptionType.encode_length, AccountType.encode_length, OpenClose.encode_length, LiquidityStatus.encode_length, TradeType.encode_length, OppositeAccountType.encode_length]
 
 theorem encode_length_pos (message : GiveUpCancel) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1517,7 +1624,7 @@ set_option maxRecDepth 4096 in
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  rw [List.append_assoc, StrikePriceFractionIndicator.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, OptionType.decode_encode, some_bind]
   dsimp only

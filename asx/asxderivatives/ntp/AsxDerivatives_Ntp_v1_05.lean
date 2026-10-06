@@ -110,11 +110,12 @@ end OptionType
 
 /-- Side Leg: one byte code -/
 def SideLeg.codes : List UInt8 :=
-  [0x42, 0x53]
+  [0x42, 0x53, 0x20]
 
 inductive SideLeg where
   | buy -- Buy
   | sell -- Sell
+  | notDefined -- Not Defined
   | unlisted (byte : { byte : UInt8 // byte ∉ SideLeg.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -123,12 +124,14 @@ namespace SideLeg
 def toByte : SideLeg → UInt8
   | .buy => 0x42
   | .sell => 0x53
+  | .notDefined => 0x20
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : SideLeg :=
   if byte = 0x42 then .buy
-  else .sell
+  else if byte = 0x53 then .sell
+  else .notDefined
 
 def ofByte (byte : UInt8) : SideLeg :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -137,6 +140,7 @@ theorem ofByte_toByte (value : SideLeg) : ofByte value.toByte = value := by
   cases value with
   | buy => decide
   | sell => decide
+  | notDefined => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : SideLeg) : List UInt8 :=

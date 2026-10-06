@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 966 | 2886513 |
+| 974 | 2902849 |
 
 ## Testing
 
@@ -110,6 +110,7 @@ Enjoy.
 [Omi.Encoding.Binary]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Binary.md "Binary Encoding"
 [Omi.Encoding.Utp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Utp.md "Utp Encoding"
 [Omi.Encoding.NxtAscii]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/NxtAscii.md "NxtAscii Encoding"
+[Omi.Encoding.NxtBinary]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/NxtBinary.md "NxtBinary Encoding"
 [Omi.Encoding.NnfTrimmed]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/NnfTrimmed.md "NnfTrimmed Encoding"
 [Omi.Encoding.Gfx]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Gfx.md "Gfx Encoding"
 [Omi.Encoding.Xmt]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Xmt.md "Xmt Encoding"

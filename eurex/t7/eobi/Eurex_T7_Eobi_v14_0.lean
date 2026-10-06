@@ -57,12 +57,13 @@ end EobiHeader
 /-- Packet Header: 32 bytes -/
 structure PacketHeader where
   eobiHeader : EobiHeader
-  applSeqNum : BitVec 64
+  applSeqNum : BitVec 32
   marketSegmentId : BitVec 32
   partitionId : BitVec 8
   completionIndicator : BitVec 8
   applSeqResetIndicator : BitVec 8
-  pad1 : Alpha 1
+  dscp : BitVec 8
+  pad4 : Alpha 4
   transactTime : BitVec 64
   deriving DecidableEq, Repr
 
@@ -70,24 +71,26 @@ namespace PacketHeader
 
 def encode (message : PacketHeader) : List UInt8 :=
   EobiHeader.encode message.eobiHeader
-    ++ (encodeUIntLE 8 message.applSeqNum
+    ++ (encodeUIntLE 4 message.applSeqNum
     ++ (encodeUIntLE 4 message.marketSegmentId
     ++ (encodeUInt 1 message.partitionId
     ++ (encodeUInt 1 message.completionIndicator
     ++ (encodeUInt 1 message.applSeqResetIndicator
-    ++ (Alpha.encode message.pad1
-    ++ (encodeUIntLE 8 message.transactTime)))))))
+    ++ (encodeUInt 1 message.dscp
+    ++ (Alpha.encode message.pad4
+    ++ (encodeUIntLE 8 message.transactTime))))))))
 
 def decode (bytes : List UInt8) : Option (PacketHeader × List UInt8) := do
   let (eobiHeader, bytes) ← EobiHeader.decode bytes
-  let (applSeqNum, bytes) ← decodeUIntLE 8 bytes
+  let (applSeqNum, bytes) ← decodeUIntLE 4 bytes
   let (marketSegmentId, bytes) ← decodeUIntLE 4 bytes
   let (partitionId, bytes) ← decodeUInt 1 bytes
   let (completionIndicator, bytes) ← decodeUInt 1 bytes
   let (applSeqResetIndicator, bytes) ← decodeUInt 1 bytes
-  let (pad1, bytes) ← Alpha.decode 1 bytes
+  let (dscp, bytes) ← decodeUInt 1 bytes
+  let (pad4, bytes) ← Alpha.decode 4 bytes
   let (transactTime, bytes) ← decodeUIntLE 8 bytes
-  pure ({ eobiHeader, applSeqNum, marketSegmentId, partitionId, completionIndicator, applSeqResetIndicator, pad1, transactTime }, bytes)
+  pure ({ eobiHeader, applSeqNum, marketSegmentId, partitionId, completionIndicator, applSeqResetIndicator, dscp, pad4, transactTime }, bytes)
 
 @[simp] theorem encode_length (message : PacketHeader) : (encode message).length = 32 := by
   unfold encode
@@ -105,6 +108,8 @@ theorem encode_length_pos (message : PacketHeader) : (encode message).length > 0
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only

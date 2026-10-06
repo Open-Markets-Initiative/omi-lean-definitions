@@ -7296,7 +7296,7 @@ inductive MessageBody where
   | groupStatusMessage (message : GroupStatusMessage) -- "GR" 0x4752
   | groupStatusStrategiesMessage (message : GroupStatusStrategiesMessage) -- "GS" 0x4753
   | futureDeliverablesMessage (message : FutureDeliverablesMessage) -- "KF" 0x4B46
-  | bulletinsMessage (message : BulletinsMessage) -- "L:" 0x4C3A
+  | bulletinsMessage (message : BulletinsMessage) -- "L " 0x4C20
   | endOfSalesMessage (message : EndOfSalesMessage) -- "S " 0x5320
   | tickTableMessage (message : TickTableMessage) -- "TT" 0x5454
   | endOfTransmissionMessage (message : EndOfTransmissionMessage) -- "U " 0x5520
@@ -7348,7 +7348,7 @@ def tag : MessageBody → BitVec 16
   | .groupStatusMessage _ => 18258
   | .groupStatusStrategiesMessage _ => 18259
   | .futureDeliverablesMessage _ => 19270
-  | .bulletinsMessage _ => 19514
+  | .bulletinsMessage _ => 19488
   | .endOfSalesMessage _ => 21280
   | .tickTableMessage _ => 21588
   | .endOfTransmissionMessage _ => 21792
@@ -7594,7 +7594,7 @@ def decode (tag : BitVec 16) (bytes : List UInt8) : Option (MessageBody × List 
   else if tag = 18258 then (GroupStatusMessage.decode bytes).map fun (message, rest) => (.groupStatusMessage message, rest)
   else if tag = 18259 then (GroupStatusStrategiesMessage.decode bytes).map fun (message, rest) => (.groupStatusStrategiesMessage message, rest)
   else if tag = 19270 then (FutureDeliverablesMessage.decode bytes).map fun (message, rest) => (.futureDeliverablesMessage message, rest)
-  else if tag = 19514 then (BulletinsMessage.decode bytes).map fun (message, rest) => (.bulletinsMessage message, rest)
+  else if tag = 19488 then (BulletinsMessage.decode bytes).map fun (message, rest) => (.bulletinsMessage message, rest)
   else if tag = 21280 then (EndOfSalesMessage.decode bytes).map fun (message, rest) => (.endOfSalesMessage message, rest)
   else if tag = 21588 then (TickTableMessage.decode bytes).map fun (message, rest) => (.tickTableMessage message, rest)
   else if tag = 21792 then (EndOfTransmissionMessage.decode bytes).map fun (message, rest) => (.endOfTransmissionMessage message, rest)

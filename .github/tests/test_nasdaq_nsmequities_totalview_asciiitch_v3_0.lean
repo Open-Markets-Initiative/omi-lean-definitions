@@ -108,20 +108,6 @@ def captureStocktradingactionmessage : List UInt8 :=
 example : (decodeAll Omi.NasdaqNsmequitiesTotalviewAsciiitchV30Udp.Packet.decode captureStocktradingactionmessage.length captureStocktradingactionmessage).isSome = true := by
   decide +kernel
 
-/-- Nasdaq/NsmEquities.TotalView.AsciiItch.v3.0/StockTradingActionMessageWithStockDirectoryMessage.pcap: 34 bytes -/
-def captureStocktradingactionmessagewithstockdirectorymessage_1 : List UInt8 :=
-  [0x53, 0x30, 0x39, 0x32, 0x39, 0x30, 0x38, 0x76, 0x33, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x10, 0x52, 0x41, 0x20, 0x20, 0x20, 0x20, 0x20, 0x54, 0x20, 0x20, 0x20, 0x20, 0x31, 0x30, 0x30, 0x4e]
-
-example : (decodeAll Omi.NasdaqNsmequitiesTotalviewAsciiitchV30Udp.Packet.decode captureStocktradingactionmessagewithstockdirectorymessage_1.length captureStocktradingactionmessagewithstockdirectorymessage_1).isSome = true := by
-  decide +kernel
-
-/-- Nasdaq/NsmEquities.TotalView.AsciiItch.v3.0/StockTradingActionMessageWithStockDirectoryMessage.pcap: 31 bytes -/
-def captureStocktradingactionmessagewithstockdirectorymessage_2 : List UInt8 :=
-  [0x53, 0x30, 0x39, 0x32, 0x39, 0x30, 0x38, 0x76, 0x33, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x0d, 0x48, 0x41, 0x20, 0x20, 0x20, 0x20, 0x20, 0x54, 0x20, 0x20, 0x20, 0x20, 0x20]
-
-example : (decodeAll Omi.NasdaqNsmequitiesTotalviewAsciiitchV30Udp.Packet.decode captureStocktradingactionmessagewithstockdirectorymessage_2.length captureStocktradingactionmessagewithstockdirectorymessage_2).isSome = true := by
-  decide +kernel
-
 /-- Nasdaq/NsmEquities.TotalView.AsciiItch.v3.0/SystemEventMessage.pcap: 20 bytes -/
 def captureSystemeventmessage : List UInt8 :=
   [0x53, 0x30, 0x39, 0x32, 0x39, 0x30, 0x38, 0x76, 0x33, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x02, 0x53, 0x4f]

@@ -10,11 +10,11 @@ behind, which `decide` checks at build time.
 
 namespace Omi.TxseTxseequitiesSeedRakeV10.Tests
 
-/-- Txse/TxseEquities.Seed.Rake.v1.0/LimitOrderAccepted.pcap: 68 bytes -/
-def captureLimitorderaccepted : List UInt8 :=
+/-- Txse/TxseEquities.Seed.Rake.v1.0/LimitOrderAcceptedMessage.pcap: 68 bytes -/
+def captureLimitorderacceptedmessage : List UInt8 :=
   [0x42, 0x00, 0x32, 0x02, 0x49, 0x07, 0x0e, 0x00, 0x00, 0x30, 0x33, 0xc5, 0xf9, 0xab, 0x9e, 0x77, 0x18, 0x02, 0xe5, 0x85, 0x01, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x64, 0x00, 0x00, 0x00, 0x11, 0x01, 0x00, 0x00, 0x04, 0x0b, 0x00, 0x49, 0xd9, 0x71, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x4f, 0x1c, 0x01, 0x66, 0xde, 0xab, 0x00, 0x54, 0x58, 0x53, 0x45, 0x20, 0x20]
 
-example : (Omi.TxseTxseequitiesSeedRakeV10.Packet.decode captureLimitorderaccepted).isSome = true := by
+example : (Omi.TxseTxseequitiesSeedRakeV10.Packet.decode captureLimitorderacceptedmessage).isSome = true := by
   decide +kernel
 
 /-- Txse/TxseEquities.Seed.Rake.v1.0/LimitOrderMessage.pcap: 42 bytes -/
@@ -24,11 +24,11 @@ def captureLimitordermessage : List UInt8 :=
 example : (Omi.TxseTxseequitiesSeedRakeV10.Packet.decode captureLimitordermessage).isSome = true := by
   decide +kernel
 
-/-- Txse/TxseEquities.Seed.Rake.v1.0/LogonRequestMessage.pcap: 35 bytes -/
-def captureLogonrequestmessage : List UInt8 :=
+/-- Txse/TxseEquities.Seed.Rake.v1.0/LogonRequestPacket.pcap: 35 bytes -/
+def captureLogonrequestpacket : List UInt8 :=
   [0x21, 0x00, 0x35, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4f, 0x45, 0x4d, 0x41, 0x4e, 0x4a, 0x55, 0x4c, 0x4f, 0x45, 0x4d, 0x41, 0x4e, 0x4a, 0x55, 0x4c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
-example : (Omi.TxseTxseequitiesSeedRakeV10.Packet.decode captureLogonrequestmessage).isSome = true := by
+example : (Omi.TxseTxseequitiesSeedRakeV10.Packet.decode captureLogonrequestpacket).isSome = true := by
   decide +kernel
 
 /-- Txse/TxseEquities.Seed.Rake.v1.0/LogonResponseMessage.pcap: 33 bytes -/

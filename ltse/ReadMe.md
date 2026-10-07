@@ -1,0 +1,64 @@
+[![Ltse](https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Images/Logo.png)](https://ltse.com)
+
+
+## Long-Term Stock Exchange
+
+| Division | [Protocol][Omi.Ltse.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Ltse.Specifications] |
+| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+|  | [CommonHeader][Ltse.CommonHeader] | [Tcp][Omi.Encoding.Tcp] | [1.2][Ltse.CommonHeader.Tcp.v1.2.Definition] | 12/13/2023 | 995 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [url][Ltse.CommonHeader.Tcp.v1.2.Url] |
+|  | [CommonHeader][Ltse.CommonHeader] | [Udp][Omi.Encoding.Udp] | [1.1][Ltse.CommonHeader.Udp.v1.1.Definition] | 12/13/2023 | 224 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [url][Ltse.CommonHeader.Udp.v1.1.Url] |
+| [LtseEquities][LtseEquities.Exchange] | [Memo][Ltse.LtseEquities.Memo] | [Sbe][Omi.Encoding.Sbe] | [1.12][Ltse.LtseEquities.Memo.Sbe.v1.12.Definition] | 12/13/2023 | 3466 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Ltse.LtseEquities.Memo.Sbe.v1.12.Url] - [pdf][Ltse.LtseEquities.Memo.Sbe.v1.12.Pdf] - [xml][Ltse.LtseEquities.Memo.Sbe.v1.12.Xml] |
+| [LtseEquities][LtseEquities.Exchange] | [MemoirDepthFeed][Ltse.LtseEquities.MemoirDepthFeed] | [Sbe][Omi.Encoding.Sbe] | [1.3][Ltse.LtseEquities.MemoirDepthFeed.Sbe.v1.3.Definition] | 12/13/2023 | 1190 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Ltse.LtseEquities.MemoirDepthFeed.Sbe.v1.3.Url] - [pdf][Ltse.LtseEquities.MemoirDepthFeed.Sbe.v1.3.Pdf] - [xml][Ltse.LtseEquities.MemoirDepthFeed.Sbe.v1.3.Xml] |
+| [LtseEquities][LtseEquities.Exchange] | [MemoirLastSale][Ltse.LtseEquities.MemoirLastSale] | [Sbe][Omi.Encoding.Sbe] | [1.3][Ltse.LtseEquities.MemoirLastSale.Sbe.v1.3.Definition] | 12/13/2023 | 1469 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Ltse.LtseEquities.MemoirLastSale.Sbe.v1.3.Url] - [pdf][Ltse.LtseEquities.MemoirLastSale.Sbe.v1.3.Pdf] - [xml][Ltse.LtseEquities.MemoirLastSale.Sbe.v1.3.Xml] |
+| [LtseEquities][LtseEquities.Exchange] | [MemoirTopOfBook][Ltse.LtseEquities.MemoirTopOfBook] | [Sbe][Omi.Encoding.Sbe] | [1.3][Ltse.LtseEquities.MemoirTopOfBook.Sbe.v1.3.Definition] | 12/13/2023 | 998 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Ltse.LtseEquities.MemoirTopOfBook.Sbe.v1.3.Url] - [pdf][Ltse.LtseEquities.MemoirTopOfBook.Sbe.v1.3.Pdf] - [xml][Ltse.LtseEquities.MemoirTopOfBook.Sbe.v1.3.Xml] |
+
+
+<p align="center"><a href="https://ltse.com" title="Long-Term Stock Exchange Website"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Website.png" alt="Website" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/company/ltse" title="Long-Term Stock Exchange on LinkedIn"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/LinkedIn.png" alt="LinkedIn" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://en.wikipedia.org/wiki/Long-Term_Stock_Exchange" title="Long-Term Stock Exchange on Wikipedia"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Wikipedia.png" alt="Wikipedia" width="32" height="32"></a></p>
+
+
+[Omi.Glossary.Deployment]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Protocol Deployment"
+[Omi.Glossary.Deployment.Active]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Protocol is in active production"
+[Omi.Glossary.Deployment.Deprecated]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Protocol is no longer in active use"
+[Omi.Glossary.Deployment.Pending]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Protocol is not yet deployed to an active production environment"
+[Omi.Glossary.Deployment.Observability]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Protocol is carried for observability rather than trading"
+[Omi.Glossary.Deployment.Header]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Header only protocol provided for debugging"
+[Omi.Glossary.Deployment.Unknown]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Protocol deployment is unknown"
+[Omi.Glossary.Testing]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Protocol Testing Status"
+[Omi.Glossary.Testing.Verified]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has been tested on live data"
+[Omi.Glossary.Testing.Incomplete]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has been tested on live data but contains known issues"
+[Omi.Glossary.Testing.Beta]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has not been tested and structure is speculative"
+[Omi.Glossary.Testing.Untested]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has not been tested on live data"
+[Omi.Glossary.Testing.Unavailable]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol does not state a testing status"
+[Omi.Encoding.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Protocols/ReadMe.md "Encoding Directory"
+[Omi.Ltse.Protocol.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Ltse/Protocols "Ltse Protocol Directory"
+[Omi.Ltse.Specifications]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Ltse/Specifications "Ltse Specifications Directory"
+[Omi.Encoding.Tcp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Tcp.md "Tcp Encoding"
+[Omi.Encoding.Udp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Udp.md "Udp Encoding"
+[Omi.Encoding.Sbe]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Sbe.md "Sbe Encoding"
+[LtseEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Ltse/Protocols/LtseEquities "Ltse LtseEquities"
+[Ltse.CommonHeader]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Protocols/CommonHeader.md "Common Header"
+[Ltse.LtseEquities.Memo]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Protocols/LtseEquities/Memo.md "Members Orders"
+[Ltse.LtseEquities.MemoirDepthFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Protocols/LtseEquities/MemoirDepthFeed.md "Member Order Information Record Depth Feed"
+[Ltse.LtseEquities.MemoirLastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Protocols/LtseEquities/MemoirLastSale.md "Member Order Information Record Last Sale"
+[Ltse.LtseEquities.MemoirTopOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Protocols/LtseEquities/MemoirTopOfBook.md "Member Order Information Record Top Of Book"
+
+[Ltse.CommonHeader.Tcp.v1.2.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/ltse/commonheader/Ltse_CommonHeader_v1_2.lean "Ltse CommonHeader Tcp v1.2 Lean Definition"
+[Ltse.CommonHeader.Tcp.v1.2.Url]: https://ltse.com/trading/user-guide-technical-specifications "Long-Term Stock Exchange 1.2 Url"
+[Ltse.CommonHeader.Udp.v1.1.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/ltse/commonheader/Ltse_CommonHeader_v1_1.lean "Ltse CommonHeader Udp v1.1 Lean Definition"
+[Ltse.CommonHeader.Udp.v1.1.Url]: https://ltse.com/trading/user-guide-technical-specifications "Long-Term Stock Exchange 1.1 Url"
+[Ltse.LtseEquities.Memo.Sbe.v1.12.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/ltse/ltseequities/memo/LtseEquities_Memo_v1_12.lean "Ltse LtseEquities Memo Sbe v1.12 Lean Definition"
+[Ltse.LtseEquities.Memo.Sbe.v1.12.Url]: https://ltse.com/trading/user-guide-technical-specifications "Long-Term Stock Exchange 1.12 Url"
+[Ltse.LtseEquities.Memo.Sbe.v1.12.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/Equities/Memo/Ltse.LtseEquities.Memo.Sbe.v1.12.pdf "Long-Term Stock Exchange 1.12 Pdf"
+[Ltse.LtseEquities.Memo.Sbe.v1.12.Xml]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/Equities/Memo/Ltse.LtseEquities.Memo.Sbe.v1.12.xml "Long-Term Stock Exchange 1.12 Xml"
+[Ltse.LtseEquities.MemoirDepthFeed.Sbe.v1.3.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/ltse/ltseequities/memoirdepthfeed/LtseEquities_MemoirDepthFeed_v1_3.lean "Ltse LtseEquities MemoirDepthFeed Sbe v1.3 Lean Definition"
+[Ltse.LtseEquities.MemoirDepthFeed.Sbe.v1.3.Url]: https://ltse.com/trading/user-guide-technical-specifications "Long-Term Stock Exchange 1.3 Url"
+[Ltse.LtseEquities.MemoirDepthFeed.Sbe.v1.3.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/Equities/Memoir/Depth/Ltse.LtseEquities.MemoirDepthFeed.Sbe.v1.3.pdf "Long-Term Stock Exchange 1.3 Pdf"
+[Ltse.LtseEquities.MemoirDepthFeed.Sbe.v1.3.Xml]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/Equities/Memoir/Depth/Ltse.LtseEquities.MemoirDepthFeed.Sbe.v1.3.xml "Long-Term Stock Exchange 1.3 Xml"
+[Ltse.LtseEquities.MemoirLastSale.Sbe.v1.3.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/ltse/ltseequities/memoirlastsale/LtseEquities_MemoirLastSale_v1_3.lean "Ltse LtseEquities MemoirLastSale Sbe v1.3 Lean Definition"
+[Ltse.LtseEquities.MemoirLastSale.Sbe.v1.3.Url]: https://ltse.com/trading/user-guide-technical-specifications "Long-Term Stock Exchange 1.3 Url"
+[Ltse.LtseEquities.MemoirLastSale.Sbe.v1.3.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/Equities/Memoir/LastSale/Ltse.LtseEquities.MemoirLastSale.Sbe.v1.3.pdf "Long-Term Stock Exchange 1.3 Pdf"
+[Ltse.LtseEquities.MemoirLastSale.Sbe.v1.3.Xml]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/Equities/Memoir/LastSale/Ltse.LtseEquities.MemoirLastSale.Sbe.v1.3.xml "Long-Term Stock Exchange 1.3 Xml"
+[Ltse.LtseEquities.MemoirTopOfBook.Sbe.v1.3.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/ltse/ltseequities/memoirtopofbook/LtseEquities_MemoirTopOfBook_v1_3.lean "Ltse LtseEquities MemoirTopOfBook Sbe v1.3 Lean Definition"
+[Ltse.LtseEquities.MemoirTopOfBook.Sbe.v1.3.Url]: https://ltse.com/trading/user-guide-technical-specifications "Long-Term Stock Exchange 1.3 Url"
+[Ltse.LtseEquities.MemoirTopOfBook.Sbe.v1.3.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/Equities/Memoir/Top/Ltse.LtseEquities.MemoirTopOfBook.Sbe.v1.3.pdf "Long-Term Stock Exchange 1.3 Pdf"
+[Ltse.LtseEquities.MemoirTopOfBook.Sbe.v1.3.Xml]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/Equities/Memoir/Top/Ltse.LtseEquities.MemoirTopOfBook.Sbe.v1.3.xml "Long-Term Stock Exchange 1.3 Xml"

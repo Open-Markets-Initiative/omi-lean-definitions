@@ -4975,37 +4975,32 @@ theorem decode_encode (message : SequencedDataPacket) : decode (encode message) 
 
 end SequencedDataPacket
 
-/-- Debug Packet: 1 bytes -/
+/-- Debug Packet -/
 structure DebugPacket where
-  debugText : Alpha 1
+  debugText : Capped 65535
   deriving DecidableEq, Repr
 
 namespace DebugPacket
 
 def encode (message : DebugPacket) : List UInt8 :=
-  Alpha.encode message.debugText
+  message.debugText.val
 
-def decode (bytes : List UInt8) : Option (DebugPacket × List UInt8) := do
-  let (debugText, bytes) ← Alpha.decode 1 bytes
-  pure ({ debugText }, bytes)
+def decode (bytes : List UInt8) : Option DebugPacket := do
+  let debugText_ := bytes
+  if fits_debugText : debugText_.length ≤ 65535 then
+    pure { debugText := ⟨debugText_, fits_debugText⟩ }
+  else none
 
-@[simp] theorem encode_length (message : DebugPacket) : (encode message).length = 1 := by
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : DebugPacket) : (encode message).length ≤ 65535 := by
+  have bound_debugText := message.debugText.length_le
   unfold encode
-  simp only [Alpha.encode_length]
+  omega
 
-theorem encode_length_pos (message : DebugPacket) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
-
-@[simp] theorem decode_encode (message : DebugPacket) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
+theorem decode_encode (message : DebugPacket) : decode (encode message) = some message := by
   unfold decode encode
-  rw [Alpha.decode_encode, some_bind]
+  rw [dite_eq_left message.debugText.length_le]
   rfl
-
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : DebugPacket) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
 
 end DebugPacket
 
@@ -5169,7 +5164,8 @@ theorem encode_length_le (message : ServerTcpPayload) : (encode message).length 
     simp only [encode]
     omega
   | debugPacket inner =>
-    simp only [encode, DebugPacket.encode_length]
+    have bound_inner := DebugPacket.encode_length_le inner
+    simp only [encode]
     omega
   | loginAcceptedPacket inner =>
     simp only [encode, LoginAcceptedPacket.encode_length]
@@ -5187,7 +5183,7 @@ theorem encode_length_le (message : ServerTcpPayload) : (encode message).length 
 /-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option ServerTcpPayload :=
   if tag = 83 then (SequencedDataPacket.decode bytes).map fun message => .sequencedDataPacket message
-  else if tag = 43 then (DebugPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.debugPacket message) else none
+  else if tag = 43 then (DebugPacket.decode bytes).map fun message => .debugPacket message
   else if tag = 65 then (LoginAcceptedPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.loginAcceptedPacket message) else none
   else if tag = 74 then (LoginRejectedPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.loginRejectedPacket message) else none
   else if tag = 72 then (ServerHeartbeatPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.serverHeartbeatPacket message) else none
@@ -5198,7 +5194,7 @@ theorem decode_encode (message : ServerTcpPayload) :
     decode (tag message) (encode message) = some message := by
   cases message with
   | sequencedDataPacket message => simp [decode, encode, tag, SequencedDataPacket.decode_encode]
-  | debugPacket message => simp [decode, encode, tag, DebugPacket.decode_encode_nil]
+  | debugPacket message => simp [decode, encode, tag, DebugPacket.decode_encode]
   | loginAcceptedPacket message => simp [decode, encode, tag, LoginAcceptedPacket.decode_encode_nil]
   | loginRejectedPacket message => simp [decode, encode, tag, LoginRejectedPacket.decode_encode_nil]
   | serverHeartbeatPacket message => simp [decode, encode, tag, ServerHeartbeatPacket.decode_encode_nil]

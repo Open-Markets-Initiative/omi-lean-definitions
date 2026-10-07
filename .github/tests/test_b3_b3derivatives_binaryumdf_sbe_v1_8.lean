@@ -17,11 +17,11 @@ def captureSecuritydefinitionmessage : List UInt8 :=
 example : (Omi.B3B3derivativesBinaryumdfSbeV18.Packet.decode captureSecuritydefinitionmessage).isSome = true := by
   decide +kernel
 
-/-- B3/B3Derivatives.BinaryUmdf.Sbe.v1.8/Sequence.pcap: 32 bytes -/
-def captureSequence : List UInt8 :=
+/-- B3/B3Derivatives.BinaryUmdf.Sbe.v1.8/SequenceMessage.pcap: 32 bytes -/
+def captureSequencemessage : List UInt8 :=
   [0x32, 0x01, 0xdf, 0x15, 0x00, 0x00, 0x00, 0x00, 0x0d, 0xb7, 0x92, 0x61, 0x97, 0x9c, 0xf3, 0x17, 0x10, 0x00, 0x50, 0xeb, 0x04, 0x00, 0x02, 0x00, 0x02, 0x00, 0x09, 0x00, 0x44, 0x2d, 0x01, 0x00]
 
-example : (Omi.B3B3derivativesBinaryumdfSbeV18.Packet.decode captureSequence).isSome = true := by
+example : (Omi.B3B3derivativesBinaryumdfSbeV18.Packet.decode captureSequencemessage).isSome = true := by
   decide +kernel
 
 end Omi.B3B3derivativesBinaryumdfSbeV18.Tests

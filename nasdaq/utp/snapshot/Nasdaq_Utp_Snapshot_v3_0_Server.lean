@@ -3156,34 +3156,37 @@ theorem encode_length_le (message : SequencedDataPacket) : (encode message).leng
   rw [CategoryPayload.decode_encode, some_bind]
   rfl
 
+/-- Decoded as the whole of a frame: nothing follows -/
+theorem decode_encode_nil (message : SequencedDataPacket) : decode (encode message) = some (message, []) :=
+  List.append_nil (encode message) ▸ decode_encode message []
+
 end SequencedDataPacket
 
-/-- Debug Packet: 1 bytes -/
+/-- Debug Packet -/
 structure DebugPacket where
-  debugText : Alpha 1
+  debugText : Capped 65386
   deriving DecidableEq, Repr
 
 namespace DebugPacket
 
 def encode (message : DebugPacket) : List UInt8 :=
-  Alpha.encode message.debugText
+  message.debugText.val
 
-def decode (bytes : List UInt8) : Option (DebugPacket × List UInt8) := do
-  let (debugText, bytes) ← Alpha.decode 1 bytes
-  pure ({ debugText }, bytes)
+def decode (bytes : List UInt8) : Option DebugPacket := do
+  let debugText_ := bytes
+  if fits_debugText : debugText_.length ≤ 65386 then
+    pure { debugText := ⟨debugText_, fits_debugText⟩ }
+  else none
 
-@[simp] theorem encode_length (message : DebugPacket) : (encode message).length = 1 := by
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : DebugPacket) : (encode message).length ≤ 65386 := by
+  have bound_debugText := message.debugText.length_le
   unfold encode
-  simp only [Alpha.encode_length]
+  omega
 
-theorem encode_length_pos (message : DebugPacket) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
-
-@[simp] theorem decode_encode (message : DebugPacket) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
+theorem decode_encode (message : DebugPacket) : decode (encode message) = some message := by
   unfold decode encode
-  rw [Alpha.decode_encode, some_bind]
+  rw [dite_eq_left message.debugText.length_le]
   rfl
 
 end DebugPacket
@@ -3221,6 +3224,10 @@ theorem encode_length_pos (message : LoginAcceptedPacket) : (encode message).len
   rw [Alpha.decode_encode, some_bind]
   rfl
 
+/-- Decoded as the whole of a frame: nothing follows -/
+theorem decode_encode_nil (message : LoginAcceptedPacket) : decode (encode message) = some (message, []) :=
+  List.append_nil (encode message) ▸ decode_encode message []
+
 end LoginAcceptedPacket
 
 /-- Login Rejected Packet: 1 bytes -/
@@ -3251,6 +3258,10 @@ theorem encode_length_pos (message : LoginRejectedPacket) : (encode message).len
   rw [Alpha.decode_encode, some_bind]
   rfl
 
+/-- Decoded as the whole of a frame: nothing follows -/
+theorem decode_encode_nil (message : LoginRejectedPacket) : decode (encode message) = some (message, []) :=
+  List.append_nil (encode message) ▸ decode_encode message []
+
 end LoginRejectedPacket
 
 /-- Server Heartbeat Packet: 0 bytes -/
@@ -3272,6 +3283,10 @@ def decode (bytes : List UInt8) : Option (ServerHeartbeatPacket × List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode]
 
+/-- Decoded as the whole of a frame: nothing follows -/
+theorem decode_encode_nil (message : ServerHeartbeatPacket) : decode (encode message) = some (message, []) :=
+  List.append_nil (encode message) ▸ decode_encode message []
+
 end ServerHeartbeatPacket
 
 /-- End Of Session Packet: 0 bytes -/
@@ -3292,6 +3307,10 @@ def decode (bytes : List UInt8) : Option (EndOfSessionPacket × List UInt8) :=
 @[simp] theorem decode_encode (message : EndOfSessionPacket) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode]
+
+/-- Decoded as the whole of a frame: nothing follows -/
+theorem decode_encode_nil (message : EndOfSessionPacket) : decode (encode message) = some (message, []) :=
+  List.append_nil (encode message) ▸ decode_encode message []
 
 end EndOfSessionPacket
 
@@ -3325,14 +3344,15 @@ def encode : ServerTcpPayload → List UInt8
   | .endOfSessionPacket message => EndOfSessionPacket.encode message
 
 /-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : ServerTcpPayload) : (encode message).length ≤ 148 := by
+theorem encode_length_le (message : ServerTcpPayload) : (encode message).length ≤ 65386 := by
   cases message with
   | sequencedDataPacket inner =>
     have bound_inner := SequencedDataPacket.encode_length_le inner
     simp only [encode]
     omega
   | debugPacket inner =>
-    simp only [encode, DebugPacket.encode_length]
+    have bound_inner := DebugPacket.encode_length_le inner
+    simp only [encode]
     omega
   | loginAcceptedPacket inner =>
     simp only [encode, LoginAcceptedPacket.encode_length]
@@ -3347,18 +3367,25 @@ theorem encode_length_le (message : ServerTcpPayload) : (encode message).length 
     simp only [encode, EndOfSessionPacket.encode_length]
     omega
 
-def decode (tag : BitVec 8) (bytes : List UInt8) : Option (ServerTcpPayload × List UInt8) :=
-  if tag = 83 then (SequencedDataPacket.decode bytes).map fun (message, rest) => (.sequencedDataPacket message, rest)
-  else if tag = 43 then (DebugPacket.decode bytes).map fun (message, rest) => (.debugPacket message, rest)
-  else if tag = 65 then (LoginAcceptedPacket.decode bytes).map fun (message, rest) => (.loginAcceptedPacket message, rest)
-  else if tag = 74 then (LoginRejectedPacket.decode bytes).map fun (message, rest) => (.loginRejectedPacket message, rest)
-  else if tag = 72 then (ServerHeartbeatPacket.decode bytes).map fun (message, rest) => (.serverHeartbeatPacket message, rest)
-  else if tag = 90 then (EndOfSessionPacket.decode bytes).map fun (message, rest) => (.endOfSessionPacket message, rest)
+/-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
+def decode (tag : BitVec 8) (bytes : List UInt8) : Option ServerTcpPayload :=
+  if tag = 83 then (SequencedDataPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.sequencedDataPacket message) else none
+  else if tag = 43 then (DebugPacket.decode bytes).map fun message => .debugPacket message
+  else if tag = 65 then (LoginAcceptedPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.loginAcceptedPacket message) else none
+  else if tag = 74 then (LoginRejectedPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.loginRejectedPacket message) else none
+  else if tag = 72 then (ServerHeartbeatPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.serverHeartbeatPacket message) else none
+  else if tag = 90 then (EndOfSessionPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.endOfSessionPacket message) else none
   else none
 
-@[simp] theorem decode_encode (message : ServerTcpPayload) (rest : List UInt8) :
-    decode (tag message) (encode message ++ rest) = some (message, rest) := by
-  cases message <;> simp [decode, encode, tag]
+theorem decode_encode (message : ServerTcpPayload) :
+    decode (tag message) (encode message) = some message := by
+  cases message with
+  | sequencedDataPacket message => simp [decode, encode, tag, SequencedDataPacket.decode_encode_nil]
+  | debugPacket message => simp [decode, encode, tag, DebugPacket.decode_encode]
+  | loginAcceptedPacket message => simp [decode, encode, tag, LoginAcceptedPacket.decode_encode_nil]
+  | loginRejectedPacket message => simp [decode, encode, tag, LoginRejectedPacket.decode_encode_nil]
+  | serverHeartbeatPacket message => simp [decode, encode, tag, ServerHeartbeatPacket.decode_encode_nil]
+  | endOfSessionPacket message => simp [decode, encode, tag, EndOfSessionPacket.decode_encode_nil]
 
 end ServerTcpPayload
 
@@ -3373,15 +3400,14 @@ def encodeBody (message : ServerPacket) : List UInt8 :=
   encodeUInt 1 (ServerTcpPayload.tag message.serverTcpPayload)
     ++ (ServerTcpPayload.encode message.serverTcpPayload)
 
-def decodeBody (bytes : List UInt8) : Option (ServerPacket × List UInt8) := do
+def decodeBody (bytes : List UInt8) : Option ServerPacket := do
   let (serverPacketType, bytes) ← decodeUInt 1 bytes
-  let (serverTcpPayload, bytes) ← ServerTcpPayload.decode serverPacketType bytes
-  pure ({ serverTcpPayload }, bytes)
+  let serverTcpPayload ← ServerTcpPayload.decode serverPacketType bytes
+  pure { serverTcpPayload }
 
-theorem decodeBody_encodeBody (message : ServerPacket) (rest : List UInt8) :
-    decodeBody (encodeBody message ++ rest) = some (message, rest) := by
+theorem decodeBody_encodeBody (message : ServerPacket) : decodeBody (encodeBody message) = some message := by
   unfold decodeBody encodeBody
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  rw [decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [ServerTcpPayload.decode_encode, some_bind]
   rfl
@@ -3395,7 +3421,8 @@ theorem encodeBody_length_lt (message : ServerPacket) : (encodeBody message).len
     simp only [ServerTcpPayload.encode, List.length_append, encodeUInt_length]
     omega
   | debugPacket inner =>
-    simp only [ServerTcpPayload.encode, List.length_append, encodeUInt_length, DebugPacket.encode_length]
+    have bound_inner := DebugPacket.encode_length_le inner
+    simp only [ServerTcpPayload.encode, List.length_append, encodeUInt_length]
     omega
   | loginAcceptedPacket inner =>
     simp only [ServerTcpPayload.encode, List.length_append, encodeUInt_length, LoginAcceptedPacket.encode_length]
@@ -3415,11 +3442,11 @@ def encode : ServerPacket → List UInt8 :=
   encodeFramed 2 0 encodeBody
 
 def decode : List UInt8 → Option (ServerPacket × List UInt8) :=
-  decodeFramed 2 0 decodeBody
+  decodeFramedAll 2 0 decodeBody
 
 @[simp] theorem decode_encode (message : ServerPacket) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) :=
-  decodeFramed_encodeFramed 2 0 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
+  decodeFramedAll_encodeFramed 2 0 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
 
 theorem encode_length_pos (message : ServerPacket) : (encode message).length > 0 := by
   unfold encode

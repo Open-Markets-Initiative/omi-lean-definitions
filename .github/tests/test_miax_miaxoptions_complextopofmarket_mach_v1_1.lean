@@ -17,11 +17,11 @@ def captureHeartbeat : List UInt8 :=
 example : (Omi.MiaxMiaxoptionsComplextopofmarketMachV11.Packet.decode captureHeartbeat).isSome = true := by
   decide +kernel
 
-/-- Miax/MiaxOptions.ComplexTopOfMarket.Mach.v1.1/SystemStatusMessage.pcap: 30 bytes -/
-def captureSystemstatusmessage : List UInt8 :=
+/-- Miax/MiaxOptions.ComplexTopOfMarket.Mach.v1.1/SystemStateMessage.pcap: 30 bytes -/
+def captureSystemstatemessage : List UInt8 :=
   [0xd6, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1e, 0x00, 0x03, 0x01, 0x53, 0x07, 0x54, 0x1a, 0x36, 0x43, 0x54, 0x4f, 0x4d, 0x31, 0x2e, 0x30, 0x20, 0x01, 0x00, 0x00, 0x00, 0x31]
 
-example : (Omi.MiaxMiaxoptionsComplextopofmarketMachV11.Packet.decode captureSystemstatusmessage).isSome = true := by
+example : (Omi.MiaxMiaxoptionsComplextopofmarketMachV11.Packet.decode captureSystemstatemessage).isSome = true := by
   decide +kernel
 
 end Omi.MiaxMiaxoptionsComplextopofmarketMachV11.Tests

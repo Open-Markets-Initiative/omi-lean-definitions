@@ -8,22 +8,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Number Of Message Types To Be Received counts User Connection Occurrence in ascii digits: it is written from the list as its digits, and a list of more than 99 could not be written.
-
-Note: Number Of Instructions Present In The Message counts Disconnection Instruction Occurrence in ascii digits: it is written from the list as its digits, and a list of more than 99 could not be written.
-
-Note: Number Of Traders In Team counts Firm Risk Config Trader Team Trader in ascii digits: it is written from the list as its digits, and a list of more than 999 could not be written.
-
-Note: Number Of Trader Teams counts Firm Risk Config Trader Team in ascii digits: it is written from the list as its digits, and a list of more than 999 could not be written.
-
-Note: Number Of Group Limits counts Set Group Risk Limits Occurrence in ascii digits: it is written from the list as its digits, and a list of more than 999 could not be written.
-
-Note: Number Of Legs counts New Strategy Instrument Leg Definition Repeating Block in ascii digits: it is written from the list as its digits, and a list of more than 99 could not be written.
-
-Note: Number Of Quotes counts Bulk Quote Occurrence in ascii digits: it is written from the list as its digits, and a list of more than 999 could not be written.
-
-Note: Alignment Padding pads to a 4 byte boundary: it is read as the bytes left to the end of the frame, fewer than 4, and the frame's length is trusted to keep the boundary.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/

@@ -8,8 +8,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: a Delivery Flag of 1 marks Heartbeat and carries no messages; the decoder reads it as a count and the encoder never writes it.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/
@@ -1289,6 +1287,7 @@ end FullRefreshHeader
 /-- Any Refresh Header Layout, selected by Current Refresh Pkt -/
 inductive RefreshHeaderLayout where
   | fullRefreshHeader (message : FullRefreshHeader) -- 1
+  | shortRefreshHeader (tag : { v : BitVec 16 // v ≠ 1 }) -- any other value, read as nothing
   deriving DecidableEq, Repr
 
 namespace RefreshHeaderLayout
@@ -1296,9 +1295,11 @@ namespace RefreshHeaderLayout
 /-- The Current Refresh Pkt each message is sent under -/
 def tag : RefreshHeaderLayout → BitVec 16
   | .fullRefreshHeader _ => 1
+  | .shortRefreshHeader tag => tag.val
 
 def encode : RefreshHeaderLayout → List UInt8
   | .fullRefreshHeader message => FullRefreshHeader.encode message
+  | .shortRefreshHeader _ => []
 
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : RefreshHeaderLayout) : (encode message).length ≤ 8 := by
@@ -1306,14 +1307,21 @@ theorem encode_length_le (message : RefreshHeaderLayout) : (encode message).leng
   | fullRefreshHeader inner =>
     simp only [encode, FullRefreshHeader.encode_length]
     omega
+  | shortRefreshHeader _ =>
+    simp only [encode, List.length_nil]
+    omega
 
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (RefreshHeaderLayout × List UInt8) :=
-  if tag = 1 then (FullRefreshHeader.decode bytes).map fun (message, rest) => (.fullRefreshHeader message, rest)
-  else none
+  if h0 : tag = 1 then (FullRefreshHeader.decode bytes).map fun (message, rest) => (.fullRefreshHeader message, rest)
+  else some (.shortRefreshHeader ⟨tag, h0⟩, bytes)
 
 @[simp] theorem decode_encode (message : RefreshHeaderLayout) (rest : List UInt8) :
     decode (tag message) (encode message ++ rest) = some (message, rest) := by
-  cases message <;> simp [decode, encode, tag]
+  cases message with
+  | fullRefreshHeader m => simp [decode, encode, tag]
+  | shortRefreshHeader t =>
+    obtain ⟨v, h0⟩ := t
+    simp only [tag, encode, decode, h0, List.nil_append, reduceDIte]
 
 end RefreshHeaderLayout
 
@@ -1347,6 +1355,9 @@ theorem encode_length_le (message : RefreshHeaderMessage) : (encode message).len
   cases message.refreshHeaderLayout with
   | fullRefreshHeader inner =>
     simp only [RefreshHeaderLayout.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, FullRefreshHeader.encode_length]
+    omega
+  | shortRefreshHeader _ =>
+    simp only [RefreshHeaderLayout.encode, List.length_nil, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
     omega
 
 @[simp] theorem decode_encode (message : RefreshHeaderMessage) (rest : List UInt8) :

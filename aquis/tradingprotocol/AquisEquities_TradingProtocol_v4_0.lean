@@ -8,26 +8,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Table Select 1 is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Table Select 2 is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Table Select 3 is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Extended Order Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Status is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Order Add Response Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Trade Capture Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Trade Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Ioi Extended Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/

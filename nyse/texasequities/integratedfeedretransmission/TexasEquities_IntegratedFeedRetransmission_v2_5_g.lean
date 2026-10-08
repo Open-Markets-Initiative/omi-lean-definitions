@@ -8,8 +8,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: a Delivery Flag of 1 marks Heartbeat and carries no messages; the decoder reads it as a count and the encoder never writes it.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/

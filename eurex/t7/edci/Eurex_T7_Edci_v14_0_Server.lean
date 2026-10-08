@@ -8,30 +8,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Delete Order Broadcast is not framed: its length Body Len is not an integer it reads.
-
-Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
-
-Note: Forced Logout Notification is not framed: its length Body Len is not an integer it reads.
-
-Note: Heartbeat Notification is not framed: its length Body Len is not an integer it reads.
-
-Note: Logon Response is not framed: its length Body Len is not an integer it reads.
-
-Note: Logout Response is not framed: its length Body Len is not an integer it reads.
-
-Note: Order Exec Report Broadcast is not framed: its length Body Len is not an integer it reads.
-
-Note: Partition List Notification is not framed: its length Body Len is not an integer it reads.
-
-Note: Alignment Padding pads to a 8 byte boundary: it is read as the bytes left to the end of the frame, fewer than 8, and the frame's length is trusted to keep the boundary.
-
-Note: Reject is not framed: its length Body Len is not an integer it reads.
-
-Note: Session List Notification is not framed: its length Body Len is not an integer it reads.
-
-Note: Session Status Broadcast is not framed: its length Body Len is not an integer it reads.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/

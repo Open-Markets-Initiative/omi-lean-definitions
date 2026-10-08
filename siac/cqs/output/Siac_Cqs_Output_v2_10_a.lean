@@ -8,10 +8,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: National Bbo Indicator chooses the National Best Bid Long Appendage or National Best Offer Long Appendage or National Best Bid And Offer Long Appendage or National Best Bid Short Appendage or National Best Offer Short Appendage or National Best Bid And Offer Short Appendage attached, or none: it is written from the choice, and a value it does not list is not decoded.
-
-Note: Block Pad Byte pads to a 2 byte boundary: it is read as the bytes left to the end of the frame, fewer than 2, and the frame's length is trusted to keep the boundary.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/

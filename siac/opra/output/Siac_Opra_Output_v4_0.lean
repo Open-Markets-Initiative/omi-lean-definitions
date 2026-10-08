@@ -8,12 +8,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Bbo Indicator chooses the Best Bid Appendage or Best Offer Appendage or Best Bid And Offer Appendage attached, or none: it is written from the choice, and a value it does not list is not decoded.
-
-Note: Bbo Indicator chooses the Best Bid Appendage or Best Offer Appendage attached, or none: it is written from the choice, and a value it does not list is not decoded.
-
-Note: Block Pad Byte pads to a 2 byte boundary: it is read as the bytes left to the end of the frame, fewer than 2, and the frame's length is trusted to keep the boundary.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/
@@ -1159,6 +1153,27 @@ end EquityAndIndexLastSaleMessage
 /-- Any Equity And Index Last Sale Message Payload, selected by Equity And Index Last Sale Message Type -/
 inductive EquityAndIndexLastSaleMessagePayload where
   | equityAndIndexLastSaleMessage (message : EquityAndIndexLastSaleMessage) -- " " 0x20
+  | equityAndIndexLastSaleMessage65 (message : EquityAndIndexLastSaleMessage) -- "A" 0x41
+  | equityAndIndexLastSaleMessage66 (message : EquityAndIndexLastSaleMessage) -- "B" 0x42
+  | equityAndIndexLastSaleMessage67 (message : EquityAndIndexLastSaleMessage) -- "C" 0x43
+  | equityAndIndexLastSaleMessage68 (message : EquityAndIndexLastSaleMessage) -- "D" 0x44
+  | equityAndIndexLastSaleMessage69 (message : EquityAndIndexLastSaleMessage) -- "E" 0x45
+  | equityAndIndexLastSaleMessage70 (message : EquityAndIndexLastSaleMessage) -- "F" 0x46
+  | equityAndIndexLastSaleMessage71 (message : EquityAndIndexLastSaleMessage) -- "G" 0x47
+  | equityAndIndexLastSaleMessage72 (message : EquityAndIndexLastSaleMessage) -- "H" 0x48
+  | equityAndIndexLastSaleMessage73 (message : EquityAndIndexLastSaleMessage) -- "I" 0x49
+  | equityAndIndexLastSaleMessage74 (message : EquityAndIndexLastSaleMessage) -- "J" 0x4A
+  | equityAndIndexLastSaleMessage75 (message : EquityAndIndexLastSaleMessage) -- "K" 0x4B
+  | equityAndIndexLastSaleMessage76 (message : EquityAndIndexLastSaleMessage) -- "L" 0x4C
+  | equityAndIndexLastSaleMessage77 (message : EquityAndIndexLastSaleMessage) -- "M" 0x4D
+  | equityAndIndexLastSaleMessage78 (message : EquityAndIndexLastSaleMessage) -- "N" 0x4E
+  | equityAndIndexLastSaleMessage79 (message : EquityAndIndexLastSaleMessage) -- "O" 0x4F
+  | equityAndIndexLastSaleMessage80 (message : EquityAndIndexLastSaleMessage) -- "P" 0x50
+  | equityAndIndexLastSaleMessage81 (message : EquityAndIndexLastSaleMessage) -- "Q" 0x51
+  | equityAndIndexLastSaleMessage82 (message : EquityAndIndexLastSaleMessage) -- "R" 0x52
+  | equityAndIndexLastSaleMessage83 (message : EquityAndIndexLastSaleMessage) -- "S" 0x53
+  | equityAndIndexLastSaleMessage84 (message : EquityAndIndexLastSaleMessage) -- "T" 0x54
+  | equityAndIndexLastSaleMessage88 (message : EquityAndIndexLastSaleMessage) -- "X" 0x58
   deriving DecidableEq, Repr
 
 namespace EquityAndIndexLastSaleMessagePayload
@@ -1166,9 +1181,51 @@ namespace EquityAndIndexLastSaleMessagePayload
 /-- The Equity And Index Last Sale Message Type each message is sent under -/
 def tag : EquityAndIndexLastSaleMessagePayload → BitVec 8
   | .equityAndIndexLastSaleMessage _ => 32
+  | .equityAndIndexLastSaleMessage65 _ => 65
+  | .equityAndIndexLastSaleMessage66 _ => 66
+  | .equityAndIndexLastSaleMessage67 _ => 67
+  | .equityAndIndexLastSaleMessage68 _ => 68
+  | .equityAndIndexLastSaleMessage69 _ => 69
+  | .equityAndIndexLastSaleMessage70 _ => 70
+  | .equityAndIndexLastSaleMessage71 _ => 71
+  | .equityAndIndexLastSaleMessage72 _ => 72
+  | .equityAndIndexLastSaleMessage73 _ => 73
+  | .equityAndIndexLastSaleMessage74 _ => 74
+  | .equityAndIndexLastSaleMessage75 _ => 75
+  | .equityAndIndexLastSaleMessage76 _ => 76
+  | .equityAndIndexLastSaleMessage77 _ => 77
+  | .equityAndIndexLastSaleMessage78 _ => 78
+  | .equityAndIndexLastSaleMessage79 _ => 79
+  | .equityAndIndexLastSaleMessage80 _ => 80
+  | .equityAndIndexLastSaleMessage81 _ => 81
+  | .equityAndIndexLastSaleMessage82 _ => 82
+  | .equityAndIndexLastSaleMessage83 _ => 83
+  | .equityAndIndexLastSaleMessage84 _ => 84
+  | .equityAndIndexLastSaleMessage88 _ => 88
 
 def encode : EquityAndIndexLastSaleMessagePayload → List UInt8
   | .equityAndIndexLastSaleMessage message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage65 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage66 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage67 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage68 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage69 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage70 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage71 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage72 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage73 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage74 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage75 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage76 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage77 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage78 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage79 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage80 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage81 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage82 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage83 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage84 message => EquityAndIndexLastSaleMessage.encode message
+  | .equityAndIndexLastSaleMessage88 message => EquityAndIndexLastSaleMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : EquityAndIndexLastSaleMessagePayload) : (encode message).length ≤ 40 := by
@@ -1176,9 +1233,93 @@ theorem encode_length_le (message : EquityAndIndexLastSaleMessagePayload) : (enc
   | equityAndIndexLastSaleMessage inner =>
     simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
     omega
+  | equityAndIndexLastSaleMessage65 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage66 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage67 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage68 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage69 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage70 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage71 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage72 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage73 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage74 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage75 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage76 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage77 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage78 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage79 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage80 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage81 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage82 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage83 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage84 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage88 inner =>
+    simp only [encode, EquityAndIndexLastSaleMessage.encode_length]
+    omega
 
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (EquityAndIndexLastSaleMessagePayload × List UInt8) :=
   if tag = 32 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage message, rest)
+  else if tag = 65 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage65 message, rest)
+  else if tag = 66 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage66 message, rest)
+  else if tag = 67 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage67 message, rest)
+  else if tag = 68 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage68 message, rest)
+  else if tag = 69 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage69 message, rest)
+  else if tag = 70 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage70 message, rest)
+  else if tag = 71 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage71 message, rest)
+  else if tag = 72 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage72 message, rest)
+  else if tag = 73 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage73 message, rest)
+  else if tag = 74 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage74 message, rest)
+  else if tag = 75 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage75 message, rest)
+  else if tag = 76 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage76 message, rest)
+  else if tag = 77 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage77 message, rest)
+  else if tag = 78 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage78 message, rest)
+  else if tag = 79 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage79 message, rest)
+  else if tag = 80 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage80 message, rest)
+  else if tag = 81 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage81 message, rest)
+  else if tag = 82 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage82 message, rest)
+  else if tag = 83 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage83 message, rest)
+  else if tag = 84 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage84 message, rest)
+  else if tag = 88 then (EquityAndIndexLastSaleMessage.decode bytes).map fun (message, rest) => (.equityAndIndexLastSaleMessage88 message, rest)
   else none
 
 @[simp] theorem decode_encode (message : EquityAndIndexLastSaleMessagePayload) (rest : List UInt8) :
@@ -1213,6 +1354,69 @@ theorem encode_length_le (message : EquityAndIndexLastSaleCategory) : (encode me
   unfold encode
   cases message.equityAndIndexLastSaleMessagePayload with
   | equityAndIndexLastSaleMessage inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage65 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage66 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage67 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage68 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage69 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage70 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage71 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage72 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage73 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage74 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage75 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage76 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage77 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage78 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage79 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage80 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage81 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage82 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage83 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage84 inner =>
+    simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
+    omega
+  | equityAndIndexLastSaleMessage88 inner =>
     simp only [EquityAndIndexLastSaleMessagePayload.encode, List.length_append, encodeUInt_length, EquityAndIndexLastSaleMessage.encode_length]
     omega
 
@@ -2015,6 +2219,16 @@ end LongEquityAndIndexQuoteMessage
 /-- Any Long Equity And Index Quote Message Payload, selected by Long Equity And Index Quote Message Type -/
 inductive LongEquityAndIndexQuoteMessagePayload where
   | longEquityAndIndexQuoteMessage (message : LongEquityAndIndexQuoteMessage) -- " " 0x20
+  | longEquityAndIndexQuoteMessage70 (message : LongEquityAndIndexQuoteMessage) -- "F" 0x46
+  | longEquityAndIndexQuoteMessage73 (message : LongEquityAndIndexQuoteMessage) -- "I" 0x49
+  | longEquityAndIndexQuoteMessage82 (message : LongEquityAndIndexQuoteMessage) -- "R" 0x52
+  | longEquityAndIndexQuoteMessage84 (message : LongEquityAndIndexQuoteMessage) -- "T" 0x54
+  | longEquityAndIndexQuoteMessage65 (message : LongEquityAndIndexQuoteMessage) -- "A" 0x41
+  | longEquityAndIndexQuoteMessage66 (message : LongEquityAndIndexQuoteMessage) -- "B" 0x42
+  | longEquityAndIndexQuoteMessage79 (message : LongEquityAndIndexQuoteMessage) -- "O" 0x4F
+  | longEquityAndIndexQuoteMessage67 (message : LongEquityAndIndexQuoteMessage) -- "C" 0x43
+  | longEquityAndIndexQuoteMessage88 (message : LongEquityAndIndexQuoteMessage) -- "X" 0x58
+  | longEquityAndIndexQuoteMessage89 (message : LongEquityAndIndexQuoteMessage) -- "Y" 0x59
   deriving DecidableEq, Repr
 
 namespace LongEquityAndIndexQuoteMessagePayload
@@ -2022,9 +2236,29 @@ namespace LongEquityAndIndexQuoteMessagePayload
 /-- The Long Equity And Index Quote Message Type each message is sent under -/
 def tag : LongEquityAndIndexQuoteMessagePayload → BitVec 8
   | .longEquityAndIndexQuoteMessage _ => 32
+  | .longEquityAndIndexQuoteMessage70 _ => 70
+  | .longEquityAndIndexQuoteMessage73 _ => 73
+  | .longEquityAndIndexQuoteMessage82 _ => 82
+  | .longEquityAndIndexQuoteMessage84 _ => 84
+  | .longEquityAndIndexQuoteMessage65 _ => 65
+  | .longEquityAndIndexQuoteMessage66 _ => 66
+  | .longEquityAndIndexQuoteMessage79 _ => 79
+  | .longEquityAndIndexQuoteMessage67 _ => 67
+  | .longEquityAndIndexQuoteMessage88 _ => 88
+  | .longEquityAndIndexQuoteMessage89 _ => 89
 
 def encode : LongEquityAndIndexQuoteMessagePayload → List UInt8
   | .longEquityAndIndexQuoteMessage message => LongEquityAndIndexQuoteMessage.encode message
+  | .longEquityAndIndexQuoteMessage70 message => LongEquityAndIndexQuoteMessage.encode message
+  | .longEquityAndIndexQuoteMessage73 message => LongEquityAndIndexQuoteMessage.encode message
+  | .longEquityAndIndexQuoteMessage82 message => LongEquityAndIndexQuoteMessage.encode message
+  | .longEquityAndIndexQuoteMessage84 message => LongEquityAndIndexQuoteMessage.encode message
+  | .longEquityAndIndexQuoteMessage65 message => LongEquityAndIndexQuoteMessage.encode message
+  | .longEquityAndIndexQuoteMessage66 message => LongEquityAndIndexQuoteMessage.encode message
+  | .longEquityAndIndexQuoteMessage79 message => LongEquityAndIndexQuoteMessage.encode message
+  | .longEquityAndIndexQuoteMessage67 message => LongEquityAndIndexQuoteMessage.encode message
+  | .longEquityAndIndexQuoteMessage88 message => LongEquityAndIndexQuoteMessage.encode message
+  | .longEquityAndIndexQuoteMessage89 message => LongEquityAndIndexQuoteMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : LongEquityAndIndexQuoteMessagePayload) : (encode message).length ≤ 60 := by
@@ -2033,9 +2267,59 @@ theorem encode_length_le (message : LongEquityAndIndexQuoteMessagePayload) : (en
     have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
     simp only [encode]
     omega
+  | longEquityAndIndexQuoteMessage70 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | longEquityAndIndexQuoteMessage73 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | longEquityAndIndexQuoteMessage82 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | longEquityAndIndexQuoteMessage84 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | longEquityAndIndexQuoteMessage65 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | longEquityAndIndexQuoteMessage66 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | longEquityAndIndexQuoteMessage79 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | longEquityAndIndexQuoteMessage67 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | longEquityAndIndexQuoteMessage88 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | longEquityAndIndexQuoteMessage89 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
 
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (LongEquityAndIndexQuoteMessagePayload × List UInt8) :=
   if tag = 32 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage message, rest)
+  else if tag = 70 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage70 message, rest)
+  else if tag = 73 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage73 message, rest)
+  else if tag = 82 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage82 message, rest)
+  else if tag = 84 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage84 message, rest)
+  else if tag = 65 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage65 message, rest)
+  else if tag = 66 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage66 message, rest)
+  else if tag = 79 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage79 message, rest)
+  else if tag = 67 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage67 message, rest)
+  else if tag = 88 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage88 message, rest)
+  else if tag = 89 then (LongEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.longEquityAndIndexQuoteMessage89 message, rest)
   else none
 
 @[simp] theorem decode_encode (message : LongEquityAndIndexQuoteMessagePayload) (rest : List UInt8) :
@@ -2070,6 +2354,46 @@ theorem encode_length_le (message : LongEquityAndIndexQuoteCategory) : (encode m
   unfold encode
   cases message.longEquityAndIndexQuoteMessagePayload with
   | longEquityAndIndexQuoteMessage inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | longEquityAndIndexQuoteMessage70 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | longEquityAndIndexQuoteMessage73 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | longEquityAndIndexQuoteMessage82 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | longEquityAndIndexQuoteMessage84 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | longEquityAndIndexQuoteMessage65 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | longEquityAndIndexQuoteMessage66 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | longEquityAndIndexQuoteMessage79 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | longEquityAndIndexQuoteMessage67 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | longEquityAndIndexQuoteMessage88 inner =>
+    have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | longEquityAndIndexQuoteMessage89 inner =>
     have bound_inner := LongEquityAndIndexQuoteMessage.encode_length_le inner
     simp only [LongEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
     omega
@@ -2357,6 +2681,16 @@ end ShortEquityAndIndexQuoteMessage
 /-- Any Short Equity And Index Quote Message Payload, selected by Short Equity And Index Quote Message Type -/
 inductive ShortEquityAndIndexQuoteMessagePayload where
   | shortEquityAndIndexQuoteMessage (message : ShortEquityAndIndexQuoteMessage) -- " " 0x20
+  | shortEquityAndIndexQuoteMessage70 (message : ShortEquityAndIndexQuoteMessage) -- "F" 0x46
+  | shortEquityAndIndexQuoteMessage73 (message : ShortEquityAndIndexQuoteMessage) -- "I" 0x49
+  | shortEquityAndIndexQuoteMessage82 (message : ShortEquityAndIndexQuoteMessage) -- "R" 0x52
+  | shortEquityAndIndexQuoteMessage84 (message : ShortEquityAndIndexQuoteMessage) -- "T" 0x54
+  | shortEquityAndIndexQuoteMessage65 (message : ShortEquityAndIndexQuoteMessage) -- "A" 0x41
+  | shortEquityAndIndexQuoteMessage66 (message : ShortEquityAndIndexQuoteMessage) -- "B" 0x42
+  | shortEquityAndIndexQuoteMessage79 (message : ShortEquityAndIndexQuoteMessage) -- "O" 0x4F
+  | shortEquityAndIndexQuoteMessage67 (message : ShortEquityAndIndexQuoteMessage) -- "C" 0x43
+  | shortEquityAndIndexQuoteMessage88 (message : ShortEquityAndIndexQuoteMessage) -- "X" 0x58
+  | shortEquityAndIndexQuoteMessage89 (message : ShortEquityAndIndexQuoteMessage) -- "Y" 0x59
   deriving DecidableEq, Repr
 
 namespace ShortEquityAndIndexQuoteMessagePayload
@@ -2364,9 +2698,29 @@ namespace ShortEquityAndIndexQuoteMessagePayload
 /-- The Short Equity And Index Quote Message Type each message is sent under -/
 def tag : ShortEquityAndIndexQuoteMessagePayload → BitVec 8
   | .shortEquityAndIndexQuoteMessage _ => 32
+  | .shortEquityAndIndexQuoteMessage70 _ => 70
+  | .shortEquityAndIndexQuoteMessage73 _ => 73
+  | .shortEquityAndIndexQuoteMessage82 _ => 82
+  | .shortEquityAndIndexQuoteMessage84 _ => 84
+  | .shortEquityAndIndexQuoteMessage65 _ => 65
+  | .shortEquityAndIndexQuoteMessage66 _ => 66
+  | .shortEquityAndIndexQuoteMessage79 _ => 79
+  | .shortEquityAndIndexQuoteMessage67 _ => 67
+  | .shortEquityAndIndexQuoteMessage88 _ => 88
+  | .shortEquityAndIndexQuoteMessage89 _ => 89
 
 def encode : ShortEquityAndIndexQuoteMessagePayload → List UInt8
   | .shortEquityAndIndexQuoteMessage message => ShortEquityAndIndexQuoteMessage.encode message
+  | .shortEquityAndIndexQuoteMessage70 message => ShortEquityAndIndexQuoteMessage.encode message
+  | .shortEquityAndIndexQuoteMessage73 message => ShortEquityAndIndexQuoteMessage.encode message
+  | .shortEquityAndIndexQuoteMessage82 message => ShortEquityAndIndexQuoteMessage.encode message
+  | .shortEquityAndIndexQuoteMessage84 message => ShortEquityAndIndexQuoteMessage.encode message
+  | .shortEquityAndIndexQuoteMessage65 message => ShortEquityAndIndexQuoteMessage.encode message
+  | .shortEquityAndIndexQuoteMessage66 message => ShortEquityAndIndexQuoteMessage.encode message
+  | .shortEquityAndIndexQuoteMessage79 message => ShortEquityAndIndexQuoteMessage.encode message
+  | .shortEquityAndIndexQuoteMessage67 message => ShortEquityAndIndexQuoteMessage.encode message
+  | .shortEquityAndIndexQuoteMessage88 message => ShortEquityAndIndexQuoteMessage.encode message
+  | .shortEquityAndIndexQuoteMessage89 message => ShortEquityAndIndexQuoteMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : ShortEquityAndIndexQuoteMessagePayload) : (encode message).length ≤ 36 := by
@@ -2375,9 +2729,59 @@ theorem encode_length_le (message : ShortEquityAndIndexQuoteMessagePayload) : (e
     have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
     simp only [encode]
     omega
+  | shortEquityAndIndexQuoteMessage70 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | shortEquityAndIndexQuoteMessage73 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | shortEquityAndIndexQuoteMessage82 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | shortEquityAndIndexQuoteMessage84 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | shortEquityAndIndexQuoteMessage65 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | shortEquityAndIndexQuoteMessage66 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | shortEquityAndIndexQuoteMessage79 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | shortEquityAndIndexQuoteMessage67 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | shortEquityAndIndexQuoteMessage88 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | shortEquityAndIndexQuoteMessage89 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [encode]
+    omega
 
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (ShortEquityAndIndexQuoteMessagePayload × List UInt8) :=
   if tag = 32 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage message, rest)
+  else if tag = 70 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage70 message, rest)
+  else if tag = 73 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage73 message, rest)
+  else if tag = 82 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage82 message, rest)
+  else if tag = 84 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage84 message, rest)
+  else if tag = 65 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage65 message, rest)
+  else if tag = 66 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage66 message, rest)
+  else if tag = 79 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage79 message, rest)
+  else if tag = 67 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage67 message, rest)
+  else if tag = 88 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage88 message, rest)
+  else if tag = 89 then (ShortEquityAndIndexQuoteMessage.decode bytes).map fun (message, rest) => (.shortEquityAndIndexQuoteMessage89 message, rest)
   else none
 
 @[simp] theorem decode_encode (message : ShortEquityAndIndexQuoteMessagePayload) (rest : List UInt8) :
@@ -2412,6 +2816,46 @@ theorem encode_length_le (message : ShortEquityAndIndexQuoteCategory) : (encode 
   unfold encode
   cases message.shortEquityAndIndexQuoteMessagePayload with
   | shortEquityAndIndexQuoteMessage inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | shortEquityAndIndexQuoteMessage70 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | shortEquityAndIndexQuoteMessage73 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | shortEquityAndIndexQuoteMessage82 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | shortEquityAndIndexQuoteMessage84 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | shortEquityAndIndexQuoteMessage65 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | shortEquityAndIndexQuoteMessage66 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | shortEquityAndIndexQuoteMessage79 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | shortEquityAndIndexQuoteMessage67 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | shortEquityAndIndexQuoteMessage88 inner =>
+    have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
+    simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | shortEquityAndIndexQuoteMessage89 inner =>
     have bound_inner := ShortEquityAndIndexQuoteMessage.encode_length_le inner
     simp only [ShortEquityAndIndexQuoteMessagePayload.encode, List.length_append, encodeUInt_length]
     omega
@@ -2605,6 +3049,20 @@ end ControlMessage
 /-- Any Control Message Payload, selected by Control Message Type -/
 inductive ControlMessagePayload where
   | controlMessage (message : ControlMessage) -- "A" 0x41
+  | controlMessage66 (message : ControlMessage) -- "B" 0x42
+  | controlMessage67 (message : ControlMessage) -- "C" 0x43
+  | controlMessage68 (message : ControlMessage) -- "D" 0x44
+  | controlMessage69 (message : ControlMessage) -- "E" 0x45
+  | controlMessage70 (message : ControlMessage) -- "F" 0x46
+  | controlMessage71 (message : ControlMessage) -- "G" 0x47
+  | controlMessage72 (message : ControlMessage) -- "H" 0x48
+  | controlMessage73 (message : ControlMessage) -- "I" 0x49
+  | controlMessage74 (message : ControlMessage) -- "J" 0x4A
+  | controlMessage75 (message : ControlMessage) -- "K" 0x4B
+  | controlMessage76 (message : ControlMessage) -- "L" 0x4C
+  | controlMessage77 (message : ControlMessage) -- "M" 0x4D
+  | controlMessage78 (message : ControlMessage) -- "N" 0x4E
+  | controlMessage80 (message : ControlMessage) -- "P" 0x50
   deriving DecidableEq, Repr
 
 namespace ControlMessagePayload
@@ -2612,9 +3070,37 @@ namespace ControlMessagePayload
 /-- The Control Message Type each message is sent under -/
 def tag : ControlMessagePayload → BitVec 8
   | .controlMessage _ => 65
+  | .controlMessage66 _ => 66
+  | .controlMessage67 _ => 67
+  | .controlMessage68 _ => 68
+  | .controlMessage69 _ => 69
+  | .controlMessage70 _ => 70
+  | .controlMessage71 _ => 71
+  | .controlMessage72 _ => 72
+  | .controlMessage73 _ => 73
+  | .controlMessage74 _ => 74
+  | .controlMessage75 _ => 75
+  | .controlMessage76 _ => 76
+  | .controlMessage77 _ => 77
+  | .controlMessage78 _ => 78
+  | .controlMessage80 _ => 80
 
 def encode : ControlMessagePayload → List UInt8
   | .controlMessage message => ControlMessage.encode message
+  | .controlMessage66 message => ControlMessage.encode message
+  | .controlMessage67 message => ControlMessage.encode message
+  | .controlMessage68 message => ControlMessage.encode message
+  | .controlMessage69 message => ControlMessage.encode message
+  | .controlMessage70 message => ControlMessage.encode message
+  | .controlMessage71 message => ControlMessage.encode message
+  | .controlMessage72 message => ControlMessage.encode message
+  | .controlMessage73 message => ControlMessage.encode message
+  | .controlMessage74 message => ControlMessage.encode message
+  | .controlMessage75 message => ControlMessage.encode message
+  | .controlMessage76 message => ControlMessage.encode message
+  | .controlMessage77 message => ControlMessage.encode message
+  | .controlMessage78 message => ControlMessage.encode message
+  | .controlMessage80 message => ControlMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : ControlMessagePayload) : (encode message).length ≤ 65546 := by
@@ -2623,9 +3109,79 @@ theorem encode_length_le (message : ControlMessagePayload) : (encode message).le
     have bound_inner := ControlMessage.encode_length_le inner
     simp only [encode]
     omega
+  | controlMessage66 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage67 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage68 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage69 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage70 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage71 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage72 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage73 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage74 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage75 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage76 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage77 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage78 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | controlMessage80 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [encode]
+    omega
 
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (ControlMessagePayload × List UInt8) :=
   if tag = 65 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage message, rest)
+  else if tag = 66 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage66 message, rest)
+  else if tag = 67 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage67 message, rest)
+  else if tag = 68 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage68 message, rest)
+  else if tag = 69 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage69 message, rest)
+  else if tag = 70 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage70 message, rest)
+  else if tag = 71 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage71 message, rest)
+  else if tag = 72 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage72 message, rest)
+  else if tag = 73 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage73 message, rest)
+  else if tag = 74 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage74 message, rest)
+  else if tag = 75 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage75 message, rest)
+  else if tag = 76 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage76 message, rest)
+  else if tag = 77 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage77 message, rest)
+  else if tag = 78 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage78 message, rest)
+  else if tag = 80 then (ControlMessage.decode bytes).map fun (message, rest) => (.controlMessage80 message, rest)
   else none
 
 @[simp] theorem decode_encode (message : ControlMessagePayload) (rest : List UInt8) :
@@ -2660,6 +3216,62 @@ theorem encode_length_le (message : ControlCategory) : (encode message).length �
   unfold encode
   cases message.controlMessagePayload with
   | controlMessage inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage66 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage67 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage68 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage69 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage70 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage71 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage72 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage73 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage74 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage75 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage76 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage77 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage78 inner =>
+    have bound_inner := ControlMessage.encode_length_le inner
+    simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
+    omega
+  | controlMessage80 inner =>
     have bound_inner := ControlMessage.encode_length_le inner
     simp only [ControlMessagePayload.encode, List.length_append, encodeUInt_length]
     omega

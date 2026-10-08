@@ -8,20 +8,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Packet Flag is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: a Heartbeat of 1 marks Heartbeat Packet and carries no messages; the decoder reads it as a count and the encoder never writes it.
-
-Note: Security Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Quote Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Extended Quote Flags is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Extended Security Flags is a bit field set, proven as its 2 byte integer rather than bit by bit.
-
-Note: Trade Status is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/

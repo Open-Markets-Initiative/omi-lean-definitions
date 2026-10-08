@@ -8,20 +8,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Number Of Levels counts Option Market Depth Level in ascii digits: it is written from the list as its digits, and a list of more than 9 could not be written.
-
-Note: Number Of Levels counts Future Options Market Depth Trading Instrument in ascii digits: it is written from the list as its digits, and a list of more than 9 could not be written.
-
-Note: Number Of Levels counts Futures Market Depth Trading Instrument in ascii digits: it is written from the list as its digits, and a list of more than 9 could not be written.
-
-Note: Number Of Levels counts Strategy Market Depth Trading Instrument in ascii digits: it is written from the list as its digits, and a list of more than 9 could not be written.
-
-Note: Number Of Legs counts Strategy Instrument Leg in ascii digits: it is written from the list as its digits, and a list of more than 99 could not be written.
-
-Note: Number Of Bonds counts Bond Definition in ascii digits: it is written from the list as its digits, and a list of more than 99 could not be written.
-
-Note: Number Of Entries counts Tick Entry in ascii digits: it is written from the list as its digits, and a list of more than 99 could not be written.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/

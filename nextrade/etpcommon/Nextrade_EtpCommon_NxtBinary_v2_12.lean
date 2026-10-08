@@ -8,16 +8,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Etp Constituents Message is selected by more than one code: each is a constructor of its own over the one record, so the code read is the code written back.
-
-Note: Mm Lp Information Message is selected by more than one code: each is a constructor of its own over the one record, so the code read is the code written back.
-
-Note: Equities Batch Data Message is selected by more than one code: each is a constructor of its own over the one record, so the code read is the code written back.
-
-Note: Member Information Message is selected by more than one code: each is a constructor of its own over the one record, so the code read is the code written back.
-
-Note: Issue Event Message is selected by more than one code: each is a constructor of its own over the one record, so the code read is the code written back.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/

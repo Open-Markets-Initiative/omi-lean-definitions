@@ -9,20 +9,6 @@ decodes back to what was encoded; a message dispatch selects the message its typ
 a count is written from the list it counts; a length prefix is written from the bytes it frames;
 and a packet read to the end of its data decodes to the messages that were written.
 
-Note: Packet Flags is a bit field set, proven as its 2 byte integer rather than bit by bit.
-
-Note: Trade Qualifier is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Phase Qualifier is a bit field set, proven as its 2 byte integer rather than bit by bit.
-
-Note: Order Type Rules is a bit field set, proven as its 2 byte integer rather than bit by bit.
-
-Note: Mm Protections is a bit field set, proven as its 1 byte integer rather than bit by bit.
-
-Note: Strategy Authorized is a bit field set, proven as its 8 byte integer rather than bit by bit.
-
-Note: Compression says whether the Optiq Message was LZ4 transformed: the bytes of a transformed body are carried as they lie rather than read, and Compression is written from which of the two the message holds.
-
 Text fields are kept byte for byte, padding included, so what is decoded encodes back unchanged.
 Prices with implied decimals are proven as the integers on the wire.
 -/

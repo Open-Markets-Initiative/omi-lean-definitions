@@ -1206,22 +1206,22 @@ def decode : List UInt8 → Option (Side × List UInt8)
 end Side
 
 /-- Type: one byte code -/
-def Type.codes : List UInt8 :=
+def Type_.codes : List UInt8 :=
   [0x42, 0x43, 0x46, 0x4C, 0x50, 0x53]
 
-inductive Type where
+inductive Type_ where
   | boldOutrightOnly -- Bold Outright Only
   | coaComplexOnly -- Coa Complex Only
   | flexPriceImprovementCube -- Flex Price Improvement Cube
   | flexAonSolicitationCube -- Flex Aon Solicitation Cube
   | priceImprovementCube -- Price Improvement Cube
   | aonSolicitationCube -- Aon Solicitation Cube
-  | unlisted (byte : { byte : UInt8 // byte ∉ Type.codes }) -- any other code, kept as it is
+  | unlisted (byte : { byte : UInt8 // byte ∉ Type_.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
-namespace Type
+namespace Type_
 
-def toByte : Type → UInt8
+def toByte : Type_ → UInt8
   | .boldOutrightOnly => 0x42
   | .coaComplexOnly => 0x43
   | .flexPriceImprovementCube => 0x46
@@ -1231,7 +1231,7 @@ def toByte : Type → UInt8
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
-def listed (byte : UInt8) : Type :=
+def listed (byte : UInt8) : Type_ :=
   if byte = 0x42 then .boldOutrightOnly
   else if byte = 0x43 then .coaComplexOnly
   else if byte = 0x46 then .flexPriceImprovementCube
@@ -1239,10 +1239,10 @@ def listed (byte : UInt8) : Type :=
   else if byte = 0x50 then .priceImprovementCube
   else .aonSolicitationCube
 
-def ofByte (byte : UInt8) : Type :=
+def ofByte (byte : UInt8) : Type_ :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
 
-theorem ofByte_toByte (value : Type) : ofByte value.toByte = value := by
+theorem ofByte_toByte (value : Type_) : ofByte value.toByte = value := by
   cases value with
   | boldOutrightOnly => decide
   | coaComplexOnly => decide
@@ -1252,21 +1252,21 @@ theorem ofByte_toByte (value : Type) : ofByte value.toByte = value := by
   | aonSolicitationCube => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
-def encode (value : Type) : List UInt8 :=
+def encode (value : Type_) : List UInt8 :=
   [value.toByte]
 
-def decode : List UInt8 → Option (Type × List UInt8)
+def decode : List UInt8 → Option (Type_ × List UInt8)
   | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
-@[simp] theorem encode_length (value : Type) : (encode value).length = 1 :=
+@[simp] theorem encode_length (value : Type_) : (encode value).length = 1 :=
   rfl
 
-@[simp] theorem decode_encode (value : Type) (rest : List UInt8) :
+@[simp] theorem decode_encode (value : Type_) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
 
-end Type
+end Type_
 
 /-- Capacity: one byte code -/
 def Capacity.codes : List UInt8 :=
@@ -2562,7 +2562,7 @@ structure SeriesRfqMessage where
   seriesIndex : BitVec 32
   seriesSeqNum : BitVec 32
   side : Side
-  type : Type
+  type : Type_
   capacity : Capacity
   totalQuantity : BitVec 32
   workingPrice : BitVec 32
@@ -2579,7 +2579,7 @@ def encode (message : SeriesRfqMessage) : List UInt8 :=
     ++ (encodeUIntLE 4 message.seriesIndex
     ++ (encodeUIntLE 4 message.seriesSeqNum
     ++ (Side.encode message.side
-    ++ (Type.encode message.type
+    ++ (Type_.encode message.type
     ++ (Capacity.encode message.capacity
     ++ (encodeUIntLE 4 message.totalQuantity
     ++ (encodeUIntLE 4 message.workingPrice
@@ -2593,7 +2593,7 @@ def decode (bytes : List UInt8) : Option (SeriesRfqMessage × List UInt8) := do
   let (seriesIndex, bytes) ← decodeUIntLE 4 bytes
   let (seriesSeqNum, bytes) ← decodeUIntLE 4 bytes
   let (side, bytes) ← Side.decode bytes
-  let (type, bytes) ← Type.decode bytes
+  let (type, bytes) ← Type_.decode bytes
   let (capacity, bytes) ← Capacity.decode bytes
   let (totalQuantity, bytes) ← decodeUIntLE 4 bytes
   let (workingPrice, bytes) ← decodeUIntLE 4 bytes
@@ -2604,7 +2604,7 @@ def decode (bytes : List UInt8) : Option (SeriesRfqMessage × List UInt8) := do
 
 @[simp] theorem encode_length (message : SeriesRfqMessage) : (encode message).length = 40 := by
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length, Side.encode_length, Type.encode_length, Capacity.encode_length, RfqStatus.encode_length]
+  simp only [List.length_append, encodeUIntLE_length, Side.encode_length, Type_.encode_length, Capacity.encode_length, RfqStatus.encode_length]
 
 theorem encode_length_pos (message : SeriesRfqMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -2623,7 +2623,7 @@ theorem encode_length_pos (message : SeriesRfqMessage) : (encode message).length
   dsimp only
   rw [List.append_assoc, Side.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, Type.decode_encode, some_bind]
+  rw [List.append_assoc, Type_.decode_encode, some_bind]
   dsimp only
   rw [List.append_assoc, Capacity.decode_encode, some_bind]
   dsimp only

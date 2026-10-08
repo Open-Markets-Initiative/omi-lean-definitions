@@ -11,18 +11,18 @@ behind, which `decide` checks at build time.
 
 namespace Omi.NasdaqNsmequitiesOrdersOuchV50.Tests
 
-/-- Nasdaq/NsmEquities.Orders.Ouch.v5.0/CancelOrderMessage.pcap: 12 bytes -/
-def captureCancelordermessage : List UInt8 :=
-  [0x00, 0x0a, 0x55, 0x58, 0x00, 0x75, 0x2e, 0x71, 0x00, 0x00, 0x00, 0x00]
-
-example : (Omi.NasdaqNsmequitiesOrdersOuchV50Client.ClientPacket.decode captureCancelordermessage).isSome = true := by
-  decide +kernel
-
 /-- Nasdaq/NsmEquities.Orders.Ouch.v5.0/CanceledMessage.pcap: 21 bytes -/
 def captureCanceledmessage : List UInt8 :=
   [0x00, 0x13, 0x53, 0x43, 0x00, 0x00, 0x28, 0x9b, 0x4d, 0x68, 0x13, 0x17, 0x00, 0x75, 0x3a, 0x8d, 0x00, 0x00, 0x00, 0x28, 0x55]
 
 example : (Omi.NasdaqNsmequitiesOrdersOuchV50Server.ServerPacket.decode captureCanceledmessage).isSome = true := by
+  decide +kernel
+
+/-- Nasdaq/NsmEquities.Orders.Ouch.v5.0/CancelOrderMessage.pcap: 12 bytes -/
+def captureCancelordermessage : List UInt8 :=
+  [0x00, 0x0a, 0x55, 0x58, 0x00, 0x75, 0x2e, 0x71, 0x00, 0x00, 0x00, 0x00]
+
+example : (Omi.NasdaqNsmequitiesOrdersOuchV50Client.ClientPacket.decode captureCancelordermessage).isSome = true := by
   decide +kernel
 
 /-- Nasdaq/NsmEquities.Orders.Ouch.v5.0/ClientHeartbeat.pcap: 3 bytes -/

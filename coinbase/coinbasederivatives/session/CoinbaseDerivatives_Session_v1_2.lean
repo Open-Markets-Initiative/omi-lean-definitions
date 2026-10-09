@@ -1,7 +1,7 @@
 import Wire
 
 /-!
-# Coinbase Session Layer v1.2
+# Coinbase  v1.2
 
 Generated from the binary model, with the proofs the model's rules call for: every record
 decodes back to what was encoded; a message dispatch selects the message its type names;

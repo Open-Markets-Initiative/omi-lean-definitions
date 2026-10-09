@@ -108,46 +108,6 @@ def decode : List UInt8 → Option (RequestStatus × List UInt8)
 
 end RequestStatus
 
-/-- Stream Header: 8 bytes -/
-structure StreamHeader where
-  messageLength : BitVec 16
-  streamId : BitVec 16
-  sequenceNumber : BitVec 32
-  deriving DecidableEq, Repr
-
-namespace StreamHeader
-
-def encode (message : StreamHeader) : List UInt8 :=
-  encodeUIntLE 2 message.messageLength
-    ++ (encodeUIntLE 2 message.streamId
-    ++ (encodeUIntLE 4 message.sequenceNumber))
-
-def decode (bytes : List UInt8) : Option (StreamHeader × List UInt8) := do
-  let (messageLength, bytes) ← decodeUIntLE 2 bytes
-  let (streamId, bytes) ← decodeUIntLE 2 bytes
-  let (sequenceNumber, bytes) ← decodeUIntLE 4 bytes
-  pure ({ messageLength, streamId, sequenceNumber }, bytes)
-
-@[simp] theorem encode_length (message : StreamHeader) : (encode message).length = 8 := by
-  unfold encode
-  simp only [List.length_append, encodeUIntLE_length]
-
-theorem encode_length_pos (message : StreamHeader) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
-
-@[simp] theorem decode_encode (message : StreamHeader) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [decodeUIntLE_encodeUIntLE, some_bind]
-  rfl
-
-end StreamHeader
-
 /-- New Order Message: 29 bytes -/
 structure NewOrderMessage where
   timestamp : BitVec 64
@@ -804,76 +764,113 @@ def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8
 
 end Payload
 
+/-- Stream Packet -/
+structure StreamPacket where
+  streamId : BitVec 16
+  sequenceNumber : BitVec 32
+  payload : Payload
+  deriving DecidableEq, Repr
+
+namespace StreamPacket
+
+def encodeBody (message : StreamPacket) : List UInt8 :=
+  encodeUIntLE 2 message.streamId
+    ++ (encodeUIntLE 4 message.sequenceNumber
+    ++ (encodeUInt 1 (Payload.tag message.payload)
+    ++ (Payload.encode message.payload)))
+
+def decodeBody (bytes : List UInt8) : Option (StreamPacket × List UInt8) := do
+  let (streamId, bytes) ← decodeUIntLE 2 bytes
+  let (sequenceNumber, bytes) ← decodeUIntLE 4 bytes
+  let (messageType, bytes) ← decodeUInt 1 bytes
+  let (payload, bytes) ← Payload.decode messageType bytes
+  pure ({ streamId, sequenceNumber, payload }, bytes)
+
+theorem decodeBody_encodeBody (message : StreamPacket) (rest : List UInt8) :
+    decodeBody (encodeBody message ++ rest) = some (message, rest) := by
+  unfold decodeBody encodeBody
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [Payload.decode_encode, some_bind]
+  rfl
+
+/-- Every body fits the length prefix -/
+theorem encodeBody_length_lt (message : StreamPacket) : (encodeBody message).length + 2 < 256 ^ 2 := by
+  unfold encodeBody
+  cases message.payload with
+  | newOrderMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, NewOrderMessage.encode_length]
+    omega
+  | orderModificationMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, OrderModificationMessage.encode_length]
+    omega
+  | orderCancellationMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, OrderCancellationMessage.encode_length]
+    omega
+  | tradeMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, TradeMessage.encode_length]
+    omega
+  | newSpreadOrderMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, NewSpreadOrderMessage.encode_length]
+    omega
+  | spreadOrderModificationMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, SpreadOrderModificationMessage.encode_length]
+    omega
+  | spreadOrderCancellationMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, SpreadOrderCancellationMessage.encode_length]
+    omega
+  | spreadTradeMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, SpreadTradeMessage.encode_length]
+    omega
+  | tradeCancelMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, TradeCancelMessage.encode_length]
+    omega
+  | heartbeatMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, HeartbeatMessage.encode_length]
+    omega
+  | tickDataRecoveryResponseMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, TickDataRecoveryResponseMessage.encode_length]
+    omega
+
+/-- Size rule: Message Length counts the bytes after it plus 2, so it is written from the body and checked on decode -/
+def encode : StreamPacket → List UInt8 :=
+  encodeFramedLE 2 2 encodeBody
+
+def decode : List UInt8 → Option (StreamPacket × List UInt8) :=
+  decodeFramedLE 2 2 decodeBody
+
+@[simp] theorem decode_encode (message : StreamPacket) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) :=
+  decodeFramedLE_encodeFramedLE 2 2 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
+
+theorem encode_length_pos (message : StreamPacket) : (encode message).length > 0 := by
+  unfold encode
+  rw [encodeFramedLE_length]
+  omega
+
+end StreamPacket
+
 /-- Packet -/
 structure Packet where
-  streamHeader : StreamHeader
-  payload : Payload
+  streamPacket : List StreamPacket
   deriving DecidableEq, Repr
 
 namespace Packet
 
 def encode (message : Packet) : List UInt8 :=
-  StreamHeader.encode message.streamHeader
-    ++ (encodeUInt 1 (Payload.tag message.payload)
-    ++ (Payload.encode message.payload))
+  encodeMany StreamPacket.encode message.streamPacket
 
-def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
-  let (streamHeader, bytes) ← StreamHeader.decode bytes
-  let (messageType, bytes) ← decodeUInt 1 bytes
-  let (payload, bytes) ← Payload.decode messageType bytes
-  pure ({ streamHeader, payload }, bytes)
+def decode (bytes : List UInt8) : Option Packet := do
+  let streamPacket ← decodeAll StreamPacket.decode bytes.length bytes
+  pure { streamPacket }
 
-theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
-  unfold encode
-  simp only [StreamHeader.encode_length, List.length_append, ← Nat.add_assoc]
-  omega
-
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : Packet) : (encode message).length ≤ 45 := by
-  unfold encode
-  cases message.payload with
-  | newOrderMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, NewOrderMessage.encode_length]
-    omega
-  | orderModificationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, OrderModificationMessage.encode_length]
-    omega
-  | orderCancellationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, OrderCancellationMessage.encode_length]
-    omega
-  | tradeMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, TradeMessage.encode_length]
-    omega
-  | newSpreadOrderMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, NewSpreadOrderMessage.encode_length]
-    omega
-  | spreadOrderModificationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, SpreadOrderModificationMessage.encode_length]
-    omega
-  | spreadOrderCancellationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, SpreadOrderCancellationMessage.encode_length]
-    omega
-  | spreadTradeMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, SpreadTradeMessage.encode_length]
-    omega
-  | tradeCancelMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, TradeCancelMessage.encode_length]
-    omega
-  | heartbeatMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, HeartbeatMessage.encode_length]
-    omega
-  | tickDataRecoveryResponseMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, StreamHeader.encode_length, encodeUInt_length, TickDataRecoveryResponseMessage.encode_length]
-    omega
-
-@[simp] theorem decode_encode (message : Packet) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
+theorem decode_encode (message : Packet) : decode (encode message) = some message := by
   unfold decode encode
-  rw [List.append_assoc, StreamHeader.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [Payload.decode_encode, some_bind]
+  rw [decodeAll_encodeMany StreamPacket.encode StreamPacket.decode StreamPacket.decode_encode StreamPacket.encode_length_pos message.streamPacket _ (encodeMany_length_ge StreamPacket.encode StreamPacket.encode_length_pos message.streamPacket), some_bind]
   rfl
 
 end Packet

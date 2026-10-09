@@ -16,10 +16,11 @@ namespace Omi.NyseArcaoptionsDeepfeedPillarV12M
 
 /-- Exchange Code: one byte code -/
 def ExchangeCode.codes : List UInt8 :=
-  [0x41, 0x4C, 0x4D, 0x4E, 0x50, 0x51, 0x56, 0x5A, 0x20]
+  [0x41, 0x46, 0x4C, 0x4D, 0x4E, 0x50, 0x51, 0x56, 0x5A, 0x20]
 
 inductive ExchangeCode where
   | nyseAmerican -- Nyse American
+  | txse -- Txse
   | ltse -- Ltse
   | nyseTexas -- Nyse Texas
   | nyse -- Nyse
@@ -35,6 +36,7 @@ namespace ExchangeCode
 
 def toByte : ExchangeCode → UInt8
   | .nyseAmerican => 0x41
+  | .txse => 0x46
   | .ltse => 0x4C
   | .nyseTexas => 0x4D
   | .nyse => 0x4E
@@ -48,6 +50,7 @@ def toByte : ExchangeCode → UInt8
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : ExchangeCode :=
   if byte = 0x41 then .nyseAmerican
+  else if byte = 0x46 then .txse
   else if byte = 0x4C then .ltse
   else if byte = 0x4D then .nyseTexas
   else if byte = 0x4E then .nyse
@@ -63,6 +66,7 @@ def ofByte (byte : UInt8) : ExchangeCode :=
 theorem ofByte_toByte (value : ExchangeCode) : ofByte value.toByte = value := by
   cases value with
   | nyseAmerican => decide
+  | txse => decide
   | ltse => decide
   | nyseTexas => decide
   | nyse => decide

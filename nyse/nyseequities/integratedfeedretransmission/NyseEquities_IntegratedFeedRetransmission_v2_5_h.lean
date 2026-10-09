@@ -241,7 +241,7 @@ end RoundLot
 
 /-- Security Status: one byte code -/
 def SecurityStatus.codes : List UInt8 :=
-  [0x34, 0x35, 0x36, 0x41, 0x43, 0x44, 0x50, 0x42, 0x45, 0x4F, 0x4C, 0x58, 0x49, 0x47]
+  [0x34, 0x35, 0x36, 0x41, 0x43, 0x44, 0x50, 0x42, 0x4E, 0x45, 0x4F, 0x4C, 0x58, 0x49, 0x47]
 
 inductive SecurityStatus where
   | tradingHalt -- Trading Halt
@@ -252,6 +252,7 @@ inductive SecurityStatus where
   | shortSaleRestrictionDeactivated -- Short Sale Restriction Deactivated
   | preopening -- Preopening
   | beginAcceptingOrders -- Begin Accepting Orders
+  | overnightSession -- Overnight Session
   | earlySession -- Early Session
   | coreSession -- Core Session
   | lateSessionNonNyseOnly -- Late Session Non Nyse Only
@@ -272,6 +273,7 @@ def toByte : SecurityStatus → UInt8
   | .shortSaleRestrictionDeactivated => 0x44
   | .preopening => 0x50
   | .beginAcceptingOrders => 0x42
+  | .overnightSession => 0x4E
   | .earlySession => 0x45
   | .coreSession => 0x4F
   | .lateSessionNonNyseOnly => 0x4C
@@ -290,6 +292,7 @@ def listed (byte : UInt8) : SecurityStatus :=
   else if byte = 0x44 then .shortSaleRestrictionDeactivated
   else if byte = 0x50 then .preopening
   else if byte = 0x42 then .beginAcceptingOrders
+  else if byte = 0x4E then .overnightSession
   else if byte = 0x45 then .earlySession
   else if byte = 0x4F then .coreSession
   else if byte = 0x4C then .lateSessionNonNyseOnly
@@ -310,6 +313,7 @@ theorem ofByte_toByte (value : SecurityStatus) : ofByte value.toByte = value := 
   | shortSaleRestrictionDeactivated => decide
   | preopening => decide
   | beginAcceptingOrders => decide
+  | overnightSession => decide
   | earlySession => decide
   | coreSession => decide
   | lateSessionNonNyseOnly => decide
@@ -617,10 +621,11 @@ end SsrState
 
 /-- Market State: one byte code -/
 def MarketState.codes : List UInt8 :=
-  [0x50, 0x45, 0x4F, 0x4C, 0x58]
+  [0x50, 0x4E, 0x45, 0x4F, 0x4C, 0x58]
 
 inductive MarketState where
   | preopening -- Preopening
+  | overnightSession -- Overnight Session
   | earlySession -- Early Session
   | coreSession -- Core Session
   | lateSessionNonNyseOnly -- Late Session Non Nyse Only
@@ -632,6 +637,7 @@ namespace MarketState
 
 def toByte : MarketState → UInt8
   | .preopening => 0x50
+  | .overnightSession => 0x4E
   | .earlySession => 0x45
   | .coreSession => 0x4F
   | .lateSessionNonNyseOnly => 0x4C
@@ -641,6 +647,7 @@ def toByte : MarketState → UInt8
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : MarketState :=
   if byte = 0x50 then .preopening
+  else if byte = 0x4E then .overnightSession
   else if byte = 0x45 then .earlySession
   else if byte = 0x4F then .coreSession
   else if byte = 0x4C then .lateSessionNonNyseOnly
@@ -652,6 +659,7 @@ def ofByte (byte : UInt8) : MarketState :=
 theorem ofByte_toByte (value : MarketState) : ofByte value.toByte = value := by
   cases value with
   | preopening => decide
+  | overnightSession => decide
   | earlySession => decide
   | coreSession => decide
   | lateSessionNonNyseOnly => decide

@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 1322 | 3534169 |
+| 1322 | 3534997 |
 
 ## Testing
 

@@ -16,12 +16,11 @@ namespace Omi.MemxMemxequitiesMemoSbeV11Server
 
 /-- Supported Request Mode: one byte code -/
 def SupportedRequestMode.codes : List UInt8 :=
-  [0x53, 0x52, 0x54]
+  [0x53, 0x52]
 
 inductive SupportedRequestMode where
   | stream -- Stream
   | replay -- Replay
-  | snapshotMode -- Snapshot Mode
   | unlisted (byte : { byte : UInt8 // byte ∉ SupportedRequestMode.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -30,14 +29,12 @@ namespace SupportedRequestMode
 def toByte : SupportedRequestMode → UInt8
   | .stream => 0x53
   | .replay => 0x52
-  | .snapshotMode => 0x54
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : SupportedRequestMode :=
   if byte = 0x53 then .stream
-  else if byte = 0x52 then .replay
-  else .snapshotMode
+  else .replay
 
 def ofByte (byte : UInt8) : SupportedRequestMode :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -46,7 +43,6 @@ theorem ofByte_toByte (value : SupportedRequestMode) : ofByte value.toByte = val
   cases value with
   | stream => decide
   | replay => decide
-  | snapshotMode => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : SupportedRequestMode) : List UInt8 :=
@@ -392,6 +388,36 @@ theorem encode_length_pos (message : LoginRejectedMessage) : (encode message).le
   rfl
 
 end LoginRejectedMessage
+
+/-- Start Of Session Message: 8 bytes -/
+structure StartOfSessionMessage where
+  sessionId : BitVec 64
+  deriving DecidableEq, Repr
+
+namespace StartOfSessionMessage
+
+def encode (message : StartOfSessionMessage) : List UInt8 :=
+  encodeUInt 8 message.sessionId
+
+def decode (bytes : List UInt8) : Option (StartOfSessionMessage × List UInt8) := do
+  let (sessionId, bytes) ← decodeUInt 8 bytes
+  pure ({ sessionId }, bytes)
+
+@[simp] theorem encode_length (message : StartOfSessionMessage) : (encode message).length = 8 := by
+  unfold encode
+  simp only [encodeUInt_length]
+
+theorem encode_length_pos (message : StartOfSessionMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : StartOfSessionMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end StartOfSessionMessage
 
 /-- Replay Begin Message: 12 bytes -/
 structure ReplayBeginMessage where
@@ -2200,6 +2226,7 @@ end SequencedMessage
 inductive ServerData where
   | loginAcceptedMessage (message : LoginAcceptedMessage) -- 1
   | loginRejectedMessage (message : LoginRejectedMessage) -- 2
+  | startOfSessionMessage (message : StartOfSessionMessage) -- 3
   | replayBeginMessage (message : ReplayBeginMessage) -- 5
   | replayRejectedMessage (message : ReplayRejectedMessage) -- 6
   | replayCompleteMessage (message : ReplayCompleteMessage) -- 7
@@ -2215,6 +2242,7 @@ namespace ServerData
 def tag : ServerData → BitVec 8
   | .loginAcceptedMessage _ => 1
   | .loginRejectedMessage _ => 2
+  | .startOfSessionMessage _ => 3
   | .replayBeginMessage _ => 5
   | .replayRejectedMessage _ => 6
   | .replayCompleteMessage _ => 7
@@ -2226,6 +2254,7 @@ def tag : ServerData → BitVec 8
 def encode : ServerData → List UInt8
   | .loginAcceptedMessage message => LoginAcceptedMessage.encode message
   | .loginRejectedMessage message => LoginRejectedMessage.encode message
+  | .startOfSessionMessage message => StartOfSessionMessage.encode message
   | .replayBeginMessage message => ReplayBeginMessage.encode message
   | .replayRejectedMessage message => ReplayRejectedMessage.encode message
   | .replayCompleteMessage message => ReplayCompleteMessage.encode message
@@ -2237,6 +2266,7 @@ def encode : ServerData → List UInt8
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (ServerData × List UInt8) :=
   if tag = 1 then (LoginAcceptedMessage.decode bytes).map fun (message, rest) => (.loginAcceptedMessage message, rest)
   else if tag = 2 then (LoginRejectedMessage.decode bytes).map fun (message, rest) => (.loginRejectedMessage message, rest)
+  else if tag = 3 then (StartOfSessionMessage.decode bytes).map fun (message, rest) => (.startOfSessionMessage message, rest)
   else if tag = 5 then (ReplayBeginMessage.decode bytes).map fun (message, rest) => (.replayBeginMessage message, rest)
   else if tag = 6 then (ReplayRejectedMessage.decode bytes).map fun (message, rest) => (.replayRejectedMessage message, rest)
   else if tag = 7 then (ReplayCompleteMessage.decode bytes).map fun (message, rest) => (.replayCompleteMessage message, rest)

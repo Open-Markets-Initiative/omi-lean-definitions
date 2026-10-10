@@ -1434,6 +1434,86 @@ theorem encode_length_pos (message : MassCancelClearLockoutRequestMessage) : (en
 
 end MassCancelClearLockoutRequestMessage
 
+/-- Mass Cancel Bulk Clear All Lockouts Request Message: 28 bytes -/
+structure MassCancelBulkClearAllLockoutsRequestMessage where
+  sendingTime : BitVec 64
+  clordid : Alpha 20
+  deriving DecidableEq, Repr
+
+namespace MassCancelBulkClearAllLockoutsRequestMessage
+
+def encode (message : MassCancelBulkClearAllLockoutsRequestMessage) : List UInt8 :=
+  encodeUInt 8 message.sendingTime
+    ++ (Alpha.encode message.clordid)
+
+def decode (bytes : List UInt8) : Option (MassCancelBulkClearAllLockoutsRequestMessage × List UInt8) := do
+  let (sendingTime, bytes) ← decodeUInt 8 bytes
+  let (clordid, bytes) ← Alpha.decode 20 bytes
+  pure ({ sendingTime, clordid }, bytes)
+
+@[simp] theorem encode_length (message : MassCancelBulkClearAllLockoutsRequestMessage) : (encode message).length = 28 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : MassCancelBulkClearAllLockoutsRequestMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : MassCancelBulkClearAllLockoutsRequestMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [Alpha.decode_encode, some_bind]
+  rfl
+
+end MassCancelBulkClearAllLockoutsRequestMessage
+
+/-- Mass Cancel Bulk Clear Lockouts By Efid Or Underlier Request Message: 38 bytes -/
+structure MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage where
+  sendingTime : BitVec 64
+  clordid : Alpha 20
+  efidOptional : Alpha 4
+  underlierOptional : Alpha 6
+  deriving DecidableEq, Repr
+
+namespace MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage
+
+def encode (message : MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage) : List UInt8 :=
+  encodeUInt 8 message.sendingTime
+    ++ (Alpha.encode message.clordid
+    ++ (Alpha.encode message.efidOptional
+    ++ (Alpha.encode message.underlierOptional)))
+
+def decode (bytes : List UInt8) : Option (MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage × List UInt8) := do
+  let (sendingTime, bytes) ← decodeUInt 8 bytes
+  let (clordid, bytes) ← Alpha.decode 20 bytes
+  let (efidOptional, bytes) ← Alpha.decode 4 bytes
+  let (underlierOptional, bytes) ← Alpha.decode 6 bytes
+  pure ({ sendingTime, clordid, efidOptional, underlierOptional }, bytes)
+
+@[simp] theorem encode_length (message : MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage) : (encode message).length = 38 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length, Alpha.encode_length]
+
+theorem encode_length_pos (message : MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [Alpha.decode_encode, some_bind]
+  rfl
+
+end MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage
+
 /-- Execution Allocations Group: 20 bytes -/
 structure ExecutionAllocationsGroup where
   tradeId : BitVec 64
@@ -1780,86 +1860,6 @@ theorem encode_length_le (message : AllocationInstructionMessage) : (encode mess
 
 end AllocationInstructionMessage
 
-/-- Mass Cancel Bulk Clear All Lockouts Request Message: 28 bytes -/
-structure MassCancelBulkClearAllLockoutsRequestMessage where
-  sendingTime : BitVec 64
-  clordid : Alpha 20
-  deriving DecidableEq, Repr
-
-namespace MassCancelBulkClearAllLockoutsRequestMessage
-
-def encode (message : MassCancelBulkClearAllLockoutsRequestMessage) : List UInt8 :=
-  encodeUInt 8 message.sendingTime
-    ++ (Alpha.encode message.clordid)
-
-def decode (bytes : List UInt8) : Option (MassCancelBulkClearAllLockoutsRequestMessage × List UInt8) := do
-  let (sendingTime, bytes) ← decodeUInt 8 bytes
-  let (clordid, bytes) ← Alpha.decode 20 bytes
-  pure ({ sendingTime, clordid }, bytes)
-
-@[simp] theorem encode_length (message : MassCancelBulkClearAllLockoutsRequestMessage) : (encode message).length = 28 := by
-  unfold encode
-  simp only [List.length_append, encodeUInt_length, Alpha.encode_length]
-
-theorem encode_length_pos (message : MassCancelBulkClearAllLockoutsRequestMessage) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
-
-@[simp] theorem decode_encode (message : MassCancelBulkClearAllLockoutsRequestMessage) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [Alpha.decode_encode, some_bind]
-  rfl
-
-end MassCancelBulkClearAllLockoutsRequestMessage
-
-/-- Mass Cancel Bulk Clear Lockouts By Efid Or Underlier Request Message: 38 bytes -/
-structure MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage where
-  sendingTime : BitVec 64
-  clordid : Alpha 20
-  efidOptional : Alpha 4
-  underlierOptional : Alpha 6
-  deriving DecidableEq, Repr
-
-namespace MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage
-
-def encode (message : MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage) : List UInt8 :=
-  encodeUInt 8 message.sendingTime
-    ++ (Alpha.encode message.clordid
-    ++ (Alpha.encode message.efidOptional
-    ++ (Alpha.encode message.underlierOptional)))
-
-def decode (bytes : List UInt8) : Option (MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage × List UInt8) := do
-  let (sendingTime, bytes) ← decodeUInt 8 bytes
-  let (clordid, bytes) ← Alpha.decode 20 bytes
-  let (efidOptional, bytes) ← Alpha.decode 4 bytes
-  let (underlierOptional, bytes) ← Alpha.decode 6 bytes
-  pure ({ sendingTime, clordid, efidOptional, underlierOptional }, bytes)
-
-@[simp] theorem encode_length (message : MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage) : (encode message).length = 38 := by
-  unfold encode
-  simp only [List.length_append, encodeUInt_length, Alpha.encode_length]
-
-theorem encode_length_pos (message : MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
-
-@[simp] theorem decode_encode (message : MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [Alpha.decode_encode, some_bind]
-  rfl
-
-end MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage
-
 /-- Any Client Payload, selected by Template Id -/
 inductive ClientPayload where
   | newOrderSingleMessage (message : NewOrderSingleMessage) -- 1
@@ -1871,9 +1871,9 @@ inductive ClientPayload where
   | orderCancelRequestMessage (message : OrderCancelRequestMessage) -- 7
   | massCancelRequestMessage (message : MassCancelRequestMessage) -- 8
   | massCancelClearLockoutRequestMessage (message : MassCancelClearLockoutRequestMessage) -- 9
-  | allocationInstructionMessage (message : AllocationInstructionMessage) -- 10
   | massCancelBulkClearAllLockoutsRequestMessage (message : MassCancelBulkClearAllLockoutsRequestMessage) -- 32
   | massCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage (message : MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage) -- 33
+  | allocationInstructionMessage (message : AllocationInstructionMessage) -- 10
   deriving DecidableEq, Repr
 
 namespace ClientPayload
@@ -1889,9 +1889,9 @@ def tag : ClientPayload → BitVec 8
   | .orderCancelRequestMessage _ => 7
   | .massCancelRequestMessage _ => 8
   | .massCancelClearLockoutRequestMessage _ => 9
-  | .allocationInstructionMessage _ => 10
   | .massCancelBulkClearAllLockoutsRequestMessage _ => 32
   | .massCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage _ => 33
+  | .allocationInstructionMessage _ => 10
 
 def encode : ClientPayload → List UInt8
   | .newOrderSingleMessage message => NewOrderSingleMessage.encode message
@@ -1903,9 +1903,9 @@ def encode : ClientPayload → List UInt8
   | .orderCancelRequestMessage message => OrderCancelRequestMessage.encode message
   | .massCancelRequestMessage message => MassCancelRequestMessage.encode message
   | .massCancelClearLockoutRequestMessage message => MassCancelClearLockoutRequestMessage.encode message
-  | .allocationInstructionMessage message => AllocationInstructionMessage.encode message
   | .massCancelBulkClearAllLockoutsRequestMessage message => MassCancelBulkClearAllLockoutsRequestMessage.encode message
   | .massCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage message => MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage.encode message
+  | .allocationInstructionMessage message => AllocationInstructionMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : ClientPayload) : (encode message).length ≤ 1177653 := by
@@ -1942,15 +1942,15 @@ theorem encode_length_le (message : ClientPayload) : (encode message).length ≤
   | massCancelClearLockoutRequestMessage inner =>
     simp only [encode, MassCancelClearLockoutRequestMessage.encode_length]
     omega
-  | allocationInstructionMessage inner =>
-    have bound_inner := AllocationInstructionMessage.encode_length_le inner
-    simp only [encode]
-    omega
   | massCancelBulkClearAllLockoutsRequestMessage inner =>
     simp only [encode, MassCancelBulkClearAllLockoutsRequestMessage.encode_length]
     omega
   | massCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage inner =>
     simp only [encode, MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage.encode_length]
+    omega
+  | allocationInstructionMessage inner =>
+    have bound_inner := AllocationInstructionMessage.encode_length_le inner
+    simp only [encode]
     omega
 
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (ClientPayload × List UInt8) :=
@@ -1963,9 +1963,9 @@ def decode (tag : BitVec 8) (bytes : List UInt8) : Option (ClientPayload × List
   else if tag = 7 then (OrderCancelRequestMessage.decode bytes).map fun (message, rest) => (.orderCancelRequestMessage message, rest)
   else if tag = 8 then (MassCancelRequestMessage.decode bytes).map fun (message, rest) => (.massCancelRequestMessage message, rest)
   else if tag = 9 then (MassCancelClearLockoutRequestMessage.decode bytes).map fun (message, rest) => (.massCancelClearLockoutRequestMessage message, rest)
-  else if tag = 10 then (AllocationInstructionMessage.decode bytes).map fun (message, rest) => (.allocationInstructionMessage message, rest)
   else if tag = 32 then (MassCancelBulkClearAllLockoutsRequestMessage.decode bytes).map fun (message, rest) => (.massCancelBulkClearAllLockoutsRequestMessage message, rest)
   else if tag = 33 then (MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage.decode bytes).map fun (message, rest) => (.massCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage message, rest)
+  else if tag = 10 then (AllocationInstructionMessage.decode bytes).map fun (message, rest) => (.allocationInstructionMessage message, rest)
   else none
 
 @[simp] theorem decode_encode (message : ClientPayload) (rest : List UInt8) :
@@ -2040,15 +2040,15 @@ theorem encode_length_le (message : ClientSbeMessage) : (encode message).length 
   | massCancelClearLockoutRequestMessage inner =>
     simp only [ClientPayload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MassCancelClearLockoutRequestMessage.encode_length]
     omega
-  | allocationInstructionMessage inner =>
-    have bound_inner := AllocationInstructionMessage.encode_length_le inner
-    simp only [ClientPayload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length]
-    omega
   | massCancelBulkClearAllLockoutsRequestMessage inner =>
     simp only [ClientPayload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MassCancelBulkClearAllLockoutsRequestMessage.encode_length]
     omega
   | massCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage inner =>
     simp only [ClientPayload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MassCancelBulkClearLockoutsByEfidOrUnderlierRequestMessage.encode_length]
+    omega
+  | allocationInstructionMessage inner =>
+    have bound_inner := AllocationInstructionMessage.encode_length_le inner
+    simp only [ClientPayload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length]
     omega
 
 @[simp] theorem decode_encode (message : ClientSbeMessage) (rest : List UInt8) :

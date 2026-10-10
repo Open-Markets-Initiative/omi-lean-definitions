@@ -371,6 +371,77 @@ def decode : List UInt8 → Option (MassActionOrdTyp × List UInt8)
 
 end MassActionOrdTyp
 
+/-- Dk Reason: one byte code -/
+def DkReason.codes : List UInt8 :=
+  [0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x5A]
+
+inductive DkReason where
+  | unknownSecurity -- Unknown Security
+  | wrongSide -- Wrong Side
+  | quantityExceedsOrder -- Quantity Exceeds Order
+  | noMatchingOrder -- No Matching Order
+  | priceExceedsLimit -- Price Exceeds Limit
+  | calculationDifference -- Calculation Difference
+  | noMatchingExecutionReport -- No Matching Execution Report
+  | other -- Other
+  | unlisted (byte : { byte : UInt8 // byte ∉ DkReason.codes }) -- any other code, kept as it is
+  deriving DecidableEq, Repr
+
+namespace DkReason
+
+def toByte : DkReason → UInt8
+  | .unknownSecurity => 0x41
+  | .wrongSide => 0x42
+  | .quantityExceedsOrder => 0x43
+  | .noMatchingOrder => 0x44
+  | .priceExceedsLimit => 0x45
+  | .calculationDifference => 0x46
+  | .noMatchingExecutionReport => 0x47
+  | .other => 0x5A
+  | .unlisted byte => byte.val
+
+/-- The constructor of a listed code -/
+def listed (byte : UInt8) : DkReason :=
+  if byte = 0x41 then .unknownSecurity
+  else if byte = 0x42 then .wrongSide
+  else if byte = 0x43 then .quantityExceedsOrder
+  else if byte = 0x44 then .noMatchingOrder
+  else if byte = 0x45 then .priceExceedsLimit
+  else if byte = 0x46 then .calculationDifference
+  else if byte = 0x47 then .noMatchingExecutionReport
+  else .other
+
+def ofByte (byte : UInt8) : DkReason :=
+  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
+
+theorem ofByte_toByte (value : DkReason) : ofByte value.toByte = value := by
+  cases value with
+  | unknownSecurity => decide
+  | wrongSide => decide
+  | quantityExceedsOrder => decide
+  | noMatchingOrder => decide
+  | priceExceedsLimit => decide
+  | calculationDifference => decide
+  | noMatchingExecutionReport => decide
+  | other => decide
+  | unlisted byte => simp [ofByte, toByte, byte.property]
+
+def encode (value : DkReason) : List UInt8 :=
+  [value.toByte]
+
+def decode : List UInt8 → Option (DkReason × List UInt8)
+  | byte :: rest => some (ofByte byte, rest)
+  | [] => none
+
+@[simp] theorem encode_length (value : DkReason) : (encode value).length = 1 :=
+  rfl
+
+@[simp] theorem decode_encode (value : DkReason) (rest : List UInt8) :
+    decode (encode value ++ rest) = some (value, rest) := by
+  simp [decode, encode, ofByte_toByte]
+
+end DkReason
+
 /-- Credentials -/
 structure Credentials where
   credentialsData : Bounded 2 UInt8
@@ -2322,6 +2393,86 @@ theorem encode_length_le (message : PartyDetailsListRequest) : (encode message).
 
 end PartyDetailsListRequest
 
+/-- Execution Ack: 67 bytes -/
+structure ExecutionAck where
+  partyDetailsListReqId : BitVec 64
+  orderId : BitVec 64
+  execAckStatus : BitVec 8
+  seqNum : BitVec 32
+  clordid : Alpha 20
+  secExecId : BitVec 64
+  lastPx : BitVec 64
+  securityId : BitVec 32
+  lastQty : BitVec 32
+  dkReason : DkReason
+  side : BitVec 8
+  deriving DecidableEq, Repr
+
+namespace ExecutionAck
+
+def encode (message : ExecutionAck) : List UInt8 :=
+  encodeUIntLE 8 message.partyDetailsListReqId
+    ++ (encodeUIntLE 8 message.orderId
+    ++ (encodeUInt 1 message.execAckStatus
+    ++ (encodeUIntLE 4 message.seqNum
+    ++ (Alpha.encode message.clordid
+    ++ (encodeUIntLE 8 message.secExecId
+    ++ (encodeUIntLE 8 message.lastPx
+    ++ (encodeUIntLE 4 message.securityId
+    ++ (encodeUIntLE 4 message.lastQty
+    ++ (DkReason.encode message.dkReason
+    ++ (encodeUInt 1 message.side))))))))))
+
+def decode (bytes : List UInt8) : Option (ExecutionAck × List UInt8) := do
+  let (partyDetailsListReqId, bytes) ← decodeUIntLE 8 bytes
+  let (orderId, bytes) ← decodeUIntLE 8 bytes
+  let (execAckStatus, bytes) ← decodeUInt 1 bytes
+  let (seqNum, bytes) ← decodeUIntLE 4 bytes
+  let (clordid, bytes) ← Alpha.decode 20 bytes
+  let (secExecId, bytes) ← decodeUIntLE 8 bytes
+  let (lastPx, bytes) ← decodeUIntLE 8 bytes
+  let (securityId, bytes) ← decodeUIntLE 4 bytes
+  let (lastQty, bytes) ← decodeUIntLE 4 bytes
+  let (dkReason, bytes) ← DkReason.decode bytes
+  let (side, bytes) ← decodeUInt 1 bytes
+  pure ({ partyDetailsListReqId, orderId, execAckStatus, seqNum, clordid, secExecId, lastPx, securityId, lastQty, dkReason, side }, bytes)
+
+@[simp] theorem encode_length (message : ExecutionAck) : (encode message).length = 67 := by
+  unfold encode
+  simp only [List.length_append, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length, DkReason.encode_length]
+
+theorem encode_length_pos (message : ExecutionAck) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : ExecutionAck) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, DkReason.decode_encode, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end ExecutionAck
+
 /-- Related Sym Group: 9 bytes -/
 structure RelatedSymGroup where
   securityId : BitVec 32
@@ -2907,6 +3058,7 @@ inductive ClientPayload where
   | orderMassStatusRequest (message : OrderMassStatusRequest) -- 530
   | orderStatusRequest (message : OrderStatusRequest) -- 533
   | partyDetailsListRequest (message : PartyDetailsListRequest) -- 537
+  | executionAck (message : ExecutionAck) -- 539
   | requestForQuote (message : RequestForQuote) -- 543
   | newOrderCross (message : NewOrderCross) -- 544
   | securityDefinitionRequest (message : SecurityDefinitionRequest) -- 560
@@ -2931,6 +3083,7 @@ def tag : ClientPayload → BitVec 16
   | .orderMassStatusRequest _ => 530
   | .orderStatusRequest _ => 533
   | .partyDetailsListRequest _ => 537
+  | .executionAck _ => 539
   | .requestForQuote _ => 543
   | .newOrderCross _ => 544
   | .securityDefinitionRequest _ => 560
@@ -2951,6 +3104,7 @@ def encode : ClientPayload → List UInt8
   | .orderMassStatusRequest message => OrderMassStatusRequest.encode message
   | .orderStatusRequest message => OrderStatusRequest.encode message
   | .partyDetailsListRequest message => PartyDetailsListRequest.encode message
+  | .executionAck message => ExecutionAck.encode message
   | .requestForQuote message => RequestForQuote.encode message
   | .newOrderCross message => NewOrderCross.encode message
   | .securityDefinitionRequest message => SecurityDefinitionRequest.encode message
@@ -3009,6 +3163,9 @@ theorem encode_length_le (message : ClientPayload) : (encode message).length ≤
     have bound_inner := PartyDetailsListRequest.encode_length_le inner
     simp only [encode]
     omega
+  | executionAck inner =>
+    simp only [encode, ExecutionAck.encode_length]
+    omega
   | requestForQuote inner =>
     have bound_inner := RequestForQuote.encode_length_le inner
     simp only [encode]
@@ -3038,6 +3195,7 @@ def decode (tag : BitVec 16) (bytes : List UInt8) : Option (ClientPayload × Lis
   else if tag = 530 then (OrderMassStatusRequest.decode bytes).map fun (message, rest) => (.orderMassStatusRequest message, rest)
   else if tag = 533 then (OrderStatusRequest.decode bytes).map fun (message, rest) => (.orderStatusRequest message, rest)
   else if tag = 537 then (PartyDetailsListRequest.decode bytes).map fun (message, rest) => (.partyDetailsListRequest message, rest)
+  else if tag = 539 then (ExecutionAck.decode bytes).map fun (message, rest) => (.executionAck message, rest)
   else if tag = 543 then (RequestForQuote.decode bytes).map fun (message, rest) => (.requestForQuote message, rest)
   else if tag = 544 then (NewOrderCross.decode bytes).map fun (message, rest) => (.newOrderCross message, rest)
   else if tag = 560 then (SecurityDefinitionRequest.decode bytes).map fun (message, rest) => (.securityDefinitionRequest message, rest)

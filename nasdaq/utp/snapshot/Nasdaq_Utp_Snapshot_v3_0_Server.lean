@@ -1050,65 +1050,6 @@ def decode : List UInt8 → Option (RetailInterestIndicator × List UInt8)
 
 end RetailInterestIndicator
 
-/-- Nbbo Appendage Indicator: one byte code -/
-def NbboAppendageIndicator.codes : List UInt8 :=
-  [0x30, 0x31, 0x32, 0x33, 0x34]
-
-inductive NbboAppendageIndicator where
-  | noNationalBboChange -- No National Bbo Change
-  | noNationalBboCanBeCalculated -- No National Bbo Can Be Calculated
-  | shortFormNationalBboAppendageAttached -- Short Form National Bbo Appendage Attached
-  | longFormNationalBboAppendageAttached -- Long Form National Bbo Appendage Attached
-  | quoteContainsAllNationalBboInformation -- Quote Contains All National Bbo Information
-  | unlisted (byte : { byte : UInt8 // byte ∉ NbboAppendageIndicator.codes }) -- any other code, kept as it is
-  deriving DecidableEq, Repr
-
-namespace NbboAppendageIndicator
-
-def toByte : NbboAppendageIndicator → UInt8
-  | .noNationalBboChange => 0x30
-  | .noNationalBboCanBeCalculated => 0x31
-  | .shortFormNationalBboAppendageAttached => 0x32
-  | .longFormNationalBboAppendageAttached => 0x33
-  | .quoteContainsAllNationalBboInformation => 0x34
-  | .unlisted byte => byte.val
-
-/-- The constructor of a listed code -/
-def listed (byte : UInt8) : NbboAppendageIndicator :=
-  if byte = 0x30 then .noNationalBboChange
-  else if byte = 0x31 then .noNationalBboCanBeCalculated
-  else if byte = 0x32 then .shortFormNationalBboAppendageAttached
-  else if byte = 0x33 then .longFormNationalBboAppendageAttached
-  else .quoteContainsAllNationalBboInformation
-
-def ofByte (byte : UInt8) : NbboAppendageIndicator :=
-  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
-
-theorem ofByte_toByte (value : NbboAppendageIndicator) : ofByte value.toByte = value := by
-  cases value with
-  | noNationalBboChange => decide
-  | noNationalBboCanBeCalculated => decide
-  | shortFormNationalBboAppendageAttached => decide
-  | longFormNationalBboAppendageAttached => decide
-  | quoteContainsAllNationalBboInformation => decide
-  | unlisted byte => simp [ofByte, toByte, byte.property]
-
-def encode (value : NbboAppendageIndicator) : List UInt8 :=
-  [value.toByte]
-
-def decode : List UInt8 → Option (NbboAppendageIndicator × List UInt8)
-  | byte :: rest => some (ofByte byte, rest)
-  | [] => none
-
-@[simp] theorem encode_length (value : NbboAppendageIndicator) : (encode value).length = 1 :=
-  rfl
-
-@[simp] theorem decode_encode (value : NbboAppendageIndicator) (rest : List UInt8) :
-    decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte_toByte]
-
-end NbboAppendageIndicator
-
 /-- Luld National Bbo Indicator: one byte code -/
 def LuldNationalBboIndicator.codes : List UInt8 :=
   [0x20, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49]
@@ -1188,174 +1129,52 @@ def decode : List UInt8 → Option (LuldNationalBboIndicator × List UInt8)
 
 end LuldNationalBboIndicator
 
-/-- Finra Adf Mpid Appendage Indicator: one byte code -/
-def FinraAdfMpidAppendageIndicator.codes : List UInt8 :=
-  [0x20, 0x30, 0x31, 0x32]
+/-- Side: one byte code -/
+def Side.codes : List UInt8 :=
+  [0x42, 0x41]
 
-inductive FinraAdfMpidAppendageIndicator where
-  | notApplicableQuotationOriginatesFromAUtpParticipantOtherThanFinra -- Not Applicable Quotation Originates From A Utp Participant Other Than Finra
-  | noAdfMpidChangesCurrentAdfQuoteDoesNotAffectTheFinraMpid -- No Adf Mpid Changes Current Adf Quote Does Not Affect The Finra Mpid
-  | noAdfMpidExistsNoCalculationOfTheFinraMpid -- No Adf Mpid Exists No Calculation Of The Finra Mpid
-  | adfMpiDsAttachedFinraMpidWasGenerated -- Adf Mpi Ds Attached Finra Mpid Was Generated
-  | unlisted (byte : { byte : UInt8 // byte ∉ FinraAdfMpidAppendageIndicator.codes }) -- any other code, kept as it is
+inductive Side where
+  | updateForTheBidSide -- Update For The Bid Side
+  | updateForTheAskSide -- Update For The Ask Side
+  | unlisted (byte : { byte : UInt8 // byte ∉ Side.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
-namespace FinraAdfMpidAppendageIndicator
+namespace Side
 
-def toByte : FinraAdfMpidAppendageIndicator → UInt8
-  | .notApplicableQuotationOriginatesFromAUtpParticipantOtherThanFinra => 0x20
-  | .noAdfMpidChangesCurrentAdfQuoteDoesNotAffectTheFinraMpid => 0x30
-  | .noAdfMpidExistsNoCalculationOfTheFinraMpid => 0x31
-  | .adfMpiDsAttachedFinraMpidWasGenerated => 0x32
+def toByte : Side → UInt8
+  | .updateForTheBidSide => 0x42
+  | .updateForTheAskSide => 0x41
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
-def listed (byte : UInt8) : FinraAdfMpidAppendageIndicator :=
-  if byte = 0x20 then .notApplicableQuotationOriginatesFromAUtpParticipantOtherThanFinra
-  else if byte = 0x30 then .noAdfMpidChangesCurrentAdfQuoteDoesNotAffectTheFinraMpid
-  else if byte = 0x31 then .noAdfMpidExistsNoCalculationOfTheFinraMpid
-  else .adfMpiDsAttachedFinraMpidWasGenerated
+def listed (byte : UInt8) : Side :=
+  if byte = 0x42 then .updateForTheBidSide
+  else .updateForTheAskSide
 
-def ofByte (byte : UInt8) : FinraAdfMpidAppendageIndicator :=
+def ofByte (byte : UInt8) : Side :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
 
-theorem ofByte_toByte (value : FinraAdfMpidAppendageIndicator) : ofByte value.toByte = value := by
+theorem ofByte_toByte (value : Side) : ofByte value.toByte = value := by
   cases value with
-  | notApplicableQuotationOriginatesFromAUtpParticipantOtherThanFinra => decide
-  | noAdfMpidChangesCurrentAdfQuoteDoesNotAffectTheFinraMpid => decide
-  | noAdfMpidExistsNoCalculationOfTheFinraMpid => decide
-  | adfMpiDsAttachedFinraMpidWasGenerated => decide
+  | updateForTheBidSide => decide
+  | updateForTheAskSide => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
-def encode (value : FinraAdfMpidAppendageIndicator) : List UInt8 :=
+def encode (value : Side) : List UInt8 :=
   [value.toByte]
 
-def decode : List UInt8 → Option (FinraAdfMpidAppendageIndicator × List UInt8)
+def decode : List UInt8 → Option (Side × List UInt8)
   | byte :: rest => some (ofByte byte, rest)
   | [] => none
 
-@[simp] theorem encode_length (value : FinraAdfMpidAppendageIndicator) : (encode value).length = 1 :=
+@[simp] theorem encode_length (value : Side) : (encode value).length = 1 :=
   rfl
 
-@[simp] theorem decode_encode (value : FinraAdfMpidAppendageIndicator) (rest : List UInt8) :
+@[simp] theorem decode_encode (value : Side) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
 
-end FinraAdfMpidAppendageIndicator
-
-/-- Bolo Appendage Indicator: one byte code -/
-def BoloAppendageIndicator.codes : List UInt8 :=
-  [0x30, 0x31, 0x32, 0x33, 0x35]
-
-inductive BoloAppendageIndicator where
-  | noBoloChange -- No Bolo Change
-  | noBoloCanBeCalculated -- No Bolo Can Be Calculated
-  | shortFormBoloAppendageAttached -- Short Form Bolo Appendage Attached
-  | longFormBoloAppendageAttached -- Long Form Bolo Appendage Attached
-  | mpidFormBoloAppendageAttached -- Mpid Form Bolo Appendage Attached
-  | unlisted (byte : { byte : UInt8 // byte ∉ BoloAppendageIndicator.codes }) -- any other code, kept as it is
-  deriving DecidableEq, Repr
-
-namespace BoloAppendageIndicator
-
-def toByte : BoloAppendageIndicator → UInt8
-  | .noBoloChange => 0x30
-  | .noBoloCanBeCalculated => 0x31
-  | .shortFormBoloAppendageAttached => 0x32
-  | .longFormBoloAppendageAttached => 0x33
-  | .mpidFormBoloAppendageAttached => 0x35
-  | .unlisted byte => byte.val
-
-/-- The constructor of a listed code -/
-def listed (byte : UInt8) : BoloAppendageIndicator :=
-  if byte = 0x30 then .noBoloChange
-  else if byte = 0x31 then .noBoloCanBeCalculated
-  else if byte = 0x32 then .shortFormBoloAppendageAttached
-  else if byte = 0x33 then .longFormBoloAppendageAttached
-  else .mpidFormBoloAppendageAttached
-
-def ofByte (byte : UInt8) : BoloAppendageIndicator :=
-  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
-
-theorem ofByte_toByte (value : BoloAppendageIndicator) : ofByte value.toByte = value := by
-  cases value with
-  | noBoloChange => decide
-  | noBoloCanBeCalculated => decide
-  | shortFormBoloAppendageAttached => decide
-  | longFormBoloAppendageAttached => decide
-  | mpidFormBoloAppendageAttached => decide
-  | unlisted byte => simp [ofByte, toByte, byte.property]
-
-def encode (value : BoloAppendageIndicator) : List UInt8 :=
-  [value.toByte]
-
-def decode : List UInt8 → Option (BoloAppendageIndicator × List UInt8)
-  | byte :: rest => some (ofByte byte, rest)
-  | [] => none
-
-@[simp] theorem encode_length (value : BoloAppendageIndicator) : (encode value).length = 1 :=
-  rfl
-
-@[simp] theorem decode_encode (value : BoloAppendageIndicator) (rest : List UInt8) :
-    decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte_toByte]
-
-end BoloAppendageIndicator
-
-/-- Odd Lot Attachment Type: one byte code -/
-def OddLotAttachmentType.codes : List UInt8 :=
-  [0x30, 0x32, 0x33, 0x35]
-
-inductive OddLotAttachmentType where
-  | noOddLotPriceLevelsAttached -- No Odd Lot Price Levels Attached
-  | shortFormOddLotPriceLevelsAttached -- Short Form Odd Lot Price Levels Attached
-  | longFormOddLotPriceLevelsAttached -- Long Form Odd Lot Price Levels Attached
-  | mpidFormOddLotPriceLevelsAttached -- Mpid Form Odd Lot Price Levels Attached
-  | unlisted (byte : { byte : UInt8 // byte ∉ OddLotAttachmentType.codes }) -- any other code, kept as it is
-  deriving DecidableEq, Repr
-
-namespace OddLotAttachmentType
-
-def toByte : OddLotAttachmentType → UInt8
-  | .noOddLotPriceLevelsAttached => 0x30
-  | .shortFormOddLotPriceLevelsAttached => 0x32
-  | .longFormOddLotPriceLevelsAttached => 0x33
-  | .mpidFormOddLotPriceLevelsAttached => 0x35
-  | .unlisted byte => byte.val
-
-/-- The constructor of a listed code -/
-def listed (byte : UInt8) : OddLotAttachmentType :=
-  if byte = 0x30 then .noOddLotPriceLevelsAttached
-  else if byte = 0x32 then .shortFormOddLotPriceLevelsAttached
-  else if byte = 0x33 then .longFormOddLotPriceLevelsAttached
-  else .mpidFormOddLotPriceLevelsAttached
-
-def ofByte (byte : UInt8) : OddLotAttachmentType :=
-  if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
-
-theorem ofByte_toByte (value : OddLotAttachmentType) : ofByte value.toByte = value := by
-  cases value with
-  | noOddLotPriceLevelsAttached => decide
-  | shortFormOddLotPriceLevelsAttached => decide
-  | longFormOddLotPriceLevelsAttached => decide
-  | mpidFormOddLotPriceLevelsAttached => decide
-  | unlisted byte => simp [ofByte, toByte, byte.property]
-
-def encode (value : OddLotAttachmentType) : List UInt8 :=
-  [value.toByte]
-
-def decode : List UInt8 → Option (OddLotAttachmentType × List UInt8)
-  | byte :: rest => some (ofByte byte, rest)
-  | [] => none
-
-@[simp] theorem encode_length (value : OddLotAttachmentType) : (encode value).length = 1 :=
-  rfl
-
-@[simp] theorem decode_encode (value : OddLotAttachmentType) (rest : List UInt8) :
-    decode (encode value ++ rest) = some (value, rest) := by
-  simp [decode, encode, ofByte_toByte]
-
-end OddLotAttachmentType
+end Side
 
 /-- Issue Symbol Directory Message: 87 bytes -/
 structure IssueSymbolDirectoryMessage where
@@ -2647,6 +2466,86 @@ theorem encode_length_pos (message : NationalBboAppendageLongform) : (encode mes
 
 end NationalBboAppendageLongform
 
+/-- Nbbo Appendage Indicator: 0 bytes -/
+structure NbboAppendageAbsent where
+  deriving DecidableEq, Repr
+
+namespace NbboAppendageAbsent
+
+def encode (_ : NbboAppendageAbsent) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (NbboAppendageAbsent × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : NbboAppendageAbsent) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : NbboAppendageAbsent) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end NbboAppendageAbsent
+
+/-- The National Bbo Appendage Longform the Nbbo Appendage Indicator says is attached, or none -/
+inductive NbboAppendageChoice where
+  | nationalBboAppendageLongform (message : NationalBboAppendageLongform) -- "3" 0x33
+  | noNationalBboChange (message : NbboAppendageAbsent) -- "0" 0x30
+  | noNationalBboCanBeCalculated (message : NbboAppendageAbsent) -- "1" 0x31
+  | shortFormNationalBboAppendageAttached (message : NbboAppendageAbsent) -- "2" 0x32
+  | quoteContainsAllNationalBboInformation (message : NbboAppendageAbsent) -- "4" 0x34
+  deriving DecidableEq, Repr
+
+namespace NbboAppendageChoice
+
+/-- The Nbbo Appendage Indicator each message is sent under -/
+def tag : NbboAppendageChoice → BitVec 8
+  | .nationalBboAppendageLongform _ => 51
+  | .noNationalBboChange _ => 48
+  | .noNationalBboCanBeCalculated _ => 49
+  | .shortFormNationalBboAppendageAttached _ => 50
+  | .quoteContainsAllNationalBboInformation _ => 52
+
+def encode : NbboAppendageChoice → List UInt8
+  | .nationalBboAppendageLongform message => NationalBboAppendageLongform.encode message
+  | .noNationalBboChange message => NbboAppendageAbsent.encode message
+  | .noNationalBboCanBeCalculated message => NbboAppendageAbsent.encode message
+  | .shortFormNationalBboAppendageAttached message => NbboAppendageAbsent.encode message
+  | .quoteContainsAllNationalBboInformation message => NbboAppendageAbsent.encode message
+
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : NbboAppendageChoice) : (encode message).length ≤ 27 := by
+  cases message with
+  | nationalBboAppendageLongform inner =>
+    simp only [encode, NationalBboAppendageLongform.encode_length]
+    omega
+  | noNationalBboChange inner =>
+    simp only [encode, NbboAppendageAbsent.encode_length]
+    omega
+  | noNationalBboCanBeCalculated inner =>
+    simp only [encode, NbboAppendageAbsent.encode_length]
+    omega
+  | shortFormNationalBboAppendageAttached inner =>
+    simp only [encode, NbboAppendageAbsent.encode_length]
+    omega
+  | quoteContainsAllNationalBboInformation inner =>
+    simp only [encode, NbboAppendageAbsent.encode_length]
+    omega
+
+def decode (tag : BitVec 8) (bytes : List UInt8) : Option (NbboAppendageChoice × List UInt8) :=
+  if tag = 51 then (NationalBboAppendageLongform.decode bytes).map fun (message, rest) => (.nationalBboAppendageLongform message, rest)
+  else if tag = 48 then (NbboAppendageAbsent.decode bytes).map fun (message, rest) => (.noNationalBboChange message, rest)
+  else if tag = 49 then (NbboAppendageAbsent.decode bytes).map fun (message, rest) => (.noNationalBboCanBeCalculated message, rest)
+  else if tag = 50 then (NbboAppendageAbsent.decode bytes).map fun (message, rest) => (.shortFormNationalBboAppendageAttached message, rest)
+  else if tag = 52 then (NbboAppendageAbsent.decode bytes).map fun (message, rest) => (.quoteContainsAllNationalBboInformation message, rest)
+  else none
+
+@[simp] theorem decode_encode (message : NbboAppendageChoice) (rest : List UInt8) :
+    decode (tag message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, tag]
+
+end NbboAppendageChoice
+
 /-- Finra Adf Mpid Appendage: 8 bytes -/
 structure FinraAdfMpidAppendage where
   bidAdfMpid : Alpha 4
@@ -2681,6 +2580,79 @@ theorem encode_length_pos (message : FinraAdfMpidAppendage) : (encode message).l
   rfl
 
 end FinraAdfMpidAppendage
+
+/-- Finra Adf Mpid Appendage Indicator: 0 bytes -/
+structure FinraAdfMpidAppendageAbsent where
+  deriving DecidableEq, Repr
+
+namespace FinraAdfMpidAppendageAbsent
+
+def encode (_ : FinraAdfMpidAppendageAbsent) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (FinraAdfMpidAppendageAbsent × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : FinraAdfMpidAppendageAbsent) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : FinraAdfMpidAppendageAbsent) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end FinraAdfMpidAppendageAbsent
+
+/-- The Finra Adf Mpid Appendage the Finra Adf Mpid Appendage Indicator says is attached, or none -/
+inductive FinraAdfMpidAppendageChoice where
+  | finraAdfMpidAppendage (message : FinraAdfMpidAppendage) -- "2" 0x32
+  | notApplicableQuotationOriginatesFromAUtpParticipantOtherThanFinra (message : FinraAdfMpidAppendageAbsent) -- " " 0x20
+  | noAdfMpidChangesCurrentAdfQuoteDoesNotAffectTheFinraMpid (message : FinraAdfMpidAppendageAbsent) -- "0" 0x30
+  | noAdfMpidExistsNoCalculationOfTheFinraMpid (message : FinraAdfMpidAppendageAbsent) -- "1" 0x31
+  deriving DecidableEq, Repr
+
+namespace FinraAdfMpidAppendageChoice
+
+/-- The Finra Adf Mpid Appendage Indicator each message is sent under -/
+def tag : FinraAdfMpidAppendageChoice → BitVec 8
+  | .finraAdfMpidAppendage _ => 50
+  | .notApplicableQuotationOriginatesFromAUtpParticipantOtherThanFinra _ => 32
+  | .noAdfMpidChangesCurrentAdfQuoteDoesNotAffectTheFinraMpid _ => 48
+  | .noAdfMpidExistsNoCalculationOfTheFinraMpid _ => 49
+
+def encode : FinraAdfMpidAppendageChoice → List UInt8
+  | .finraAdfMpidAppendage message => FinraAdfMpidAppendage.encode message
+  | .notApplicableQuotationOriginatesFromAUtpParticipantOtherThanFinra message => FinraAdfMpidAppendageAbsent.encode message
+  | .noAdfMpidChangesCurrentAdfQuoteDoesNotAffectTheFinraMpid message => FinraAdfMpidAppendageAbsent.encode message
+  | .noAdfMpidExistsNoCalculationOfTheFinraMpid message => FinraAdfMpidAppendageAbsent.encode message
+
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : FinraAdfMpidAppendageChoice) : (encode message).length ≤ 8 := by
+  cases message with
+  | finraAdfMpidAppendage inner =>
+    simp only [encode, FinraAdfMpidAppendage.encode_length]
+    omega
+  | notApplicableQuotationOriginatesFromAUtpParticipantOtherThanFinra inner =>
+    simp only [encode, FinraAdfMpidAppendageAbsent.encode_length]
+    omega
+  | noAdfMpidChangesCurrentAdfQuoteDoesNotAffectTheFinraMpid inner =>
+    simp only [encode, FinraAdfMpidAppendageAbsent.encode_length]
+    omega
+  | noAdfMpidExistsNoCalculationOfTheFinraMpid inner =>
+    simp only [encode, FinraAdfMpidAppendageAbsent.encode_length]
+    omega
+
+def decode (tag : BitVec 8) (bytes : List UInt8) : Option (FinraAdfMpidAppendageChoice × List UInt8) :=
+  if tag = 50 then (FinraAdfMpidAppendage.decode bytes).map fun (message, rest) => (.finraAdfMpidAppendage message, rest)
+  else if tag = 32 then (FinraAdfMpidAppendageAbsent.decode bytes).map fun (message, rest) => (.notApplicableQuotationOriginatesFromAUtpParticipantOtherThanFinra message, rest)
+  else if tag = 48 then (FinraAdfMpidAppendageAbsent.decode bytes).map fun (message, rest) => (.noAdfMpidChangesCurrentAdfQuoteDoesNotAffectTheFinraMpid message, rest)
+  else if tag = 49 then (FinraAdfMpidAppendageAbsent.decode bytes).map fun (message, rest) => (.noAdfMpidExistsNoCalculationOfTheFinraMpid message, rest)
+  else none
+
+@[simp] theorem decode_encode (message : FinraAdfMpidAppendageChoice) (rest : List UInt8) :
+    decode (tag message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, tag]
+
+end FinraAdfMpidAppendageChoice
 
 /-- Bolo Appendage Mpid Form: 30 bytes -/
 structure BoloAppendageMpidForm where
@@ -2747,7 +2719,210 @@ theorem encode_length_pos (message : BoloAppendageMpidForm) : (encode message).l
 
 end BoloAppendageMpidForm
 
-/-- Utp Combined Quote Message Long Form: 145 bytes -/
+/-- Bolo Appendage Indicator: 0 bytes -/
+structure BoloAppendageAbsent where
+  deriving DecidableEq, Repr
+
+namespace BoloAppendageAbsent
+
+def encode (_ : BoloAppendageAbsent) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (BoloAppendageAbsent × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : BoloAppendageAbsent) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : BoloAppendageAbsent) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end BoloAppendageAbsent
+
+/-- The Bolo Appendage Mpid Form the Bolo Appendage Indicator says is attached, or none -/
+inductive BoloAppendageChoice where
+  | boloAppendageMpidForm (message : BoloAppendageMpidForm) -- "5" 0x35
+  | noBoloChange (message : BoloAppendageAbsent) -- "0" 0x30
+  | noBoloCanBeCalculated (message : BoloAppendageAbsent) -- "1" 0x31
+  | shortFormBoloAppendageAttached (message : BoloAppendageAbsent) -- "2" 0x32
+  | longFormBoloAppendageAttached (message : BoloAppendageAbsent) -- "3" 0x33
+  deriving DecidableEq, Repr
+
+namespace BoloAppendageChoice
+
+/-- The Bolo Appendage Indicator each message is sent under -/
+def tag : BoloAppendageChoice → BitVec 8
+  | .boloAppendageMpidForm _ => 53
+  | .noBoloChange _ => 48
+  | .noBoloCanBeCalculated _ => 49
+  | .shortFormBoloAppendageAttached _ => 50
+  | .longFormBoloAppendageAttached _ => 51
+
+def encode : BoloAppendageChoice → List UInt8
+  | .boloAppendageMpidForm message => BoloAppendageMpidForm.encode message
+  | .noBoloChange message => BoloAppendageAbsent.encode message
+  | .noBoloCanBeCalculated message => BoloAppendageAbsent.encode message
+  | .shortFormBoloAppendageAttached message => BoloAppendageAbsent.encode message
+  | .longFormBoloAppendageAttached message => BoloAppendageAbsent.encode message
+
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : BoloAppendageChoice) : (encode message).length ≤ 30 := by
+  cases message with
+  | boloAppendageMpidForm inner =>
+    simp only [encode, BoloAppendageMpidForm.encode_length]
+    omega
+  | noBoloChange inner =>
+    simp only [encode, BoloAppendageAbsent.encode_length]
+    omega
+  | noBoloCanBeCalculated inner =>
+    simp only [encode, BoloAppendageAbsent.encode_length]
+    omega
+  | shortFormBoloAppendageAttached inner =>
+    simp only [encode, BoloAppendageAbsent.encode_length]
+    omega
+  | longFormBoloAppendageAttached inner =>
+    simp only [encode, BoloAppendageAbsent.encode_length]
+    omega
+
+def decode (tag : BitVec 8) (bytes : List UInt8) : Option (BoloAppendageChoice × List UInt8) :=
+  if tag = 53 then (BoloAppendageMpidForm.decode bytes).map fun (message, rest) => (.boloAppendageMpidForm message, rest)
+  else if tag = 48 then (BoloAppendageAbsent.decode bytes).map fun (message, rest) => (.noBoloChange message, rest)
+  else if tag = 49 then (BoloAppendageAbsent.decode bytes).map fun (message, rest) => (.noBoloCanBeCalculated message, rest)
+  else if tag = 50 then (BoloAppendageAbsent.decode bytes).map fun (message, rest) => (.shortFormBoloAppendageAttached message, rest)
+  else if tag = 51 then (BoloAppendageAbsent.decode bytes).map fun (message, rest) => (.longFormBoloAppendageAttached message, rest)
+  else none
+
+@[simp] theorem decode_encode (message : BoloAppendageChoice) (rest : List UInt8) :
+    decode (tag message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, tag]
+
+end BoloAppendageChoice
+
+/-- Utp Adf Mpid Odd Lot Attachment: 16 bytes -/
+structure UtpAdfMpidOddLotAttachment where
+  marketCenterId : Alpha 1
+  side : Side
+  oddLotPrice : BitVec 64
+  sharesAtOddLotPrice : BitVec 16
+  adfMarketParticipantIdentifier : Alpha 4
+  deriving DecidableEq, Repr
+
+namespace UtpAdfMpidOddLotAttachment
+
+def encode (message : UtpAdfMpidOddLotAttachment) : List UInt8 :=
+  Alpha.encode message.marketCenterId
+    ++ (Side.encode message.side
+    ++ (encodeUInt 8 message.oddLotPrice
+    ++ (encodeUInt 2 message.sharesAtOddLotPrice
+    ++ (Alpha.encode message.adfMarketParticipantIdentifier))))
+
+def decode (bytes : List UInt8) : Option (UtpAdfMpidOddLotAttachment × List UInt8) := do
+  let (marketCenterId, bytes) ← Alpha.decode 1 bytes
+  let (side, bytes) ← Side.decode bytes
+  let (oddLotPrice, bytes) ← decodeUInt 8 bytes
+  let (sharesAtOddLotPrice, bytes) ← decodeUInt 2 bytes
+  let (adfMarketParticipantIdentifier, bytes) ← Alpha.decode 4 bytes
+  pure ({ marketCenterId, side, oddLotPrice, sharesAtOddLotPrice, adfMarketParticipantIdentifier }, bytes)
+
+@[simp] theorem encode_length (message : UtpAdfMpidOddLotAttachment) : (encode message).length = 16 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, Side.encode_length, encodeUInt_length]
+
+theorem encode_length_pos (message : UtpAdfMpidOddLotAttachment) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : UtpAdfMpidOddLotAttachment) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Side.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [Alpha.decode_encode, some_bind]
+  rfl
+
+end UtpAdfMpidOddLotAttachment
+
+/-- Odd Lot Attachment Type: 0 bytes -/
+structure OddLotAttachmentTypeAbsent where
+  deriving DecidableEq, Repr
+
+namespace OddLotAttachmentTypeAbsent
+
+def encode (_ : OddLotAttachmentTypeAbsent) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (OddLotAttachmentTypeAbsent × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : OddLotAttachmentTypeAbsent) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : OddLotAttachmentTypeAbsent) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end OddLotAttachmentTypeAbsent
+
+/-- The Utp Adf Mpid Odd Lot Attachment the Odd Lot Attachment Type says is attached, or none -/
+inductive OddLotAttachmentTypeChoice where
+  | utpAdfMpidOddLotAttachment (message : UtpAdfMpidOddLotAttachment) -- "5" 0x35
+  | noOddLotPriceLevelsAttached (message : OddLotAttachmentTypeAbsent) -- "0" 0x30
+  | shortFormOddLotPriceLevelsAttached (message : OddLotAttachmentTypeAbsent) -- "2" 0x32
+  | longFormOddLotPriceLevelsAttached (message : OddLotAttachmentTypeAbsent) -- "3" 0x33
+  deriving DecidableEq, Repr
+
+namespace OddLotAttachmentTypeChoice
+
+/-- The Odd Lot Attachment Type each message is sent under -/
+def tag : OddLotAttachmentTypeChoice → BitVec 8
+  | .utpAdfMpidOddLotAttachment _ => 53
+  | .noOddLotPriceLevelsAttached _ => 48
+  | .shortFormOddLotPriceLevelsAttached _ => 50
+  | .longFormOddLotPriceLevelsAttached _ => 51
+
+def encode : OddLotAttachmentTypeChoice → List UInt8
+  | .utpAdfMpidOddLotAttachment message => UtpAdfMpidOddLotAttachment.encode message
+  | .noOddLotPriceLevelsAttached message => OddLotAttachmentTypeAbsent.encode message
+  | .shortFormOddLotPriceLevelsAttached message => OddLotAttachmentTypeAbsent.encode message
+  | .longFormOddLotPriceLevelsAttached message => OddLotAttachmentTypeAbsent.encode message
+
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : OddLotAttachmentTypeChoice) : (encode message).length ≤ 16 := by
+  cases message with
+  | utpAdfMpidOddLotAttachment inner =>
+    simp only [encode, UtpAdfMpidOddLotAttachment.encode_length]
+    omega
+  | noOddLotPriceLevelsAttached inner =>
+    simp only [encode, OddLotAttachmentTypeAbsent.encode_length]
+    omega
+  | shortFormOddLotPriceLevelsAttached inner =>
+    simp only [encode, OddLotAttachmentTypeAbsent.encode_length]
+    omega
+  | longFormOddLotPriceLevelsAttached inner =>
+    simp only [encode, OddLotAttachmentTypeAbsent.encode_length]
+    omega
+
+def decode (tag : BitVec 8) (bytes : List UInt8) : Option (OddLotAttachmentTypeChoice × List UInt8) :=
+  if tag = 53 then (UtpAdfMpidOddLotAttachment.decode bytes).map fun (message, rest) => (.utpAdfMpidOddLotAttachment message, rest)
+  else if tag = 48 then (OddLotAttachmentTypeAbsent.decode bytes).map fun (message, rest) => (.noOddLotPriceLevelsAttached message, rest)
+  else if tag = 50 then (OddLotAttachmentTypeAbsent.decode bytes).map fun (message, rest) => (.shortFormOddLotPriceLevelsAttached message, rest)
+  else if tag = 51 then (OddLotAttachmentTypeAbsent.decode bytes).map fun (message, rest) => (.longFormOddLotPriceLevelsAttached message, rest)
+  else none
+
+@[simp] theorem decode_encode (message : OddLotAttachmentTypeChoice) (rest : List UInt8) :
+    decode (tag message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, tag]
+
+end OddLotAttachmentTypeChoice
+
+/-- Utp Combined Quote Message Long Form -/
 structure UtpCombinedQuoteMessageLongForm where
   marketCenterOriginator : MarketCenterOriginator
   subMarketCenterId : SubMarketCenterId
@@ -2764,15 +2939,12 @@ structure UtpCombinedQuoteMessageLongForm where
   sipGeneratedUpdateFlag : SipGeneratedUpdateFlag
   luldBboIndicator : LuldBboIndicator
   retailInterestIndicator : RetailInterestIndicator
-  nbboAppendageIndicator : NbboAppendageIndicator
   luldNationalBboIndicator : LuldNationalBboIndicator
-  finraAdfMpidAppendageIndicator : FinraAdfMpidAppendageIndicator
-  boloAppendageIndicator : BoloAppendageIndicator
-  oddLotAttachmentType : OddLotAttachmentType
   oddLotAttachmentCount : BitVec 16
-  nationalBboAppendageLongform : NationalBboAppendageLongform
-  finraAdfMpidAppendage : FinraAdfMpidAppendage
-  boloAppendageMpidForm : BoloAppendageMpidForm
+  nbboAppendageChoice : NbboAppendageChoice
+  finraAdfMpidAppendageChoice : FinraAdfMpidAppendageChoice
+  boloAppendageChoice : BoloAppendageChoice
+  oddLotAttachmentTypeChoice : OddLotAttachmentTypeChoice
   deriving DecidableEq, Repr
 
 namespace UtpCombinedQuoteMessageLongForm
@@ -2793,16 +2965,19 @@ def encode (message : UtpCombinedQuoteMessageLongForm) : List UInt8 :=
     ++ (SipGeneratedUpdateFlag.encode message.sipGeneratedUpdateFlag
     ++ (LuldBboIndicator.encode message.luldBboIndicator
     ++ (RetailInterestIndicator.encode message.retailInterestIndicator
-    ++ (NbboAppendageIndicator.encode message.nbboAppendageIndicator
+    ++ (encodeUInt 1 (NbboAppendageChoice.tag message.nbboAppendageChoice)
     ++ (LuldNationalBboIndicator.encode message.luldNationalBboIndicator
-    ++ (FinraAdfMpidAppendageIndicator.encode message.finraAdfMpidAppendageIndicator
-    ++ (BoloAppendageIndicator.encode message.boloAppendageIndicator
-    ++ (OddLotAttachmentType.encode message.oddLotAttachmentType
+    ++ (encodeUInt 1 (FinraAdfMpidAppendageChoice.tag message.finraAdfMpidAppendageChoice)
+    ++ (encodeUInt 1 (BoloAppendageChoice.tag message.boloAppendageChoice)
+    ++ (encodeUInt 1 (OddLotAttachmentTypeChoice.tag message.oddLotAttachmentTypeChoice)
     ++ (encodeUInt 2 message.oddLotAttachmentCount
-    ++ (NationalBboAppendageLongform.encode message.nationalBboAppendageLongform
-    ++ (FinraAdfMpidAppendage.encode message.finraAdfMpidAppendage
-    ++ (BoloAppendageMpidForm.encode message.boloAppendageMpidForm)))))))))))))))))))))))
+    ++ (NbboAppendageChoice.encode message.nbboAppendageChoice
+    ++ (FinraAdfMpidAppendageChoice.encode message.finraAdfMpidAppendageChoice
+    ++ (BoloAppendageChoice.encode message.boloAppendageChoice
+    ++ (OddLotAttachmentTypeChoice.encode message.oddLotAttachmentTypeChoice))))))))))))))))))))))))
 
+-- a long run of fields nests deeper than the elaborator's default limit
+set_option maxRecDepth 4096 in
 def decode (bytes : List UInt8) : Option (UtpCombinedQuoteMessageLongForm × List UInt8) := do
   let (marketCenterOriginator, bytes) ← MarketCenterOriginator.decode bytes
   let (subMarketCenterId, bytes) ← SubMarketCenterId.decode bytes
@@ -2819,25 +2994,47 @@ def decode (bytes : List UInt8) : Option (UtpCombinedQuoteMessageLongForm × Lis
   let (sipGeneratedUpdateFlag, bytes) ← SipGeneratedUpdateFlag.decode bytes
   let (luldBboIndicator, bytes) ← LuldBboIndicator.decode bytes
   let (retailInterestIndicator, bytes) ← RetailInterestIndicator.decode bytes
-  let (nbboAppendageIndicator, bytes) ← NbboAppendageIndicator.decode bytes
+  let (nbboAppendageIndicator, bytes) ← decodeUInt 1 bytes
   let (luldNationalBboIndicator, bytes) ← LuldNationalBboIndicator.decode bytes
-  let (finraAdfMpidAppendageIndicator, bytes) ← FinraAdfMpidAppendageIndicator.decode bytes
-  let (boloAppendageIndicator, bytes) ← BoloAppendageIndicator.decode bytes
-  let (oddLotAttachmentType, bytes) ← OddLotAttachmentType.decode bytes
+  let (finraAdfMpidAppendageIndicator, bytes) ← decodeUInt 1 bytes
+  let (boloAppendageIndicator, bytes) ← decodeUInt 1 bytes
+  let (oddLotAttachmentType, bytes) ← decodeUInt 1 bytes
   let (oddLotAttachmentCount, bytes) ← decodeUInt 2 bytes
-  let (nationalBboAppendageLongform, bytes) ← NationalBboAppendageLongform.decode bytes
-  let (finraAdfMpidAppendage, bytes) ← FinraAdfMpidAppendage.decode bytes
-  let (boloAppendageMpidForm, bytes) ← BoloAppendageMpidForm.decode bytes
-  pure ({ marketCenterOriginator, subMarketCenterId, sipTimestamp, timestamp1, participantToken, finraAdfTimestamp, symbol, bidPrice, bidSize, askPrice, askSize, quoteCondition, sipGeneratedUpdateFlag, luldBboIndicator, retailInterestIndicator, nbboAppendageIndicator, luldNationalBboIndicator, finraAdfMpidAppendageIndicator, boloAppendageIndicator, oddLotAttachmentType, oddLotAttachmentCount, nationalBboAppendageLongform, finraAdfMpidAppendage, boloAppendageMpidForm }, bytes)
-
-@[simp] theorem encode_length (message : UtpCombinedQuoteMessageLongForm) : (encode message).length = 145 := by
-  unfold encode
-  simp only [List.length_append, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, QuoteCondition.encode_length, SipGeneratedUpdateFlag.encode_length, LuldBboIndicator.encode_length, RetailInterestIndicator.encode_length, NbboAppendageIndicator.encode_length, LuldNationalBboIndicator.encode_length, FinraAdfMpidAppendageIndicator.encode_length, BoloAppendageIndicator.encode_length, OddLotAttachmentType.encode_length, NationalBboAppendageLongform.encode_length, FinraAdfMpidAppendage.encode_length, BoloAppendageMpidForm.encode_length]
+  let (nbboAppendageChoice, bytes) ← NbboAppendageChoice.decode nbboAppendageIndicator bytes
+  let (finraAdfMpidAppendageChoice, bytes) ← FinraAdfMpidAppendageChoice.decode finraAdfMpidAppendageIndicator bytes
+  let (boloAppendageChoice, bytes) ← BoloAppendageChoice.decode boloAppendageIndicator bytes
+  let (oddLotAttachmentTypeChoice, bytes) ← OddLotAttachmentTypeChoice.decode oddLotAttachmentType bytes
+  pure ({ marketCenterOriginator, subMarketCenterId, sipTimestamp, timestamp1, participantToken, finraAdfTimestamp, symbol, bidPrice, bidSize, askPrice, askSize, quoteCondition, sipGeneratedUpdateFlag, luldBboIndicator, retailInterestIndicator, luldNationalBboIndicator, oddLotAttachmentCount, nbboAppendageChoice, finraAdfMpidAppendageChoice, boloAppendageChoice, oddLotAttachmentTypeChoice }, bytes)
 
 theorem encode_length_pos (message : UtpCombinedQuoteMessageLongForm) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
+  unfold encode
+  simp only [MarketCenterOriginator.encode_length, List.length_append, ← Nat.add_assoc]
+  omega
 
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : UtpCombinedQuoteMessageLongForm) : (encode message).length ≤ 161 := by
+  have bound_finraAdfMpidAppendageChoice := FinraAdfMpidAppendageChoice.encode_length_le message.finraAdfMpidAppendageChoice
+  have bound_boloAppendageChoice := BoloAppendageChoice.encode_length_le message.boloAppendageChoice
+  have bound_oddLotAttachmentTypeChoice := OddLotAttachmentTypeChoice.encode_length_le message.oddLotAttachmentTypeChoice
+  unfold encode
+  cases message.nbboAppendageChoice with
+  | nationalBboAppendageLongform inner =>
+    simp only [NbboAppendageChoice.encode, List.length_append, ← Nat.add_assoc, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, QuoteCondition.encode_length, SipGeneratedUpdateFlag.encode_length, LuldBboIndicator.encode_length, RetailInterestIndicator.encode_length, LuldNationalBboIndicator.encode_length, NationalBboAppendageLongform.encode_length]
+    omega
+  | noNationalBboChange inner =>
+    simp only [NbboAppendageChoice.encode, List.length_append, ← Nat.add_assoc, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, QuoteCondition.encode_length, SipGeneratedUpdateFlag.encode_length, LuldBboIndicator.encode_length, RetailInterestIndicator.encode_length, LuldNationalBboIndicator.encode_length, NbboAppendageAbsent.encode_length]
+    omega
+  | noNationalBboCanBeCalculated inner =>
+    simp only [NbboAppendageChoice.encode, List.length_append, ← Nat.add_assoc, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, QuoteCondition.encode_length, SipGeneratedUpdateFlag.encode_length, LuldBboIndicator.encode_length, RetailInterestIndicator.encode_length, LuldNationalBboIndicator.encode_length, NbboAppendageAbsent.encode_length]
+    omega
+  | shortFormNationalBboAppendageAttached inner =>
+    simp only [NbboAppendageChoice.encode, List.length_append, ← Nat.add_assoc, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, QuoteCondition.encode_length, SipGeneratedUpdateFlag.encode_length, LuldBboIndicator.encode_length, RetailInterestIndicator.encode_length, LuldNationalBboIndicator.encode_length, NbboAppendageAbsent.encode_length]
+    omega
+  | quoteContainsAllNationalBboInformation inner =>
+    simp only [NbboAppendageChoice.encode, List.length_append, ← Nat.add_assoc, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, QuoteCondition.encode_length, SipGeneratedUpdateFlag.encode_length, LuldBboIndicator.encode_length, RetailInterestIndicator.encode_length, LuldNationalBboIndicator.encode_length, NbboAppendageAbsent.encode_length]
+    omega
+
+set_option maxRecDepth 4096 in
 @[simp] theorem decode_encode (message : UtpCombinedQuoteMessageLongForm) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
@@ -2871,28 +3068,30 @@ theorem encode_length_pos (message : UtpCombinedQuoteMessageLongForm) : (encode 
   dsimp only
   rw [List.append_assoc, RetailInterestIndicator.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, NbboAppendageIndicator.decode_encode, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [List.append_assoc, LuldNationalBboIndicator.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, FinraAdfMpidAppendageIndicator.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, BoloAppendageIndicator.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, OddLotAttachmentType.decode_encode, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [List.append_assoc, NationalBboAppendageLongform.decode_encode, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [List.append_assoc, FinraAdfMpidAppendage.decode_encode, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [BoloAppendageMpidForm.decode_encode, some_bind]
+  rw [List.append_assoc, NbboAppendageChoice.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, FinraAdfMpidAppendageChoice.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, BoloAppendageChoice.decode_encode, some_bind]
+  dsimp only
+  rw [OddLotAttachmentTypeChoice.decode_encode, some_bind]
   rfl
 
 end UtpCombinedQuoteMessageLongForm
 
-/-- Odd Lot Quote Message Long Form: 80 bytes -/
+/-- Odd Lot Quote Message Long Form -/
 structure OddLotQuoteMessageLongForm where
   marketCenterOriginator : MarketCenterOriginator
   subMarketCenterId : SubMarketCenterId
@@ -2902,10 +3101,9 @@ structure OddLotQuoteMessageLongForm where
   adfTimestamp : BitVec 64
   symbol : Alpha 11
   sipGeneratedUpdateFlag : SipGeneratedUpdateFlag
-  boloAppendageIndicator : BoloAppendageIndicator
-  oddLotAttachmentType : OddLotAttachmentType
   oddLotAttachmentCount : BitVec 16
-  boloAppendageMpidForm : BoloAppendageMpidForm
+  boloAppendageChoice : BoloAppendageChoice
+  oddLotAttachmentTypeChoice : OddLotAttachmentTypeChoice
   deriving DecidableEq, Repr
 
 namespace OddLotQuoteMessageLongForm
@@ -2919,10 +3117,11 @@ def encode (message : OddLotQuoteMessageLongForm) : List UInt8 :=
     ++ (encodeUInt 8 message.adfTimestamp
     ++ (Alpha.encode message.symbol
     ++ (SipGeneratedUpdateFlag.encode message.sipGeneratedUpdateFlag
-    ++ (BoloAppendageIndicator.encode message.boloAppendageIndicator
-    ++ (OddLotAttachmentType.encode message.oddLotAttachmentType
+    ++ (encodeUInt 1 (BoloAppendageChoice.tag message.boloAppendageChoice)
+    ++ (encodeUInt 1 (OddLotAttachmentTypeChoice.tag message.oddLotAttachmentTypeChoice)
     ++ (encodeUInt 2 message.oddLotAttachmentCount
-    ++ (BoloAppendageMpidForm.encode message.boloAppendageMpidForm)))))))))))
+    ++ (BoloAppendageChoice.encode message.boloAppendageChoice
+    ++ (OddLotAttachmentTypeChoice.encode message.oddLotAttachmentTypeChoice))))))))))))
 
 def decode (bytes : List UInt8) : Option (OddLotQuoteMessageLongForm × List UInt8) := do
   let (marketCenterOriginator, bytes) ← MarketCenterOriginator.decode bytes
@@ -2933,19 +3132,38 @@ def decode (bytes : List UInt8) : Option (OddLotQuoteMessageLongForm × List UIn
   let (adfTimestamp, bytes) ← decodeUInt 8 bytes
   let (symbol, bytes) ← Alpha.decode 11 bytes
   let (sipGeneratedUpdateFlag, bytes) ← SipGeneratedUpdateFlag.decode bytes
-  let (boloAppendageIndicator, bytes) ← BoloAppendageIndicator.decode bytes
-  let (oddLotAttachmentType, bytes) ← OddLotAttachmentType.decode bytes
+  let (boloAppendageIndicator, bytes) ← decodeUInt 1 bytes
+  let (oddLotAttachmentType, bytes) ← decodeUInt 1 bytes
   let (oddLotAttachmentCount, bytes) ← decodeUInt 2 bytes
-  let (boloAppendageMpidForm, bytes) ← BoloAppendageMpidForm.decode bytes
-  pure ({ marketCenterOriginator, subMarketCenterId, sipTimestamp, timestamp1, participantToken, adfTimestamp, symbol, sipGeneratedUpdateFlag, boloAppendageIndicator, oddLotAttachmentType, oddLotAttachmentCount, boloAppendageMpidForm }, bytes)
-
-@[simp] theorem encode_length (message : OddLotQuoteMessageLongForm) : (encode message).length = 80 := by
-  unfold encode
-  simp only [List.length_append, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, SipGeneratedUpdateFlag.encode_length, BoloAppendageIndicator.encode_length, OddLotAttachmentType.encode_length, BoloAppendageMpidForm.encode_length]
+  let (boloAppendageChoice, bytes) ← BoloAppendageChoice.decode boloAppendageIndicator bytes
+  let (oddLotAttachmentTypeChoice, bytes) ← OddLotAttachmentTypeChoice.decode oddLotAttachmentType bytes
+  pure ({ marketCenterOriginator, subMarketCenterId, sipTimestamp, timestamp1, participantToken, adfTimestamp, symbol, sipGeneratedUpdateFlag, oddLotAttachmentCount, boloAppendageChoice, oddLotAttachmentTypeChoice }, bytes)
 
 theorem encode_length_pos (message : OddLotQuoteMessageLongForm) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
+  unfold encode
+  simp only [MarketCenterOriginator.encode_length, List.length_append, ← Nat.add_assoc]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : OddLotQuoteMessageLongForm) : (encode message).length ≤ 96 := by
+  have bound_oddLotAttachmentTypeChoice := OddLotAttachmentTypeChoice.encode_length_le message.oddLotAttachmentTypeChoice
+  unfold encode
+  cases message.boloAppendageChoice with
+  | boloAppendageMpidForm inner =>
+    simp only [BoloAppendageChoice.encode, List.length_append, ← Nat.add_assoc, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, SipGeneratedUpdateFlag.encode_length, BoloAppendageMpidForm.encode_length]
+    omega
+  | noBoloChange inner =>
+    simp only [BoloAppendageChoice.encode, List.length_append, ← Nat.add_assoc, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, SipGeneratedUpdateFlag.encode_length, BoloAppendageAbsent.encode_length]
+    omega
+  | noBoloCanBeCalculated inner =>
+    simp only [BoloAppendageChoice.encode, List.length_append, ← Nat.add_assoc, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, SipGeneratedUpdateFlag.encode_length, BoloAppendageAbsent.encode_length]
+    omega
+  | shortFormBoloAppendageAttached inner =>
+    simp only [BoloAppendageChoice.encode, List.length_append, ← Nat.add_assoc, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, SipGeneratedUpdateFlag.encode_length, BoloAppendageAbsent.encode_length]
+    omega
+  | longFormBoloAppendageAttached inner =>
+    simp only [BoloAppendageChoice.encode, List.length_append, ← Nat.add_assoc, MarketCenterOriginator.encode_length, SubMarketCenterId.encode_length, encodeUInt_length, Alpha.encode_length, SipGeneratedUpdateFlag.encode_length, BoloAppendageAbsent.encode_length]
+    omega
 
 @[simp] theorem decode_encode (message : OddLotQuoteMessageLongForm) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
@@ -2966,13 +3184,15 @@ theorem encode_length_pos (message : OddLotQuoteMessageLongForm) : (encode messa
   dsimp only
   rw [List.append_assoc, SipGeneratedUpdateFlag.decode_encode, some_bind]
   dsimp only
-  rw [List.append_assoc, BoloAppendageIndicator.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, OddLotAttachmentType.decode_encode, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [BoloAppendageMpidForm.decode_encode, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, BoloAppendageChoice.decode_encode, some_bind]
+  dsimp only
+  rw [OddLotAttachmentTypeChoice.decode_encode, some_bind]
   rfl
 
 end OddLotQuoteMessageLongForm
@@ -2995,13 +3215,15 @@ def encode : QuoteMessagePayload → List UInt8
   | .oddLotQuoteMessageLongForm message => OddLotQuoteMessageLongForm.encode message
 
 /-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : QuoteMessagePayload) : (encode message).length ≤ 145 := by
+theorem encode_length_le (message : QuoteMessagePayload) : (encode message).length ≤ 161 := by
   cases message with
   | utpCombinedQuoteMessageLongForm inner =>
-    simp only [encode, UtpCombinedQuoteMessageLongForm.encode_length]
+    have bound_inner := UtpCombinedQuoteMessageLongForm.encode_length_le inner
+    simp only [encode]
     omega
   | oddLotQuoteMessageLongForm inner =>
-    simp only [encode, OddLotQuoteMessageLongForm.encode_length]
+    have bound_inner := OddLotQuoteMessageLongForm.encode_length_le inner
+    simp only [encode]
     omega
 
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (QuoteMessagePayload × List UInt8) :=
@@ -3037,14 +3259,16 @@ theorem encode_length_pos (message : QuoteMessage) : (encode message).length > 0
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : QuoteMessage) : (encode message).length ≤ 146 := by
+theorem encode_length_le (message : QuoteMessage) : (encode message).length ≤ 162 := by
   unfold encode
   cases message.quoteMessagePayload with
   | utpCombinedQuoteMessageLongForm inner =>
-    simp only [QuoteMessagePayload.encode, List.length_append, encodeUInt_length, UtpCombinedQuoteMessageLongForm.encode_length]
+    have bound_inner := UtpCombinedQuoteMessageLongForm.encode_length_le inner
+    simp only [QuoteMessagePayload.encode, List.length_append, encodeUInt_length]
     omega
   | oddLotQuoteMessageLongForm inner =>
-    simp only [QuoteMessagePayload.encode, List.length_append, encodeUInt_length, OddLotQuoteMessageLongForm.encode_length]
+    have bound_inner := OddLotQuoteMessageLongForm.encode_length_le inner
+    simp only [QuoteMessagePayload.encode, List.length_append, encodeUInt_length]
     omega
 
 @[simp] theorem decode_encode (message : QuoteMessage) (rest : List UInt8) :
@@ -3078,7 +3302,7 @@ def encode : CategoryPayload → List UInt8
   | .quoteMessage message => QuoteMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : CategoryPayload) : (encode message).length ≤ 146 := by
+theorem encode_length_le (message : CategoryPayload) : (encode message).length ≤ 162 := by
   cases message with
   | administrativeMessage inner =>
     have bound_inner := AdministrativeMessage.encode_length_le inner
@@ -3130,7 +3354,7 @@ theorem encode_length_pos (message : SequencedDataPacket) : (encode message).len
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : SequencedDataPacket) : (encode message).length ≤ 148 := by
+theorem encode_length_le (message : SequencedDataPacket) : (encode message).length ≤ 164 := by
   unfold encode
   cases message.categoryPayload with
   | administrativeMessage inner =>
@@ -3164,7 +3388,7 @@ end SequencedDataPacket
 
 /-- Debug Packet -/
 structure DebugPacket where
-  debugText : Capped 65386
+  debugText : Capped 65370
   deriving DecidableEq, Repr
 
 namespace DebugPacket
@@ -3174,12 +3398,12 @@ def encode (message : DebugPacket) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option DebugPacket := do
   let debugText_ := bytes
-  if fits_debugText : debugText_.length ≤ 65386 then
+  if fits_debugText : debugText_.length ≤ 65370 then
     pure { debugText := ⟨debugText_, fits_debugText⟩ }
   else none
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : DebugPacket) : (encode message).length ≤ 65386 := by
+theorem encode_length_le (message : DebugPacket) : (encode message).length ≤ 65370 := by
   have bound_debugText := message.debugText.length_le
   unfold encode
   omega
@@ -3344,7 +3568,7 @@ def encode : ServerTcpPayload → List UInt8
   | .endOfSessionPacket message => EndOfSessionPacket.encode message
 
 /-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : ServerTcpPayload) : (encode message).length ≤ 65386 := by
+theorem encode_length_le (message : ServerTcpPayload) : (encode message).length ≤ 65370 := by
   cases message with
   | sequencedDataPacket inner =>
     have bound_inner := SequencedDataPacket.encode_length_le inner

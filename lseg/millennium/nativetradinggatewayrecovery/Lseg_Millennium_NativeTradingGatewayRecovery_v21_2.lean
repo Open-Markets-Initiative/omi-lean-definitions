@@ -309,6 +309,27 @@ theorem encode_length_pos (message : LogoutMessage) : (encode message).length > 
 
 end LogoutMessage
 
+/-- Heartbeat Message: 0 bytes -/
+structure HeartbeatMessage where
+  deriving DecidableEq, Repr
+
+namespace HeartbeatMessage
+
+def encode (_ : HeartbeatMessage) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (HeartbeatMessage × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : HeartbeatMessage) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : HeartbeatMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end HeartbeatMessage
+
 /-- Missed Message Request Message: 5 bytes -/
 structure MissedMessageRequestMessage where
   appId : BitVec 8
@@ -1573,6 +1594,7 @@ inductive Payload where
   | logonMessage (message : LogonMessage) -- "A" 0x41
   | logonReplyMessage (message : LogonReplyMessage) -- "B" 0x42
   | logoutMessage (message : LogoutMessage) -- "5" 0x35
+  | heartbeatMessage (message : HeartbeatMessage) -- "0" 0x30
   | missedMessageRequestMessage (message : MissedMessageRequestMessage) -- "M" 0x4D
   | missedMessageRequestAckMessage (message : MissedMessageRequestAckMessage) -- "N" 0x4E
   | missedMessageReportMessage (message : MissedMessageReportMessage) -- "P" 0x50
@@ -1596,6 +1618,7 @@ def tag : Payload → BitVec 8
   | .logonMessage _ => 65
   | .logonReplyMessage _ => 66
   | .logoutMessage _ => 53
+  | .heartbeatMessage _ => 48
   | .missedMessageRequestMessage _ => 77
   | .missedMessageRequestAckMessage _ => 78
   | .missedMessageReportMessage _ => 80
@@ -1615,6 +1638,7 @@ def encode : Payload → List UInt8
   | .logonMessage message => LogonMessage.encode message
   | .logonReplyMessage message => LogonReplyMessage.encode message
   | .logoutMessage message => LogoutMessage.encode message
+  | .heartbeatMessage message => HeartbeatMessage.encode message
   | .missedMessageRequestMessage message => MissedMessageRequestMessage.encode message
   | .missedMessageRequestAckMessage message => MissedMessageRequestAckMessage.encode message
   | .missedMessageReportMessage message => MissedMessageReportMessage.encode message
@@ -1641,6 +1665,9 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 157 :
     omega
   | logoutMessage inner =>
     simp only [encode, LogoutMessage.encode_length]
+    omega
+  | heartbeatMessage inner =>
+    simp only [encode, HeartbeatMessage.encode_length]
     omega
   | missedMessageRequestMessage inner =>
     simp only [encode, MissedMessageRequestMessage.encode_length]
@@ -1689,6 +1716,7 @@ def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8
   if tag = 65 then (LogonMessage.decode bytes).map fun (message, rest) => (.logonMessage message, rest)
   else if tag = 66 then (LogonReplyMessage.decode bytes).map fun (message, rest) => (.logonReplyMessage message, rest)
   else if tag = 53 then (LogoutMessage.decode bytes).map fun (message, rest) => (.logoutMessage message, rest)
+  else if tag = 48 then (HeartbeatMessage.decode bytes).map fun (message, rest) => (.heartbeatMessage message, rest)
   else if tag = 77 then (MissedMessageRequestMessage.decode bytes).map fun (message, rest) => (.missedMessageRequestMessage message, rest)
   else if tag = 78 then (MissedMessageRequestAckMessage.decode bytes).map fun (message, rest) => (.missedMessageRequestAckMessage message, rest)
   else if tag = 80 then (MissedMessageReportMessage.decode bytes).map fun (message, rest) => (.missedMessageReportMessage message, rest)
@@ -1748,6 +1776,9 @@ theorem encodeBody_length_lt (message : Message) : (encodeBody message).length +
     omega
   | logoutMessage inner =>
     simp only [Payload.encode, List.length_append, encodeUInt_length, LogoutMessage.encode_length]
+    omega
+  | heartbeatMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, HeartbeatMessage.encode_length]
     omega
   | missedMessageRequestMessage inner =>
     simp only [Payload.encode, List.length_append, encodeUInt_length, MissedMessageRequestMessage.encode_length]

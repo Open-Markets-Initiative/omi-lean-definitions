@@ -309,6 +309,27 @@ theorem encode_length_pos (message : LogoutMessage) : (encode message).length > 
 
 end LogoutMessage
 
+/-- Heartbeat Message: 0 bytes -/
+structure HeartbeatMessage where
+  deriving DecidableEq, Repr
+
+namespace HeartbeatMessage
+
+def encode (_ : HeartbeatMessage) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (HeartbeatMessage × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : HeartbeatMessage) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : HeartbeatMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end HeartbeatMessage
+
 /-- Reject Message: 55 bytes -/
 structure RejectMessage where
   rejectCode : BitVec 32
@@ -2121,6 +2142,7 @@ inductive Payload where
   | logonMessage (message : LogonMessage) -- "A" 0x41
   | logonReplyMessage (message : LogonReplyMessage) -- "B" 0x42
   | logoutMessage (message : LogoutMessage) -- "5" 0x35
+  | heartbeatMessage (message : HeartbeatMessage) -- "0" 0x30
   | rejectMessage (message : RejectMessage) -- "3" 0x33
   | systemStatusMessage (message : SystemStatusMessage) -- "n" 0x6E
   | newOrderMessage (message : NewOrderMessage) -- "D" 0x44
@@ -2148,6 +2170,7 @@ def tag : Payload → BitVec 8
   | .logonMessage _ => 65
   | .logonReplyMessage _ => 66
   | .logoutMessage _ => 53
+  | .heartbeatMessage _ => 48
   | .rejectMessage _ => 51
   | .systemStatusMessage _ => 110
   | .newOrderMessage _ => 68
@@ -2171,6 +2194,7 @@ def encode : Payload → List UInt8
   | .logonMessage message => LogonMessage.encode message
   | .logonReplyMessage message => LogonReplyMessage.encode message
   | .logoutMessage message => LogoutMessage.encode message
+  | .heartbeatMessage message => HeartbeatMessage.encode message
   | .rejectMessage message => RejectMessage.encode message
   | .systemStatusMessage message => SystemStatusMessage.encode message
   | .newOrderMessage message => NewOrderMessage.encode message
@@ -2201,6 +2225,9 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 157 :
     omega
   | logoutMessage inner =>
     simp only [encode, LogoutMessage.encode_length]
+    omega
+  | heartbeatMessage inner =>
+    simp only [encode, HeartbeatMessage.encode_length]
     omega
   | rejectMessage inner =>
     simp only [encode, RejectMessage.encode_length]
@@ -2261,6 +2288,7 @@ def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8
   if tag = 65 then (LogonMessage.decode bytes).map fun (message, rest) => (.logonMessage message, rest)
   else if tag = 66 then (LogonReplyMessage.decode bytes).map fun (message, rest) => (.logonReplyMessage message, rest)
   else if tag = 53 then (LogoutMessage.decode bytes).map fun (message, rest) => (.logoutMessage message, rest)
+  else if tag = 48 then (HeartbeatMessage.decode bytes).map fun (message, rest) => (.heartbeatMessage message, rest)
   else if tag = 51 then (RejectMessage.decode bytes).map fun (message, rest) => (.rejectMessage message, rest)
   else if tag = 110 then (SystemStatusMessage.decode bytes).map fun (message, rest) => (.systemStatusMessage message, rest)
   else if tag = 68 then (NewOrderMessage.decode bytes).map fun (message, rest) => (.newOrderMessage message, rest)
@@ -2324,6 +2352,9 @@ theorem encodeBody_length_lt (message : Message) : (encodeBody message).length +
     omega
   | logoutMessage inner =>
     simp only [Payload.encode, List.length_append, encodeUInt_length, LogoutMessage.encode_length]
+    omega
+  | heartbeatMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, HeartbeatMessage.encode_length]
     omega
   | rejectMessage inner =>
     simp only [Payload.encode, List.length_append, encodeUInt_length, RejectMessage.encode_length]

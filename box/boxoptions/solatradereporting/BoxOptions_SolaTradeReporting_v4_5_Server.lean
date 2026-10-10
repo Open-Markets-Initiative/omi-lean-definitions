@@ -1847,8 +1847,8 @@ def decode (tag : BitVec 16) (bytes : List UInt8) : Option (ServerMessage × Lis
 
 end ServerMessage
 
-/-- Server Packet -/
-structure ServerPacket where
+/-- Server Frame -/
+structure ServerFrame where
   source : Alpha 4
   destination : Alpha 4
   messageFlag : MessageFlag
@@ -1859,9 +1859,9 @@ structure ServerPacket where
   endOfText : BitVec 8
   deriving DecidableEq, Repr
 
-namespace ServerPacket
+namespace ServerFrame
 
-def encode (message : ServerPacket) : List UInt8 :=
+def encode (message : ServerFrame) : List UInt8 :=
   Alpha.encode message.source
     ++ (Alpha.encode message.destination
     ++ (encodeUInt 2 (ServerMessage.tag message.serverMessage)
@@ -1872,7 +1872,7 @@ def encode (message : ServerPacket) : List UInt8 :=
     ++ (ServerMessage.encode message.serverMessage
     ++ (encodeUInt 1 message.endOfText))))))))
 
-def decode (bytes : List UInt8) : Option (ServerPacket × List UInt8) := do
+def decode (bytes : List UInt8) : Option (ServerFrame × List UInt8) := do
   let (source, bytes) ← Alpha.decode 4 bytes
   let (destination, bytes) ← Alpha.decode 4 bytes
   let (messageType, bytes) ← decodeUInt 2 bytes
@@ -1884,13 +1884,13 @@ def decode (bytes : List UInt8) : Option (ServerPacket × List UInt8) := do
   let (endOfText, bytes) ← decodeUInt 1 bytes
   pure ({ source, destination, messageFlag, controlByte, sequenceNumber, acknowledgementSequenceNumber, serverMessage, endOfText }, bytes)
 
-theorem encode_length_pos (message : ServerPacket) : (encode message).length > 0 := by
+theorem encode_length_pos (message : ServerFrame) : (encode message).length > 0 := by
   unfold encode
   simp only [Alpha.encode_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : ServerPacket) : (encode message).length ≤ 237 := by
+theorem encode_length_le (message : ServerFrame) : (encode message).length ≤ 237 := by
   unfold encode
   cases message.serverMessage with
   | startOfDay inner =>
@@ -1933,7 +1933,7 @@ theorem encode_length_le (message : ServerPacket) : (encode message).length ≤ 
     simp only [ServerMessage.encode, List.length_append, ← Nat.add_assoc, Alpha.encode_length, encodeUInt_length, MessageFlag.encode_length, ErrorMessage.encode_length]
     omega
 
-@[simp] theorem decode_encode (message : ServerPacket) (rest : List UInt8) :
+@[simp] theorem decode_encode (message : ServerFrame) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
@@ -1953,6 +1953,27 @@ theorem encode_length_le (message : ServerPacket) : (encode message).length ≤ 
   rw [List.append_assoc, ServerMessage.decode_encode, some_bind]
   dsimp only
   rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end ServerFrame
+
+/-- Server Packet -/
+structure ServerPacket where
+  serverFrame : List ServerFrame
+  deriving DecidableEq, Repr
+
+namespace ServerPacket
+
+def encode (message : ServerPacket) : List UInt8 :=
+  encodeMany ServerFrame.encode message.serverFrame
+
+def decode (bytes : List UInt8) : Option ServerPacket := do
+  let serverFrame ← decodeAll ServerFrame.decode bytes.length bytes
+  pure { serverFrame }
+
+theorem decode_encode (message : ServerPacket) : decode (encode message) = some message := by
+  unfold decode encode
+  rw [decodeAll_encodeMany ServerFrame.encode ServerFrame.decode ServerFrame.decode_encode ServerFrame.encode_length_pos message.serverFrame _ (encodeMany_length_ge ServerFrame.encode ServerFrame.encode_length_pos message.serverFrame), some_bind]
   rfl
 
 end ServerPacket

@@ -4625,41 +4625,71 @@ def decode (bytes : List UInt8) : Option (SubscriberHeartbeat × List UInt8) :=
 
 end SubscriberHeartbeat
 
-/-- Any Payload, selected by Template Id -/
+/-- Any Payload, selected by Schema Id and Template Id -/
 inductive Payload where
-  | channelReset (message : ChannelReset) -- 4
-  | adminHeartbeat (message : AdminHeartbeat) -- 12
-  | adminLogin (message : AdminLogin) -- 15
-  | adminLogout (message : AdminLogout) -- 16
-  | mdInstrumentDefinitionFuture (message : MdInstrumentDefinitionFuture) -- 27
-  | mdInstrumentDefinitionSpread (message : MdInstrumentDefinitionSpread) -- 29
-  | securityStatus (message : SecurityStatus) -- 30
-  | mdIncrementalRefreshBook (message : MdIncrementalRefreshBook) -- 32
-  | mdIncrementalRefreshDailyStatistics (message : MdIncrementalRefreshDailyStatistics) -- 33
-  | mdIncrementalRefreshLimitsBanding (message : MdIncrementalRefreshLimitsBanding) -- 34
-  | mdIncrementalRefreshSessionStatistics (message : MdIncrementalRefreshSessionStatistics) -- 35
-  | mdIncrementalRefreshTrade (message : MdIncrementalRefreshTrade) -- 36
-  | mdIncrementalRefreshVolume (message : MdIncrementalRefreshVolume) -- 37
-  | snapshotFullRefresh (message : SnapshotFullRefresh) -- 38
-  | quoteRequest (message : QuoteRequest) -- 39
-  | mdInstrumentDefinitionOption (message : MdInstrumentDefinitionOption) -- 41
-  | mdIncrementalRefreshTradeSummary (message : MdIncrementalRefreshTradeSummary) -- 42
-  | negotiate (message : Negotiate) -- 200
-  | negotiationReject (message : NegotiationReject) -- 201
-  | negotiationResponse (message : NegotiationResponse) -- 202
-  | terminate (message : Terminate) -- 203
-  | marketDataRequest (message : MarketDataRequest) -- 205
-  | requestAck (message : RequestAck) -- 206
-  | requestReject (message : RequestReject) -- 207
-  | securityListRequest (message : SecurityListRequest) -- 208
-  | securityStatusRequest (message : SecurityStatusRequest) -- 209
-  | subscriberHeartbeat (message : SubscriberHeartbeat) -- 210
+  | channelReset (message : ChannelReset) -- 1, 4
+  | adminHeartbeat (message : AdminHeartbeat) -- 1, 12
+  | adminLogin (message : AdminLogin) -- 1, 15
+  | adminLogout (message : AdminLogout) -- 1, 16
+  | mdInstrumentDefinitionFuture (message : MdInstrumentDefinitionFuture) -- 1, 27
+  | mdInstrumentDefinitionSpread (message : MdInstrumentDefinitionSpread) -- 1, 29
+  | securityStatus (message : SecurityStatus) -- 1, 30
+  | mdIncrementalRefreshBook (message : MdIncrementalRefreshBook) -- 1, 32
+  | mdIncrementalRefreshDailyStatistics (message : MdIncrementalRefreshDailyStatistics) -- 1, 33
+  | mdIncrementalRefreshLimitsBanding (message : MdIncrementalRefreshLimitsBanding) -- 1, 34
+  | mdIncrementalRefreshSessionStatistics (message : MdIncrementalRefreshSessionStatistics) -- 1, 35
+  | mdIncrementalRefreshTrade (message : MdIncrementalRefreshTrade) -- 1, 36
+  | mdIncrementalRefreshVolume (message : MdIncrementalRefreshVolume) -- 1, 37
+  | snapshotFullRefresh (message : SnapshotFullRefresh) -- 1, 38
+  | quoteRequest (message : QuoteRequest) -- 1, 39
+  | mdInstrumentDefinitionOption (message : MdInstrumentDefinitionOption) -- 1, 41
+  | mdIncrementalRefreshTradeSummary (message : MdIncrementalRefreshTradeSummary) -- 1, 42
+  | negotiate (message : Negotiate) -- 2, 200
+  | negotiationReject (message : NegotiationReject) -- 2, 201
+  | negotiationResponse (message : NegotiationResponse) -- 2, 202
+  | terminate (message : Terminate) -- 2, 203
+  | marketDataRequest (message : MarketDataRequest) -- 2, 205
+  | requestAck (message : RequestAck) -- 2, 206
+  | requestReject (message : RequestReject) -- 2, 207
+  | securityListRequest (message : SecurityListRequest) -- 2, 208
+  | securityStatusRequest (message : SecurityStatusRequest) -- 2, 209
+  | subscriberHeartbeat (message : SubscriberHeartbeat) -- 2, 210
   deriving DecidableEq, Repr
 
 namespace Payload
 
+/-- The Schema Id each message is sent under -/
+def schemaId : Payload → BitVec 16
+  | .channelReset _ => 1
+  | .adminHeartbeat _ => 1
+  | .adminLogin _ => 1
+  | .adminLogout _ => 1
+  | .mdInstrumentDefinitionFuture _ => 1
+  | .mdInstrumentDefinitionSpread _ => 1
+  | .securityStatus _ => 1
+  | .mdIncrementalRefreshBook _ => 1
+  | .mdIncrementalRefreshDailyStatistics _ => 1
+  | .mdIncrementalRefreshLimitsBanding _ => 1
+  | .mdIncrementalRefreshSessionStatistics _ => 1
+  | .mdIncrementalRefreshTrade _ => 1
+  | .mdIncrementalRefreshVolume _ => 1
+  | .snapshotFullRefresh _ => 1
+  | .quoteRequest _ => 1
+  | .mdInstrumentDefinitionOption _ => 1
+  | .mdIncrementalRefreshTradeSummary _ => 1
+  | .negotiate _ => 2
+  | .negotiationReject _ => 2
+  | .negotiationResponse _ => 2
+  | .terminate _ => 2
+  | .marketDataRequest _ => 2
+  | .requestAck _ => 2
+  | .requestReject _ => 2
+  | .securityListRequest _ => 2
+  | .securityStatusRequest _ => 2
+  | .subscriberHeartbeat _ => 2
+
 /-- The Template Id each message is sent under -/
-def tag : Payload → BitVec 16
+def templateId : Payload → BitVec 16
   | .channelReset _ => 4
   | .adminHeartbeat _ => 12
   | .adminLogin _ => 15
@@ -4819,46 +4849,45 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 12262
     simp only [encode, SubscriberHeartbeat.encode_length]
     omega
 
-def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
-  if tag = 4 then (ChannelReset.decode bytes).map fun (message, rest) => (.channelReset message, rest)
-  else if tag = 12 then (AdminHeartbeat.decode bytes).map fun (message, rest) => (.adminHeartbeat message, rest)
-  else if tag = 15 then (AdminLogin.decode bytes).map fun (message, rest) => (.adminLogin message, rest)
-  else if tag = 16 then (AdminLogout.decode bytes).map fun (message, rest) => (.adminLogout message, rest)
-  else if tag = 27 then (MdInstrumentDefinitionFuture.decode bytes).map fun (message, rest) => (.mdInstrumentDefinitionFuture message, rest)
-  else if tag = 29 then (MdInstrumentDefinitionSpread.decode bytes).map fun (message, rest) => (.mdInstrumentDefinitionSpread message, rest)
-  else if tag = 30 then (SecurityStatus.decode bytes).map fun (message, rest) => (.securityStatus message, rest)
-  else if tag = 32 then (MdIncrementalRefreshBook.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshBook message, rest)
-  else if tag = 33 then (MdIncrementalRefreshDailyStatistics.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshDailyStatistics message, rest)
-  else if tag = 34 then (MdIncrementalRefreshLimitsBanding.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshLimitsBanding message, rest)
-  else if tag = 35 then (MdIncrementalRefreshSessionStatistics.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshSessionStatistics message, rest)
-  else if tag = 36 then (MdIncrementalRefreshTrade.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshTrade message, rest)
-  else if tag = 37 then (MdIncrementalRefreshVolume.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshVolume message, rest)
-  else if tag = 38 then (SnapshotFullRefresh.decode bytes).map fun (message, rest) => (.snapshotFullRefresh message, rest)
-  else if tag = 39 then (QuoteRequest.decode bytes).map fun (message, rest) => (.quoteRequest message, rest)
-  else if tag = 41 then (MdInstrumentDefinitionOption.decode bytes).map fun (message, rest) => (.mdInstrumentDefinitionOption message, rest)
-  else if tag = 42 then (MdIncrementalRefreshTradeSummary.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshTradeSummary message, rest)
-  else if tag = 200 then (Negotiate.decode bytes).map fun (message, rest) => (.negotiate message, rest)
-  else if tag = 201 then (NegotiationReject.decode bytes).map fun (message, rest) => (.negotiationReject message, rest)
-  else if tag = 202 then (NegotiationResponse.decode bytes).map fun (message, rest) => (.negotiationResponse message, rest)
-  else if tag = 203 then (Terminate.decode bytes).map fun (message, rest) => (.terminate message, rest)
-  else if tag = 205 then (MarketDataRequest.decode bytes).map fun (message, rest) => (.marketDataRequest message, rest)
-  else if tag = 206 then (RequestAck.decode bytes).map fun (message, rest) => (.requestAck message, rest)
-  else if tag = 207 then (RequestReject.decode bytes).map fun (message, rest) => (.requestReject message, rest)
-  else if tag = 208 then (SecurityListRequest.decode bytes).map fun (message, rest) => (.securityListRequest message, rest)
-  else if tag = 209 then (SecurityStatusRequest.decode bytes).map fun (message, rest) => (.securityStatusRequest message, rest)
-  else if tag = 210 then (SubscriberHeartbeat.decode bytes).map fun (message, rest) => (.subscriberHeartbeat message, rest)
+def decode (schemaId : BitVec 16) (templateId : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
+  if schemaId = 1 ∧ templateId = 4 then (ChannelReset.decode bytes).map fun (message, rest) => (.channelReset message, rest)
+  else if schemaId = 1 ∧ templateId = 12 then (AdminHeartbeat.decode bytes).map fun (message, rest) => (.adminHeartbeat message, rest)
+  else if schemaId = 1 ∧ templateId = 15 then (AdminLogin.decode bytes).map fun (message, rest) => (.adminLogin message, rest)
+  else if schemaId = 1 ∧ templateId = 16 then (AdminLogout.decode bytes).map fun (message, rest) => (.adminLogout message, rest)
+  else if schemaId = 1 ∧ templateId = 27 then (MdInstrumentDefinitionFuture.decode bytes).map fun (message, rest) => (.mdInstrumentDefinitionFuture message, rest)
+  else if schemaId = 1 ∧ templateId = 29 then (MdInstrumentDefinitionSpread.decode bytes).map fun (message, rest) => (.mdInstrumentDefinitionSpread message, rest)
+  else if schemaId = 1 ∧ templateId = 30 then (SecurityStatus.decode bytes).map fun (message, rest) => (.securityStatus message, rest)
+  else if schemaId = 1 ∧ templateId = 32 then (MdIncrementalRefreshBook.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshBook message, rest)
+  else if schemaId = 1 ∧ templateId = 33 then (MdIncrementalRefreshDailyStatistics.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshDailyStatistics message, rest)
+  else if schemaId = 1 ∧ templateId = 34 then (MdIncrementalRefreshLimitsBanding.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshLimitsBanding message, rest)
+  else if schemaId = 1 ∧ templateId = 35 then (MdIncrementalRefreshSessionStatistics.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshSessionStatistics message, rest)
+  else if schemaId = 1 ∧ templateId = 36 then (MdIncrementalRefreshTrade.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshTrade message, rest)
+  else if schemaId = 1 ∧ templateId = 37 then (MdIncrementalRefreshVolume.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshVolume message, rest)
+  else if schemaId = 1 ∧ templateId = 38 then (SnapshotFullRefresh.decode bytes).map fun (message, rest) => (.snapshotFullRefresh message, rest)
+  else if schemaId = 1 ∧ templateId = 39 then (QuoteRequest.decode bytes).map fun (message, rest) => (.quoteRequest message, rest)
+  else if schemaId = 1 ∧ templateId = 41 then (MdInstrumentDefinitionOption.decode bytes).map fun (message, rest) => (.mdInstrumentDefinitionOption message, rest)
+  else if schemaId = 1 ∧ templateId = 42 then (MdIncrementalRefreshTradeSummary.decode bytes).map fun (message, rest) => (.mdIncrementalRefreshTradeSummary message, rest)
+  else if schemaId = 2 ∧ templateId = 200 then (Negotiate.decode bytes).map fun (message, rest) => (.negotiate message, rest)
+  else if schemaId = 2 ∧ templateId = 201 then (NegotiationReject.decode bytes).map fun (message, rest) => (.negotiationReject message, rest)
+  else if schemaId = 2 ∧ templateId = 202 then (NegotiationResponse.decode bytes).map fun (message, rest) => (.negotiationResponse message, rest)
+  else if schemaId = 2 ∧ templateId = 203 then (Terminate.decode bytes).map fun (message, rest) => (.terminate message, rest)
+  else if schemaId = 2 ∧ templateId = 205 then (MarketDataRequest.decode bytes).map fun (message, rest) => (.marketDataRequest message, rest)
+  else if schemaId = 2 ∧ templateId = 206 then (RequestAck.decode bytes).map fun (message, rest) => (.requestAck message, rest)
+  else if schemaId = 2 ∧ templateId = 207 then (RequestReject.decode bytes).map fun (message, rest) => (.requestReject message, rest)
+  else if schemaId = 2 ∧ templateId = 208 then (SecurityListRequest.decode bytes).map fun (message, rest) => (.securityListRequest message, rest)
+  else if schemaId = 2 ∧ templateId = 209 then (SecurityStatusRequest.decode bytes).map fun (message, rest) => (.securityStatusRequest message, rest)
+  else if schemaId = 2 ∧ templateId = 210 then (SubscriberHeartbeat.decode bytes).map fun (message, rest) => (.subscriberHeartbeat message, rest)
   else none
 
 @[simp] theorem decode_encode (message : Payload) (rest : List UInt8) :
-    decode (tag message) (encode message ++ rest) = some (message, rest) := by
-  cases message <;> simp [decode, encode, tag]
+    decode (schemaId message) (templateId message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, schemaId, templateId]
 
 end Payload
 
 /-- Message -/
 structure Message where
   blockLength : BitVec 16
-  schemaId : BitVec 16
   version : BitVec 16
   payload : Payload
   deriving DecidableEq, Repr
@@ -4867,8 +4896,8 @@ namespace Message
 
 def encodeBody (message : Message) : List UInt8 :=
   encodeUIntLE 2 message.blockLength
-    ++ (encodeUIntLE 2 (Payload.tag message.payload)
-    ++ (encodeUIntLE 2 message.schemaId
+    ++ (encodeUIntLE 2 (Payload.templateId message.payload)
+    ++ (encodeUIntLE 2 (Payload.schemaId message.payload)
     ++ (encodeUIntLE 2 message.version
     ++ (Payload.encode message.payload))))
 
@@ -4877,8 +4906,8 @@ def decodeBody (bytes : List UInt8) : Option (Message × List UInt8) := do
   let (templateId, bytes) ← decodeUIntLE 2 bytes
   let (schemaId, bytes) ← decodeUIntLE 2 bytes
   let (version, bytes) ← decodeUIntLE 2 bytes
-  let (payload, bytes) ← Payload.decode templateId bytes
-  pure ({ blockLength, schemaId, version, payload }, bytes)
+  let (payload, bytes) ← Payload.decode schemaId templateId bytes
+  pure ({ blockLength, version, payload }, bytes)
 
 theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
     decodeBody (encodeBody message ++ rest) = some (message, rest) := by

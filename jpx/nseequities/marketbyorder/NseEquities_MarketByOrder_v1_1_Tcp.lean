@@ -176,7 +176,7 @@ end LoginResultMessage
 
 /-- Message Response Message -/
 structure MessageResponseMessage where
-  data : Capped 65517
+  data : Capped 65519
   deriving DecidableEq, Repr
 
 namespace MessageResponseMessage
@@ -186,12 +186,12 @@ def encode (message : MessageResponseMessage) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option MessageResponseMessage := do
   let data_ := bytes
-  if fits_data : data_.length ≤ 65517 then
+  if fits_data : data_.length ≤ 65519 then
     pure { data := ⟨data_, fits_data⟩ }
   else none
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : MessageResponseMessage) : (encode message).length ≤ 65517 := by
+theorem encode_length_le (message : MessageResponseMessage) : (encode message).length ≤ 65519 := by
   have bound_data := message.data.length_le
   unfold encode
   omega
@@ -271,7 +271,7 @@ def encode : TcpPayload → List UInt8
   | .endOfMessageMessage message => EndOfMessageMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : TcpPayload) : (encode message).length ≤ 65517 := by
+theorem encode_length_le (message : TcpPayload) : (encode message).length ≤ 65519 := by
   cases message with
   | loginRequestMessage inner =>
     simp only [encode, LoginRequestMessage.encode_length]
@@ -329,7 +329,7 @@ theorem decodeBody_encodeBody (message : TcpPacket) : decodeBody (encodeBody mes
   rfl
 
 /-- Every body fits the length prefix -/
-theorem encodeBody_length_lt (message : TcpPacket) : (encodeBody message).length + 2 < 256 ^ 2 := by
+theorem encodeBody_length_lt (message : TcpPacket) : (encodeBody message).length + 0 < 256 ^ 2 := by
   unfold encodeBody
   cases message.tcpPayload with
   | loginRequestMessage inner =>
@@ -346,16 +346,16 @@ theorem encodeBody_length_lt (message : TcpPacket) : (encodeBody message).length
     simp only [TcpPayload.encode, List.length_append, encodeUInt_length, EndOfMessageMessage.encode_length]
     omega
 
-/-- Size rule: Packet Length counts the bytes after it plus 2, so it is written from the body and checked on decode -/
+/-- Size rule: Packet Length counts the bytes after it, so it is written from the body and checked on decode -/
 def encode : TcpPacket → List UInt8 :=
-  encodeFramed 2 2 encodeBody
+  encodeFramed 2 0 encodeBody
 
 def decode : List UInt8 → Option (TcpPacket × List UInt8) :=
-  decodeFramedAll 2 2 decodeBody
+  decodeFramedAll 2 0 decodeBody
 
 @[simp] theorem decode_encode (message : TcpPacket) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) :=
-  decodeFramedAll_encodeFramed 2 2 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
+  decodeFramedAll_encodeFramed 2 0 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
 
 theorem encode_length_pos (message : TcpPacket) : (encode message).length > 0 := by
   unfold encode

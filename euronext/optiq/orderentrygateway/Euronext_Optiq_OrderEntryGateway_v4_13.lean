@@ -8620,7 +8620,6 @@ end Payload
 
 /-- Message -/
 structure Message where
-  frame : BitVec 16
   blockLength : BitVec 16
   schemaId : BitVec 16
   version : BitVec 16
@@ -8629,31 +8628,38 @@ structure Message where
 
 namespace Message
 
-def encode (message : Message) : List UInt8 :=
-  encodeUIntLE 2 message.frame
-    ++ (encodeUIntLE 2 message.blockLength
+def encodeBody (message : Message) : List UInt8 :=
+  encodeUIntLE 2 message.blockLength
     ++ (encodeUIntLE 2 (Payload.tag message.payload)
     ++ (encodeUIntLE 2 message.schemaId
     ++ (encodeUIntLE 2 message.version
-    ++ (Payload.encode message.payload)))))
+    ++ (Payload.encode message.payload))))
 
-def decode (bytes : List UInt8) : Option (Message × List UInt8) := do
-  let (frame, bytes) ← decodeUIntLE 2 bytes
+def decodeBody (bytes : List UInt8) : Option (Message × List UInt8) := do
   let (blockLength, bytes) ← decodeUIntLE 2 bytes
   let (templateId, bytes) ← decodeUIntLE 2 bytes
   let (schemaId, bytes) ← decodeUIntLE 2 bytes
   let (version, bytes) ← decodeUIntLE 2 bytes
   let (payload, bytes) ← Payload.decode templateId bytes
-  pure ({ frame, blockLength, schemaId, version, payload }, bytes)
+  pure ({ blockLength, schemaId, version, payload }, bytes)
 
-theorem encode_length_pos (message : Message) : (encode message).length > 0 := by
-  unfold encode
-  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
-  omega
+theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
+    decodeBody (encodeBody message ++ rest) = some (message, rest) := by
+  unfold decodeBody encodeBody
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [Payload.decode_encode, some_bind]
+  rfl
 
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : Message) : (encode message).length ≤ 33481 := by
-  unfold encode
+/-- Every body fits the length prefix -/
+theorem encodeBody_length_lt (message : Message) : (encodeBody message).length + 2 < 256 ^ 2 := by
+  unfold encodeBody
   cases message.payload with
   | newOrderMessage inner =>
     have bound_inner := NewOrderMessage.encode_length_le inner
@@ -8835,21 +8841,21 @@ theorem encode_length_le (message : Message) : (encode message).length ≤ 33481
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DeclarationEntryRejectMessage.encode_length]
     omega
 
+/-- Size rule: Frame counts the bytes after it plus 2, so it is written from the body and checked on decode -/
+def encode : Message → List UInt8 :=
+  encodeFramedLE 2 2 encodeBody
+
+def decode : List UInt8 → Option (Message × List UInt8) :=
+  decodeFramedLE 2 2 decodeBody
+
 @[simp] theorem decode_encode (message : Message) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [Payload.decode_encode, some_bind]
-  rfl
+    decode (encode message ++ rest) = some (message, rest) :=
+  decodeFramedLE_encodeFramedLE 2 2 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
+
+theorem encode_length_pos (message : Message) : (encode message).length > 0 := by
+  unfold encode
+  rw [encodeFramedLE_length]
+  omega
 
 end Message
 

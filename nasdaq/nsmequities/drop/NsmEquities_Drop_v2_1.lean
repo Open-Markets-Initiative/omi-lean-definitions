@@ -1463,8 +1463,8 @@ def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Message × List UInt8
 
 end Message
 
-/-- Line -/
-structure Line where
+/-- Frame -/
+structure Frame where
   timeStamp : Alpha 9
   comma : Alpha 1
   message : Message
@@ -1472,9 +1472,9 @@ structure Line where
   lf : BitVec 8
   deriving DecidableEq, Repr
 
-namespace Line
+namespace Frame
 
-def encode (message : Line) : List UInt8 :=
+def encode (message : Frame) : List UInt8 :=
   Alpha.encode message.timeStamp
     ++ (Alpha.encode message.comma
     ++ (encodeUInt 1 (Message.tag message.message)
@@ -1482,7 +1482,7 @@ def encode (message : Line) : List UInt8 :=
     ++ (encodeUInt 1 message.cr
     ++ (encodeUInt 1 message.lf)))))
 
-def decode (bytes : List UInt8) : Option (Line × List UInt8) := do
+def decode (bytes : List UInt8) : Option (Frame × List UInt8) := do
   let (timeStamp, bytes) ← Alpha.decode 9 bytes
   let (comma, bytes) ← Alpha.decode 1 bytes
   let (messageType, bytes) ← decodeUInt 1 bytes
@@ -1491,13 +1491,13 @@ def decode (bytes : List UInt8) : Option (Line × List UInt8) := do
   let (lf, bytes) ← decodeUInt 1 bytes
   pure ({ timeStamp, comma, message, cr, lf }, bytes)
 
-theorem encode_length_pos (message : Line) : (encode message).length > 0 := by
+theorem encode_length_pos (message : Frame) : (encode message).length > 0 := by
   unfold encode
   simp only [Alpha.encode_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : Line) : (encode message).length ≤ 112 := by
+theorem encode_length_le (message : Frame) : (encode message).length ≤ 112 := by
   unfold encode
   cases message.message with
   | newOrderAcceptedMessage inner =>
@@ -1519,7 +1519,7 @@ theorem encode_length_le (message : Line) : (encode message).length ≤ 112 := b
     simp only [Message.encode, List.length_append, ← Nat.add_assoc, Alpha.encode_length, encodeUInt_length, ExistingOrderCancelledAiqMessage.encode_length]
     omega
 
-@[simp] theorem decode_encode (message : Line) (rest : List UInt8) :
+@[simp] theorem decode_encode (message : Frame) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
@@ -1533,6 +1533,27 @@ theorem encode_length_le (message : Line) : (encode message).length ≤ 112 := b
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end Frame
+
+/-- Line -/
+structure Line where
+  frame : List Frame
+  deriving DecidableEq, Repr
+
+namespace Line
+
+def encode (message : Line) : List UInt8 :=
+  encodeMany Frame.encode message.frame
+
+def decode (bytes : List UInt8) : Option Line := do
+  let frame ← decodeAll Frame.decode bytes.length bytes
+  pure { frame }
+
+theorem decode_encode (message : Line) : decode (encode message) = some message := by
+  unfold decode encode
+  rw [decodeAll_encodeMany Frame.encode Frame.decode Frame.decode_encode Frame.encode_length_pos message.frame _ (encodeMany_length_ge Frame.encode Frame.encode_length_pos message.frame), some_bind]
   rfl
 
 end Line

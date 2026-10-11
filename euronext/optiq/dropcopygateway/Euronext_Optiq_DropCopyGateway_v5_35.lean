@@ -5903,7 +5903,6 @@ end Payload
 
 /-- Message -/
 structure Message where
-  frame : BitVec 16
   blockLength : BitVec 16
   schemaId : BitVec 16
   version : BitVec 16
@@ -5912,103 +5911,24 @@ structure Message where
 
 namespace Message
 
-def encode (message : Message) : List UInt8 :=
-  encodeUIntLE 2 message.frame
-    ++ (encodeUIntLE 2 message.blockLength
+def encodeBody (message : Message) : List UInt8 :=
+  encodeUIntLE 2 message.blockLength
     ++ (encodeUIntLE 2 (Payload.tag message.payload)
     ++ (encodeUIntLE 2 message.schemaId
     ++ (encodeUIntLE 2 message.version
-    ++ (Payload.encode message.payload)))))
+    ++ (Payload.encode message.payload))))
 
-def decode (bytes : List UInt8) : Option (Message × List UInt8) := do
-  let (frame, bytes) ← decodeUIntLE 2 bytes
+def decodeBody (bytes : List UInt8) : Option (Message × List UInt8) := do
   let (blockLength, bytes) ← decodeUIntLE 2 bytes
   let (templateId, bytes) ← decodeUIntLE 2 bytes
   let (schemaId, bytes) ← decodeUIntLE 2 bytes
   let (version, bytes) ← decodeUIntLE 2 bytes
   let (payload, bytes) ← Payload.decode templateId bytes
-  pure ({ frame, blockLength, schemaId, version, payload }, bytes)
+  pure ({ blockLength, schemaId, version, payload }, bytes)
 
-theorem encode_length_pos (message : Message) : (encode message).length > 0 := by
-  unfold encode
-  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
-  omega
-
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : Message) : (encode message).length ≤ 73750 := by
-  unfold encode
-  cases message.payload with
-  | dcMarketStatusChangeMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcMarketStatusChangeMessage.encode_length]
-    omega
-  | dcPriceUpdateMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcPriceUpdateMessage.encode_length]
-    omega
-  | longOrderMessage inner =>
-    have bound_inner := LongOrderMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | dcShortOrderRejectMessage inner =>
-    have bound_inner := DcShortOrderRejectMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | dcShortTradeCancellationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcShortTradeCancellationMessage.encode_length]
-    omega
-  | dcStaticCollarsMessage inner =>
-    have bound_inner := DcStaticCollarsMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | tradeBustNotificationMessage inner =>
-    have bound_inner := TradeBustNotificationMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | dcQuoteMessage inner =>
-    have bound_inner := DcQuoteMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | dcafqrfeMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcafqrfeMessage.encode_length]
-    omega
-  | dcDeclarationNewMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcDeclarationNewMessage.encode_length]
-    omega
-  | dcShortDeclarationRejectMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcShortDeclarationRejectMessage.encode_length]
-    omega
-  | dcShortDeclarationCancelMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcShortDeclarationCancelMessage.encode_length]
-    omega
-  | dcShortTradeDeclarationMessage inner =>
-    have bound_inner := DcShortTradeDeclarationMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | dcShortTradeDeclarationCancellationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcShortTradeDeclarationCancellationMessage.encode_length]
-    omega
-  | dcTradeBustDeclarationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcTradeBustDeclarationMessage.encode_length]
-    omega
-  | dcTradeMessage inner =>
-    have bound_inner := DcTradeMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | dcShortDeclarationFillMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcShortDeclarationFillMessage.encode_length]
-    omega
-  | dcQuoteRequestMessage inner =>
-    have bound_inner := DcQuoteRequestMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | dcClearBookMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, DcClearBookMessage.encode_length]
-    omega
-
-@[simp] theorem decode_encode (message : Message) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
+theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
+    decodeBody (encodeBody message ++ rest) = some (message, rest) := by
+  unfold decodeBody encodeBody
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
@@ -6019,6 +5939,25 @@ theorem encode_length_le (message : Message) : (encode message).length ≤ 73750
   dsimp only
   rw [Payload.decode_encode, some_bind]
   rfl
+
+/-- Size rule: Frame counts the bytes after it plus 2, so it is written from the body; the body has no bound the prefix must fit, so it is read by its content and the prefix is not checked -/
+def encode (message : Message) : List UInt8 :=
+  encodeUIntLE 2 (BitVec.ofNat (8 * 2) ((encodeBody message).length + 2)) ++ encodeBody message
+
+def decode (bytes : List UInt8) : Option (Message × List UInt8) := do
+  let (_, bytes) ← decodeUIntLE 2 bytes
+  decodeBody bytes
+
+@[simp] theorem decode_encode (message : Message) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  exact decodeBody_encodeBody message rest
+
+theorem encode_length_pos (message : Message) : (encode message).length > 0 := by
+  unfold encode
+  simp only [List.length_append, encodeUIntLE_length]
+  omega
 
 end Message
 

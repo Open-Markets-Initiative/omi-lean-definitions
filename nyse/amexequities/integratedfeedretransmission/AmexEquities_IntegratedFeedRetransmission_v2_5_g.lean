@@ -16,10 +16,9 @@ namespace Omi.NyseAmexequitiesIntegratedfeedretransmissionPillarV25G
 
 /-- Exchange Code: one byte code -/
 def ExchangeCode.codes : List UInt8 :=
-  [0x46, 0x41, 0x4C, 0x4D, 0x4E, 0x50, 0x51, 0x56, 0x5A]
+  [0x41, 0x4C, 0x4D, 0x4E, 0x50, 0x51, 0x56, 0x5A]
 
 inductive ExchangeCode where
-  | txse -- Txse
   | nyseAmerican -- Nyse American
   | ltse -- Ltse
   | nyseTexas -- Nyse Texas
@@ -34,7 +33,6 @@ inductive ExchangeCode where
 namespace ExchangeCode
 
 def toByte : ExchangeCode → UInt8
-  | .txse => 0x46
   | .nyseAmerican => 0x41
   | .ltse => 0x4C
   | .nyseTexas => 0x4D
@@ -47,8 +45,7 @@ def toByte : ExchangeCode → UInt8
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : ExchangeCode :=
-  if byte = 0x46 then .txse
-  else if byte = 0x41 then .nyseAmerican
+  if byte = 0x41 then .nyseAmerican
   else if byte = 0x4C then .ltse
   else if byte = 0x4D then .nyseTexas
   else if byte = 0x4E then .nyse
@@ -62,7 +59,6 @@ def ofByte (byte : UInt8) : ExchangeCode :=
 
 theorem ofByte_toByte (value : ExchangeCode) : ofByte value.toByte = value := by
   cases value with
-  | txse => decide
   | nyseAmerican => decide
   | ltse => decide
   | nyseTexas => decide
@@ -246,7 +242,7 @@ def SecurityStatus.codes : List UInt8 :=
 inductive SecurityStatus where
   | tradingHalt -- Trading Halt
   | resume -- Resume
-  | suspendOperationalHalt -- Suspend Operational Halt
+  | suspend -- Suspend
   | shortSaleRestrictionActivatedDay1 -- Short Sale Restriction Activated Day 1
   | shortSaleRestrictionContinuedDay2 -- Short Sale Restriction Continued Day 2
   | shortSaleRestrictionDeactivated -- Short Sale Restriction Deactivated
@@ -266,7 +262,7 @@ namespace SecurityStatus
 def toByte : SecurityStatus → UInt8
   | .tradingHalt => 0x34
   | .resume => 0x35
-  | .suspendOperationalHalt => 0x36
+  | .suspend => 0x36
   | .shortSaleRestrictionActivatedDay1 => 0x41
   | .shortSaleRestrictionContinuedDay2 => 0x43
   | .shortSaleRestrictionDeactivated => 0x44
@@ -284,7 +280,7 @@ def toByte : SecurityStatus → UInt8
 def listed (byte : UInt8) : SecurityStatus :=
   if byte = 0x34 then .tradingHalt
   else if byte = 0x35 then .resume
-  else if byte = 0x36 then .suspendOperationalHalt
+  else if byte = 0x36 then .suspend
   else if byte = 0x41 then .shortSaleRestrictionActivatedDay1
   else if byte = 0x43 then .shortSaleRestrictionContinuedDay2
   else if byte = 0x44 then .shortSaleRestrictionDeactivated
@@ -304,7 +300,7 @@ theorem ofByte_toByte (value : SecurityStatus) : ofByte value.toByte = value := 
   cases value with
   | tradingHalt => decide
   | resume => decide
-  | suspendOperationalHalt => decide
+  | suspend => decide
   | shortSaleRestrictionActivatedDay1 => decide
   | shortSaleRestrictionContinuedDay2 => decide
   | shortSaleRestrictionDeactivated => decide
@@ -345,14 +341,14 @@ inductive HaltCondition where
   | newsPending -- News Pending
   | luldPause -- Luld Pause
   | equipmentChangeover -- Equipment Changeover
-  | sipOutageMaterialSipLatencyOrExtraordinaryMarketActivity -- Sip Outage Material Sip Latency Or Extraordinary Market Activity
+  | additionalInformationRequested -- Additional Information Requested
   | regulatoryConcern -- Regulatory Concern
   | mergerEffective -- Merger Effective
-  | etfIivEtfComponentPricesNotAvailable -- Etf Iiv Etf Component Prices Not Available
+  | etfComponentPricesNotAvailable -- Etf Component Prices Not Available
   | corporateAction -- Corporate Action
   | newSecurityOffering -- New Security Offering
-  | primaryListingExchangeDiscretionaryHalt -- Primary Listing Exchange Discretionary Halt
-  | suspendOperationalHalt -- Suspend Operational Halt
+  | intradayIndicativeValueNotAvailable -- Intraday Indicative Value Not Available
+  | suspend -- Suspend
   | marketWideCircuitBreakerHaltLevel1 -- Market Wide Circuit Breaker Halt Level 1
   | marketWideCircuitBreakerHaltLevel2 -- Market Wide Circuit Breaker Halt Level 2
   | marketWideCircuitBreakerHaltLevel3 -- Market Wide Circuit Breaker Halt Level 3
@@ -368,14 +364,14 @@ def toByte : HaltCondition → UInt8
   | .newsPending => 0x50
   | .luldPause => 0x4D
   | .equipmentChangeover => 0x58
-  | .sipOutageMaterialSipLatencyOrExtraordinaryMarketActivity => 0x41
+  | .additionalInformationRequested => 0x41
   | .regulatoryConcern => 0x43
   | .mergerEffective => 0x45
-  | .etfIivEtfComponentPricesNotAvailable => 0x46
+  | .etfComponentPricesNotAvailable => 0x46
   | .corporateAction => 0x4E
   | .newSecurityOffering => 0x4F
-  | .primaryListingExchangeDiscretionaryHalt => 0x56
-  | .suspendOperationalHalt => 0x36
+  | .intradayIndicativeValueNotAvailable => 0x56
+  | .suspend => 0x36
   | .marketWideCircuitBreakerHaltLevel1 => 0x31
   | .marketWideCircuitBreakerHaltLevel2 => 0x32
   | .marketWideCircuitBreakerHaltLevel3 => 0x33
@@ -389,14 +385,14 @@ def listed (byte : UInt8) : HaltCondition :=
   else if byte = 0x50 then .newsPending
   else if byte = 0x4D then .luldPause
   else if byte = 0x58 then .equipmentChangeover
-  else if byte = 0x41 then .sipOutageMaterialSipLatencyOrExtraordinaryMarketActivity
+  else if byte = 0x41 then .additionalInformationRequested
   else if byte = 0x43 then .regulatoryConcern
   else if byte = 0x45 then .mergerEffective
-  else if byte = 0x46 then .etfIivEtfComponentPricesNotAvailable
+  else if byte = 0x46 then .etfComponentPricesNotAvailable
   else if byte = 0x4E then .corporateAction
   else if byte = 0x4F then .newSecurityOffering
-  else if byte = 0x56 then .primaryListingExchangeDiscretionaryHalt
-  else if byte = 0x36 then .suspendOperationalHalt
+  else if byte = 0x56 then .intradayIndicativeValueNotAvailable
+  else if byte = 0x36 then .suspend
   else if byte = 0x31 then .marketWideCircuitBreakerHaltLevel1
   else if byte = 0x32 then .marketWideCircuitBreakerHaltLevel2
   else .marketWideCircuitBreakerHaltLevel3
@@ -412,14 +408,14 @@ theorem ofByte_toByte (value : HaltCondition) : ofByte value.toByte = value := b
   | newsPending => decide
   | luldPause => decide
   | equipmentChangeover => decide
-  | sipOutageMaterialSipLatencyOrExtraordinaryMarketActivity => decide
+  | additionalInformationRequested => decide
   | regulatoryConcern => decide
   | mergerEffective => decide
-  | etfIivEtfComponentPricesNotAvailable => decide
+  | etfComponentPricesNotAvailable => decide
   | corporateAction => decide
   | newSecurityOffering => decide
-  | primaryListingExchangeDiscretionaryHalt => decide
-  | suspendOperationalHalt => decide
+  | intradayIndicativeValueNotAvailable => decide
+  | suspend => decide
   | marketWideCircuitBreakerHaltLevel1 => decide
   | marketWideCircuitBreakerHaltLevel2 => decide
   | marketWideCircuitBreakerHaltLevel3 => decide
@@ -447,7 +443,7 @@ def SsrTriggeringExchangeId.codes : List UInt8 :=
 
 inductive SsrTriggeringExchangeId where
   | nyseAmerican -- Nyse American
-  | nasdaqOmsTx -- Nasdaq Oms Tx
+  | nasdaqOmxBx -- Nasdaq Omx Bx
   | nyseNational -- Nyse National
   | finra -- Finra
   | n24X -- N 24 X
@@ -475,7 +471,7 @@ namespace SsrTriggeringExchangeId
 
 def toByte : SsrTriggeringExchangeId → UInt8
   | .nyseAmerican => 0x41
-  | .nasdaqOmsTx => 0x42
+  | .nasdaqOmxBx => 0x42
   | .nyseNational => 0x43
   | .finra => 0x44
   | .n24X => 0x47
@@ -501,7 +497,7 @@ def toByte : SsrTriggeringExchangeId → UInt8
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : SsrTriggeringExchangeId :=
   if byte = 0x41 then .nyseAmerican
-  else if byte = 0x42 then .nasdaqOmsTx
+  else if byte = 0x42 then .nasdaqOmxBx
   else if byte = 0x43 then .nyseNational
   else if byte = 0x44 then .finra
   else if byte = 0x47 then .n24X
@@ -529,7 +525,7 @@ def ofByte (byte : UInt8) : SsrTriggeringExchangeId :=
 theorem ofByte_toByte (value : SsrTriggeringExchangeId) : ofByte value.toByte = value := by
   cases value with
   | nyseAmerican => decide
-  | nasdaqOmsTx => decide
+  | nasdaqOmxBx => decide
   | nyseNational => decide
   | finra => decide
   | n24X => decide
@@ -1349,8 +1345,7 @@ structure SymbolIndexMappingMessage where
   roundLot : RoundLot
   mpv : BitVec 16
   unitOfTrade : BitVec 16
-  lateCloseEligible : BitVec 8
-  ethEligible : BitVec 8
+  reserved2 : Alpha 2
   deriving DecidableEq, Repr
 
 namespace SymbolIndexMappingMessage
@@ -1371,8 +1366,7 @@ def encode (message : SymbolIndexMappingMessage) : List UInt8 :=
     ++ (RoundLot.encode message.roundLot
     ++ (encodeUIntLE 2 message.mpv
     ++ (encodeUIntLE 2 message.unitOfTrade
-    ++ (encodeUIntLE 1 message.lateCloseEligible
-    ++ (encodeUIntLE 1 message.ethEligible))))))))))))))))
+    ++ (Alpha.encode message.reserved2)))))))))))))))
 
 def decode (bytes : List UInt8) : Option (SymbolIndexMappingMessage × List UInt8) := do
   let (symbolIndex, bytes) ← decodeUIntLE 4 bytes
@@ -1390,9 +1384,8 @@ def decode (bytes : List UInt8) : Option (SymbolIndexMappingMessage × List UInt
   let (roundLot, bytes) ← RoundLot.decode bytes
   let (mpv, bytes) ← decodeUIntLE 2 bytes
   let (unitOfTrade, bytes) ← decodeUIntLE 2 bytes
-  let (lateCloseEligible, bytes) ← decodeUIntLE 1 bytes
-  let (ethEligible, bytes) ← decodeUIntLE 1 bytes
-  pure ({ symbolIndex, symbol, reserved1, marketId, systemId, exchangeCode, priceScaleCode, securityType, lotSize, prevClosePrice, prevCloseVolume, priceResolution, roundLot, mpv, unitOfTrade, lateCloseEligible, ethEligible }, bytes)
+  let (reserved2, bytes) ← Alpha.decode 2 bytes
+  pure ({ symbolIndex, symbol, reserved1, marketId, systemId, exchangeCode, priceScaleCode, securityType, lotSize, prevClosePrice, prevCloseVolume, priceResolution, roundLot, mpv, unitOfTrade, reserved2 }, bytes)
 
 @[simp] theorem encode_length (message : SymbolIndexMappingMessage) : (encode message).length = 40 := by
   unfold encode
@@ -1435,9 +1428,7 @@ theorem encode_length_pos (message : SymbolIndexMappingMessage) : (encode messag
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [decodeUIntLE_encodeUIntLE, some_bind]
+  rw [Alpha.decode_encode, some_bind]
   rfl
 
 end SymbolIndexMappingMessage

@@ -144,46 +144,6 @@ def decode : List UInt8 → Option (MdEntryTypeIndices × List UInt8)
 
 end MdEntryTypeIndices
 
-/-- Technical Header: 14 bytes -/
-structure TechnicalHeader where
-  encodingType : BitVec 16
-  messageSequenceNumber : BitVec 32
-  tcpSendingTime : BitVec 64
-  deriving DecidableEq, Repr
-
-namespace TechnicalHeader
-
-def encode (message : TechnicalHeader) : List UInt8 :=
-  encodeUIntLE 2 message.encodingType
-    ++ (encodeUIntLE 4 message.messageSequenceNumber
-    ++ (encodeUIntLE 8 message.tcpSendingTime))
-
-def decode (bytes : List UInt8) : Option (TechnicalHeader × List UInt8) := do
-  let (encodingType, bytes) ← decodeUIntLE 2 bytes
-  let (messageSequenceNumber, bytes) ← decodeUIntLE 4 bytes
-  let (tcpSendingTime, bytes) ← decodeUIntLE 8 bytes
-  pure ({ encodingType, messageSequenceNumber, tcpSendingTime }, bytes)
-
-@[simp] theorem encode_length (message : TechnicalHeader) : (encode message).length = 14 := by
-  unfold encode
-  simp only [List.length_append, encodeUIntLE_length]
-
-theorem encode_length_pos (message : TechnicalHeader) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
-
-@[simp] theorem decode_encode (message : TechnicalHeader) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [decodeUIntLE_encodeUIntLE, some_bind]
-  rfl
-
-end TechnicalHeader
-
 /-- Admin Heartbeat: 0 bytes -/
 structure AdminHeartbeat where
   deriving DecidableEq, Repr
@@ -5315,14 +5275,14 @@ structure TcpMessage where
 
 namespace TcpMessage
 
-def encodeBody (message : TcpMessage) : List UInt8 :=
+def encode (message : TcpMessage) : List UInt8 :=
   encodeUIntLE 2 message.blockLength
     ++ (encodeUIntLE 2 (Payload.tag message.payload)
     ++ (encodeUIntLE 2 message.schemaId
     ++ (encodeUIntLE 2 message.version
     ++ (Payload.encode message.payload))))
 
-def decodeBody (bytes : List UInt8) : Option (TcpMessage × List UInt8) := do
+def decode (bytes : List UInt8) : Option (TcpMessage × List UInt8) := do
   let (blockLength, bytes) ← decodeUIntLE 2 bytes
   let (templateId, bytes) ← decodeUIntLE 2 bytes
   let (schemaId, bytes) ← decodeUIntLE 2 bytes
@@ -5330,9 +5290,72 @@ def decodeBody (bytes : List UInt8) : Option (TcpMessage × List UInt8) := do
   let (payload, bytes) ← Payload.decode templateId bytes
   pure ({ blockLength, schemaId, version, payload }, bytes)
 
-theorem decodeBody_encodeBody (message : TcpMessage) (rest : List UInt8) :
-    decodeBody (encodeBody message ++ rest) = some (message, rest) := by
-  unfold decodeBody encodeBody
+theorem encode_length_pos (message : TcpMessage) : (encode message).length > 0 := by
+  unfold encode
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : TcpMessage) : (encode message).length ≤ 16667334 := by
+  unfold encode
+  cases message.payload with
+  | adminHeartbeat inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, AdminHeartbeat.encode_length]
+    omega
+  | adminLogin inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, AdminLogin.encode_length]
+    omega
+  | adminLogout inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, AdminLogout.encode_length]
+    omega
+  | mdIncrementalRefreshErisReferenceDataAndDailyStatistics inner =>
+    have bound_inner := MdIncrementalRefreshErisReferenceDataAndDailyStatistics.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+  | mdNewsIndices inner =>
+    have bound_inner := MdNewsIndices.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+  | mdIncrementalRefreshTradeBlocks340 inner =>
+    have bound_inner := MdIncrementalRefreshTradeBlocks340.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+  | quoteRequest inner =>
+    have bound_inner := QuoteRequest.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+  | mdInstrumentDefinitionIndices inner =>
+    have bound_inner := MdInstrumentDefinitionIndices.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+  | mdIncrementalRefreshIndices inner =>
+    have bound_inner := MdIncrementalRefreshIndices.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+  | mdIncrementalRefreshTradeBlocks349 inner =>
+    have bound_inner := MdIncrementalRefreshTradeBlocks349.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+  | mdIncrementalRefreshEris351 inner =>
+    have bound_inner := MdIncrementalRefreshEris351.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+  | mdIncrementalRefreshEris353 inner =>
+    have bound_inner := MdIncrementalRefreshEris353.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+  | mdIncrementalRefreshOtc inner =>
+    have bound_inner := MdIncrementalRefreshOtc.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+  | mdInstrumentDefinitionEris inner =>
+    have bound_inner := MdInstrumentDefinitionEris.encode_length_le inner
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
+    omega
+
+@[simp] theorem decode_encode (message : TcpMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
@@ -5344,54 +5367,81 @@ theorem decodeBody_encodeBody (message : TcpMessage) (rest : List UInt8) :
   rw [Payload.decode_encode, some_bind]
   rfl
 
-/-- Size rule: Tcp Message Size counts the bytes after it plus 2, so it is written from the body; the body has no bound the prefix must fit, so it is read by its content and the prefix is not checked -/
-def encode (message : TcpMessage) : List UInt8 :=
-  encodeUIntLE 2 (BitVec.ofNat (8 * 2) ((encodeBody message).length + 2)) ++ encodeBody message
+end TcpMessage
 
-def decode (bytes : List UInt8) : Option (TcpMessage × List UInt8) := do
+/-- Tcp Frame -/
+structure TcpFrame where
+  encodingType : BitVec 16
+  messageSequenceNumber : BitVec 32
+  tcpSendingTime : BitVec 64
+  tcpMessage : TcpMessage
+  deriving DecidableEq, Repr
+
+namespace TcpFrame
+
+def encodeBody (message : TcpFrame) : List UInt8 :=
+  TcpMessage.encode message.tcpMessage
+
+def decodeBody (encodingType : BitVec 16) (messageSequenceNumber : BitVec 32) (tcpSendingTime : BitVec 64) (bytes : List UInt8) : Option (TcpFrame × List UInt8) := do
+  let (tcpMessage, bytes) ← TcpMessage.decode bytes
+  pure ({ encodingType, messageSequenceNumber, tcpSendingTime, tcpMessage }, bytes)
+
+theorem decodeBody_encodeBody (message : TcpFrame) (rest : List UInt8) :
+    decodeBody message.encodingType message.messageSequenceNumber message.tcpSendingTime (encodeBody message ++ rest) = some (message, rest) := by
+  unfold decodeBody encodeBody
+  rw [TcpMessage.decode_encode, some_bind]
+  rfl
+
+/-- Size rule: Tcp Message Size counts the bytes after it plus 2, so it is written from the body; the body has no bound the prefix must fit, so it is read by its content and the prefix is not checked; Encoding Type, Message Sequence Number, Tcp Sending Time are read ahead of it -/
+def encode (message : TcpFrame) : List UInt8 :=
+  encodeUIntLE 2 message.encodingType
+    ++ (encodeUIntLE 4 message.messageSequenceNumber
+    ++ (encodeUIntLE 8 message.tcpSendingTime
+    ++ (encodeUIntLE 2 (BitVec.ofNat (8 * 2) ((encodeBody message).length + 2)) ++ encodeBody message)))
+
+def decode (bytes : List UInt8) : Option (TcpFrame × List UInt8) := do
+  let (encodingType, bytes) ← decodeUIntLE 2 bytes
+  let (messageSequenceNumber, bytes) ← decodeUIntLE 4 bytes
+  let (tcpSendingTime, bytes) ← decodeUIntLE 8 bytes
   let (_, bytes) ← decodeUIntLE 2 bytes
-  decodeBody bytes
+  (decodeBody encodingType messageSequenceNumber tcpSendingTime) bytes
 
-@[simp] theorem decode_encode (message : TcpMessage) (rest : List UInt8) :
+@[simp] theorem decode_encode (message : TcpFrame) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   exact decodeBody_encodeBody message rest
 
-theorem encode_length_pos (message : TcpMessage) : (encode message).length > 0 := by
+theorem encode_length_pos (message : TcpFrame) : (encode message).length > 0 := by
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length]
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
-end TcpMessage
+end TcpFrame
 
 /-- Tcp Packet -/
 structure TcpPacket where
-  technicalHeader : TechnicalHeader
-  tcpMessage : List TcpMessage
+  tcpFrame : List TcpFrame
   deriving DecidableEq, Repr
 
 namespace TcpPacket
 
 def encode (message : TcpPacket) : List UInt8 :=
-  TechnicalHeader.encode message.technicalHeader
-    ++ (encodeMany TcpMessage.encode message.tcpMessage)
+  encodeMany TcpFrame.encode message.tcpFrame
 
 def decode (bytes : List UInt8) : Option TcpPacket := do
-  let (technicalHeader, bytes) ← TechnicalHeader.decode bytes
-  let tcpMessage ← decodeAll TcpMessage.decode bytes.length bytes
-  pure { technicalHeader, tcpMessage }
-
-theorem encode_length_pos (message : TcpPacket) : (encode message).length > 0 := by
-  unfold encode
-  simp only [TechnicalHeader.encode_length, List.length_append]
-  omega
+  let tcpFrame ← decodeAll TcpFrame.decode bytes.length bytes
+  pure { tcpFrame }
 
 theorem decode_encode (message : TcpPacket) : decode (encode message) = some message := by
   unfold decode encode
-  rw [TechnicalHeader.decode_encode, some_bind]
-  dsimp only
-  rw [decodeAll_encodeMany TcpMessage.encode TcpMessage.decode TcpMessage.decode_encode TcpMessage.encode_length_pos message.tcpMessage _ (encodeMany_length_ge TcpMessage.encode TcpMessage.encode_length_pos message.tcpMessage), some_bind]
+  rw [decodeAll_encodeMany TcpFrame.encode TcpFrame.decode TcpFrame.decode_encode TcpFrame.encode_length_pos message.tcpFrame _ (encodeMany_length_ge TcpFrame.encode TcpFrame.encode_length_pos message.tcpFrame), some_bind]
   rfl
 
 end TcpPacket

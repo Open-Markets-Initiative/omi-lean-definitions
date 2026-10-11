@@ -544,21 +544,21 @@ end StreamCompleteMessage
 
 /-- Sequenced Message -/
 structure SequencedMessage where
-  sbeMessage : List UInt8
+  serverSbeMessage : List UInt8
   deriving DecidableEq, Repr
 
 namespace SequencedMessage
 
 def encode (message : SequencedMessage) : List UInt8 :=
-  encodeMany Byte.encode message.sbeMessage
+  encodeMany Byte.encode message.serverSbeMessage
 
 def decode (bytes : List UInt8) : Option SequencedMessage := do
-  let sbeMessage ← decodeAll Byte.decode bytes.length bytes
-  pure { sbeMessage }
+  let serverSbeMessage ← decodeAll Byte.decode bytes.length bytes
+  pure { serverSbeMessage }
 
 theorem decode_encode (message : SequencedMessage) : decode (encode message) = some message := by
   unfold decode encode
-  rw [decodeAll_encodeMany Byte.encode Byte.decode Byte.decode_encode Byte.encode_length_pos message.sbeMessage _ (encodeMany_length_ge Byte.encode Byte.encode_length_pos message.sbeMessage), some_bind]
+  rw [decodeAll_encodeMany Byte.encode Byte.decode Byte.decode_encode Byte.encode_length_pos message.serverSbeMessage _ (encodeMany_length_ge Byte.encode Byte.encode_length_pos message.serverSbeMessage), some_bind]
   rfl
 
 end SequencedMessage

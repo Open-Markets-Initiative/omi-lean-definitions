@@ -172,21 +172,21 @@ end StreamRequestMessage
 
 /-- Unsequenced Message -/
 structure UnsequencedMessage where
-  sbeMessage : List UInt8
+  clientSbeMessage : List UInt8
   deriving DecidableEq, Repr
 
 namespace UnsequencedMessage
 
 def encode (message : UnsequencedMessage) : List UInt8 :=
-  encodeMany Byte.encode message.sbeMessage
+  encodeMany Byte.encode message.clientSbeMessage
 
 def decode (bytes : List UInt8) : Option UnsequencedMessage := do
-  let sbeMessage ← decodeAll Byte.decode bytes.length bytes
-  pure { sbeMessage }
+  let clientSbeMessage ← decodeAll Byte.decode bytes.length bytes
+  pure { clientSbeMessage }
 
 theorem decode_encode (message : UnsequencedMessage) : decode (encode message) = some message := by
   unfold decode encode
-  rw [decodeAll_encodeMany Byte.encode Byte.decode Byte.decode_encode Byte.encode_length_pos message.sbeMessage _ (encodeMany_length_ge Byte.encode Byte.encode_length_pos message.sbeMessage), some_bind]
+  rw [decodeAll_encodeMany Byte.encode Byte.decode Byte.decode_encode Byte.encode_length_pos message.clientSbeMessage _ (encodeMany_length_ge Byte.encode Byte.encode_length_pos message.clientSbeMessage), some_bind]
   rfl
 
 end UnsequencedMessage

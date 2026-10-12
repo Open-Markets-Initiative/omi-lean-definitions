@@ -55,6 +55,10 @@ def decode : List UInt8 → Option (RetransmissionIndicator × List UInt8)
 @[simp] theorem encode_length (value : RetransmissionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : RetransmissionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : RetransmissionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -166,6 +170,10 @@ def decode : List UInt8 → Option (ParticipantId × List UInt8)
 @[simp] theorem encode_length (value : ParticipantId) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : ParticipantId) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : ParticipantId) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -240,6 +248,10 @@ def decode : List UInt8 → Option (ControlMessageType × List UInt8)
 
 @[simp] theorem encode_length (value : ControlMessageType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : ControlMessageType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : ControlMessageType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

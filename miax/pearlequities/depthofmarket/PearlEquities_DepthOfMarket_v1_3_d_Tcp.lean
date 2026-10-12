@@ -63,6 +63,10 @@ def decode : List UInt8 → Option (RefreshMessageType × List UInt8)
 @[simp] theorem encode_length (value : RefreshMessageType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : RefreshMessageType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : RefreshMessageType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -134,6 +138,10 @@ def decode : List UInt8 → Option (LoginStatus × List UInt8)
 @[simp] theorem encode_length (value : LoginStatus) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : LoginStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : LoginStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -188,6 +196,10 @@ def decode : List UInt8 → Option (LogoutReason × List UInt8)
 
 @[simp] theorem encode_length (value : LogoutReason) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : LogoutReason) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : LogoutReason) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

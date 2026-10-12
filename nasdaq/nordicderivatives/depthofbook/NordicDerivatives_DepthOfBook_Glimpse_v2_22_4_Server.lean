@@ -55,6 +55,10 @@ def decode : List UInt8 → Option (RejectReasonCode × List UInt8)
 @[simp] theorem encode_length (value : RejectReasonCode) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : RejectReasonCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : RejectReasonCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -101,6 +105,10 @@ def decode : List UInt8 → Option (Leg1Side × List UInt8)
 
 @[simp] theorem encode_length (value : Leg1Side) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : Leg1Side) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : Leg1Side) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -149,6 +157,10 @@ def decode : List UInt8 → Option (Leg2Side × List UInt8)
 @[simp] theorem encode_length (value : Leg2Side) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : Leg2Side) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : Leg2Side) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -195,6 +207,10 @@ def decode : List UInt8 → Option (Leg3Side × List UInt8)
 
 @[simp] theorem encode_length (value : Leg3Side) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : Leg3Side) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : Leg3Side) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -243,6 +259,10 @@ def decode : List UInt8 → Option (Leg4Side × List UInt8)
 @[simp] theorem encode_length (value : Leg4Side) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : Leg4Side) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : Leg4Side) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -289,6 +309,10 @@ def decode : List UInt8 → Option (Side × List UInt8)
 
 @[simp] theorem encode_length (value : Side) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : Side) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : Side) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

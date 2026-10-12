@@ -62,6 +62,9 @@ def decodeUInt (n : Nat) (bytes : List UInt8) : Option (BitVec (8 * n) × List U
 @[simp] theorem encodeUInt_length (n : Nat) (value : BitVec (8 * n)) : (encodeUInt n value).length = n :=
   beBytes_length n value.toNat
 
+theorem encodeUInt_length_pos (n : Nat) (pos : 0 < n) (value : BitVec (8 * n)) : (encodeUInt n value).length > 0 := by
+  rw [encodeUInt_length]; omega
+
 theorem BitVec.toNat_lt_pow (n : Nat) (value : BitVec (8 * n)) : value.toNat < 256 ^ n := by
   have := value.isLt
   rwa [Nat.pow_mul] at this
@@ -81,6 +84,9 @@ def decodeUIntLE (n : Nat) (bytes : List UInt8) : Option (BitVec (8 * n) × List
 
 @[simp] theorem encodeUIntLE_length (n : Nat) (value : BitVec (8 * n)) : (encodeUIntLE n value).length = n := by
   simp [encodeUIntLE, beBytes_length]
+
+theorem encodeUIntLE_length_pos (n : Nat) (pos : 0 < n) (value : BitVec (8 * n)) : (encodeUIntLE n value).length > 0 := by
+  rw [encodeUIntLE_length]; omega
 
 @[simp] theorem decodeUIntLE_encodeUIntLE (n : Nat) (value : BitVec (8 * n)) (rest : List UInt8) :
     decodeUIntLE n (encodeUIntLE n value ++ rest) = some (value, rest) := by
@@ -526,6 +532,34 @@ theorem decodeTail_encodeTail (encode : α → List UInt8) (read : List UInt8 �
     have step := roundtrip item []
     rw [List.append_nil, spelled] at step
     simp [encodeTail, spelled, decodeTail, step]
+
+/-- A field present only while bytes remain: read when the body still has bytes, taking all of
+    them, and absent when none do. The body that holds it is read whole within its frame, so what
+    is left after the fixed fields ahead of it is exactly this field or nothing — which is what an
+    optional rule stating presence on the remaining bytes means. It is written with encodeOptional,
+    the value when there and nothing when not. -/
+def decodeRemaining {α : Type} (decode : List UInt8 → Option (α × List UInt8)) : List UInt8 → Option (Option α)
+  | [] => some none
+  | bytes => (decode bytes).bind fun (value, rest) => if rest.isEmpty then some (some value) else none
+
+/-- A closing optional field written back, or nothing, reads back as it was -/
+theorem decodeRemaining_encodeOptional {α : Type} (encode : α → List UInt8)
+    (decode : List UInt8 → Option (α × List UInt8))
+    (roundtrip : ∀ value rest, decode (encode value ++ rest) = some (value, rest))
+    (nonempty : ∀ value, (encode value).length > 0)
+    (value : Option α) :
+    decodeRemaining decode (encodeOptional encode value) = some value := by
+  cases value with
+  | none => rfl
+  | some item =>
+    have long := nonempty item
+    obtain ⟨byte, rest, spelled⟩ : ∃ byte rest, encode item = byte :: rest := by
+      cases h : encode item with
+      | nil => rw [h] at long; simp at long
+      | cons byte rest => exact ⟨byte, rest, rfl⟩
+    have step := roundtrip item []
+    rw [List.append_nil, spelled] at step
+    simp [encodeOptional, spelled, decodeRemaining, step]
 
 /-! ## Framing -/
 

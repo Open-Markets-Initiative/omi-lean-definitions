@@ -83,6 +83,10 @@ def decode : List UInt8 → Option (Status × List UInt8)
 @[simp] theorem encode_length (value : Status) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : Status) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : Status) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]

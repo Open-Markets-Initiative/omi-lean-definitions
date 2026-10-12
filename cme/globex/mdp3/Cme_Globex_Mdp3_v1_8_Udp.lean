@@ -59,6 +59,10 @@ def decode : List UInt8 → Option (SecurityUpdateAction × List UInt8)
 @[simp] theorem encode_length (value : SecurityUpdateAction) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SecurityUpdateAction) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SecurityUpdateAction) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -118,6 +122,10 @@ def decode : List UInt8 → Option (MdEntryTypeBook × List UInt8)
 @[simp] theorem encode_length (value : MdEntryTypeBook) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : MdEntryTypeBook) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : MdEntryTypeBook) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -172,6 +180,10 @@ def decode : List UInt8 → Option (MdEntryTypeDailyStatistics × List UInt8)
 
 @[simp] theorem encode_length (value : MdEntryTypeDailyStatistics) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MdEntryTypeDailyStatistics) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MdEntryTypeDailyStatistics) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -231,6 +243,10 @@ def decode : List UInt8 → Option (MdEntryTypeStatistics × List UInt8)
 
 @[simp] theorem encode_length (value : MdEntryTypeStatistics) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MdEntryTypeStatistics) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MdEntryTypeStatistics) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -338,6 +354,10 @@ def decode : List UInt8 → Option (MdEntryType × List UInt8)
 
 @[simp] theorem encode_length (value : MdEntryType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MdEntryType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MdEntryType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

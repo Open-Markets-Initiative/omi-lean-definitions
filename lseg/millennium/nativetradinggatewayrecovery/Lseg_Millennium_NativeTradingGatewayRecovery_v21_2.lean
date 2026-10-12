@@ -83,6 +83,10 @@ def decode : List UInt8 → Option (ExecType × List UInt8)
 @[simp] theorem encode_length (value : ExecType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : ExecType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : ExecType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -133,6 +137,10 @@ def decode : List UInt8 → Option (TradeLiquidityIndicator × List UInt8)
 
 @[simp] theorem encode_length (value : TradeLiquidityIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : TradeLiquidityIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : TradeLiquidityIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -192,6 +200,10 @@ def decode : List UInt8 → Option (ExecutionType × List UInt8)
 
 @[simp] theorem encode_length (value : ExecutionType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : ExecutionType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : ExecutionType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

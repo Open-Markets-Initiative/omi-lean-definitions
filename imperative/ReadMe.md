@@ -5,7 +5,7 @@
 
 | [Protocol][Omi.Imperative.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Imperative.Specifications] |
 | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| [DepthOfBook][Imperative.IntelligentCross.DepthOfBook] | [Aspen][Omi.Encoding.Aspen] | [1.11][Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Definition] | 7/30/2020 | 983 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Url] - [pdf][Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Pdf] |
+| [DepthOfBook][Imperative.IntelligentCross.DepthOfBook] | [Aspen][Omi.Encoding.Aspen] | [1.11][Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Definition] | 7/30/2020 | 999 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Url] - [pdf][Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Pdf] |
 
 
 <p align="center"><a href="https://www.imperativex.com" title="Imperative Execution Website"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Website.png" alt="Website" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/company/imperativex" title="Imperative Execution on LinkedIn"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/LinkedIn.png" alt="LinkedIn" width="32" height="32"></a></p>
@@ -33,4 +33,4 @@
 
 [Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/imperative/depthofbook/IntelligentCross_DepthOfBook_v1_11.lean "Imperative DepthOfBook Aspen v1.11 Lean Definition"
 [Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Url]: https://www.imperativex.com/market-data "Imperative Execution 1.11 Url"
-[Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Imperative/Specifications/IntelligentCross/DepthOfBook/Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.pdf "Imperative Execution 1.11 Pdf"
+[Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Pdf]: http://iqx.imperativex.com/IntelligentCrossMarketDataFeedSpec.v.1.11.pdf "Imperative Execution 1.11 Pdf"

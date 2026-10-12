@@ -55,6 +55,10 @@ def decode : List UInt8 → Option (MessageFlag × List UInt8)
 @[simp] theorem encode_length (value : MessageFlag) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : MessageFlag) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : MessageFlag) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -130,6 +134,10 @@ def decode : List UInt8 → Option (AccountType × List UInt8)
 @[simp] theorem encode_length (value : AccountType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : AccountType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : AccountType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -176,6 +184,10 @@ def decode : List UInt8 → Option (OpenClose × List UInt8)
 
 @[simp] theorem encode_length (value : OpenClose) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : OpenClose) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : OpenClose) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

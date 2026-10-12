@@ -87,6 +87,10 @@ def decode : List UInt8 → Option (ReportingStatus × List UInt8)
 @[simp] theorem encode_length (value : ReportingStatus) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : ReportingStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : ReportingStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -158,6 +162,10 @@ def decode : List UInt8 → Option (SecurityStatus × List UInt8)
 @[simp] theorem encode_length (value : SecurityStatus) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SecurityStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SecurityStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -205,6 +213,10 @@ def decode : List UInt8 → Option (SideIndicator × List UInt8)
 @[simp] theorem encode_length (value : SideIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SideIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SideIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -251,6 +263,10 @@ def decode : List UInt8 → Option (Unsolicited × List UInt8)
 
 @[simp] theorem encode_length (value : Unsolicited) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : Unsolicited) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : Unsolicited) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -307,6 +323,10 @@ def decode : List UInt8 → Option (CurrentInsideImbalanceSide × List UInt8)
 @[simp] theorem encode_length (value : CurrentInsideImbalanceSide) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : CurrentInsideImbalanceSide) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : CurrentInsideImbalanceSide) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -357,6 +377,10 @@ def decode : List UInt8 → Option (MocSharesUnmatched × List UInt8)
 
 @[simp] theorem encode_length (value : MocSharesUnmatched) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MocSharesUnmatched) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MocSharesUnmatched) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

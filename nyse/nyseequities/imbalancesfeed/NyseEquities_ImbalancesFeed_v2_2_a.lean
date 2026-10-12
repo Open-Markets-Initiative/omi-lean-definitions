@@ -67,6 +67,10 @@ def decode : List UInt8 → Option (AuctionType × List UInt8)
 @[simp] theorem encode_length (value : AuctionType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : AuctionType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : AuctionType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -117,6 +121,10 @@ def decode : List UInt8 → Option (ImbalanceSide × List UInt8)
 
 @[simp] theorem encode_length (value : ImbalanceSide) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : ImbalanceSide) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : ImbalanceSide) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -169,6 +177,10 @@ def decode : List UInt8 → Option (UnpairedSide × List UInt8)
 @[simp] theorem encode_length (value : UnpairedSide) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : UnpairedSide) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : UnpairedSide) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -215,6 +227,10 @@ def decode : List UInt8 → Option (SignificantImbalance × List UInt8)
 
 @[simp] theorem encode_length (value : SignificantImbalance) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : SignificantImbalance) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : SignificantImbalance) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

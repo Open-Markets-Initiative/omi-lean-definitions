@@ -59,6 +59,10 @@ def decode : List UInt8 → Option (SecurityUpdateAction × List UInt8)
 @[simp] theorem encode_length (value : SecurityUpdateAction) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SecurityUpdateAction) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SecurityUpdateAction) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -137,6 +141,10 @@ def decode : List UInt8 → Option (MdEntryTypeIndices × List UInt8)
 
 @[simp] theorem encode_length (value : MdEntryTypeIndices) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MdEntryTypeIndices) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MdEntryTypeIndices) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

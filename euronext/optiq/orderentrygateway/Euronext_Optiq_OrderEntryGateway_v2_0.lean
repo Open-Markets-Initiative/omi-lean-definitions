@@ -239,6 +239,10 @@ def decode : List UInt8 → Option (StrategyCode × List UInt8)
 @[simp] theorem encode_length (value : StrategyCode) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : StrategyCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : StrategyCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -469,6 +473,10 @@ def decode : List UInt8 → Option (StrategyCodeOptional × List UInt8)
 
 @[simp] theorem encode_length (value : StrategyCodeOptional) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : StrategyCodeOptional) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : StrategyCodeOptional) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

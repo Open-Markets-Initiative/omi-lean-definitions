@@ -71,6 +71,10 @@ def decode : List UInt8 → Option (AccountType × List UInt8)
 @[simp] theorem encode_length (value : AccountType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : AccountType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : AccountType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -121,6 +125,10 @@ def decode : List UInt8 → Option (OrderVerb × List UInt8)
 
 @[simp] theorem encode_length (value : OrderVerb) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : OrderVerb) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : OrderVerb) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

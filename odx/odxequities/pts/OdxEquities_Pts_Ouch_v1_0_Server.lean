@@ -55,6 +55,10 @@ def decode : List UInt8 → Option (RejectReasonCode × List UInt8)
 @[simp] theorem encode_length (value : RejectReasonCode) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : RejectReasonCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : RejectReasonCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -101,6 +105,10 @@ def decode : List UInt8 → Option (SystemEvent × List UInt8)
 
 @[simp] theorem encode_length (value : SystemEvent) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : SystemEvent) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : SystemEvent) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -157,6 +165,10 @@ def decode : List UInt8 → Option (BuySellIndicator × List UInt8)
 @[simp] theorem encode_length (value : BuySellIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : BuySellIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : BuySellIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -199,6 +211,10 @@ def decode : List UInt8 → Option (Display × List UInt8)
 
 @[simp] theorem encode_length (value : Display) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : Display) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : Display) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -247,6 +263,10 @@ def decode : List UInt8 → Option (Capacity × List UInt8)
 @[simp] theorem encode_length (value : Capacity) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : Capacity) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : Capacity) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -293,6 +313,10 @@ def decode : List UInt8 → Option (OrderState × List UInt8)
 
 @[simp] theorem encode_length (value : OrderState) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : OrderState) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : OrderState) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -353,6 +377,10 @@ def decode : List UInt8 → Option (OrderClassification × List UInt8)
 @[simp] theorem encode_length (value : OrderClassification) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : OrderClassification) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : OrderClassification) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -411,6 +439,10 @@ def decode : List UInt8 → Option (CashMarginType × List UInt8)
 
 @[simp] theorem encode_length (value : CashMarginType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : CashMarginType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : CashMarginType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -515,6 +547,10 @@ def decode : List UInt8 → Option (OrderCanceledReason × List UInt8)
 @[simp] theorem encode_length (value : OrderCanceledReason) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : OrderCanceledReason) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : OrderCanceledReason) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -561,6 +597,10 @@ def decode : List UInt8 → Option (LiquidityIndicator × List UInt8)
 
 @[simp] theorem encode_length (value : LiquidityIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : LiquidityIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : LiquidityIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -660,6 +700,10 @@ def decode : List UInt8 → Option (OrderRejectedReason × List UInt8)
 
 @[simp] theorem encode_length (value : OrderRejectedReason) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : OrderRejectedReason) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : OrderRejectedReason) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

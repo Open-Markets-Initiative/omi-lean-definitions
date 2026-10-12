@@ -55,6 +55,10 @@ def decode : List UInt8 → Option (OrderType × List UInt8)
 @[simp] theorem encode_length (value : OrderType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : OrderType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : OrderType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -101,6 +105,10 @@ def decode : List UInt8 → Option (RequestStatus × List UInt8)
 
 @[simp] theorem encode_length (value : RequestStatus) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : RequestStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : RequestStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

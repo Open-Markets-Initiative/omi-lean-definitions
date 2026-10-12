@@ -67,6 +67,10 @@ def decode : List UInt8 → Option (QuoteCondition × List UInt8)
 @[simp] theorem encode_length (value : QuoteCondition) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : QuoteCondition) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : QuoteCondition) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -122,6 +126,10 @@ def decode : List UInt8 → Option (TradeCond1 × List UInt8)
 @[simp] theorem encode_length (value : TradeCond1) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : TradeCond1) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : TradeCond1) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -168,6 +176,10 @@ def decode : List UInt8 → Option (Side × List UInt8)
 
 @[simp] theorem encode_length (value : Side) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : Side) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : Side) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -240,6 +252,10 @@ def decode : List UInt8 → Option (SecurityStatus × List UInt8)
 @[simp] theorem encode_length (value : SecurityStatus) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SecurityStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SecurityStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -286,6 +302,10 @@ def decode : List UInt8 → Option (LegSecurityType × List UInt8)
 
 @[simp] theorem encode_length (value : LegSecurityType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : LegSecurityType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : LegSecurityType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -893,7 +913,7 @@ theorem encode_length_pos (message : LegDefinition) : (encode message).length > 
 
 end LegDefinition
 
-/-- Complex Symbol Definition Message: 44 bytes -/
+/-- Complex Symbol Definition Message -/
 structure ComplexSymbolDefinitionMessage where
   complexIndex : BitVec 32
   complexSymbol : Alpha 21
@@ -902,9 +922,8 @@ structure ComplexSymbolDefinitionMessage where
   systemId : BitVec 8
   reserved1 : Alpha 1
   streamId : BitVec 16
-  noOfLegs : BitVec 16
   reserved2 : Alpha 2
-  legDefinition : LegDefinition
+  legDefinition : Bounded 2 LegDefinition
   deriving DecidableEq, Repr
 
 namespace ComplexSymbolDefinitionMessage
@@ -917,9 +936,9 @@ def encode (message : ComplexSymbolDefinitionMessage) : List UInt8 :=
     ++ (encodeUIntLE 1 message.systemId
     ++ (Alpha.encode message.reserved1
     ++ (encodeUIntLE 2 message.streamId
-    ++ (encodeUIntLE 2 message.noOfLegs
+    ++ (encodeUIntLE 2 (BitVec.ofNat (8 * 2) message.legDefinition.val.length)
     ++ (Alpha.encode message.reserved2
-    ++ (LegDefinition.encode message.legDefinition)))))))))
+    ++ (encodeMany LegDefinition.encode message.legDefinition.val)))))))))
 
 def decode (bytes : List UInt8) : Option (ComplexSymbolDefinitionMessage × List UInt8) := do
   let (complexIndex, bytes) ← decodeUIntLE 4 bytes
@@ -931,16 +950,22 @@ def decode (bytes : List UInt8) : Option (ComplexSymbolDefinitionMessage × List
   let (streamId, bytes) ← decodeUIntLE 2 bytes
   let (noOfLegs, bytes) ← decodeUIntLE 2 bytes
   let (reserved2, bytes) ← Alpha.decode 2 bytes
-  let (legDefinition, bytes) ← LegDefinition.decode bytes
-  pure ({ complexIndex, complexSymbol, channelId, marketId, systemId, reserved1, streamId, noOfLegs, reserved2, legDefinition }, bytes)
-
-@[simp] theorem encode_length (message : ComplexSymbolDefinitionMessage) : (encode message).length = 44 := by
-  unfold encode
-  simp only [List.length_append, encodeUIntLE_length, Alpha.encode_length, LegDefinition.encode_length]
+  let (legDefinition_, bytes) ← decodeMany LegDefinition.decode noOfLegs.toNat bytes
+  if fits_legDefinition : legDefinition_.length < 256 ^ 2 then
+    pure ({ complexIndex, complexSymbol, channelId, marketId, systemId, reserved1, streamId, reserved2, legDefinition := ⟨legDefinition_, fits_legDefinition⟩ }, bytes)
+  else none
 
 theorem encode_length_pos (message : ComplexSymbolDefinitionMessage) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
+  unfold encode
+  simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : ComplexSymbolDefinitionMessage) : (encode message).length ≤ 524316 := by
+  have bound_legDefinition := message.legDefinition.length_lt
+  unfold encode
+  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, Alpha.encode_length, encodeMany_length_const LegDefinition.encode 8 LegDefinition.encode_length]
+  omega
 
 @[simp] theorem decode_encode (message : ComplexSymbolDefinitionMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
@@ -963,7 +988,9 @@ theorem encode_length_pos (message : ComplexSymbolDefinitionMessage) : (encode m
   dsimp only
   rw [List.append_assoc, Alpha.decode_encode, some_bind]
   dsimp only
-  rw [LegDefinition.decode_encode, some_bind]
+  rw [decodeMany_bounded 2 LegDefinition.encode LegDefinition.decode LegDefinition.decode_encode, some_bind]
+  dsimp only
+  rw [dite_eq_left message.legDefinition.length_lt]
   rfl
 
 end ComplexSymbolDefinitionMessage
@@ -1090,7 +1117,7 @@ def encode : Payload → List UInt8
   | .sequenceNumberResetMessage message => SequenceNumberResetMessage.encode message
 
 /-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : Payload) : (encode message).length ≤ 44 := by
+theorem encode_length_le (message : Payload) : (encode message).length ≤ 524316 := by
   cases message with
   | complexQuoteMessage inner =>
     simp only [encode, ComplexQuoteMessage.encode_length]
@@ -1114,7 +1141,8 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 44 :=
     simp only [encode, RefreshComplexTradeMessage.encode_length]
     omega
   | complexSymbolDefinitionMessage inner =>
-    simp only [encode, ComplexSymbolDefinitionMessage.encode_length]
+    have bound_inner := ComplexSymbolDefinitionMessage.encode_length_le inner
+    simp only [encode]
     omega
   | streamIdMessage inner =>
     simp only [encode, StreamIdMessage.encode_length]
@@ -1166,55 +1194,23 @@ theorem decodeBody_encodeBody (message : Message) (rest : List UInt8) :
   rw [Payload.decode_encode, some_bind]
   rfl
 
-/-- Every body fits the length prefix -/
-theorem encodeBody_length_lt (message : Message) : (encodeBody message).length + 2 < 256 ^ 2 := by
-  unfold encodeBody
-  cases message.payload with
-  | complexQuoteMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, ComplexQuoteMessage.encode_length]
-    omega
-  | complexTradeMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, ComplexTradeMessage.encode_length]
-    omega
-  | complexCrossingRfqMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, ComplexCrossingRfqMessage.encode_length]
-    omega
-  | complexCubeRfqMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, ComplexCubeRfqMessage.encode_length]
-    omega
-  | complexStatusMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, ComplexStatusMessage.encode_length]
-    omega
-  | refreshComplexQuoteMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, RefreshComplexQuoteMessage.encode_length]
-    omega
-  | refreshComplexTradeMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, RefreshComplexTradeMessage.encode_length]
-    omega
-  | complexSymbolDefinitionMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, ComplexSymbolDefinitionMessage.encode_length]
-    omega
-  | streamIdMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, StreamIdMessage.encode_length]
-    omega
-  | sequenceNumberResetMessage inner =>
-    simp only [Payload.encode, List.length_append, encodeUIntLE_length, SequenceNumberResetMessage.encode_length]
-    omega
+/-- Size rule: Message Size counts the bytes after it plus 2, so it is written from the body; the body has no bound the prefix must fit, so it is read by its content and the prefix is not checked -/
+def encode (message : Message) : List UInt8 :=
+  encodeUIntLE 2 (BitVec.ofNat (8 * 2) ((encodeBody message).length + 2)) ++ encodeBody message
 
-/-- Size rule: Message Size counts the bytes after it plus 2, so it is written from the body and checked on decode -/
-def encode : Message → List UInt8 :=
-  encodeFramedLE 2 2 encodeBody
-
-def decode : List UInt8 → Option (Message × List UInt8) :=
-  decodeFramedLE 2 2 decodeBody
+def decode (bytes : List UInt8) : Option (Message × List UInt8) := do
+  let (_, bytes) ← decodeUIntLE 2 bytes
+  decodeBody bytes
 
 @[simp] theorem decode_encode (message : Message) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) :=
-  decodeFramedLE_encodeFramedLE 2 2 encodeBody decodeBody message (decodeBody_encodeBody message) (encodeBody_length_lt message) rest
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  exact decodeBody_encodeBody message rest
 
 theorem encode_length_pos (message : Message) : (encode message).length > 0 := by
   unfold encode
-  rw [encodeFramedLE_length]
+  simp only [List.length_append, encodeUIntLE_length]
   omega
 
 end Message

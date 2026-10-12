@@ -115,6 +115,10 @@ def decode : List UInt8 → Option (StrikePriceFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : StrikePriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : StrikePriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : StrikePriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -221,6 +225,10 @@ def decode : List UInt8 → Option (TradePriceFractionIndicator × List UInt8)
 
 @[simp] theorem encode_length (value : TradePriceFractionIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : TradePriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : TradePriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -329,6 +337,10 @@ def decode : List UInt8 → Option (NetChangeFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : NetChangeFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : NetChangeFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : NetChangeFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -375,6 +387,10 @@ def decode : List UInt8 → Option (CallPutCode × List UInt8)
 
 @[simp] theorem encode_length (value : CallPutCode) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : CallPutCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : CallPutCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -483,6 +499,10 @@ def decode : List UInt8 → Option (FixedRateFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : FixedRateFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : FixedRateFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : FixedRateFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -533,6 +553,10 @@ def decode : List UInt8 → Option (RequestedMarketSide × List UInt8)
 
 @[simp] theorem encode_length (value : RequestedMarketSide) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : RequestedMarketSide) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : RequestedMarketSide) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -641,6 +665,10 @@ def decode : List UInt8 → Option (BidPriceFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : BidPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : BidPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : BidPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -747,6 +775,10 @@ def decode : List UInt8 → Option (AskPriceFractionIndicator × List UInt8)
 
 @[simp] theorem encode_length (value : AskPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : AskPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : AskPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -855,6 +887,10 @@ def decode : List UInt8 → Option (PriceFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : PriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : PriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : PriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -961,6 +997,10 @@ def decode : List UInt8 → Option (MaximumThresholdPriceFractionIndicator × Li
 
 @[simp] theorem encode_length (value : MaximumThresholdPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MaximumThresholdPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MaximumThresholdPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1069,6 +1109,10 @@ def decode : List UInt8 → Option (MinimumThresholdPriceFractionIndicator × Li
 @[simp] theorem encode_length (value : MinimumThresholdPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : MinimumThresholdPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : MinimumThresholdPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1176,6 +1220,10 @@ def decode : List UInt8 → Option (TickIncrementFractionIndicator × List UInt8
 @[simp] theorem encode_length (value : TickIncrementFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : TickIncrementFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : TickIncrementFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1222,6 +1270,10 @@ def decode : List UInt8 → Option (OptionType × List UInt8)
 
 @[simp] theorem encode_length (value : OptionType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : OptionType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : OptionType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1330,6 +1382,10 @@ def decode : List UInt8 → Option (TickValueFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : TickValueFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : TickValueFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : TickValueFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1377,6 +1433,10 @@ def decode : List UInt8 → Option (DeliveryType × List UInt8)
 @[simp] theorem encode_length (value : DeliveryType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : DeliveryType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : DeliveryType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1423,6 +1483,10 @@ def decode : List UInt8 → Option (StrategyAllowImplied × List UInt8)
 
 @[simp] theorem encode_length (value : StrategyAllowImplied) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : StrategyAllowImplied) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : StrategyAllowImplied) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1474,6 +1538,10 @@ def decode : List UInt8 → Option (DayCountConvention × List UInt8)
 
 @[simp] theorem encode_length (value : DayCountConvention) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : DayCountConvention) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : DayCountConvention) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1582,6 +1650,10 @@ def decode : List UInt8 → Option (LastPriceFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : LastPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : LastPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : LastPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1628,6 +1700,10 @@ def decode : List UInt8 → Option (Tick × List UInt8)
 
 @[simp] theorem encode_length (value : Tick) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : Tick) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : Tick) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1736,6 +1812,10 @@ def decode : List UInt8 → Option (OpenPriceFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : OpenPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : OpenPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : OpenPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1842,6 +1922,10 @@ def decode : List UInt8 → Option (HighPriceFractionIndicator × List UInt8)
 
 @[simp] theorem encode_length (value : HighPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : HighPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : HighPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1950,6 +2034,10 @@ def decode : List UInt8 → Option (LowPriceFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : LowPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : LowPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : LowPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -2056,6 +2144,10 @@ def decode : List UInt8 → Option (SettlementPriceFractionIndicator × List UIn
 
 @[simp] theorem encode_length (value : SettlementPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : SettlementPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : SettlementPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -2164,6 +2256,10 @@ def decode : List UInt8 → Option (PreviousSettlementPriceFractionIndicator × 
 @[simp] theorem encode_length (value : PreviousSettlementPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : PreviousSettlementPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : PreviousSettlementPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -2218,6 +2314,10 @@ def decode : List UInt8 → Option (Reason × List UInt8)
 
 @[simp] theorem encode_length (value : Reason) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : Reason) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : Reason) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -2326,6 +2426,10 @@ def decode : List UInt8 → Option (OpeningPriceFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : OpeningPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : OpeningPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : OpeningPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -2432,6 +2536,10 @@ def decode : List UInt8 → Option (PreviousSettlementFractionIndicator × List 
 
 @[simp] theorem encode_length (value : PreviousSettlementFractionIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : PreviousSettlementFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : PreviousSettlementFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -2540,6 +2648,10 @@ def decode : List UInt8 → Option (ExternalPriceFractionIndicator × List UInt8
 @[simp] theorem encode_length (value : ExternalPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : ExternalPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : ExternalPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -2586,6 +2698,10 @@ def decode : List UInt8 → Option (LegRatioSign × List UInt8)
 
 @[simp] theorem encode_length (value : LegRatioSign) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : LegRatioSign) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : LegRatioSign) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -2694,6 +2810,10 @@ def decode : List UInt8 → Option (NetPresentValueFractionIndicator × List UIn
 @[simp] theorem encode_length (value : NetPresentValueFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : NetPresentValueFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : NetPresentValueFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -2800,6 +2920,10 @@ def decode : List UInt8 → Option (HistoricalCouponFractionIndicator × List UI
 
 @[simp] theorem encode_length (value : HistoricalCouponFractionIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : HistoricalCouponFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : HistoricalCouponFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -2908,6 +3032,10 @@ def decode : List UInt8 → Option (PriceAlignmentInterestFractionIndicator × L
 @[simp] theorem encode_length (value : PriceAlignmentInterestFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : PriceAlignmentInterestFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : PriceAlignmentInterestFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -3014,6 +3142,10 @@ def decode : List UInt8 → Option (PreviousResetRateFractionIndicator × List U
 
 @[simp] theorem encode_length (value : PreviousResetRateFractionIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : PreviousResetRateFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : PreviousResetRateFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -3122,6 +3254,10 @@ def decode : List UInt8 → Option (MinPriceFractionIndicator × List UInt8)
 @[simp] theorem encode_length (value : MinPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : MinPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : MinPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -3228,6 +3364,10 @@ def decode : List UInt8 → Option (TickPriceFractionIndicator × List UInt8)
 
 @[simp] theorem encode_length (value : TickPriceFractionIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : TickPriceFractionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : TickPriceFractionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

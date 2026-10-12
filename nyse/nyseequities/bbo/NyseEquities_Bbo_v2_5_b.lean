@@ -83,6 +83,10 @@ def decode : List UInt8 → Option (ExchangeCode × List UInt8)
 @[simp] theorem encode_length (value : ExchangeCode) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : ExchangeCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : ExchangeCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -185,6 +189,10 @@ def decode : List UInt8 → Option (SecurityType × List UInt8)
 
 @[simp] theorem encode_length (value : SecurityType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : SecurityType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : SecurityType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -289,6 +297,10 @@ def decode : List UInt8 → Option (SecurityStatus × List UInt8)
 @[simp] theorem encode_length (value : SecurityStatus) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SecurityStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SecurityStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -375,6 +387,10 @@ def decode : List UInt8 → Option (HaltCondition × List UInt8)
 
 @[simp] theorem encode_length (value : HaltCondition) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : HaltCondition) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : HaltCondition) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -491,6 +507,10 @@ def decode : List UInt8 → Option (SsrTriggeringExchangeId × List UInt8)
 @[simp] theorem encode_length (value : SsrTriggeringExchangeId) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SsrTriggeringExchangeId) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SsrTriggeringExchangeId) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -537,6 +557,10 @@ def decode : List UInt8 → Option (QuoteCondition × List UInt8)
 
 @[simp] theorem encode_length (value : QuoteCondition) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : QuoteCondition) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : QuoteCondition) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -592,6 +616,10 @@ def decode : List UInt8 → Option (RpiIndicator × List UInt8)
 
 @[simp] theorem encode_length (value : RpiIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : RpiIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : RpiIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

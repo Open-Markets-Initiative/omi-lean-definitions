@@ -55,6 +55,10 @@ def decode : List UInt8 → Option (Side × List UInt8)
 @[simp] theorem encode_length (value : Side) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : Side) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : Side) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -101,6 +105,10 @@ def decode : List UInt8 → Option (SimpleOrdtype × List UInt8)
 
 @[simp] theorem encode_length (value : SimpleOrdtype) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : SimpleOrdtype) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : SimpleOrdtype) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -152,6 +160,10 @@ def decode : List UInt8 → Option (TimeInForceSimple × List UInt8)
 
 @[simp] theorem encode_length (value : TimeInForceSimple) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : TimeInForceSimple) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : TimeInForceSimple) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -220,6 +232,10 @@ def decode : List UInt8 → Option (Ordtype × List UInt8)
 @[simp] theorem encode_length (value : Ordtype) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : Ordtype) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : Ordtype) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -287,6 +303,10 @@ def decode : List UInt8 → Option (TimeInForce × List UInt8)
 @[simp] theorem encode_length (value : TimeInForce) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : TimeInForce) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : TimeInForce) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -353,6 +373,10 @@ def decode : List UInt8 → Option (TimeInForceOptional × List UInt8)
 
 @[simp] theorem encode_length (value : TimeInForceOptional) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : TimeInForceOptional) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : TimeInForceOptional) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -429,6 +453,10 @@ def decode : List UInt8 → Option (OrdStatus × List UInt8)
 @[simp] theorem encode_length (value : OrdStatus) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : OrdStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : OrdStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -480,6 +508,10 @@ def decode : List UInt8 → Option (MultiLegReportingType × List UInt8)
 @[simp] theorem encode_length (value : MultiLegReportingType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : MultiLegReportingType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : MultiLegReportingType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -526,6 +558,10 @@ def decode : List UInt8 → Option (ExecType × List UInt8)
 
 @[simp] theorem encode_length (value : ExecType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : ExecType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : ExecType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -594,6 +630,10 @@ def decode : List UInt8 → Option (OrderCategory × List UInt8)
 @[simp] theorem encode_length (value : OrderCategory) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : OrderCategory) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : OrderCategory) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -645,6 +685,10 @@ def decode : List UInt8 → Option (SettlTypeOptional × List UInt8)
 @[simp] theorem encode_length (value : SettlTypeOptional) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SettlTypeOptional) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SettlTypeOptional) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -691,6 +735,10 @@ def decode : List UInt8 → Option (LegSide × List UInt8)
 
 @[simp] theorem encode_length (value : LegSide) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : LegSide) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : LegSide) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -743,6 +791,10 @@ def decode : List UInt8 → Option (SettlType × List UInt8)
 @[simp] theorem encode_length (value : SettlType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SettlType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SettlType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -789,6 +841,10 @@ def decode : List UInt8 → Option (ExecuteUnderlyingTrade × List UInt8)
 
 @[simp] theorem encode_length (value : ExecuteUnderlyingTrade) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : ExecuteUnderlyingTrade) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : ExecuteUnderlyingTrade) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -845,6 +901,10 @@ def decode : List UInt8 → Option (QuoteStatusResponseTo × List UInt8)
 @[simp] theorem encode_length (value : QuoteStatusResponseTo) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : QuoteStatusResponseTo) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : QuoteStatusResponseTo) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -892,6 +952,10 @@ def decode : List UInt8 → Option (SideOptional × List UInt8)
 @[simp] theorem encode_length (value : SideOptional) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SideOptional) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SideOptional) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -938,6 +1002,10 @@ def decode : List UInt8 → Option (PosMaintAction × List UInt8)
 
 @[simp] theorem encode_length (value : PosMaintAction) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : PosMaintAction) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : PosMaintAction) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -993,6 +1061,10 @@ def decode : List UInt8 → Option (PosMaintStatus × List UInt8)
 
 @[simp] theorem encode_length (value : PosMaintStatus) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : PosMaintStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : PosMaintStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1057,6 +1129,10 @@ def decode : List UInt8 → Option (PosType × List UInt8)
 @[simp] theorem encode_length (value : PosType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : PosType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : PosType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1104,6 +1180,10 @@ def decode : List UInt8 → Option (AllocTransType × List UInt8)
 @[simp] theorem encode_length (value : AllocTransType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : AllocTransType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : AllocTransType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1146,6 +1226,10 @@ def decode : List UInt8 → Option (AllocType × List UInt8)
 
 @[simp] theorem encode_length (value : AllocType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : AllocType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : AllocType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1190,6 +1274,10 @@ def decode : List UInt8 → Option (AllocNoOrdersType × List UInt8)
 @[simp] theorem encode_length (value : AllocNoOrdersType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : AllocNoOrdersType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : AllocNoOrdersType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1232,6 +1320,10 @@ def decode : List UInt8 → Option (AllocReportType × List UInt8)
 
 @[simp] theorem encode_length (value : AllocReportType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : AllocReportType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : AllocReportType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1280,6 +1372,10 @@ def decode : List UInt8 → Option (AllocStatus × List UInt8)
 @[simp] theorem encode_length (value : AllocStatus) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : AllocStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : AllocStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1326,6 +1422,10 @@ def decode : List UInt8 → Option (MassActionResponse × List UInt8)
 
 @[simp] theorem encode_length (value : MassActionResponse) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MassActionResponse) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MassActionResponse) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

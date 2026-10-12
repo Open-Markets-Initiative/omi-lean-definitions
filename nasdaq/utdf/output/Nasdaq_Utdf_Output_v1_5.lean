@@ -127,6 +127,10 @@ def decode : List UInt8 → Option (MarketCenterOriginatorId × List UInt8)
 @[simp] theorem encode_length (value : MarketCenterOriginatorId) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : MarketCenterOriginatorId) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : MarketCenterOriginatorId) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -181,6 +185,10 @@ def decode : List UInt8 → Option (SubMarketCenterId × List UInt8)
 
 @[simp] theorem encode_length (value : SubMarketCenterId) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : SubMarketCenterId) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : SubMarketCenterId) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -244,6 +252,10 @@ def decode : List UInt8 → Option (Level1 × List UInt8)
 
 @[simp] theorem encode_length (value : Level1) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : Level1) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : Level1) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -319,6 +331,10 @@ def decode : List UInt8 → Option (Level2 × List UInt8)
 
 @[simp] theorem encode_length (value : Level2) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : Level2) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : Level2) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -443,6 +459,10 @@ def decode : List UInt8 → Option (Level3 × List UInt8)
 @[simp] theorem encode_length (value : Level3) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : Level3) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : Level3) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -513,6 +533,10 @@ def decode : List UInt8 → Option (ConsolidatedPriceChangeIndicator × List UIn
 
 @[simp] theorem encode_length (value : ConsolidatedPriceChangeIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : ConsolidatedPriceChangeIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : ConsolidatedPriceChangeIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -585,6 +609,10 @@ def decode : List UInt8 → Option (ParticipantPriceChangeIndicator × List UInt
 @[simp] theorem encode_length (value : ParticipantPriceChangeIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : ParticipantPriceChangeIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : ParticipantPriceChangeIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -631,6 +659,10 @@ def decode : List UInt8 → Option (AsOfAction × List UInt8)
 
 @[simp] theorem encode_length (value : AsOfAction) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : AsOfAction) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : AsOfAction) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -686,6 +718,10 @@ def decode : List UInt8 → Option (TradingActionCode × List UInt8)
 
 @[simp] theorem encode_length (value : TradingActionCode) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : TradingActionCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : TradingActionCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -790,6 +826,10 @@ def decode : List UInt8 → Option (IssueType × List UInt8)
 @[simp] theorem encode_length (value : IssueType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : IssueType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : IssueType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -840,6 +880,10 @@ def decode : List UInt8 → Option (MarketTier × List UInt8)
 
 @[simp] theorem encode_length (value : MarketTier) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MarketTier) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MarketTier) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -896,6 +940,10 @@ def decode : List UInt8 → Option (Authenticity × List UInt8)
 @[simp] theorem encode_length (value : Authenticity) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : Authenticity) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : Authenticity) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -946,6 +994,10 @@ def decode : List UInt8 → Option (ShortSaleThresholdIndicator × List UInt8)
 
 @[simp] theorem encode_length (value : ShortSaleThresholdIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : ShortSaleThresholdIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : ShortSaleThresholdIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1022,6 +1074,10 @@ def decode : List UInt8 → Option (FinancialStatusIndicator × List UInt8)
 @[simp] theorem encode_length (value : FinancialStatusIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : FinancialStatusIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : FinancialStatusIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1072,6 +1128,10 @@ def decode : List UInt8 → Option (RegShoAction × List UInt8)
 
 @[simp] theorem encode_length (value : RegShoAction) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : RegShoAction) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : RegShoAction) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -1140,6 +1200,10 @@ def decode : List UInt8 → Option (LuldPriceBandIndicator × List UInt8)
 @[simp] theorem encode_length (value : LuldPriceBandIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : LuldPriceBandIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : LuldPriceBandIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1191,6 +1255,10 @@ def decode : List UInt8 → Option (MwcbStatusLevelIndicator × List UInt8)
 @[simp] theorem encode_length (value : MwcbStatusLevelIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : MwcbStatusLevelIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : MwcbStatusLevelIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1238,6 +1306,10 @@ def decode : List UInt8 → Option (TradingActionIndicator × List UInt8)
 @[simp] theorem encode_length (value : TradingActionIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : TradingActionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : TradingActionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -1284,6 +1356,10 @@ def decode : List UInt8 → Option (MarketCenterCloseIndicator × List UInt8)
 
 @[simp] theorem encode_length (value : MarketCenterCloseIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MarketCenterCloseIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MarketCenterCloseIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

@@ -51,6 +51,10 @@ def decode : List UInt8 → Option (DataFeedIndicator × List UInt8)
 @[simp] theorem encode_length (value : DataFeedIndicator) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : DataFeedIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : DataFeedIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -97,6 +101,10 @@ def decode : List UInt8 → Option (RetransmissionIndicator × List UInt8)
 
 @[simp] theorem encode_length (value : RetransmissionIndicator) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : RetransmissionIndicator) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : RetransmissionIndicator) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -204,6 +212,10 @@ def decode : List UInt8 → Option (ParticipantId × List UInt8)
 
 @[simp] theorem encode_length (value : ParticipantId) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : ParticipantId) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : ParticipantId) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -340,6 +352,10 @@ def decode : List UInt8 → Option (ExpirationMonth × List UInt8)
 @[simp] theorem encode_length (value : ExpirationMonth) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : ExpirationMonth) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : ExpirationMonth) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -402,6 +418,10 @@ def decode : List UInt8 → Option (StrikePriceDenominatorCode × List UInt8)
 
 @[simp] theorem encode_length (value : StrikePriceDenominatorCode) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : StrikePriceDenominatorCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : StrikePriceDenominatorCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -473,6 +493,10 @@ def decode : List UInt8 → Option (PremiumPriceDenominatorCode × List UInt8)
 
 @[simp] theorem encode_length (value : PremiumPriceDenominatorCode) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : PremiumPriceDenominatorCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : PremiumPriceDenominatorCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -548,6 +572,10 @@ def decode : List UInt8 → Option (UnderlyingPriceDenominatorCode × List UInt8
 
 @[simp] theorem encode_length (value : UnderlyingPriceDenominatorCode) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : UnderlyingPriceDenominatorCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : UnderlyingPriceDenominatorCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -656,6 +684,10 @@ def decode : List UInt8 → Option (BestBidParticipantId × List UInt8)
 @[simp] theorem encode_length (value : BestBidParticipantId) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : BestBidParticipantId) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : BestBidParticipantId) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -730,6 +762,10 @@ def decode : List UInt8 → Option (BestBidDenominatorCode × List UInt8)
 
 @[simp] theorem encode_length (value : BestBidDenominatorCode) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : BestBidDenominatorCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : BestBidDenominatorCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -838,6 +874,10 @@ def decode : List UInt8 → Option (BestOfferParticipantId × List UInt8)
 @[simp] theorem encode_length (value : BestOfferParticipantId) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : BestOfferParticipantId) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : BestOfferParticipantId) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -913,6 +953,10 @@ def decode : List UInt8 → Option (BestOfferDenominatorCode × List UInt8)
 @[simp] theorem encode_length (value : BestOfferDenominatorCode) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : BestOfferDenominatorCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : BestOfferDenominatorCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -983,6 +1027,10 @@ def decode : List UInt8 → Option (IndexValueDenominatorCode × List UInt8)
 
 @[simp] theorem encode_length (value : IndexValueDenominatorCode) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : IndexValueDenominatorCode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : IndexValueDenominatorCode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

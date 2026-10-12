@@ -55,6 +55,10 @@ def decode : List UInt8 → Option (MdEntryTypeSpectrumEntryType × List UInt8)
 @[simp] theorem encode_length (value : MdEntryTypeSpectrumEntryType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : MdEntryTypeSpectrumEntryType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : MdEntryTypeSpectrumEntryType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -141,6 +145,10 @@ def decode : List UInt8 → Option (MdEntryTypeTickerEntryType × List UInt8)
 
 @[simp] theorem encode_length (value : MdEntryTypeTickerEntryType) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MdEntryTypeTickerEntryType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MdEntryTypeTickerEntryType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

@@ -59,6 +59,10 @@ def decode : List UInt8 → Option (TriggerRestrictSymbolOnRepeatedOrderGenerati
 @[simp] theorem encode_length (value : TriggerRestrictSymbolOnRepeatedOrderGeneration) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : TriggerRestrictSymbolOnRepeatedOrderGeneration) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : TriggerRestrictSymbolOnRepeatedOrderGeneration) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -109,6 +113,10 @@ def decode : List UInt8 → Option (InAuctionMarketOrderPrevention × List UInt8
 
 @[simp] theorem encode_length (value : InAuctionMarketOrderPrevention) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : InAuctionMarketOrderPrevention) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : InAuctionMarketOrderPrevention) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -161,6 +169,10 @@ def decode : List UInt8 → Option (InAuctionFatFingerProtection × List UInt8)
 @[simp] theorem encode_length (value : InAuctionFatFingerProtection) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : InAuctionFatFingerProtection) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : InAuctionFatFingerProtection) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -211,6 +223,10 @@ def decode : List UInt8 → Option (InAuctionMarketOrderProtection × List UInt8
 
 @[simp] theorem encode_length (value : InAuctionMarketOrderProtection) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : InAuctionMarketOrderProtection) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : InAuctionMarketOrderProtection) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -267,6 +283,10 @@ def decode : List UInt8 → Option (BlockAndCancel × List UInt8)
 @[simp] theorem encode_length (value : BlockAndCancel) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : BlockAndCancel) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : BlockAndCancel) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -317,6 +337,10 @@ def decode : List UInt8 → Option (State × List UInt8)
 
 @[simp] theorem encode_length (value : State) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : State) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : State) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -369,6 +393,10 @@ def decode : List UInt8 → Option (RejectAllFlag × List UInt8)
 @[simp] theorem encode_length (value : RejectAllFlag) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : RejectAllFlag) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : RejectAllFlag) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -419,6 +447,10 @@ def decode : List UInt8 → Option (BlowThroughProtection × List UInt8)
 
 @[simp] theorem encode_length (value : BlowThroughProtection) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : BlowThroughProtection) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : BlowThroughProtection) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

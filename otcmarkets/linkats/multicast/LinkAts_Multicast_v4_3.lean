@@ -87,6 +87,10 @@ def decode : List UInt8 → Option (ReportingStatus × List UInt8)
 @[simp] theorem encode_length (value : ReportingStatus) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : ReportingStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : ReportingStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -153,6 +157,10 @@ def decode : List UInt8 → Option (SecurityStatus × List UInt8)
 
 @[simp] theorem encode_length (value : SecurityStatus) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : SecurityStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : SecurityStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

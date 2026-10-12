@@ -55,6 +55,10 @@ def decode : List UInt8 → Option (SelfMatchPreventionInstruction × List UInt8
 @[simp] theorem encode_length (value : SelfMatchPreventionInstruction) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : SelfMatchPreventionInstruction) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : SelfMatchPreventionInstruction) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -101,6 +105,10 @@ def decode : List UInt8 → Option (CmtaGiveupCd × List UInt8)
 
 @[simp] theorem encode_length (value : CmtaGiveupCd) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : CmtaGiveupCd) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : CmtaGiveupCd) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -165,6 +173,10 @@ def decode : List UInt8 → Option (CustOrderHandlingInst × List UInt8)
 @[simp] theorem encode_length (value : CustOrderHandlingInst) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : CustOrderHandlingInst) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : CustOrderHandlingInst) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -211,6 +223,10 @@ def decode : List UInt8 → Option (ListUpdateAction × List UInt8)
 
 @[simp] theorem encode_length (value : ListUpdateAction) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : ListUpdateAction) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : ListUpdateAction) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -267,6 +283,10 @@ def decode : List UInt8 → Option (OrdTypeOptional × List UInt8)
 @[simp] theorem encode_length (value : OrdTypeOptional) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : OrdTypeOptional) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : OrdTypeOptional) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -313,6 +333,10 @@ def decode : List UInt8 → Option (ExecutionMode × List UInt8)
 
 @[simp] theorem encode_length (value : ExecutionMode) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : ExecutionMode) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : ExecutionMode) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -385,6 +409,10 @@ def decode : List UInt8 → Option (OrdStatus × List UInt8)
 @[simp] theorem encode_length (value : OrdStatus) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : OrdStatus) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : OrdStatus) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -431,6 +459,10 @@ def decode : List UInt8 → Option (OrdStatusTrdCxl × List UInt8)
 
 @[simp] theorem encode_length (value : OrdStatusTrdCxl) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : OrdStatusTrdCxl) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : OrdStatusTrdCxl) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
@@ -479,6 +511,10 @@ def decode : List UInt8 → Option (ExecType × List UInt8)
 @[simp] theorem encode_length (value : ExecType) : (encode value).length = 1 :=
   rfl
 
+theorem encode_length_pos (value : ExecType) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
+
 @[simp] theorem decode_encode (value : ExecType) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by
   simp [decode, encode, ofByte_toByte]
@@ -525,6 +561,10 @@ def decode : List UInt8 → Option (MassActionOrdTyp × List UInt8)
 
 @[simp] theorem encode_length (value : MassActionOrdTyp) : (encode value).length = 1 :=
   rfl
+
+theorem encode_length_pos (value : MassActionOrdTyp) : (encode value).length > 0 := by
+  rw [encode_length]
+  decide
 
 @[simp] theorem decode_encode (value : MassActionOrdTyp) (rest : List UInt8) :
     decode (encode value ++ rest) = some (value, rest) := by

@@ -69,6 +69,6 @@
 [Aquis.AquisEquities.TcpHeader.Atp.v1.0.Url]: https://www.aquis.eu/technologies "Aquis Exchange 1.0 Url"
 [Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/aquis/tradingprotocol/AquisEquities_TradingProtocol_v4_0.lean "Aquis TradingProtocol Atp v4.0 Lean Definition"
 [Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Url]: https://www.aquis.eu/markets/documents "Aquis Exchange 4.0 Url"
-[Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/Atp/Aquis.AquisEquities.TradingProtocol.Atp.v4.0.pdf "Aquis Exchange 4.0 Pdf"
+[Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/AquisEquities/TradingProtocol/Aquis.AquisEquities.TradingProtocol.Atp.v4.0.pdf "Aquis Exchange 4.0 Pdf"
 [Aquis.AquisEquities.UdpHeader.Amd.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/aquis/udpheader/AquisEquities_UdpHeader_v1_0.lean "Aquis UdpHeader Amd v1.0 Lean Definition"
 [Aquis.AquisEquities.UdpHeader.Amd.v1.0.Url]: https://www.aquis.eu/technologies "Aquis Exchange 1.0 Url"

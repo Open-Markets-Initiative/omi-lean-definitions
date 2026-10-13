@@ -1026,14 +1026,6 @@ theorem encode_length_pos (message : SnapshotDataOfCashAuctionMessage) : (encode
   simp only [encodeUInt_length, List.length_append, ← Nat.add_assoc]
   omega
 
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : SnapshotDataOfCashAuctionMessage) : (encode message).length ≤ 68719476781 := by
-  have bound_mdEntries := message.mdEntries.length_lt
-  have bound_mdEntries_items := encodeMany_length_le MdEntries.encode 34359738392 MdEntries.encode_length_le message.mdEntries.val
-  unfold encode
-  simp only [List.length_append, ← Nat.add_assoc, encodeUInt_length, Alpha.encode_length]
-  omega
-
 @[simp] theorem decode_encode (message : SnapshotDataOfCashAuctionMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
@@ -1165,15 +1157,6 @@ def decode (bytes : List UInt8) : Option (SnapshotDataOfSpotBondTradingMessage �
 theorem encode_length_pos (message : SnapshotDataOfSpotBondTradingMessage) : (encode message).length > 0 := by
   unfold encode
   simp only [encodeUInt_length, List.length_append, ← Nat.add_assoc]
-  omega
-
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : SnapshotDataOfSpotBondTradingMessage) : (encode message).length ≤ 107374182456 := by
-  have bound_mdEntries := message.mdEntries.length_lt
-  have bound_mdEntries_items := encodeMany_length_le MdEntries.encode 34359738392 MdEntries.encode_length_le message.mdEntries.val
-  have bound_subTradingPhaseCodes := message.subTradingPhaseCodes.length_lt
-  unfold encode
-  simp only [List.length_append, ← Nat.add_assoc, encodeUInt_length, Alpha.encode_length, encodeMany_length_const SubTradingPhaseCodes.encode 9 SubTradingPhaseCodes.encode_length]
   omega
 
 @[simp] theorem decode_encode (message : SnapshotDataOfSpotBondTradingMessage) (rest : List UInt8) :
@@ -3122,113 +3105,6 @@ def encode : Payload → List UInt8
   | .transactionTickDataOfSpotBondTradingQuotationMessage message => TransactionTickDataOfSpotBondTradingQuotationMessage.encode message
   | .transactionTickDataOfBidQuotationMessage message => TransactionTickDataOfBidQuotationMessage.encode message
 
-/-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : Payload) : (encode message).length ≤ 154618822693 := by
-  cases message with
-  | logonMessage inner =>
-    simp only [encode, LogonMessage.encode_length]
-    omega
-  | logoutMessage inner =>
-    simp only [encode, LogoutMessage.encode_length]
-    omega
-  | heartbeatMessage inner =>
-    simp only [encode, HeartbeatMessage.encode_length]
-    omega
-  | channelHeartbeatMessage inner =>
-    simp only [encode, ChannelHeartbeatMessage.encode_length]
-    omega
-  | retransmittingMessage inner =>
-    simp only [encode, RetransmittingMessage.encode_length]
-    omega
-  | clientUserInformationReportingMessage inner =>
-    simp only [encode, ClientUserInformationReportingMessage.encode_length]
-    omega
-  | statisticsOfSnapshotDataChannelMessage inner =>
-    have bound_inner := StatisticsOfSnapshotDataChannelMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | businessRejectMessage inner =>
-    simp only [encode, BusinessRejectMessage.encode_length]
-    omega
-  | realTimeMarketStatusMessage inner =>
-    simp only [encode, RealTimeMarketStatusMessage.encode_length]
-    omega
-  | realTimeStatusOfSecurityMessage inner =>
-    have bound_inner := RealTimeStatusOfSecurityMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | announcementsMessage inner =>
-    have bound_inner := AnnouncementsMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | snapshotDataOfCashAuctionMessage inner =>
-    have bound_inner := SnapshotDataOfCashAuctionMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | snapshotDataOfSpotBondTradingMessage inner =>
-    have bound_inner := SnapshotDataOfSpotBondTradingMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | snapshotDataOfAfterHourTradingBlockTradeMessage inner =>
-    have bound_inner := SnapshotDataOfAfterHourTradingBlockTradeMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | snapshotDataOfAfterHourTradingMessage inner =>
-    have bound_inner := SnapshotDataOfAfterHourTradingMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | snapshotDataOfEligibleHkStocksMessage inner =>
-    have bound_inner := SnapshotDataOfEligibleHkStocksMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | indexSnapshotMessage inner =>
-    have bound_inner := IndexSnapshotMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | statisticIndicatorSnapshotMessage inner =>
-    simp only [encode, StatisticIndicatorSnapshotMessage.encode_length]
-    omega
-  | realTimeReferenceNetValueOfFundsSnapshotMessage inner =>
-    have bound_inner := RealTimeReferenceNetValueOfFundsSnapshotMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | orderTickDataInCallAuctionMessage inner =>
-    simp only [encode, OrderTickDataInCallAuctionMessage.encode_length]
-    omega
-  | orderTickDataOfNegotiableTradeMessage inner =>
-    simp only [encode, OrderTickDataOfNegotiableTradeMessage.encode_length]
-    omega
-  | orderTickDataOfSecurityLendingMessage inner =>
-    simp only [encode, OrderTickDataOfSecurityLendingMessage.encode_length]
-    omega
-  | orderTickDataOfSpotBondTradingMatchingDealMessage inner =>
-    simp only [encode, OrderTickDataOfSpotBondTradingMatchingDealMessage.encode_length]
-    omega
-  | orderTickDataOfSpotBondTradingQuotationMessage inner =>
-    simp only [encode, OrderTickDataOfSpotBondTradingQuotationMessage.encode_length]
-    omega
-  | orderTickDataOfBidQuotationMessage inner =>
-    simp only [encode, OrderTickDataOfBidQuotationMessage.encode_length]
-    omega
-  | transactionTickDataInCallAuctionMessage inner =>
-    simp only [encode, TransactionTickDataInCallAuctionMessage.encode_length]
-    omega
-  | transactionTickDataOfNegotiableTradeMessage inner =>
-    simp only [encode, TransactionTickDataOfNegotiableTradeMessage.encode_length]
-    omega
-  | transactionTickDataOfSecurityLendingMessage inner =>
-    simp only [encode, TransactionTickDataOfSecurityLendingMessage.encode_length]
-    omega
-  | transactionTickDataOfBondGeneralPledgedRepoMessage inner =>
-    simp only [encode, TransactionTickDataOfBondGeneralPledgedRepoMessage.encode_length]
-    omega
-  | transactionTickDataOfSpotBondTradingQuotationMessage inner =>
-    simp only [encode, TransactionTickDataOfSpotBondTradingQuotationMessage.encode_length]
-    omega
-  | transactionTickDataOfBidQuotationMessage inner =>
-    simp only [encode, TransactionTickDataOfBidQuotationMessage.encode_length]
-    omega
-
 def decode (tag : BitVec 32) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 1 then (LogonMessage.decode bytes).map fun (message, rest) => (.logonMessage message, rest)
   else if tag = 2 then (LogoutMessage.decode bytes).map fun (message, rest) => (.logoutMessage message, rest)
@@ -3325,114 +3201,6 @@ theorem encode_length_pos (message : Message) : (encode message).length > 0 := b
   unfold encode
   simp only [encodeUInt_length, List.length_append, ← Nat.add_assoc]
   omega
-
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : Message) : (encode message).length ≤ 154618822705 := by
-  unfold encode
-  cases message.payload with
-  | logonMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, LogonMessage.encode_length]
-    omega
-  | logoutMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, LogoutMessage.encode_length]
-    omega
-  | heartbeatMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, HeartbeatMessage.encode_length]
-    omega
-  | channelHeartbeatMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, ChannelHeartbeatMessage.encode_length]
-    omega
-  | retransmittingMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, RetransmittingMessage.encode_length]
-    omega
-  | clientUserInformationReportingMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, ClientUserInformationReportingMessage.encode_length]
-    omega
-  | statisticsOfSnapshotDataChannelMessage inner =>
-    have bound_inner := StatisticsOfSnapshotDataChannelMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length]
-    omega
-  | businessRejectMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, BusinessRejectMessage.encode_length]
-    omega
-  | realTimeMarketStatusMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, RealTimeMarketStatusMessage.encode_length]
-    omega
-  | realTimeStatusOfSecurityMessage inner =>
-    have bound_inner := RealTimeStatusOfSecurityMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length]
-    omega
-  | announcementsMessage inner =>
-    have bound_inner := AnnouncementsMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length]
-    omega
-  | snapshotDataOfCashAuctionMessage inner =>
-    have bound_inner := SnapshotDataOfCashAuctionMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length]
-    omega
-  | snapshotDataOfSpotBondTradingMessage inner =>
-    have bound_inner := SnapshotDataOfSpotBondTradingMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length]
-    omega
-  | snapshotDataOfAfterHourTradingBlockTradeMessage inner =>
-    have bound_inner := SnapshotDataOfAfterHourTradingBlockTradeMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length]
-    omega
-  | snapshotDataOfAfterHourTradingMessage inner =>
-    have bound_inner := SnapshotDataOfAfterHourTradingMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length]
-    omega
-  | snapshotDataOfEligibleHkStocksMessage inner =>
-    have bound_inner := SnapshotDataOfEligibleHkStocksMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length]
-    omega
-  | indexSnapshotMessage inner =>
-    have bound_inner := IndexSnapshotMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length]
-    omega
-  | statisticIndicatorSnapshotMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, StatisticIndicatorSnapshotMessage.encode_length]
-    omega
-  | realTimeReferenceNetValueOfFundsSnapshotMessage inner =>
-    have bound_inner := RealTimeReferenceNetValueOfFundsSnapshotMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length]
-    omega
-  | orderTickDataInCallAuctionMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, OrderTickDataInCallAuctionMessage.encode_length]
-    omega
-  | orderTickDataOfNegotiableTradeMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, OrderTickDataOfNegotiableTradeMessage.encode_length]
-    omega
-  | orderTickDataOfSecurityLendingMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, OrderTickDataOfSecurityLendingMessage.encode_length]
-    omega
-  | orderTickDataOfSpotBondTradingMatchingDealMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, OrderTickDataOfSpotBondTradingMatchingDealMessage.encode_length]
-    omega
-  | orderTickDataOfSpotBondTradingQuotationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, OrderTickDataOfSpotBondTradingQuotationMessage.encode_length]
-    omega
-  | orderTickDataOfBidQuotationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, OrderTickDataOfBidQuotationMessage.encode_length]
-    omega
-  | transactionTickDataInCallAuctionMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, TransactionTickDataInCallAuctionMessage.encode_length]
-    omega
-  | transactionTickDataOfNegotiableTradeMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, TransactionTickDataOfNegotiableTradeMessage.encode_length]
-    omega
-  | transactionTickDataOfSecurityLendingMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, TransactionTickDataOfSecurityLendingMessage.encode_length]
-    omega
-  | transactionTickDataOfBondGeneralPledgedRepoMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, TransactionTickDataOfBondGeneralPledgedRepoMessage.encode_length]
-    omega
-  | transactionTickDataOfSpotBondTradingQuotationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, TransactionTickDataOfSpotBondTradingQuotationMessage.encode_length]
-    omega
-  | transactionTickDataOfBidQuotationMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, TransactionTickDataOfBidQuotationMessage.encode_length]
-    omega
 
 @[simp] theorem decode_encode (message : Message) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by

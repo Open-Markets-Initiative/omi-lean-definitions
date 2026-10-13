@@ -584,16 +584,6 @@ theorem encode_length_pos (message : PositionBandMessage) : (encode message).len
   simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : PositionBandMessage) : (encode message).length ≤ -68719476734 := by
-  have bound_longPositionBands := message.longPositionBands.length_lt
-  have bound_longPositionBands_items := encodeMany_length_le LongPositionBands.encode 60129542150 LongPositionBands.encode_length_le message.longPositionBands.val
-  have bound_shortPositionBands := message.shortPositionBands.length_lt
-  have bound_shortPositionBands_items := encodeMany_length_le ShortPositionBands.encode 60129542150 ShortPositionBands.encode_length_le message.shortPositionBands.val
-  unfold encode
-  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, Alpha.encode_length]
-  omega
-
 @[simp] theorem decode_encode (message : PositionBandMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
@@ -843,34 +833,6 @@ def encode : Payload → List UInt8
   | .tradingVolumeMessage message => TradingVolumeMessage.encode message
   | .refreshCompleteMessage message => RefreshCompleteMessage.encode message
 
-/-- The most bytes any message's encoding can take -/
-theorem encode_length_le (message : Payload) : (encode message).length ≤ 85899345922 := by
-  cases message with
-  | sequenceResetMessage inner =>
-    simp only [encode, SequenceResetMessage.encode_length]
-    omega
-  | openInterestMessage inner =>
-    simp only [encode, OpenInterestMessage.encode_length]
-    omega
-  | openInterestBandMessage inner =>
-    have bound_inner := OpenInterestBandMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | positionBandMessage inner =>
-    have bound_inner := PositionBandMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | warrantBandMessage inner =>
-    have bound_inner := WarrantBandMessage.encode_length_le inner
-    simp only [encode]
-    omega
-  | tradingVolumeMessage inner =>
-    simp only [encode, TradingVolumeMessage.encode_length]
-    omega
-  | refreshCompleteMessage inner =>
-    simp only [encode, RefreshCompleteMessage.encode_length]
-    omega
-
 def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 100 then (SequenceResetMessage.decode bytes).map fun (message, rest) => (.sequenceResetMessage message, rest)
   else if tag = 420 then (OpenInterestMessage.decode bytes).map fun (message, rest) => (.openInterestMessage message, rest)
@@ -910,35 +872,6 @@ theorem encode_length_pos (message : Messages) : (encode message).length > 0 := 
   unfold encode
   simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
-
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : Messages) : (encode message).length ≤ 85899345926 := by
-  unfold encode
-  cases message.payload with
-  | sequenceResetMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, SequenceResetMessage.encode_length]
-    omega
-  | openInterestMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, OpenInterestMessage.encode_length]
-    omega
-  | openInterestBandMessage inner =>
-    have bound_inner := OpenInterestBandMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | positionBandMessage inner =>
-    have bound_inner := PositionBandMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | warrantBandMessage inner =>
-    have bound_inner := WarrantBandMessage.encode_length_le inner
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length]
-    omega
-  | tradingVolumeMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, TradingVolumeMessage.encode_length]
-    omega
-  | refreshCompleteMessage inner =>
-    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, RefreshCompleteMessage.encode_length]
-    omega
 
 @[simp] theorem decode_encode (message : Messages) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
@@ -985,14 +918,6 @@ def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
 theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
   unfold encode
   simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
-  omega
-
-/-- The most bytes an encoding can take -/
-theorem encode_length_le (message : Packet) : (encode message).length ≤ 21904333211146 := by
-  have bound_messages := message.messages.length_lt
-  have bound_messages_items := encodeMany_length_le Messages.encode 85899345926 Messages.encode_length_le message.messages.val
-  unfold encode
-  simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
   omega
 
 @[simp] theorem decode_encode (message : Packet) (rest : List UInt8) :

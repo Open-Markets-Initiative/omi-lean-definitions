@@ -5,7 +5,7 @@
 
 | Division | [Protocol][Omi.Szse.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Szse.Specifications] |
 | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| [SzseSecurities][SzseSecurities.Exchange] | [TcpMarketData][Szse.SzseSecurities.TcpMarketData] | [SzseBinary][Omi.Encoding.SzseBinary] | [1.17][Szse.SzseSecurities.TcpMarketData.SzseBinary.v1.17.Definition] | 4/1/2025 | 3451 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Szse.SzseSecurities.TcpMarketData.SzseBinary.v1.17.Url] - [pdf][Szse.SzseSecurities.TcpMarketData.SzseBinary.v1.17.Pdf] |
+| [SzseSecurities][SzseSecurities.Exchange] | [TcpMarketData][Szse.SzseSecurities.TcpMarketData] | [SzseBinary][Omi.Encoding.SzseBinary] | [1.17][Szse.SzseSecurities.TcpMarketData.SzseBinary.v1.17.Definition] | 4/1/2025 | 3219 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Szse.SzseSecurities.TcpMarketData.SzseBinary.v1.17.Url] - [pdf][Szse.SzseSecurities.TcpMarketData.SzseBinary.v1.17.Pdf] |
 
 
 <p align="center"><a href="https://www.szse.cn" title="Shenzhen Stock Exchange Website"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Website.png" alt="Website" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://en.wikipedia.org/wiki/Shenzhen_Stock_Exchange" title="Shenzhen Stock Exchange on Wikipedia"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Wikipedia.png" alt="Wikipedia" width="32" height="32"></a></p>

@@ -319,6 +319,27 @@ theorem encode_length_pos (message : LogoutMessage) : (encode message).length > 
 
 end LogoutMessage
 
+/-- Heartbeat Message: 0 bytes -/
+structure HeartbeatMessage where
+  deriving DecidableEq, Repr
+
+namespace HeartbeatMessage
+
+def encode (_ : HeartbeatMessage) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (HeartbeatMessage × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : HeartbeatMessage) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : HeartbeatMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end HeartbeatMessage
+
 /-- Channel Heartbeat Message: 12 bytes -/
 structure ChannelHeartbeatMessage where
   channelNo : BitVec 16
@@ -3001,6 +3022,7 @@ end TransactionTickDataOfBidQuotationMessage
 inductive Payload where
   | logonMessage (message : LogonMessage) -- 1
   | logoutMessage (message : LogoutMessage) -- 2
+  | heartbeatMessage (message : HeartbeatMessage) -- 3
   | channelHeartbeatMessage (message : ChannelHeartbeatMessage) -- 390095
   | retransmittingMessage (message : RetransmittingMessage) -- 390094
   | clientUserInformationReportingMessage (message : ClientUserInformationReportingMessage) -- 390093
@@ -3037,6 +3059,7 @@ namespace Payload
 def tag : Payload → BitVec 32
   | .logonMessage _ => 1
   | .logoutMessage _ => 2
+  | .heartbeatMessage _ => 3
   | .channelHeartbeatMessage _ => 390095
   | .retransmittingMessage _ => 390094
   | .clientUserInformationReportingMessage _ => 390093
@@ -3069,6 +3092,7 @@ def tag : Payload → BitVec 32
 def encode : Payload → List UInt8
   | .logonMessage message => LogonMessage.encode message
   | .logoutMessage message => LogoutMessage.encode message
+  | .heartbeatMessage message => HeartbeatMessage.encode message
   | .channelHeartbeatMessage message => ChannelHeartbeatMessage.encode message
   | .retransmittingMessage message => RetransmittingMessage.encode message
   | .clientUserInformationReportingMessage message => ClientUserInformationReportingMessage.encode message
@@ -3106,6 +3130,9 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 15461
     omega
   | logoutMessage inner =>
     simp only [encode, LogoutMessage.encode_length]
+    omega
+  | heartbeatMessage inner =>
+    simp only [encode, HeartbeatMessage.encode_length]
     omega
   | channelHeartbeatMessage inner =>
     simp only [encode, ChannelHeartbeatMessage.encode_length]
@@ -3205,6 +3232,7 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 15461
 def decode (tag : BitVec 32) (bytes : List UInt8) : Option (Payload × List UInt8) :=
   if tag = 1 then (LogonMessage.decode bytes).map fun (message, rest) => (.logonMessage message, rest)
   else if tag = 2 then (LogoutMessage.decode bytes).map fun (message, rest) => (.logoutMessage message, rest)
+  else if tag = 3 then (HeartbeatMessage.decode bytes).map fun (message, rest) => (.heartbeatMessage message, rest)
   else if tag = 390095 then (ChannelHeartbeatMessage.decode bytes).map fun (message, rest) => (.channelHeartbeatMessage message, rest)
   else if tag = 390094 then (RetransmittingMessage.decode bytes).map fun (message, rest) => (.retransmittingMessage message, rest)
   else if tag = 390093 then (ClientUserInformationReportingMessage.decode bytes).map fun (message, rest) => (.clientUserInformationReportingMessage message, rest)
@@ -3307,6 +3335,9 @@ theorem encode_length_le (message : Message) : (encode message).length ≤ 15461
     omega
   | logoutMessage inner =>
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, LogoutMessage.encode_length]
+    omega
+  | heartbeatMessage inner =>
+    simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, HeartbeatMessage.encode_length]
     omega
   | channelHeartbeatMessage inner =>
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUInt_length, MessageTail.encode_length, ChannelHeartbeatMessage.encode_length]

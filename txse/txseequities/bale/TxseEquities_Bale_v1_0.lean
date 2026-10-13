@@ -54,15 +54,19 @@ theorem encode_length_pos (message : TradingSessionStatusMessage) : (encode mess
 @[simp] theorem decode_encode (message : TradingSessionStatusMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_tradingSessionStatusOperationalHaltReason : ((message.tradingSessionStatusPresenceBits.val ||| presence (n := 8) 1 message.tradingSessionStatusOperationalHaltReason.isSome ||| presence (n := 8) 2 message.tradingSessionStatusRegulatoryHaltReason.isSome) &&& 1 != 0) = message.tradingSessionStatusOperationalHaltReason.isSome := by
+  generalize written_tradingSessionStatusPresenceBits_eq : (message.tradingSessionStatusPresenceBits.val ||| presence (n := 8) 1 message.tradingSessionStatusOperationalHaltReason.isSome ||| presence (n := 8) 2 message.tradingSessionStatusRegulatoryHaltReason.isSome) = written_tradingSessionStatusPresenceBits
+  have selected_tradingSessionStatusOperationalHaltReason : (written_tradingSessionStatusPresenceBits &&& 1 != 0) = message.tradingSessionStatusOperationalHaltReason.isSome := by
+    rw [← written_tradingSessionStatusPresenceBits_eq]
     have clear := message.tradingSessionStatusPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_tradingSessionStatusRegulatoryHaltReason : ((message.tradingSessionStatusPresenceBits.val ||| presence (n := 8) 1 message.tradingSessionStatusOperationalHaltReason.isSome ||| presence (n := 8) 2 message.tradingSessionStatusRegulatoryHaltReason.isSome) &&& 2 != 0) = message.tradingSessionStatusRegulatoryHaltReason.isSome := by
+  have selected_tradingSessionStatusRegulatoryHaltReason : (written_tradingSessionStatusPresenceBits &&& 2 != 0) = message.tradingSessionStatusRegulatoryHaltReason.isSome := by
+    rw [← written_tradingSessionStatusPresenceBits_eq]
     have clear := message.tradingSessionStatusPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_tradingSessionStatusPresenceBits : (message.tradingSessionStatusPresenceBits.val ||| presence (n := 8) 1 message.tradingSessionStatusOperationalHaltReason.isSome ||| presence (n := 8) 2 message.tradingSessionStatusRegulatoryHaltReason.isSome) &&& 252 = message.tradingSessionStatusPresenceBits.val := by
+  have carried_tradingSessionStatusPresenceBits : written_tradingSessionStatusPresenceBits &&& 252 = message.tradingSessionStatusPresenceBits.val := by
+    rw [← written_tradingSessionStatusPresenceBits_eq]
     have clear := message.tradingSessionStatusPresenceBits.property
     simp only [presence]
     bv_decide
@@ -193,15 +197,19 @@ theorem encode_length_pos (message : SymbolStatusMessage) : (encode message).len
 @[simp] theorem decode_encode (message : SymbolStatusMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  have selected_symbolStatusOperationalHaltReason : ((message.symbolStatusPresenceBits.val ||| presence (n := 8) 1 message.symbolStatusOperationalHaltReason.isSome ||| presence (n := 8) 2 message.symbolStatusRegulatoryHaltReason.isSome) &&& 1 != 0) = message.symbolStatusOperationalHaltReason.isSome := by
+  generalize written_symbolStatusPresenceBits_eq : (message.symbolStatusPresenceBits.val ||| presence (n := 8) 1 message.symbolStatusOperationalHaltReason.isSome ||| presence (n := 8) 2 message.symbolStatusRegulatoryHaltReason.isSome) = written_symbolStatusPresenceBits
+  have selected_symbolStatusOperationalHaltReason : (written_symbolStatusPresenceBits &&& 1 != 0) = message.symbolStatusOperationalHaltReason.isSome := by
+    rw [← written_symbolStatusPresenceBits_eq]
     have clear := message.symbolStatusPresenceBits.property
     simp only [presence]
     bv_decide
-  have selected_symbolStatusRegulatoryHaltReason : ((message.symbolStatusPresenceBits.val ||| presence (n := 8) 1 message.symbolStatusOperationalHaltReason.isSome ||| presence (n := 8) 2 message.symbolStatusRegulatoryHaltReason.isSome) &&& 2 != 0) = message.symbolStatusRegulatoryHaltReason.isSome := by
+  have selected_symbolStatusRegulatoryHaltReason : (written_symbolStatusPresenceBits &&& 2 != 0) = message.symbolStatusRegulatoryHaltReason.isSome := by
+    rw [← written_symbolStatusPresenceBits_eq]
     have clear := message.symbolStatusPresenceBits.property
     simp only [presence]
     bv_decide
-  have carried_symbolStatusPresenceBits : (message.symbolStatusPresenceBits.val ||| presence (n := 8) 1 message.symbolStatusOperationalHaltReason.isSome ||| presence (n := 8) 2 message.symbolStatusRegulatoryHaltReason.isSome) &&& 252 = message.symbolStatusPresenceBits.val := by
+  have carried_symbolStatusPresenceBits : written_symbolStatusPresenceBits &&& 252 = message.symbolStatusPresenceBits.val := by
+    rw [← written_symbolStatusPresenceBits_eq]
     have clear := message.symbolStatusPresenceBits.property
     simp only [presence]
     bv_decide

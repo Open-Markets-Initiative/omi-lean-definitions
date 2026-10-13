@@ -2808,10 +2808,6 @@ theorem encode_length_le (message : EnterOrderMessage) : (encode message).length
   rw [dite_eq_left message.enterOrderAppendage.length_lt]
   rfl
 
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : EnterOrderMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
-
 end EnterOrderMessage
 
 /-- Any Replace Order Request Optional Value, selected by Replace Order Request Optional Field -/
@@ -3185,10 +3181,6 @@ theorem encode_length_le (message : ReplaceOrderRequestMessage) : (encode messag
   rw [dite_eq_left message.replaceOrderRequestAppendage.length_lt]
   rfl
 
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : ReplaceOrderRequestMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
-
 end ReplaceOrderRequestMessage
 
 /-- Any Cancel Order Request Optional Value, selected by Cancel Order Request Optional Field -/
@@ -3322,10 +3314,6 @@ theorem encode_length_le (message : CancelOrderRequestMessage) : (encode message
   rw [dite_eq_left message.cancelOrderRequestAppendage.length_lt]
   rfl
 
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : CancelOrderRequestMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
-
 end CancelOrderRequestMessage
 
 /-- Any Account Query Request Optional Value, selected by Account Query Request Optional Field -/
@@ -3411,45 +3399,42 @@ end AccountQueryRequestAppendage
 
 /-- Account Query Request Message -/
 structure AccountQueryRequestMessage where
-  accountQueryRequestAppendage : Option (Sized 2 AccountQueryRequestAppendage.encode)
+  accountQueryRequestAppendage : Sized 2 AccountQueryRequestAppendage.encode
   deriving DecidableEq, Repr
 
 namespace AccountQueryRequestMessage
 
-/-- The Account Query Request Appendage when there: its length, then the entries filling it -/
-def encodeAccountQueryRequestAppendage (items : Sized 2 AccountQueryRequestAppendage.encode) : List UInt8 :=
-  encodeUInt 2 (BitVec.ofNat (8 * 2) (encodeMany AccountQueryRequestAppendage.encode items.val).length) ++ encodeMany AccountQueryRequestAppendage.encode items.val
+def encode (message : AccountQueryRequestMessage) : List UInt8 :=
+  encodeUInt 2 (BitVec.ofNat (8 * 2) (encodeMany AccountQueryRequestAppendage.encode message.accountQueryRequestAppendage.val).length)
+    ++ (encodeMany AccountQueryRequestAppendage.encode message.accountQueryRequestAppendage.val)
 
-def decodeAccountQueryRequestAppendage (bytes : List UInt8) : Option (Sized 2 AccountQueryRequestAppendage.encode × List UInt8) := do
-  let (length, bytes) ← decodeUInt 2 bytes
-  let (items_, bytes) ← decodeSized AccountQueryRequestAppendage.decode length.toNat bytes
-  if fits : (encodeMany AccountQueryRequestAppendage.encode items_).length < 256 ^ 2 then pure (⟨items_, fits⟩, bytes) else none
+def decode (bytes : List UInt8) : Option (AccountQueryRequestMessage × List UInt8) := do
+  let (appendageLength, bytes) ← decodeUInt 2 bytes
+  let (accountQueryRequestAppendage_, bytes) ← decodeSized AccountQueryRequestAppendage.decode appendageLength.toNat bytes
+  if fits_accountQueryRequestAppendage : (encodeMany AccountQueryRequestAppendage.encode accountQueryRequestAppendage_).length < 256 ^ 2 then
+    pure ({ accountQueryRequestAppendage := ⟨accountQueryRequestAppendage_, fits_accountQueryRequestAppendage⟩ }, bytes)
+  else none
 
-theorem decodeAccountQueryRequestAppendage_encodeAccountQueryRequestAppendage (items : Sized 2 AccountQueryRequestAppendage.encode) (rest : List UInt8) :
-    decodeAccountQueryRequestAppendage (encodeAccountQueryRequestAppendage items ++ rest) = some (items, rest) := by
-  unfold decodeAccountQueryRequestAppendage encodeAccountQueryRequestAppendage
+theorem encode_length_pos (message : AccountQueryRequestMessage) : (encode message).length > 0 := by
+  unfold encode
+  simp only [encodeUInt_length, List.length_append]
+  omega
+
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : AccountQueryRequestMessage) : (encode message).length ≤ 65537 := by
+  have bound_accountQueryRequestAppendage := message.accountQueryRequestAppendage.length_lt
+  unfold encode
+  simp only [List.length_append, encodeUInt_length]
+  omega
+
+@[simp] theorem decode_encode (message : AccountQueryRequestMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [decodeSized_encodeMany 2 AccountQueryRequestAppendage.encode AccountQueryRequestAppendage.decode AccountQueryRequestAppendage.decode_encode AccountQueryRequestAppendage.encode_length_pos, some_bind]
   dsimp only
-  rw [dite_eq_left items.length_lt]
-  rfl
-
-theorem encodeAccountQueryRequestAppendage_length_pos (items : Sized 2 AccountQueryRequestAppendage.encode) : (encodeAccountQueryRequestAppendage items).length > 0 := by
-  unfold encodeAccountQueryRequestAppendage
-  simp only [List.length_append, encodeUInt_length]
-  omega
-
-def encode (message : AccountQueryRequestMessage) : List UInt8 :=
-  encodeTail encodeAccountQueryRequestAppendage message.accountQueryRequestAppendage
-
-def decode (bytes : List UInt8) : Option AccountQueryRequestMessage := do
-  let accountQueryRequestAppendage ← decodeTail decodeAccountQueryRequestAppendage bytes
-  pure { accountQueryRequestAppendage }
-
-theorem decode_encode (message : AccountQueryRequestMessage) : decode (encode message) = some message := by
-  unfold decode encode
-  rw [decodeTail_encodeTail encodeAccountQueryRequestAppendage decodeAccountQueryRequestAppendage decodeAccountQueryRequestAppendage_encodeAccountQueryRequestAppendage encodeAccountQueryRequestAppendage_length_pos, some_bind]
+  rw [dite_eq_left message.accountQueryRequestAppendage.length_lt]
   rfl
 
 end AccountQueryRequestMessage
@@ -3477,21 +3462,36 @@ def encode : UnsequencedMessage → List UInt8
   | .cancelOrderRequestMessage message => CancelOrderRequestMessage.encode message
   | .accountQueryRequestMessage message => AccountQueryRequestMessage.encode message
 
-/-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
-def decode (tag : BitVec 8) (bytes : List UInt8) : Option UnsequencedMessage :=
-  if tag = 79 then (EnterOrderMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.enterOrderMessage message) else none
-  else if tag = 85 then (ReplaceOrderRequestMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.replaceOrderRequestMessage message) else none
-  else if tag = 88 then (CancelOrderRequestMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.cancelOrderRequestMessage message) else none
-  else if tag = 81 then (AccountQueryRequestMessage.decode bytes).map fun message => .accountQueryRequestMessage message
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : UnsequencedMessage) : (encode message).length ≤ 65576 := by
+  cases message with
+  | enterOrderMessage inner =>
+    have bound_inner := EnterOrderMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | replaceOrderRequestMessage inner =>
+    have bound_inner := ReplaceOrderRequestMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | cancelOrderRequestMessage inner =>
+    have bound_inner := CancelOrderRequestMessage.encode_length_le inner
+    simp only [encode]
+    omega
+  | accountQueryRequestMessage inner =>
+    have bound_inner := AccountQueryRequestMessage.encode_length_le inner
+    simp only [encode]
+    omega
+
+def decode (tag : BitVec 8) (bytes : List UInt8) : Option (UnsequencedMessage × List UInt8) :=
+  if tag = 79 then (EnterOrderMessage.decode bytes).map fun (message, rest) => (.enterOrderMessage message, rest)
+  else if tag = 85 then (ReplaceOrderRequestMessage.decode bytes).map fun (message, rest) => (.replaceOrderRequestMessage message, rest)
+  else if tag = 88 then (CancelOrderRequestMessage.decode bytes).map fun (message, rest) => (.cancelOrderRequestMessage message, rest)
+  else if tag = 81 then (AccountQueryRequestMessage.decode bytes).map fun (message, rest) => (.accountQueryRequestMessage message, rest)
   else none
 
-theorem decode_encode (message : UnsequencedMessage) :
-    decode (tag message) (encode message) = some message := by
-  cases message with
-  | enterOrderMessage message => simp [decode, encode, tag, EnterOrderMessage.decode_encode_nil]
-  | replaceOrderRequestMessage message => simp [decode, encode, tag, ReplaceOrderRequestMessage.decode_encode_nil]
-  | cancelOrderRequestMessage message => simp [decode, encode, tag, CancelOrderRequestMessage.decode_encode_nil]
-  | accountQueryRequestMessage message => simp [decode, encode, tag, AccountQueryRequestMessage.decode_encode]
+@[simp] theorem decode_encode (message : UnsequencedMessage) (rest : List UInt8) :
+    decode (tag message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, tag]
 
 end UnsequencedMessage
 
@@ -3506,22 +3506,48 @@ def encode (message : UnsequencedDataPacket) : List UInt8 :=
   encodeUInt 1 (UnsequencedMessage.tag message.unsequencedMessage)
     ++ (UnsequencedMessage.encode message.unsequencedMessage)
 
-def decode (bytes : List UInt8) : Option UnsequencedDataPacket := do
+def decode (bytes : List UInt8) : Option (UnsequencedDataPacket × List UInt8) := do
   let (unsequencedMessageType, bytes) ← decodeUInt 1 bytes
-  let unsequencedMessage ← UnsequencedMessage.decode unsequencedMessageType bytes
-  pure { unsequencedMessage }
+  let (unsequencedMessage, bytes) ← UnsequencedMessage.decode unsequencedMessageType bytes
+  pure ({ unsequencedMessage }, bytes)
 
 theorem encode_length_pos (message : UnsequencedDataPacket) : (encode message).length > 0 := by
   unfold encode
   simp only [encodeUInt_length, List.length_append]
   omega
 
-theorem decode_encode (message : UnsequencedDataPacket) : decode (encode message) = some message := by
+/-- The most bytes an encoding can take -/
+theorem encode_length_le (message : UnsequencedDataPacket) : (encode message).length ≤ 65577 := by
+  unfold encode
+  cases message.unsequencedMessage with
+  | enterOrderMessage inner =>
+    have bound_inner := EnterOrderMessage.encode_length_le inner
+    simp only [UnsequencedMessage.encode, List.length_append, encodeUInt_length]
+    omega
+  | replaceOrderRequestMessage inner =>
+    have bound_inner := ReplaceOrderRequestMessage.encode_length_le inner
+    simp only [UnsequencedMessage.encode, List.length_append, encodeUInt_length]
+    omega
+  | cancelOrderRequestMessage inner =>
+    have bound_inner := CancelOrderRequestMessage.encode_length_le inner
+    simp only [UnsequencedMessage.encode, List.length_append, encodeUInt_length]
+    omega
+  | accountQueryRequestMessage inner =>
+    have bound_inner := AccountQueryRequestMessage.encode_length_le inner
+    simp only [UnsequencedMessage.encode, List.length_append, encodeUInt_length]
+    omega
+
+@[simp] theorem decode_encode (message : UnsequencedDataPacket) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  rw [decodeUInt_encodeUInt, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [UnsequencedMessage.decode_encode, some_bind]
   rfl
+
+/-- Decoded as the whole of a frame: nothing follows -/
+theorem decode_encode_nil (message : UnsequencedDataPacket) : decode (encode message) = some (message, []) :=
+  List.append_nil (encode message) ▸ decode_encode message []
 
 end UnsequencedDataPacket
 
@@ -3601,11 +3627,32 @@ def encode : ClientPayload → List UInt8
   | .clientHeartbeat message => ClientHeartbeat.encode message
   | .logoutRequest message => LogoutRequest.encode message
 
+/-- The most bytes any message's encoding can take -/
+theorem encode_length_le (message : ClientPayload) : (encode message).length ≤ 65577 := by
+  cases message with
+  | debugPacket inner =>
+    have bound_inner := DebugPacket.encode_length_le inner
+    simp only [encode]
+    omega
+  | loginRequestPacket inner =>
+    simp only [encode, LoginRequestPacket.encode_length]
+    omega
+  | unsequencedDataPacket inner =>
+    have bound_inner := UnsequencedDataPacket.encode_length_le inner
+    simp only [encode]
+    omega
+  | clientHeartbeat inner =>
+    simp only [encode, ClientHeartbeat.encode_length]
+    omega
+  | logoutRequest inner =>
+    simp only [encode, LogoutRequest.encode_length]
+    omega
+
 /-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option ClientPayload :=
   if tag = 43 then (DebugPacket.decode bytes).map fun message => .debugPacket message
   else if tag = 76 then (LoginRequestPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.loginRequestPacket message) else none
-  else if tag = 85 then (UnsequencedDataPacket.decode bytes).map fun message => .unsequencedDataPacket message
+  else if tag = 85 then (UnsequencedDataPacket.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.unsequencedDataPacket message) else none
   else if tag = 82 then (ClientHeartbeat.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.clientHeartbeat message) else none
   else if tag = 79 then (LogoutRequest.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.logoutRequest message) else none
   else none
@@ -3615,7 +3662,7 @@ theorem decode_encode (message : ClientPayload) :
   cases message with
   | debugPacket message => simp [decode, encode, tag, DebugPacket.decode_encode]
   | loginRequestPacket message => simp [decode, encode, tag, LoginRequestPacket.decode_encode_nil]
-  | unsequencedDataPacket message => simp [decode, encode, tag, UnsequencedDataPacket.decode_encode]
+  | unsequencedDataPacket message => simp [decode, encode, tag, UnsequencedDataPacket.decode_encode_nil]
   | clientHeartbeat message => simp [decode, encode, tag, ClientHeartbeat.decode_encode_nil]
   | logoutRequest message => simp [decode, encode, tag, LogoutRequest.decode_encode_nil]
 

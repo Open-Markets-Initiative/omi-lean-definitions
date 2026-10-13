@@ -6412,11 +6412,14 @@ theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
 
 theorem decode_encode (message : Packet) : decode (encode message) = some message := by
   unfold decode encode
-  have selected_packetFlags : (message.packetFlags.val ||| OptiqMessageBody.tag message.optiqMessage) &&& 1 = OptiqMessageBody.tag message.optiqMessage := by
+  generalize written_packetFlags_eq : (message.packetFlags.val ||| OptiqMessageBody.tag message.optiqMessage) = written_packetFlags
+  have selected_packetFlags : written_packetFlags &&& 1 = OptiqMessageBody.tag message.optiqMessage := by
+    rw [← written_packetFlags_eq]
     have clear := message.packetFlags.property
     have inside := OptiqMessageBody.tag_inside message.optiqMessage
     bv_decide
-  have carried_packetFlags : (message.packetFlags.val ||| OptiqMessageBody.tag message.optiqMessage) &&& 65534 = message.packetFlags.val := by
+  have carried_packetFlags : written_packetFlags &&& 65534 = message.packetFlags.val := by
+    rw [← written_packetFlags_eq]
     have clear := message.packetFlags.property
     have inside := OptiqMessageBody.tag_inside message.optiqMessage
     bv_decide

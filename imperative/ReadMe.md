@@ -31,6 +31,6 @@
 [IntelligentCross.Ats]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Imperative/Protocols/IntelligentCross "Imperative IntelligentCross"
 [Imperative.IntelligentCross.DepthOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Imperative/Protocols/IntelligentCross/DepthOfBook.md "Depth Of Book"
 
-[Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/imperative/depthofbook/IntelligentCross_DepthOfBook_v1_11.lean "Imperative DepthOfBook Aspen v1.11 Lean Definition"
+[Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/imperative/depthofbook/IntelligentCross_DepthOfBook_v1_11.lean "Imperative DepthOfBook Aspen v1.11 Lean Definition"
 [Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Url]: https://www.imperativex.com/market-data "Imperative Execution 1.11 Url"
 [Imperative.IntelligentCross.DepthOfBook.Aspen.v1.11.Pdf]: http://iqx.imperativex.com/IntelligentCrossMarketDataFeedSpec.v.1.11.pdf "Imperative Execution 1.11 Pdf"

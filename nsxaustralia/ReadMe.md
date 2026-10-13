@@ -32,6 +32,6 @@
 [Nets.Platform]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/NsxAustralia/Protocols/Nets "NsxAustralia Nets"
 [NsxAustralia.Nets.MarketDataFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/NsxAustralia/Protocols/Nets/MarketDataFeed.md "NSX Market Data Feed"
 
-[NsxAustralia.Nets.MarketDataFeed.Itch.v4.2.55.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/nsxaustralia/nets/marketdatafeed/NsxAustralia_Nets_MarketDataFeed_v4_2_55_Client.lean "NsxAustralia Nets MarketDataFeed Itch v4.2.55 Lean Definition"
+[NsxAustralia.Nets.MarketDataFeed.Itch.v4.2.55.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/nsxaustralia/nets/marketdatafeed/NsxAustralia_Nets_MarketDataFeed_v4_2_55_Client.lean "NsxAustralia Nets MarketDataFeed Itch v4.2.55 Lean Definition"
 [NsxAustralia.Nets.MarketDataFeed.Itch.v4.2.55.Url]: https://docs.nsx.com.au/ncd/nsx-itch-specification "Nation Stock Exchange of Australia 4.2.55 Url"
-[NsxAustralia.Nets.MarketDataFeed.Itch.v4.2.55.Server.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/nsxaustralia/nets/marketdatafeed/NsxAustralia_Nets_MarketDataFeed_v4_2_55_Server.lean "NsxAustralia Nets MarketDataFeed Itch v4.2.55 Lean Definition"
+[NsxAustralia.Nets.MarketDataFeed.Itch.v4.2.55.Server.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/nsxaustralia/nets/marketdatafeed/NsxAustralia_Nets_MarketDataFeed_v4_2_55_Server.lean "NsxAustralia Nets MarketDataFeed Itch v4.2.55 Lean Definition"

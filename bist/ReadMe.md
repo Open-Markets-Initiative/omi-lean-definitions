@@ -31,7 +31,7 @@
 [BorsaIstanbul.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Bist/Protocols/BorsaIstanbul "Bist BorsaIstanbul"
 [Bist.BorsaIstanbul.GeniumInet]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bist/Protocols/BorsaIstanbul/GeniumInet.md "Genium Inet"
 
-[Bist.BorsaIstanbul.GeniumInet.Itch.v21.12.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/bist/borsaistanbul/geniuminet/BorsaIstanbul_GeniumInet_v21_12.lean "Bist BorsaIstanbul GeniumInet Itch v21.12 Lean Definition"
+[Bist.BorsaIstanbul.GeniumInet.Itch.v21.12.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/bist/borsaistanbul/geniuminet/BorsaIstanbul_GeniumInet_v21_12.lean "Bist BorsaIstanbul GeniumInet Itch v21.12 Lean Definition"
 [Bist.BorsaIstanbul.GeniumInet.Itch.v21.12.Url]: https://www.borsaistanbul.com/en/technical-resources/technical-documents "Borsa İstanbul A.Ş. 21.12 Url"
 [Bist.BorsaIstanbul.GeniumInet.Itch.v21.12.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bist/Specifications/Itch/Bist.BorsaIstanbul.GeniumInet.Itch.v21.12.pdf "Borsa İstanbul A.Ş. 21.12 Pdf"
 [Bist.BorsaIstanbul.GeniumInet.Itch.v21.12.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bist/Specifications/Common/Bist.MoldUdp64.Udp.v1.0.pdf "Borsa İstanbul A.Ş. 21.12 Pdf"

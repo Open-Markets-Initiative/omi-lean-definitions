@@ -1,4 +1,4 @@
-name = "omi-lean-definitions"
+name = "omi-lean4-definitions"
 version = "1.0.0"
 defaultTargets = ["Omi", "tests"]
 

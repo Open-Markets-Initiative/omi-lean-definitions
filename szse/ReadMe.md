@@ -31,6 +31,6 @@
 [SzseSecurities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Szse/Protocols/SzseSecurities "Szse SzseSecurities"
 [Szse.SzseSecurities.TcpMarketData]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Szse/Protocols/SzseSecurities/TcpMarketData.md "Szse Tcp Market Data"
 
-[Szse.SzseSecurities.TcpMarketData.SzseBinary.v1.17.Definition]: https://github.com/Open-Markets-Initiative/omi-lean-definitions/blob/main/szse/szsesecurities/tcpmarketdata/SzseSecurities_TcpMarketData_v1_17.lean "Szse SzseSecurities TcpMarketData SzseBinary v1.17 Lean Definition"
+[Szse.SzseSecurities.TcpMarketData.SzseBinary.v1.17.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/szse/szsesecurities/tcpmarketdata/SzseSecurities_TcpMarketData_v1_17.lean "Szse SzseSecurities TcpMarketData SzseBinary v1.17 Lean Definition"
 [Szse.SzseSecurities.TcpMarketData.SzseBinary.v1.17.Url]: http://www.szsi.cn/cpfw/overseas/market/technical/ "Shenzhen Stock Exchange 1.17 Url"
 [Szse.SzseSecurities.TcpMarketData.SzseBinary.v1.17.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Szse/Specifications/SzseSecurities/TcpMarketData/Szse.SzseSecurities.MarketData.SzseBinary.v1.17.pdf "Shenzhen Stock Exchange 1.17 Pdf"

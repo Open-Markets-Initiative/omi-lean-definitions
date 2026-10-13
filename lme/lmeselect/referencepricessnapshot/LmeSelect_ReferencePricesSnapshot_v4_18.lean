@@ -689,32 +689,32 @@ def decode (tag : BitVec 16) (bytes : List UInt8) : Option (Payload × List UInt
 
 end Payload
 
-/-- Messages -/
-structure Messages where
+/-- Message -/
+structure Message where
   msgSize : BitVec 16
   payload : Payload
   deriving DecidableEq, Repr
 
-namespace Messages
+namespace Message
 
-def encode (message : Messages) : List UInt8 :=
+def encode (message : Message) : List UInt8 :=
   encodeUIntLE 2 message.msgSize
     ++ (encodeUIntLE 2 (Payload.tag message.payload)
     ++ (Payload.encode message.payload))
 
-def decode (bytes : List UInt8) : Option (Messages × List UInt8) := do
+def decode (bytes : List UInt8) : Option (Message × List UInt8) := do
   let (msgSize, bytes) ← decodeUIntLE 2 bytes
   let (msgType, bytes) ← decodeUIntLE 2 bytes
   let (payload, bytes) ← Payload.decode msgType bytes
   pure ({ msgSize, payload }, bytes)
 
-theorem encode_length_pos (message : Messages) : (encode message).length > 0 := by
+theorem encode_length_pos (message : Message) : (encode message).length > 0 := by
   unfold encode
   simp only [encodeUIntLE_length, List.length_append, ← Nat.add_assoc]
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : Messages) : (encode message).length ≤ 3276786 := by
+theorem encode_length_le (message : Message) : (encode message).length ≤ 3276786 := by
   unfold encode
   cases message.payload with
   | sequenceResetMessage inner =>
@@ -738,7 +738,7 @@ theorem encode_length_le (message : Messages) : (encode message).length ≤ 3276
     simp only [Payload.encode, List.length_append, ← Nat.add_assoc, encodeUIntLE_length, RefreshCompleteMessage.encode_length]
     omega
 
-@[simp] theorem decode_encode (message : Messages) (rest : List UInt8) :
+@[simp] theorem decode_encode (message : Message) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
@@ -748,7 +748,7 @@ theorem encode_length_le (message : Messages) : (encode message).length ≤ 3276
   rw [Payload.decode_encode, some_bind]
   rfl
 
-end Messages
+end Message
 
 /-- Packet -/
 structure Packet where
@@ -756,18 +756,18 @@ structure Packet where
   filler : Alpha 1
   seqNum : BitVec 32
   sendTime : BitVec 64
-  messages : Bounded 1 Messages
+  message : Bounded 1 Message
   deriving DecidableEq, Repr
 
 namespace Packet
 
 def encode (message : Packet) : List UInt8 :=
   encodeUIntLE 2 message.pktSize
-    ++ (encodeUInt 1 (BitVec.ofNat (8 * 1) message.messages.val.length)
+    ++ (encodeUInt 1 (BitVec.ofNat (8 * 1) message.message.val.length)
     ++ (Alpha.encode message.filler
     ++ (encodeUIntLE 4 message.seqNum
     ++ (encodeUIntLE 8 message.sendTime
-    ++ (encodeMany Messages.encode message.messages.val)))))
+    ++ (encodeMany Message.encode message.message.val)))))
 
 def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (pktSize, bytes) ← decodeUIntLE 2 bytes
@@ -775,9 +775,9 @@ def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (filler, bytes) ← Alpha.decode 1 bytes
   let (seqNum, bytes) ← decodeUIntLE 4 bytes
   let (sendTime, bytes) ← decodeUIntLE 8 bytes
-  let (messages_, bytes) ← decodeMany Messages.decode msgCount.toNat bytes
-  if fits_messages : messages_.length < 256 ^ 1 then
-    pure ({ pktSize, filler, seqNum, sendTime, messages := ⟨messages_, fits_messages⟩ }, bytes)
+  let (message_, bytes) ← decodeMany Message.decode msgCount.toNat bytes
+  if fits_message : message_.length < 256 ^ 1 then
+    pure ({ pktSize, filler, seqNum, sendTime, message := ⟨message_, fits_message⟩ }, bytes)
   else none
 
 theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
@@ -787,8 +787,8 @@ theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
 
 /-- The most bytes an encoding can take -/
 theorem encode_length_le (message : Packet) : (encode message).length ≤ 835580446 := by
-  have bound_messages := message.messages.length_lt
-  have bound_messages_items := encodeMany_length_le Messages.encode 3276786 Messages.encode_length_le message.messages.val
+  have bound_message := message.message.length_lt
+  have bound_message_items := encodeMany_length_le Message.encode 3276786 Message.encode_length_le message.message.val
   unfold encode
   simp only [List.length_append, ← Nat.add_assoc, encodeUIntLE_length, encodeUInt_length, Alpha.encode_length]
   omega
@@ -806,9 +806,9 @@ theorem encode_length_le (message : Packet) : (encode message).length ≤ 835580
   dsimp only
   rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
   dsimp only
-  rw [decodeMany_bounded 1 Messages.encode Messages.decode Messages.decode_encode, some_bind]
+  rw [decodeMany_bounded 1 Message.encode Message.decode Message.decode_encode, some_bind]
   dsimp only
-  rw [dite_eq_left message.messages.length_lt]
+  rw [dite_eq_left message.message.length_lt]
   rfl
 
 end Packet

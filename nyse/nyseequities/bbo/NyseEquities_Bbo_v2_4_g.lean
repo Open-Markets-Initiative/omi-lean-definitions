@@ -1458,7 +1458,7 @@ theorem encode_length_le (message : RefreshHeaderMessage) : (encode message).len
 
 end RefreshHeaderMessage
 
-/-- Quote Message: 30 bytes -/
+/-- Quote Message: 34 bytes -/
 structure QuoteMessage where
   sourceTimeNs : BitVec 32
   symbolIndex : BitVec 32
@@ -1469,6 +1469,7 @@ structure QuoteMessage where
   bidVolume : BitVec 32
   quoteCondition : QuoteCondition
   rpiIndicator : RpiIndicator
+  reserved4 : Alpha 4
   deriving DecidableEq, Repr
 
 namespace QuoteMessage
@@ -1482,7 +1483,8 @@ def encode (message : QuoteMessage) : List UInt8 :=
     ++ (encodeUIntLE 4 message.bidPrice
     ++ (encodeUIntLE 4 message.bidVolume
     ++ (QuoteCondition.encode message.quoteCondition
-    ++ (RpiIndicator.encode message.rpiIndicator))))))))
+    ++ (RpiIndicator.encode message.rpiIndicator
+    ++ (Alpha.encode message.reserved4)))))))))
 
 def decode (bytes : List UInt8) : Option (QuoteMessage × List UInt8) := do
   let (sourceTimeNs, bytes) ← decodeUIntLE 4 bytes
@@ -1494,11 +1496,12 @@ def decode (bytes : List UInt8) : Option (QuoteMessage × List UInt8) := do
   let (bidVolume, bytes) ← decodeUIntLE 4 bytes
   let (quoteCondition, bytes) ← QuoteCondition.decode bytes
   let (rpiIndicator, bytes) ← RpiIndicator.decode bytes
-  pure ({ sourceTimeNs, symbolIndex, symbolSeqNum, askPrice, askVolume, bidPrice, bidVolume, quoteCondition, rpiIndicator }, bytes)
+  let (reserved4, bytes) ← Alpha.decode 4 bytes
+  pure ({ sourceTimeNs, symbolIndex, symbolSeqNum, askPrice, askVolume, bidPrice, bidVolume, quoteCondition, rpiIndicator, reserved4 }, bytes)
 
-@[simp] theorem encode_length (message : QuoteMessage) : (encode message).length = 30 := by
+@[simp] theorem encode_length (message : QuoteMessage) : (encode message).length = 34 := by
   unfold encode
-  simp only [List.length_append, encodeUIntLE_length, QuoteCondition.encode_length, RpiIndicator.encode_length]
+  simp only [List.length_append, encodeUIntLE_length, QuoteCondition.encode_length, RpiIndicator.encode_length, Alpha.encode_length]
 
 theorem encode_length_pos (message : QuoteMessage) : (encode message).length > 0 := by
   rw [encode_length]
@@ -1523,7 +1526,9 @@ theorem encode_length_pos (message : QuoteMessage) : (encode message).length > 0
   dsimp only
   rw [List.append_assoc, QuoteCondition.decode_encode, some_bind]
   dsimp only
-  rw [RpiIndicator.decode_encode, some_bind]
+  rw [List.append_assoc, RpiIndicator.decode_encode, some_bind]
+  dsimp only
+  rw [Alpha.decode_encode, some_bind]
   rfl
 
 end QuoteMessage

@@ -271,19 +271,19 @@ end AdminLogout
 /-- Md Entry Px Decimal Optional: 9 bytes -/
 structure MdEntryPxDecimalOptional where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace MdEntryPxDecimalOptional
 
 def encode (message : MdEntryPxDecimalOptional) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (MdEntryPxDecimalOptional × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : MdEntryPxDecimalOptional) : (encode message).length = 9 := by
   unfold encode
@@ -306,19 +306,19 @@ end MdEntryPxDecimalOptional
 /-- Cal Fut Px Optional: 9 bytes -/
 structure CalFutPxOptional where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace CalFutPxOptional
 
 def encode (message : CalFutPxOptional) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (CalFutPxOptional × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : CalFutPxOptional) : (encode message).length = 9 := by
   unfold encode
@@ -341,19 +341,19 @@ end CalFutPxOptional
 /-- Coupon Rate Optional: 5 bytes -/
 structure CouponRateOptional where
   mantissa32 : BitVec 32
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace CouponRateOptional
 
 def encode (message : CouponRateOptional) : List UInt8 :=
   encodeUIntLE 4 message.mantissa32
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (CouponRateOptional × List UInt8) := do
   let (mantissa32, bytes) ← decodeUIntLE 4 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa32, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa32, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : CouponRateOptional) : (encode message).length = 5 := by
   unfold encode
@@ -376,19 +376,19 @@ end CouponRateOptional
 /-- Fair Coupon Pct: 9 bytes -/
 structure FairCouponPct where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace FairCouponPct
 
 def encode (message : FairCouponPct) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (FairCouponPct × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : FairCouponPct) : (encode message).length = 9 := by
   unfold encode
@@ -411,19 +411,19 @@ end FairCouponPct
 /-- Leg Purchase Rate: 9 bytes -/
 structure LegPurchaseRate where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace LegPurchaseRate
 
 def encode (message : LegPurchaseRate) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (LegPurchaseRate × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : LegPurchaseRate) : (encode message).length = 9 := by
   unfold encode
@@ -446,19 +446,19 @@ end LegPurchaseRate
 /-- Fixed Npv: 9 bytes -/
 structure FixedNpv where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace FixedNpv
 
 def encode (message : FixedNpv) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (FixedNpv × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : FixedNpv) : (encode message).length = 9 := by
   unfold encode
@@ -481,19 +481,19 @@ end FixedNpv
 /-- Float Npv: 9 bytes -/
 structure FloatNpv where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace FloatNpv
 
 def encode (message : FloatNpv) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (FloatNpv × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : FloatNpv) : (encode message).length = 9 := by
   unfold encode
@@ -516,19 +516,19 @@ end FloatNpv
 /-- Npv: 9 bytes -/
 structure Npv where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace Npv
 
 def encode (message : Npv) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (Npv × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : Npv) : (encode message).length = 9 := by
   unfold encode
@@ -551,19 +551,19 @@ end Npv
 /-- Accrued Coupons: 9 bytes -/
 structure AccruedCoupons where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace AccruedCoupons
 
 def encode (message : AccruedCoupons) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (AccruedCoupons × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : AccruedCoupons) : (encode message).length = 9 := by
   unfold encode
@@ -586,19 +586,19 @@ end AccruedCoupons
 /-- Daily Incremental Eris Pai: 9 bytes -/
 structure DailyIncrementalErisPai where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace DailyIncrementalErisPai
 
 def encode (message : DailyIncrementalErisPai) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (DailyIncrementalErisPai × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : DailyIncrementalErisPai) : (encode message).length = 9 := by
   unfold encode
@@ -621,19 +621,19 @@ end DailyIncrementalErisPai
 /-- Eris Pai: 9 bytes -/
 structure ErisPai where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace ErisPai
 
 def encode (message : ErisPai) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (ErisPai × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : ErisPai) : (encode message).length = 9 := by
   unfold encode
@@ -656,19 +656,19 @@ end ErisPai
 /-- Fed Funds Rate: 9 bytes -/
 structure FedFundsRate where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace FedFundsRate
 
 def encode (message : FedFundsRate) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (FedFundsRate × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : FedFundsRate) : (encode message).length = 9 := by
   unfold encode
@@ -691,19 +691,19 @@ end FedFundsRate
 /-- Min Price Increment Optional: 9 bytes -/
 structure MinPriceIncrementOptional where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace MinPriceIncrementOptional
 
 def encode (message : MinPriceIncrementOptional) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (MinPriceIncrementOptional × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : MinPriceIncrementOptional) : (encode message).length = 9 := by
   unfold encode
@@ -726,19 +726,19 @@ end MinPriceIncrementOptional
 /-- Fixed Payment: 9 bytes -/
 structure FixedPayment where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace FixedPayment
 
 def encode (message : FixedPayment) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (FixedPayment × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : FixedPayment) : (encode message).length = 9 := by
   unfold encode
@@ -761,19 +761,19 @@ end FixedPayment
 /-- Floating Payment: 9 bytes -/
 structure FloatingPayment where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace FloatingPayment
 
 def encode (message : FloatingPayment) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (FloatingPayment × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : FloatingPayment) : (encode message).length = 9 := by
   unfold encode
@@ -796,19 +796,19 @@ end FloatingPayment
 /-- Next Fixed Payment Amount: 9 bytes -/
 structure NextFixedPaymentAmount where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace NextFixedPaymentAmount
 
 def encode (message : NextFixedPaymentAmount) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (NextFixedPaymentAmount × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : NextFixedPaymentAmount) : (encode message).length = 9 := by
   unfold encode
@@ -831,19 +831,19 @@ end NextFixedPaymentAmount
 /-- Next Floating Payment Amount: 9 bytes -/
 structure NextFloatingPaymentAmount where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace NextFloatingPaymentAmount
 
 def encode (message : NextFloatingPaymentAmount) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (NextFloatingPaymentAmount × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : NextFloatingPaymentAmount) : (encode message).length = 9 := by
   unfold encode
@@ -866,19 +866,19 @@ end NextFloatingPaymentAmount
 /-- Previous Eris Pai: 9 bytes -/
 structure PreviousErisPai where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace PreviousErisPai
 
 def encode (message : PreviousErisPai) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (PreviousErisPai × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : PreviousErisPai) : (encode message).length = 9 := by
   unfold encode
@@ -901,19 +901,19 @@ end PreviousErisPai
 /-- Leg Contract Multiplier: 9 bytes -/
 structure LegContractMultiplier where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace LegContractMultiplier
 
 def encode (message : LegContractMultiplier) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (LegContractMultiplier × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : LegContractMultiplier) : (encode message).length = 9 := by
   unfold encode
@@ -936,19 +936,19 @@ end LegContractMultiplier
 /-- P V 01: 9 bytes -/
 structure PV01 where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace PV01
 
 def encode (message : PV01) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (PV01 × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : PV01) : (encode message).length = 9 := by
   unfold encode
@@ -971,19 +971,19 @@ end PV01
 /-- D V 01: 9 bytes -/
 structure DV01 where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace DV01
 
 def encode (message : DV01) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (DV01 × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : DV01) : (encode message).length = 9 := by
   unfold encode
@@ -1006,19 +1006,19 @@ end DV01
 /-- Settlement Npv: 9 bytes -/
 structure SettlementNpv where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace SettlementNpv
 
 def encode (message : SettlementNpv) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (SettlementNpv × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : SettlementNpv) : (encode message).length = 9 := by
   unfold encode
@@ -1041,19 +1041,19 @@ end SettlementNpv
 /-- Final Settlement Futures Price: 9 bytes -/
 structure FinalSettlementFuturesPrice where
   mantissa : BitVec 64
-  exponent : BitVec 8
+  exponentOptional : BitVec 8
   deriving DecidableEq, Repr
 
 namespace FinalSettlementFuturesPrice
 
 def encode (message : FinalSettlementFuturesPrice) : List UInt8 :=
   encodeUIntLE 8 message.mantissa
-    ++ (encodeUInt 1 message.exponent)
+    ++ (encodeUInt 1 message.exponentOptional)
 
 def decode (bytes : List UInt8) : Option (FinalSettlementFuturesPrice × List UInt8) := do
   let (mantissa, bytes) ← decodeUIntLE 8 bytes
-  let (exponent, bytes) ← decodeUInt 1 bytes
-  pure ({ mantissa, exponent }, bytes)
+  let (exponentOptional, bytes) ← decodeUInt 1 bytes
+  pure ({ mantissa, exponentOptional }, bytes)
 
 @[simp] theorem encode_length (message : FinalSettlementFuturesPrice) : (encode message).length = 9 := by
   unfold encode

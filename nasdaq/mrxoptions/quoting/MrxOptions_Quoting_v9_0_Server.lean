@@ -4513,6 +4513,11 @@ def encode : ServerPayload → List UInt8
   | .serverHeartbeatPacket message => ServerHeartbeatPacket.encode message
   | .endOfSessionPacket message => EndOfSessionPacket.encode message
 
+/-- Does the message end the session? Nothing in its packet may follow it -/
+def endsSession : ServerPayload → Bool
+  | .endOfSessionPacket _ => true
+  | _ => false
+
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : ServerPayload) : (encode message).length ≤ 1638402 := by
   cases message with
@@ -4588,6 +4593,10 @@ theorem decodeBody_encodeBody (message : ServerSoupBinTcpPacketBody) : decodeBod
   rw [ServerPayload.decode_encode, some_bind]
   rfl
 
+/-- Does the message end the session? Nothing in its packet may follow it -/
+def endsSession (message : ServerSoupBinTcpPacketBody) : Bool :=
+  ServerPayload.endsSession message.serverPayload
+
 end ServerSoupBinTcpPacketBody
 
 /-- Server Soup Bin Tcp Packet: the body with the proof its encoding fits Packet Length, whose 2 bytes no bound of the fields fits -/
@@ -4617,11 +4626,16 @@ theorem encode_length_le (message : ServerSoupBinTcpPacket) : (encode message).l
   rw [encodeFramed_length]
   omega
 
+/-- Does the message end the session? Nothing in its packet may follow it -/
+def endsSession (message : ServerSoupBinTcpPacket) : Bool :=
+  ServerSoupBinTcpPacketBody.endsSession message.val
+
 end ServerSoupBinTcpPacket
 
 /-- Server Packet -/
 structure ServerPacket where
   serverSoupBinTcpPacket : List ServerSoupBinTcpPacket
+  serverSoupBinTcpPacket_last : endsLast ServerSoupBinTcpPacket.endsSession serverSoupBinTcpPacket = true
   deriving DecidableEq, Repr
 
 namespace ServerPacket
@@ -4631,11 +4645,14 @@ def encode (message : ServerPacket) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option ServerPacket := do
   let serverSoupBinTcpPacket ← decodeAll ServerSoupBinTcpPacket.decode bytes.length bytes
-  pure { serverSoupBinTcpPacket }
+  if last_serverSoupBinTcpPacket : endsLast ServerSoupBinTcpPacket.endsSession serverSoupBinTcpPacket = true then
+    pure { serverSoupBinTcpPacket, serverSoupBinTcpPacket_last := last_serverSoupBinTcpPacket }
+  else none
 
 theorem decode_encode (message : ServerPacket) : decode (encode message) = some message := by
   unfold decode encode
   rw [decodeAll_encodeMany ServerSoupBinTcpPacket.encode ServerSoupBinTcpPacket.decode ServerSoupBinTcpPacket.decode_encode ServerSoupBinTcpPacket.encode_length_pos message.serverSoupBinTcpPacket _ (encodeMany_length_ge ServerSoupBinTcpPacket.encode ServerSoupBinTcpPacket.encode_length_pos message.serverSoupBinTcpPacket), some_bind]
+  rw [dite_eq_left message.serverSoupBinTcpPacket_last]
   rfl
 
 end ServerPacket

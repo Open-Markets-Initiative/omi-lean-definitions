@@ -356,6 +356,72 @@ theorem encode_length_pos (value : ReasonCode) : (encode value).length > 0 := by
 
 end ReasonCode
 
+/-- Symbol Index Mapping Response Message: 16 bytes -/
+structure SymbolIndexMappingResponseMessage where
+  symbol11 : Alpha 11
+  filler1 : Alpha 1
+  symbolIndex : BitVec 32
+  deriving DecidableEq, Repr
+
+namespace SymbolIndexMappingResponseMessage
+
+def encode (message : SymbolIndexMappingResponseMessage) : List UInt8 :=
+  Alpha.encode message.symbol11
+    ++ (Alpha.encode message.filler1
+    ++ (encodeUInt 4 message.symbolIndex))
+
+def decode (bytes : List UInt8) : Option (SymbolIndexMappingResponseMessage × List UInt8) := do
+  let (symbol11, bytes) ← Alpha.decode 11 bytes
+  let (filler1, bytes) ← Alpha.decode 1 bytes
+  let (symbolIndex, bytes) ← decodeUInt 4 bytes
+  pure ({ symbol11, filler1, symbolIndex }, bytes)
+
+@[simp] theorem encode_length (message : SymbolIndexMappingResponseMessage) : (encode message).length = 16 := by
+  unfold encode
+  simp only [List.length_append, Alpha.encode_length, encodeUInt_length]
+
+theorem encode_length_pos (message : SymbolIndexMappingResponseMessage) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : SymbolIndexMappingResponseMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [List.append_assoc, Alpha.decode_encode, some_bind]
+  dsimp only
+  rw [decodeUInt_encodeUInt, some_bind]
+  rfl
+
+end SymbolIndexMappingResponseMessage
+
+/-- Symbol Index Mapping Response Messages -/
+structure SymbolIndexMappingResponseMessages (messageCount : BitVec 8) where
+  symbolIndexMappingResponseMessage : Exact messageCount.toNat SymbolIndexMappingResponseMessage
+  deriving DecidableEq, Repr
+
+namespace SymbolIndexMappingResponseMessages
+
+def encode {messageCount : BitVec 8} (message : SymbolIndexMappingResponseMessages messageCount) : List UInt8 :=
+  encodeMany SymbolIndexMappingResponseMessage.encode message.symbolIndexMappingResponseMessage.val
+
+def decode (messageCount : BitVec 8) (bytes : List UInt8) : Option (SymbolIndexMappingResponseMessages messageCount × List UInt8) := do
+  let (symbolIndexMappingResponseMessage_, bytes) ← decodeMany SymbolIndexMappingResponseMessage.decode messageCount.toNat bytes
+  if fits_symbolIndexMappingResponseMessage : symbolIndexMappingResponseMessage_.length = messageCount.toNat then
+    pure ({ symbolIndexMappingResponseMessage := ⟨symbolIndexMappingResponseMessage_, fits_symbolIndexMappingResponseMessage⟩ }, bytes)
+  else none
+
+@[simp] theorem decode_encode (messageCount : BitVec 8) (message : SymbolIndexMappingResponseMessages messageCount) (rest : List UInt8) :
+    decode messageCount (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [decodeMany_exact messageCount.toNat SymbolIndexMappingResponseMessage.encode SymbolIndexMappingResponseMessage.decode SymbolIndexMappingResponseMessage.decode_encode, some_bind]
+  dsimp only
+  rw [dite_eq_left message.symbolIndexMappingResponseMessage.length_eq]
+  rfl
+
+end SymbolIndexMappingResponseMessages
+
 /-- Sequence Number Reset Message: 4 bytes -/
 structure SequenceNumberResetMessage where
   nextSequenceNumber : BitVec 32
@@ -384,10 +450,6 @@ theorem encode_length_pos (message : SequenceNumberResetMessage) : (encode messa
   rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : SequenceNumberResetMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
-
 end SequenceNumberResetMessage
 
 /-- Heartbeat Message: 0 bytes -/
@@ -408,10 +470,6 @@ def decode (bytes : List UInt8) : Option (HeartbeatMessage × List UInt8) :=
 @[simp] theorem decode_encode (message : HeartbeatMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode]
-
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : HeartbeatMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
 
 end HeartbeatMessage
 
@@ -447,10 +505,6 @@ theorem encode_length_pos (message : UnavailableMessage) : (encode message).leng
   dsimp only
   rw [decodeUInt_encodeUInt, some_bind]
   rfl
-
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : UnavailableMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
 
 end UnavailableMessage
 
@@ -502,10 +556,6 @@ theorem encode_length_pos (message : RequestResponseMessage) : (encode message).
   rw [Alpha.decode_encode, some_bind]
   rfl
 
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : RequestResponseMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
-
 end RequestResponseMessage
 
 /-- Heartbeat Subscription Message: 0 bytes -/
@@ -526,10 +576,6 @@ def decode (bytes : List UInt8) : Option (HeartbeatSubscriptionMessage × List U
 @[simp] theorem decode_encode (message : HeartbeatSubscriptionMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   simp [decode, encode]
-
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : HeartbeatSubscriptionMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
 
 end HeartbeatSubscriptionMessage
 
@@ -571,10 +617,6 @@ theorem encode_length_pos (message : RetransmissionRequestMessage) : (encode mes
   rw [Alpha.decode_encode, some_bind]
   rfl
 
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : RetransmissionRequestMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
-
 end RetransmissionRequestMessage
 
 /-- Book Refresh Request Message: 36 bytes -/
@@ -610,10 +652,6 @@ theorem encode_length_pos (message : BookRefreshRequestMessage) : (encode messag
   rw [Alpha.decode_encode, some_bind]
   rfl
 
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : BookRefreshRequestMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
-
 end BookRefreshRequestMessage
 
 /-- Heartbeat Response Message: 20 bytes -/
@@ -643,10 +681,6 @@ theorem encode_length_pos (message : HeartbeatResponseMessage) : (encode message
   unfold decode encode
   rw [Alpha.decode_encode, some_bind]
   rfl
-
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : HeartbeatResponseMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
 
 end HeartbeatResponseMessage
 
@@ -688,10 +722,6 @@ theorem encode_length_pos (message : ExtendedBookRefreshRequestMessage) : (encod
   rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : ExtendedBookRefreshRequestMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
-
 end ExtendedBookRefreshRequestMessage
 
 /-- Symbol Index Mapping Request Message: 24 bytes -/
@@ -727,55 +757,7 @@ theorem encode_length_pos (message : SymbolIndexMappingRequestMessage) : (encode
   rw [decodeUInt_encodeUInt, some_bind]
   rfl
 
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : SymbolIndexMappingRequestMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
-
 end SymbolIndexMappingRequestMessage
-
-/-- Symbol Index Mapping Response Message: 16 bytes -/
-structure SymbolIndexMappingResponseMessage where
-  symbol11 : Alpha 11
-  filler1 : Alpha 1
-  symbolIndex : BitVec 32
-  deriving DecidableEq, Repr
-
-namespace SymbolIndexMappingResponseMessage
-
-def encode (message : SymbolIndexMappingResponseMessage) : List UInt8 :=
-  Alpha.encode message.symbol11
-    ++ (Alpha.encode message.filler1
-    ++ (encodeUInt 4 message.symbolIndex))
-
-def decode (bytes : List UInt8) : Option (SymbolIndexMappingResponseMessage × List UInt8) := do
-  let (symbol11, bytes) ← Alpha.decode 11 bytes
-  let (filler1, bytes) ← Alpha.decode 1 bytes
-  let (symbolIndex, bytes) ← decodeUInt 4 bytes
-  pure ({ symbol11, filler1, symbolIndex }, bytes)
-
-@[simp] theorem encode_length (message : SymbolIndexMappingResponseMessage) : (encode message).length = 16 := by
-  unfold encode
-  simp only [List.length_append, Alpha.encode_length, encodeUInt_length]
-
-theorem encode_length_pos (message : SymbolIndexMappingResponseMessage) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
-
-@[simp] theorem decode_encode (message : SymbolIndexMappingResponseMessage) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [List.append_assoc, Alpha.decode_encode, some_bind]
-  dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
-  rfl
-
-/-- Decoded as the whole of a frame: nothing follows -/
-theorem decode_encode_nil (message : SymbolIndexMappingResponseMessage) : decode (encode message) = some (message, []) :=
-  List.append_nil (encode message) ▸ decode_encode message []
-
-end SymbolIndexMappingResponseMessage
 
 /-- Full Price Point: 12 bytes -/
 structure FullPricePoint where
@@ -938,22 +920,27 @@ theorem encode_length_le (message : FullUpdateMessage) : (encode message).length
 end FullUpdateMessage
 
 /-- Full Update Messages -/
-structure FullUpdateMessages where
-  fullUpdateMessage : List FullUpdateMessage
+structure FullUpdateMessages (messageCount : BitVec 8) where
+  fullUpdateMessage : Exact messageCount.toNat FullUpdateMessage
   deriving DecidableEq, Repr
 
 namespace FullUpdateMessages
 
-def encode (message : FullUpdateMessages) : List UInt8 :=
-  encodeMany FullUpdateMessage.encode message.fullUpdateMessage
+def encode {messageCount : BitVec 8} (message : FullUpdateMessages messageCount) : List UInt8 :=
+  encodeMany FullUpdateMessage.encode message.fullUpdateMessage.val
 
-def decode (bytes : List UInt8) : Option FullUpdateMessages := do
-  let fullUpdateMessage ← decodeAll FullUpdateMessage.decode bytes.length bytes
-  pure { fullUpdateMessage }
+def decode (messageCount : BitVec 8) (bytes : List UInt8) : Option (FullUpdateMessages messageCount × List UInt8) := do
+  let (fullUpdateMessage_, bytes) ← decodeMany FullUpdateMessage.decode messageCount.toNat bytes
+  if fits_fullUpdateMessage : fullUpdateMessage_.length = messageCount.toNat then
+    pure ({ fullUpdateMessage := ⟨fullUpdateMessage_, fits_fullUpdateMessage⟩ }, bytes)
+  else none
 
-theorem decode_encode (message : FullUpdateMessages) : decode (encode message) = some message := by
+@[simp] theorem decode_encode (messageCount : BitVec 8) (message : FullUpdateMessages messageCount) (rest : List UInt8) :
+    decode messageCount (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  rw [decodeAll_encodeMany FullUpdateMessage.encode FullUpdateMessage.decode FullUpdateMessage.decode_encode FullUpdateMessage.encode_length_pos message.fullUpdateMessage _ (encodeMany_length_ge FullUpdateMessage.encode FullUpdateMessage.encode_length_pos message.fullUpdateMessage), some_bind]
+  rw [decodeMany_exact messageCount.toNat FullUpdateMessage.encode FullUpdateMessage.decode FullUpdateMessage.decode_encode, some_bind]
+  dsimp only
+  rw [dite_eq_left message.fullUpdateMessage.length_eq]
   rfl
 
 end FullUpdateMessages
@@ -1124,28 +1111,34 @@ theorem encode_length_le (message : DeltaUpdateMessage) : (encode message).lengt
 end DeltaUpdateMessage
 
 /-- Delta Update Messages -/
-structure DeltaUpdateMessages where
-  deltaUpdateMessage : List DeltaUpdateMessage
+structure DeltaUpdateMessages (messageCount : BitVec 8) where
+  deltaUpdateMessage : Exact messageCount.toNat DeltaUpdateMessage
   deriving DecidableEq, Repr
 
 namespace DeltaUpdateMessages
 
-def encode (message : DeltaUpdateMessages) : List UInt8 :=
-  encodeMany DeltaUpdateMessage.encode message.deltaUpdateMessage
+def encode {messageCount : BitVec 8} (message : DeltaUpdateMessages messageCount) : List UInt8 :=
+  encodeMany DeltaUpdateMessage.encode message.deltaUpdateMessage.val
 
-def decode (bytes : List UInt8) : Option DeltaUpdateMessages := do
-  let deltaUpdateMessage ← decodeAll DeltaUpdateMessage.decode bytes.length bytes
-  pure { deltaUpdateMessage }
+def decode (messageCount : BitVec 8) (bytes : List UInt8) : Option (DeltaUpdateMessages messageCount × List UInt8) := do
+  let (deltaUpdateMessage_, bytes) ← decodeMany DeltaUpdateMessage.decode messageCount.toNat bytes
+  if fits_deltaUpdateMessage : deltaUpdateMessage_.length = messageCount.toNat then
+    pure ({ deltaUpdateMessage := ⟨deltaUpdateMessage_, fits_deltaUpdateMessage⟩ }, bytes)
+  else none
 
-theorem decode_encode (message : DeltaUpdateMessages) : decode (encode message) = some message := by
+@[simp] theorem decode_encode (messageCount : BitVec 8) (message : DeltaUpdateMessages messageCount) (rest : List UInt8) :
+    decode messageCount (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  rw [decodeAll_encodeMany DeltaUpdateMessage.encode DeltaUpdateMessage.decode DeltaUpdateMessage.decode_encode DeltaUpdateMessage.encode_length_pos message.deltaUpdateMessage _ (encodeMany_length_ge DeltaUpdateMessage.encode DeltaUpdateMessage.encode_length_pos message.deltaUpdateMessage), some_bind]
+  rw [decodeMany_exact messageCount.toNat DeltaUpdateMessage.encode DeltaUpdateMessage.decode DeltaUpdateMessage.decode_encode, some_bind]
+  dsimp only
+  rw [dite_eq_left message.deltaUpdateMessage.length_eq]
   rfl
 
 end DeltaUpdateMessages
 
 /-- Any Payload, selected by Message Type -/
-inductive Payload where
+inductive Payload (messageCount : BitVec 8) where
+  | symbolIndexMappingResponseMessages (message : SymbolIndexMappingResponseMessages messageCount) -- 35
   | sequenceNumberResetMessage (message : SequenceNumberResetMessage) -- 1
   | heartbeatMessage (message : HeartbeatMessage) -- 2
   | unavailableMessage (message : UnavailableMessage) -- 5
@@ -1156,15 +1149,15 @@ inductive Payload where
   | heartbeatResponseMessage (message : HeartbeatResponseMessage) -- 24
   | extendedBookRefreshRequestMessage (message : ExtendedBookRefreshRequestMessage) -- 27
   | symbolIndexMappingRequestMessage (message : SymbolIndexMappingRequestMessage) -- 34
-  | symbolIndexMappingResponseMessage (message : SymbolIndexMappingResponseMessage) -- 35
-  | fullUpdateMessages (message : FullUpdateMessages) -- 230
-  | deltaUpdateMessages (message : DeltaUpdateMessages) -- 231
+  | fullUpdateMessages (message : FullUpdateMessages messageCount) -- 230
+  | deltaUpdateMessages (message : DeltaUpdateMessages messageCount) -- 231
   deriving DecidableEq, Repr
 
 namespace Payload
 
 /-- The Message Type each message is sent under -/
-def tag : Payload → BitVec 16
+def tag {messageCount : BitVec 8} : Payload messageCount → BitVec 16
+  | .symbolIndexMappingResponseMessages _ => 35
   | .sequenceNumberResetMessage _ => 1
   | .heartbeatMessage _ => 2
   | .unavailableMessage _ => 5
@@ -1175,11 +1168,11 @@ def tag : Payload → BitVec 16
   | .heartbeatResponseMessage _ => 24
   | .extendedBookRefreshRequestMessage _ => 27
   | .symbolIndexMappingRequestMessage _ => 34
-  | .symbolIndexMappingResponseMessage _ => 35
   | .fullUpdateMessages _ => 230
   | .deltaUpdateMessages _ => 231
 
-def encode : Payload → List UInt8
+def encode {messageCount : BitVec 8} : Payload messageCount → List UInt8
+  | .symbolIndexMappingResponseMessages message => SymbolIndexMappingResponseMessages.encode message
   | .sequenceNumberResetMessage message => SequenceNumberResetMessage.encode message
   | .heartbeatMessage message => HeartbeatMessage.encode message
   | .unavailableMessage message => UnavailableMessage.encode message
@@ -1190,73 +1183,55 @@ def encode : Payload → List UInt8
   | .heartbeatResponseMessage message => HeartbeatResponseMessage.encode message
   | .extendedBookRefreshRequestMessage message => ExtendedBookRefreshRequestMessage.encode message
   | .symbolIndexMappingRequestMessage message => SymbolIndexMappingRequestMessage.encode message
-  | .symbolIndexMappingResponseMessage message => SymbolIndexMappingResponseMessage.encode message
   | .fullUpdateMessages message => FullUpdateMessages.encode message
   | .deltaUpdateMessages message => DeltaUpdateMessages.encode message
 
-/-- Decoded from the whole of the frame: a message that reads to its end takes it all, any other must leave nothing -/
-def decode (tag : BitVec 16) (bytes : List UInt8) : Option Payload :=
-  if tag = 1 then (SequenceNumberResetMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.sequenceNumberResetMessage message) else none
-  else if tag = 2 then (HeartbeatMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.heartbeatMessage message) else none
-  else if tag = 5 then (UnavailableMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.unavailableMessage message) else none
-  else if tag = 10 then (RequestResponseMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.requestResponseMessage message) else none
-  else if tag = 19 then (HeartbeatSubscriptionMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.heartbeatSubscriptionMessage message) else none
-  else if tag = 20 then (RetransmissionRequestMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.retransmissionRequestMessage message) else none
-  else if tag = 22 then (BookRefreshRequestMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.bookRefreshRequestMessage message) else none
-  else if tag = 24 then (HeartbeatResponseMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.heartbeatResponseMessage message) else none
-  else if tag = 27 then (ExtendedBookRefreshRequestMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.extendedBookRefreshRequestMessage message) else none
-  else if tag = 34 then (SymbolIndexMappingRequestMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.symbolIndexMappingRequestMessage message) else none
-  else if tag = 35 then (SymbolIndexMappingResponseMessage.decode bytes).bind fun (message, rest) => if rest.isEmpty then some (.symbolIndexMappingResponseMessage message) else none
-  else if tag = 230 then (FullUpdateMessages.decode bytes).map fun message => .fullUpdateMessages message
-  else if tag = 231 then (DeltaUpdateMessages.decode bytes).map fun message => .deltaUpdateMessages message
+def decode (messageCount : BitVec 8) (tag : BitVec 16) (bytes : List UInt8) : Option (Payload messageCount × List UInt8) :=
+  if tag = 35 then (SymbolIndexMappingResponseMessages.decode messageCount bytes).map fun (message, rest) => (.symbolIndexMappingResponseMessages message, rest)
+  else if tag = 1 then (SequenceNumberResetMessage.decode bytes).map fun (message, rest) => (.sequenceNumberResetMessage message, rest)
+  else if tag = 2 then (HeartbeatMessage.decode bytes).map fun (message, rest) => (.heartbeatMessage message, rest)
+  else if tag = 5 then (UnavailableMessage.decode bytes).map fun (message, rest) => (.unavailableMessage message, rest)
+  else if tag = 10 then (RequestResponseMessage.decode bytes).map fun (message, rest) => (.requestResponseMessage message, rest)
+  else if tag = 19 then (HeartbeatSubscriptionMessage.decode bytes).map fun (message, rest) => (.heartbeatSubscriptionMessage message, rest)
+  else if tag = 20 then (RetransmissionRequestMessage.decode bytes).map fun (message, rest) => (.retransmissionRequestMessage message, rest)
+  else if tag = 22 then (BookRefreshRequestMessage.decode bytes).map fun (message, rest) => (.bookRefreshRequestMessage message, rest)
+  else if tag = 24 then (HeartbeatResponseMessage.decode bytes).map fun (message, rest) => (.heartbeatResponseMessage message, rest)
+  else if tag = 27 then (ExtendedBookRefreshRequestMessage.decode bytes).map fun (message, rest) => (.extendedBookRefreshRequestMessage message, rest)
+  else if tag = 34 then (SymbolIndexMappingRequestMessage.decode bytes).map fun (message, rest) => (.symbolIndexMappingRequestMessage message, rest)
+  else if tag = 230 then (FullUpdateMessages.decode messageCount bytes).map fun (message, rest) => (.fullUpdateMessages message, rest)
+  else if tag = 231 then (DeltaUpdateMessages.decode messageCount bytes).map fun (message, rest) => (.deltaUpdateMessages message, rest)
   else none
 
-theorem decode_encode (message : Payload) :
-    decode (tag message) (encode message) = some message := by
-  cases message with
-  | sequenceNumberResetMessage message => simp [decode, encode, tag, SequenceNumberResetMessage.decode_encode_nil]
-  | heartbeatMessage message => simp [decode, encode, tag, HeartbeatMessage.decode_encode_nil]
-  | unavailableMessage message => simp [decode, encode, tag, UnavailableMessage.decode_encode_nil]
-  | requestResponseMessage message => simp [decode, encode, tag, RequestResponseMessage.decode_encode_nil]
-  | heartbeatSubscriptionMessage message => simp [decode, encode, tag, HeartbeatSubscriptionMessage.decode_encode_nil]
-  | retransmissionRequestMessage message => simp [decode, encode, tag, RetransmissionRequestMessage.decode_encode_nil]
-  | bookRefreshRequestMessage message => simp [decode, encode, tag, BookRefreshRequestMessage.decode_encode_nil]
-  | heartbeatResponseMessage message => simp [decode, encode, tag, HeartbeatResponseMessage.decode_encode_nil]
-  | extendedBookRefreshRequestMessage message => simp [decode, encode, tag, ExtendedBookRefreshRequestMessage.decode_encode_nil]
-  | symbolIndexMappingRequestMessage message => simp [decode, encode, tag, SymbolIndexMappingRequestMessage.decode_encode_nil]
-  | symbolIndexMappingResponseMessage message => simp [decode, encode, tag, SymbolIndexMappingResponseMessage.decode_encode_nil]
-  | fullUpdateMessages message => simp [decode, encode, tag, FullUpdateMessages.decode_encode]
-  | deltaUpdateMessages message => simp [decode, encode, tag, DeltaUpdateMessages.decode_encode]
+@[simp] theorem decode_encode (messageCount : BitVec 8) (message : Payload messageCount) (rest : List UInt8) :
+    decode messageCount (tag message) (encode message ++ rest) = some (message, rest) := by
+  cases message <;> simp [decode, encode, tag]
 
 end Payload
 
 /-- Packet -/
 structure Packet where
-  packetSize : BitVec 16
   sequenceNumber : BitVec 32
   timestamp : BitVec 32
   productId : BitVec 8
   retransmissionFlag : BitVec 8
   messageCount : BitVec 8
   linkFlag : BitVec 8
-  payload : Payload
+  payload : Payload messageCount
   deriving DecidableEq, Repr
 
 namespace Packet
 
-def encode (message : Packet) : List UInt8 :=
-  encodeUInt 2 message.packetSize
-    ++ (encodeUInt 2 (Payload.tag message.payload)
+def encodeBody (message : Packet) : List UInt8 :=
+  encodeUInt 2 (Payload.tag message.payload)
     ++ (encodeUInt 4 message.sequenceNumber
     ++ (encodeUInt 4 message.timestamp
     ++ (encodeUInt 1 message.productId
     ++ (encodeUInt 1 message.retransmissionFlag
     ++ (encodeUInt 1 message.messageCount
     ++ (encodeUInt 1 message.linkFlag
-    ++ (Payload.encode message.payload))))))))
+    ++ (Payload.encode message.payload)))))))
 
-def decode (bytes : List UInt8) : Option Packet := do
-  let (packetSize, bytes) ← decodeUInt 2 bytes
+def decodeBody (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (messageType, bytes) ← decodeUInt 2 bytes
   let (sequenceNumber, bytes) ← decodeUInt 4 bytes
   let (timestamp, bytes) ← decodeUInt 4 bytes
@@ -1264,34 +1239,47 @@ def decode (bytes : List UInt8) : Option Packet := do
   let (retransmissionFlag, bytes) ← decodeUInt 1 bytes
   let (messageCount, bytes) ← decodeUInt 1 bytes
   let (linkFlag, bytes) ← decodeUInt 1 bytes
-  let payload ← Payload.decode messageType bytes
-  pure { packetSize, sequenceNumber, timestamp, productId, retransmissionFlag, messageCount, linkFlag, payload }
+  let (payload, bytes) ← Payload.decode messageCount messageType bytes
+  pure ({ sequenceNumber, timestamp, productId, retransmissionFlag, messageCount, linkFlag, payload }, bytes)
 
-theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
-  unfold encode
-  simp only [encodeUInt_length, List.length_append, ← Nat.add_assoc]
-  omega
-
-theorem decode_encode (message : Packet) : decode (encode message) = some message := by
-  unfold decode encode
-  rw [decodeUInt_encodeUInt, some_bind]
+theorem decodeBody_encodeBody (message : Packet) (rest : List UInt8) :
+    decodeBody (encodeBody message ++ rest) = some (message, rest) := by
+  unfold decodeBody encodeBody
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [Payload.decode_encode, some_bind]
   rfl
+
+/-- Size rule: Packet Size counts the bytes after it, so it is written from the body; the body has no bound the prefix must fit, so it is read by its content and the prefix is not checked -/
+def encode (message : Packet) : List UInt8 :=
+  encodeUInt 2 (BitVec.ofNat (8 * 2) ((encodeBody message).length + 0)) ++ encodeBody message
+
+def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
+  let (_, bytes) ← decodeUInt 2 bytes
+  decodeBody bytes
+
+@[simp] theorem decode_encode (message : Packet) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  exact decodeBody_encodeBody message rest
+
+theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
+  unfold encode
+  simp only [List.length_append, encodeUInt_length]
+  omega
 
 end Packet
 

@@ -165,6 +165,11 @@ def encode : ClientPayload → List UInt8
   | .clientHeartbeat message => ClientHeartbeat.encode message
   | .logoutRequest message => LogoutRequest.encode message
 
+/-- Does the message end the session? Nothing in its packet may follow it -/
+def endsSession : ClientPayload → Bool
+  | .logoutRequest _ => true
+  | _ => false
+
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : ClientPayload) : (encode message).length ≤ 65488 := by
   cases message with
@@ -257,11 +262,16 @@ theorem encode_length_pos (message : ClientSoupTcpPacket) : (encode message).len
   rw [encodeFramed_length]
   omega
 
+/-- Does the message end the session? Nothing in its packet may follow it -/
+def endsSession (message : ClientSoupTcpPacket) : Bool :=
+  ClientPayload.endsSession message.clientPayload
+
 end ClientSoupTcpPacket
 
 /-- Client Packet -/
 structure ClientPacket where
   clientSoupTcpPacket : List ClientSoupTcpPacket
+  clientSoupTcpPacket_last : endsLast ClientSoupTcpPacket.endsSession clientSoupTcpPacket = true
   deriving DecidableEq, Repr
 
 namespace ClientPacket
@@ -271,11 +281,14 @@ def encode (message : ClientPacket) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option ClientPacket := do
   let clientSoupTcpPacket ← decodeAll ClientSoupTcpPacket.decode bytes.length bytes
-  pure { clientSoupTcpPacket }
+  if last_clientSoupTcpPacket : endsLast ClientSoupTcpPacket.endsSession clientSoupTcpPacket = true then
+    pure { clientSoupTcpPacket, clientSoupTcpPacket_last := last_clientSoupTcpPacket }
+  else none
 
 theorem decode_encode (message : ClientPacket) : decode (encode message) = some message := by
   unfold decode encode
   rw [decodeAll_encodeMany ClientSoupTcpPacket.encode ClientSoupTcpPacket.decode ClientSoupTcpPacket.decode_encode ClientSoupTcpPacket.encode_length_pos message.clientSoupTcpPacket _ (encodeMany_length_ge ClientSoupTcpPacket.encode ClientSoupTcpPacket.encode_length_pos message.clientSoupTcpPacket), some_bind]
+  rw [dite_eq_left message.clientSoupTcpPacket_last]
   rfl
 
 end ClientPacket

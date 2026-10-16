@@ -1380,6 +1380,11 @@ def encode : ServerPayload → List UInt8
   | .serverHeartbeat message => ServerHeartbeat.encode message
   | .endOfSession message => EndOfSession.encode message
 
+/-- Does the message end the session? Nothing in its packet may follow it -/
+def endsSession : ServerPayload → Bool
+  | .endOfSession _ => true
+  | _ => false
+
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : ServerPayload) : (encode message).length ≤ 65471 := by
   cases message with
@@ -1490,11 +1495,16 @@ theorem encode_length_pos (message : ServerSoupBinTcpPacket) : (encode message).
   rw [encodeFramed_length]
   omega
 
+/-- Does the message end the session? Nothing in its packet may follow it -/
+def endsSession (message : ServerSoupBinTcpPacket) : Bool :=
+  ServerPayload.endsSession message.serverPayload
+
 end ServerSoupBinTcpPacket
 
 /-- Server Packet -/
 structure ServerPacket where
   serverSoupBinTcpPacket : List ServerSoupBinTcpPacket
+  serverSoupBinTcpPacket_last : endsLast ServerSoupBinTcpPacket.endsSession serverSoupBinTcpPacket = true
   deriving DecidableEq, Repr
 
 namespace ServerPacket
@@ -1504,11 +1514,14 @@ def encode (message : ServerPacket) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option ServerPacket := do
   let serverSoupBinTcpPacket ← decodeAll ServerSoupBinTcpPacket.decode bytes.length bytes
-  pure { serverSoupBinTcpPacket }
+  if last_serverSoupBinTcpPacket : endsLast ServerSoupBinTcpPacket.endsSession serverSoupBinTcpPacket = true then
+    pure { serverSoupBinTcpPacket, serverSoupBinTcpPacket_last := last_serverSoupBinTcpPacket }
+  else none
 
 theorem decode_encode (message : ServerPacket) : decode (encode message) = some message := by
   unfold decode encode
   rw [decodeAll_encodeMany ServerSoupBinTcpPacket.encode ServerSoupBinTcpPacket.decode ServerSoupBinTcpPacket.decode_encode ServerSoupBinTcpPacket.encode_length_pos message.serverSoupBinTcpPacket _ (encodeMany_length_ge ServerSoupBinTcpPacket.encode ServerSoupBinTcpPacket.encode_length_pos message.serverSoupBinTcpPacket), some_bind]
+  rw [dite_eq_left message.serverSoupBinTcpPacket_last]
   rfl
 
 end ServerPacket

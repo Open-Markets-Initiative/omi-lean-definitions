@@ -187,6 +187,48 @@ theorem encode_length_pos (value : TradingSession) : (encode value).length > 0 :
 
 end TradingSession
 
+/-- Heartbeat: 0 bytes -/
+structure Heartbeat where
+  deriving DecidableEq, Repr
+
+namespace Heartbeat
+
+def encode (_ : Heartbeat) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (Heartbeat × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : Heartbeat) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : Heartbeat) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end Heartbeat
+
+/-- Session Shutdown: 0 bytes -/
+structure SessionShutdown where
+  deriving DecidableEq, Repr
+
+namespace SessionShutdown
+
+def encode (_ : SessionShutdown) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (SessionShutdown × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : SessionShutdown) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : SessionShutdown) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end SessionShutdown
+
 /-- Instrument Directory Message: 35 bytes -/
 structure InstrumentDirectoryMessage where
   timestamp : BitVec 64
@@ -935,6 +977,8 @@ end SequencedMessage
 
 /-- Any Sequenced Messages, selected by Message Type -/
 inductive SequencedMessages where
+  | heartbeat (message : Heartbeat) -- 0
+  | sessionShutdown (message : SessionShutdown) -- 1
   | sequencedMessage (message : SequencedMessage) -- 2
   deriving DecidableEq, Repr
 
@@ -942,13 +986,19 @@ namespace SequencedMessages
 
 /-- The Message Type each message is sent under -/
 def tag : SequencedMessages → BitVec 8
+  | .heartbeat _ => 0
+  | .sessionShutdown _ => 1
   | .sequencedMessage _ => 2
 
 def encode : SequencedMessages → List UInt8
+  | .heartbeat message => Heartbeat.encode message
+  | .sessionShutdown message => SessionShutdown.encode message
   | .sequencedMessage message => SequencedMessage.encode message
 
 def decode (tag : BitVec 8) (bytes : List UInt8) : Option (SequencedMessages × List UInt8) :=
-  if tag = 2 then (SequencedMessage.decode bytes).map fun (message, rest) => (.sequencedMessage message, rest)
+  if tag = 0 then (Heartbeat.decode bytes).map fun (message, rest) => (.heartbeat message, rest)
+  else if tag = 1 then (SessionShutdown.decode bytes).map fun (message, rest) => (.sessionShutdown message, rest)
+  else if tag = 2 then (SequencedMessage.decode bytes).map fun (message, rest) => (.sequencedMessage message, rest)
   else none
 
 @[simp] theorem decode_encode (message : SequencedMessages) (rest : List UInt8) :

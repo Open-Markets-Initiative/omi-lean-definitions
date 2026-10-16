@@ -278,27 +278,6 @@ theorem encode_length_pos (message : UserDisconnection) : (encode message).lengt
 
 end UserDisconnection
 
-/-- Order Request: 0 bytes -/
-structure OrderRequest where
-  deriving DecidableEq, Repr
-
-namespace OrderRequest
-
-def encode (_ : OrderRequest) : List UInt8 :=
-  []
-
-def decode (bytes : List UInt8) : Option (OrderRequest × List UInt8) :=
-  some (⟨⟩, bytes)
-
-@[simp] theorem encode_length (message : OrderRequest) : (encode message).length = 0 := by
-  simp [encode]
-
-@[simp] theorem decode_encode (message : OrderRequest) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  simp [decode, encode]
-
-end OrderRequest
-
 /-- Incoming Messages Header: 22 bytes -/
 structure IncomingMessagesHeader where
   userTimestampLocalHhmmss : Alpha 6
@@ -338,6 +317,36 @@ theorem encode_length_pos (message : IncomingMessagesHeader) : (encode message).
   rfl
 
 end IncomingMessagesHeader
+
+/-- Order Request: 22 bytes -/
+structure OrderRequest where
+  incomingMessagesHeader : IncomingMessagesHeader
+  deriving DecidableEq, Repr
+
+namespace OrderRequest
+
+def encode (message : OrderRequest) : List UInt8 :=
+  IncomingMessagesHeader.encode message.incomingMessagesHeader
+
+def decode (bytes : List UInt8) : Option (OrderRequest × List UInt8) := do
+  let (incomingMessagesHeader, bytes) ← IncomingMessagesHeader.decode bytes
+  pure ({ incomingMessagesHeader }, bytes)
+
+@[simp] theorem encode_length (message : OrderRequest) : (encode message).length = 22 := by
+  unfold encode
+  simp only [IncomingMessagesHeader.encode_length]
+
+theorem encode_length_pos (message : OrderRequest) : (encode message).length > 0 := by
+  rw [encode_length]
+  decide
+
+@[simp] theorem decode_encode (message : OrderRequest) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  unfold decode encode
+  rw [IncomingMessagesHeader.decode_encode, some_bind]
+  rfl
+
+end OrderRequest
 
 /-- Clearing Data: 20 bytes -/
 structure ClearingData where

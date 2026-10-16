@@ -784,61 +784,6 @@ theorem encode_length_pos (value : LegSide) : (encode value).length > 0 := by
 
 end LegSide
 
-/-- Packet Header: 10 bytes -/
-structure PacketHeader where
-  channelId : BitVec 8
-  incarnation : BitVec 16
-  source : BitVec 8
-  packetFlags : BitVec 8
-  messageSequence : BitVec 32
-  messageCount : BitVec 8
-  deriving DecidableEq, Repr
-
-namespace PacketHeader
-
-def encode (message : PacketHeader) : List UInt8 :=
-  encodeUInt 1 message.channelId
-    ++ (encodeUIntLE 2 message.incarnation
-    ++ (encodeUInt 1 message.source
-    ++ (encodeUIntLE 1 message.packetFlags
-    ++ (encodeUIntLE 4 message.messageSequence
-    ++ (encodeUInt 1 message.messageCount)))))
-
-def decode (bytes : List UInt8) : Option (PacketHeader × List UInt8) := do
-  let (channelId, bytes) ← decodeUInt 1 bytes
-  let (incarnation, bytes) ← decodeUIntLE 2 bytes
-  let (source, bytes) ← decodeUInt 1 bytes
-  let (packetFlags, bytes) ← decodeUIntLE 1 bytes
-  let (messageSequence, bytes) ← decodeUIntLE 4 bytes
-  let (messageCount, bytes) ← decodeUInt 1 bytes
-  pure ({ channelId, incarnation, source, packetFlags, messageSequence, messageCount }, bytes)
-
-@[simp] theorem encode_length (message : PacketHeader) : (encode message).length = 10 := by
-  unfold encode
-  simp only [List.length_append, encodeUInt_length, encodeUIntLE_length]
-
-theorem encode_length_pos (message : PacketHeader) : (encode message).length > 0 := by
-  rw [encode_length]
-  decide
-
-@[simp] theorem decode_encode (message : PacketHeader) (rest : List UInt8) :
-    decode (encode message ++ rest) = some (message, rest) := by
-  unfold decode encode
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
-  dsimp only
-  rw [decodeUInt_encodeUInt, some_bind]
-  rfl
-
-end PacketHeader
-
 /-- Instrument Trading Status Incremental Message: 25 bytes -/
 structure InstrumentTradingStatusIncrementalMessage where
   instrumentId : BitVec 32
@@ -3062,31 +3007,60 @@ end SbeFrame
 
 /-- Packet -/
 structure Packet where
-  packetHeader : PacketHeader
-  sbeFrame : List SbeFrame
+  channelId : BitVec 8
+  incarnation : BitVec 16
+  source : BitVec 8
+  packetFlags : BitVec 8
+  messageSequence : BitVec 32
+  sbeFrame : Bounded 1 SbeFrame
   deriving DecidableEq, Repr
 
 namespace Packet
 
 def encode (message : Packet) : List UInt8 :=
-  PacketHeader.encode message.packetHeader
-    ++ (encodeMany SbeFrame.encode message.sbeFrame)
+  encodeUInt 1 message.channelId
+    ++ (encodeUIntLE 2 message.incarnation
+    ++ (encodeUInt 1 message.source
+    ++ (encodeUIntLE 1 message.packetFlags
+    ++ (encodeUIntLE 4 message.messageSequence
+    ++ (encodeUInt 1 (BitVec.ofNat (8 * 1) message.sbeFrame.val.length)
+    ++ (encodeMany SbeFrame.encode message.sbeFrame.val))))))
 
-def decode (bytes : List UInt8) : Option Packet := do
-  let (packetHeader, bytes) ← PacketHeader.decode bytes
-  let sbeFrame ← decodeAll SbeFrame.decode bytes.length bytes
-  pure { packetHeader, sbeFrame }
+def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
+  let (channelId, bytes) ← decodeUInt 1 bytes
+  let (incarnation, bytes) ← decodeUIntLE 2 bytes
+  let (source, bytes) ← decodeUInt 1 bytes
+  let (packetFlags, bytes) ← decodeUIntLE 1 bytes
+  let (messageSequence, bytes) ← decodeUIntLE 4 bytes
+  let (messageCount, bytes) ← decodeUInt 1 bytes
+  let (sbeFrame_, bytes) ← decodeMany SbeFrame.decode messageCount.toNat bytes
+  if fits_sbeFrame : sbeFrame_.length < 256 ^ 1 then
+    pure ({ channelId, incarnation, source, packetFlags, messageSequence, sbeFrame := ⟨sbeFrame_, fits_sbeFrame⟩ }, bytes)
+  else none
 
 theorem encode_length_pos (message : Packet) : (encode message).length > 0 := by
   unfold encode
-  simp only [PacketHeader.encode_length, List.length_append]
+  simp only [encodeUInt_length, List.length_append, ← Nat.add_assoc]
   omega
 
-theorem decode_encode (message : Packet) : decode (encode message) = some message := by
+@[simp] theorem decode_encode (message : Packet) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
-  rw [PacketHeader.decode_encode, some_bind]
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
-  rw [decodeAll_encodeMany SbeFrame.encode SbeFrame.decode SbeFrame.decode_encode SbeFrame.encode_length_pos message.sbeFrame _ (encodeMany_length_ge SbeFrame.encode SbeFrame.encode_length_pos message.sbeFrame), some_bind]
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUIntLE_encodeUIntLE, some_bind]
+  dsimp only
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
+  rw [decodeMany_bounded 1 SbeFrame.encode SbeFrame.decode SbeFrame.decode_encode, some_bind]
+  dsimp only
+  rw [dite_eq_left message.sbeFrame.length_lt]
   rfl
 
 end Packet

@@ -3380,6 +3380,7 @@ structure ServerSbeMessage where
   blockLength : BitVec 16
   schemaId : BitVec 8
   version : BitVec 16
+  numGroups : BitVec 8
   serverPayload : ServerPayload
   deriving DecidableEq, Repr
 
@@ -3390,15 +3391,17 @@ def encode (message : ServerSbeMessage) : List UInt8 :=
     ++ (encodeUInt 1 (ServerPayload.tag message.serverPayload)
     ++ (encodeUInt 1 message.schemaId
     ++ (encodeUInt 2 message.version
-    ++ (ServerPayload.encode message.serverPayload))))
+    ++ (encodeUInt 1 message.numGroups
+    ++ (ServerPayload.encode message.serverPayload)))))
 
 def decode (bytes : List UInt8) : Option (ServerSbeMessage × List UInt8) := do
   let (blockLength, bytes) ← decodeUInt 2 bytes
   let (templateId, bytes) ← decodeUInt 1 bytes
   let (schemaId, bytes) ← decodeUInt 1 bytes
   let (version, bytes) ← decodeUInt 2 bytes
+  let (numGroups, bytes) ← decodeUInt 1 bytes
   let (serverPayload, bytes) ← ServerPayload.decode templateId bytes
-  pure ({ blockLength, schemaId, version, serverPayload }, bytes)
+  pure ({ blockLength, schemaId, version, numGroups, serverPayload }, bytes)
 
 theorem encode_length_pos (message : ServerSbeMessage) : (encode message).length > 0 := by
   unfold encode
@@ -3406,7 +3409,7 @@ theorem encode_length_pos (message : ServerSbeMessage) : (encode message).length
   omega
 
 /-- The most bytes an encoding can take -/
-theorem encode_length_le (message : ServerSbeMessage) : (encode message).length ≤ 1182769 := by
+theorem encode_length_le (message : ServerSbeMessage) : (encode message).length ≤ 1182770 := by
   unfold encode
   cases message.serverPayload with
   | executionReportNewMessage inner =>
@@ -3487,6 +3490,8 @@ theorem encode_length_le (message : ServerSbeMessage) : (encode message).length 
 @[simp] theorem decode_encode (message : ServerSbeMessage) (rest : List UInt8) :
     decode (encode message ++ rest) = some (message, rest) := by
   unfold decode encode
+  rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
+  dsimp only
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]
   dsimp only
   rw [List.append_assoc, decodeUInt_encodeUInt, some_bind]

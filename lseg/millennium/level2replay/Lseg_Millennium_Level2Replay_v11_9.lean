@@ -834,6 +834,27 @@ theorem encode_length_pos (message : ReplayResponseMessage) : (encode message).l
 
 end ReplayResponseMessage
 
+/-- Logout Request Message: 0 bytes -/
+structure LogoutRequestMessage where
+  deriving DecidableEq, Repr
+
+namespace LogoutRequestMessage
+
+def encode (_ : LogoutRequestMessage) : List UInt8 :=
+  []
+
+def decode (bytes : List UInt8) : Option (LogoutRequestMessage × List UInt8) :=
+  some (⟨⟩, bytes)
+
+@[simp] theorem encode_length (message : LogoutRequestMessage) : (encode message).length = 0 := by
+  simp [encode]
+
+@[simp] theorem decode_encode (message : LogoutRequestMessage) (rest : List UInt8) :
+    decode (encode message ++ rest) = some (message, rest) := by
+  simp [decode, encode]
+
+end LogoutRequestMessage
+
 /-- Time Message: 4 bytes -/
 structure TimeMessage where
   seconds : BitVec 32
@@ -1805,6 +1826,7 @@ inductive Payload where
   | loginResponseMessage (message : LoginResponseMessage) -- 2
   | replayRequestMessage (message : ReplayRequestMessage) -- 3
   | replayResponseMessage (message : ReplayResponseMessage) -- 4
+  | logoutRequestMessage (message : LogoutRequestMessage) -- 5
   | timeMessage (message : TimeMessage) -- 84
   | systemEventMessage (message : SystemEventMessage) -- 83
   | symbolDirectoryMessage (message : SymbolDirectoryMessage) -- 82
@@ -1831,6 +1853,7 @@ def tag : Payload → BitVec 8
   | .loginResponseMessage _ => 2
   | .replayRequestMessage _ => 3
   | .replayResponseMessage _ => 4
+  | .logoutRequestMessage _ => 5
   | .timeMessage _ => 84
   | .systemEventMessage _ => 83
   | .symbolDirectoryMessage _ => 82
@@ -1853,6 +1876,7 @@ def encode : Payload → List UInt8
   | .loginResponseMessage message => LoginResponseMessage.encode message
   | .replayRequestMessage message => ReplayRequestMessage.encode message
   | .replayResponseMessage message => ReplayResponseMessage.encode message
+  | .logoutRequestMessage message => LogoutRequestMessage.encode message
   | .timeMessage message => TimeMessage.encode message
   | .systemEventMessage message => SystemEventMessage.encode message
   | .symbolDirectoryMessage message => SymbolDirectoryMessage.encode message
@@ -1884,6 +1908,9 @@ theorem encode_length_le (message : Payload) : (encode message).length ≤ 63 :=
     omega
   | replayResponseMessage inner =>
     simp only [encode, ReplayResponseMessage.encode_length]
+    omega
+  | logoutRequestMessage inner =>
+    simp only [encode, LogoutRequestMessage.encode_length]
     omega
   | timeMessage inner =>
     simp only [encode, TimeMessage.encode_length]
@@ -1939,6 +1966,7 @@ def decode (tag : BitVec 8) (bytes : List UInt8) : Option (Payload × List UInt8
   else if tag = 2 then (LoginResponseMessage.decode bytes).map fun (message, rest) => (.loginResponseMessage message, rest)
   else if tag = 3 then (ReplayRequestMessage.decode bytes).map fun (message, rest) => (.replayRequestMessage message, rest)
   else if tag = 4 then (ReplayResponseMessage.decode bytes).map fun (message, rest) => (.replayResponseMessage message, rest)
+  else if tag = 5 then (LogoutRequestMessage.decode bytes).map fun (message, rest) => (.logoutRequestMessage message, rest)
   else if tag = 84 then (TimeMessage.decode bytes).map fun (message, rest) => (.timeMessage message, rest)
   else if tag = 83 then (SystemEventMessage.decode bytes).map fun (message, rest) => (.systemEventMessage message, rest)
   else if tag = 82 then (SymbolDirectoryMessage.decode bytes).map fun (message, rest) => (.symbolDirectoryMessage message, rest)
@@ -2002,6 +2030,9 @@ theorem encodeBody_length_lt (message : Message) : (encodeBody message).length +
     omega
   | replayResponseMessage inner =>
     simp only [Payload.encode, List.length_append, encodeUInt_length, ReplayResponseMessage.encode_length]
+    omega
+  | logoutRequestMessage inner =>
+    simp only [Payload.encode, List.length_append, encodeUInt_length, LogoutRequestMessage.encode_length]
     omega
   | timeMessage inner =>
     simp only [Payload.encode, List.length_append, encodeUInt_length, TimeMessage.encode_length]

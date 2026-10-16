@@ -568,13 +568,13 @@ end ShortSaleThresholdIndicator
 
 /-- Ipo Flag: one byte code -/
 def IpoFlag.codes : List UInt8 :=
-  [0x59, 0x4E, 0x5A, 0x20]
+  [0x59, 0x4E, 0x20, 0x5A]
 
 inductive IpoFlag where
   | setUpForIpoRelease -- Set Up For Ipo Release
   | notSetUpForIpoRelease -- Not Set Up For Ipo Release
-  | nonIpoNewListedSecurity -- Non Ipo New Listed Security
   | notAvailable -- Not Available
+  | nonIpoNewListedSecurity -- Non Ipo New Listed Security
   | unlisted (byte : { byte : UInt8 // byte ∉ IpoFlag.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -583,16 +583,16 @@ namespace IpoFlag
 def toByte : IpoFlag → UInt8
   | .setUpForIpoRelease => 0x59
   | .notSetUpForIpoRelease => 0x4E
-  | .nonIpoNewListedSecurity => 0x5A
   | .notAvailable => 0x20
+  | .nonIpoNewListedSecurity => 0x5A
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
 def listed (byte : UInt8) : IpoFlag :=
   if byte = 0x59 then .setUpForIpoRelease
   else if byte = 0x4E then .notSetUpForIpoRelease
-  else if byte = 0x5A then .nonIpoNewListedSecurity
-  else .notAvailable
+  else if byte = 0x20 then .notAvailable
+  else .nonIpoNewListedSecurity
 
 def ofByte (byte : UInt8) : IpoFlag :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -601,8 +601,8 @@ theorem ofByte_toByte (value : IpoFlag) : ofByte value.toByte = value := by
   cases value with
   | setUpForIpoRelease => decide
   | notSetUpForIpoRelease => decide
-  | nonIpoNewListedSecurity => decide
   | notAvailable => decide
+  | nonIpoNewListedSecurity => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : IpoFlag) : List UInt8 :=
@@ -1448,14 +1448,14 @@ end Printable
 
 /-- Cross Type: one byte code -/
 def CrossType.codes : List UInt8 :=
-  [0x4F, 0x43, 0x48, 0x41, 0x49]
+  [0x4F, 0x43, 0x48, 0x49, 0x41]
 
 inductive CrossType where
   | opening -- Opening
   | closing -- Closing
   | haltedOrPaused -- Halted Or Paused
-  | extendedClose -- Extended Close
   | intradayOrPostClose -- Intraday Or Post Close
+  | extendedClose -- Extended Close
   | unlisted (byte : { byte : UInt8 // byte ∉ CrossType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -1465,8 +1465,8 @@ def toByte : CrossType → UInt8
   | .opening => 0x4F
   | .closing => 0x43
   | .haltedOrPaused => 0x48
-  | .extendedClose => 0x41
   | .intradayOrPostClose => 0x49
+  | .extendedClose => 0x41
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -1474,8 +1474,8 @@ def listed (byte : UInt8) : CrossType :=
   if byte = 0x4F then .opening
   else if byte = 0x43 then .closing
   else if byte = 0x48 then .haltedOrPaused
-  else if byte = 0x41 then .extendedClose
-  else .intradayOrPostClose
+  else if byte = 0x49 then .intradayOrPostClose
+  else .extendedClose
 
 def ofByte (byte : UInt8) : CrossType :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -1485,8 +1485,8 @@ theorem ofByte_toByte (value : CrossType) : ofByte value.toByte = value := by
   | opening => decide
   | closing => decide
   | haltedOrPaused => decide
-  | extendedClose => decide
   | intradayOrPostClose => decide
+  | extendedClose => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : CrossType) : List UInt8 :=
@@ -3691,6 +3691,11 @@ def encode : ServerPayload → List UInt8
   | .serverHeartbeatPacket message => ServerHeartbeatPacket.encode message
   | .endOfSessionPacket message => EndOfSessionPacket.encode message
 
+/-- Does the message end the session? Nothing in its packet may follow it -/
+def endsSession : ServerPayload → Bool
+  | .endOfSessionPacket _ => true
+  | _ => false
+
 /-- The most bytes any message's encoding can take -/
 theorem encode_length_le (message : ServerPayload) : (encode message).length ≤ 65483 := by
   cases message with
@@ -3801,11 +3806,16 @@ theorem encode_length_pos (message : ServerSoupBinTcpPacket) : (encode message).
   rw [encodeFramed_length]
   omega
 
+/-- Does the message end the session? Nothing in its packet may follow it -/
+def endsSession (message : ServerSoupBinTcpPacket) : Bool :=
+  ServerPayload.endsSession message.serverPayload
+
 end ServerSoupBinTcpPacket
 
 /-- Server Packet -/
 structure ServerPacket where
   serverSoupBinTcpPacket : List ServerSoupBinTcpPacket
+  serverSoupBinTcpPacket_last : endsLast ServerSoupBinTcpPacket.endsSession serverSoupBinTcpPacket = true
   deriving DecidableEq, Repr
 
 namespace ServerPacket
@@ -3815,11 +3825,14 @@ def encode (message : ServerPacket) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option ServerPacket := do
   let serverSoupBinTcpPacket ← decodeAll ServerSoupBinTcpPacket.decode bytes.length bytes
-  pure { serverSoupBinTcpPacket }
+  if last_serverSoupBinTcpPacket : endsLast ServerSoupBinTcpPacket.endsSession serverSoupBinTcpPacket = true then
+    pure { serverSoupBinTcpPacket, serverSoupBinTcpPacket_last := last_serverSoupBinTcpPacket }
+  else none
 
 theorem decode_encode (message : ServerPacket) : decode (encode message) = some message := by
   unfold decode encode
   rw [decodeAll_encodeMany ServerSoupBinTcpPacket.encode ServerSoupBinTcpPacket.decode ServerSoupBinTcpPacket.decode_encode ServerSoupBinTcpPacket.encode_length_pos message.serverSoupBinTcpPacket _ (encodeMany_length_ge ServerSoupBinTcpPacket.encode ServerSoupBinTcpPacket.encode_length_pos message.serverSoupBinTcpPacket), some_bind]
+  rw [dite_eq_left message.serverSoupBinTcpPacket_last]
   rfl
 
 end ServerPacket

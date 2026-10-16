@@ -1587,9 +1587,9 @@ def decode (bytes : List UInt8) : Option (Packet × List UInt8) := do
   let (packetSize, bytes) ← decodeUInt 2 bytes
   let (seqNum, bytes) ← decodeUInt 4 bytes
   let (packetFlag, bytes) ← decodeUIntLE 1 bytes
-  let (messages, bytes) ← decodeUInt 1 bytes
+  let (messageCount, bytes) ← decodeUInt 1 bytes
   let (packetMilli, bytes) ← decodeUInt 4 bytes
-  let (message_, bytes) ← decodeMany Message.decode messages.toNat bytes
+  let (message_, bytes) ← decodeMany Message.decode messageCount.toNat bytes
   if fits_message : message_.length < 256 ^ 1 then
     pure ({ packetSize, seqNum, packetFlag, packetMilli, message := ⟨message_, fits_message⟩ }, bytes)
   else none

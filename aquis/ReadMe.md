@@ -5,12 +5,12 @@
 
 | [Protocol][Omi.Aquis.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Aquis.Specifications] |
 | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| [RealTime][Aquis.AquisEquities.RealTime] | [Amd][Omi.Encoding.Amd] | [4.0][Aquis.AquisEquities.RealTime.Amd.v4.0.Definition] | 8/1/2025 | 779 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.RealTime.Amd.v4.0.Url] - [pdf][Aquis.AquisEquities.RealTime.Amd.v4.0.Pdf] |
+| [RealTime][Aquis.AquisEquities.RealTime] | [Amd][Omi.Encoding.Amd] | [4.0][Aquis.AquisEquities.RealTime.Amd.v4.0.Definition] | 8/1/2025 | 779 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.RealTime.Amd.v4.0.Url] |
 | [RealTime][Aquis.AquisEquities.RealTime] | [Amd][Omi.Encoding.Amd] | [4.1][Aquis.AquisEquities.RealTime.Amd.v4.1.Definition] | 1/1/2026 | 784 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.RealTime.Amd.v4.1.Url] |
-| [Replay][Aquis.AquisEquities.Replay] | [Amd][Omi.Encoding.Amd] | [4.0][Aquis.AquisEquities.Replay.Amd.v4.0.Definition] | 8/1/2025 | 245 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.Replay.Amd.v4.0.Url] - [pdf][Aquis.AquisEquities.Replay.Amd.v4.0.Pdf] |
-| [Replay][Aquis.AquisEquities.Replay] | [Amd][Omi.Encoding.Amd] | [4.1][Aquis.AquisEquities.Replay.Amd.v4.1.Definition] | 1/1/2026 | 245 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.Replay.Amd.v4.1.Url] - [pdf][Aquis.AquisEquities.Replay.Amd.v4.1.Pdf] |
-| [Snapshot][Aquis.AquisEquities.Snapshot] | [Amd][Omi.Encoding.Amd] | [4.0][Aquis.AquisEquities.Snapshot.Amd.v4.0.Definition] | 8/1/2025 | 369 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.Snapshot.Amd.v4.0.Url] - [pdf][Aquis.AquisEquities.Snapshot.Amd.v4.0.Pdf] |
-| [Snapshot][Aquis.AquisEquities.Snapshot] | [Amd][Omi.Encoding.Amd] | [4.1][Aquis.AquisEquities.Snapshot.Amd.v4.1.Definition] | 1/1/2026 | 369 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.Snapshot.Amd.v4.1.Url] - [pdf][Aquis.AquisEquities.Snapshot.Amd.v4.1.Pdf] |
+| [Replay][Aquis.AquisEquities.Replay] | [Amd][Omi.Encoding.Amd] | [4.0][Aquis.AquisEquities.Replay.Amd.v4.0.Definition] | 8/1/2025 | 245 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.Replay.Amd.v4.0.Url] |
+| [Replay][Aquis.AquisEquities.Replay] | [Amd][Omi.Encoding.Amd] | [4.1][Aquis.AquisEquities.Replay.Amd.v4.1.Definition] | 1/1/2026 | 245 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.Replay.Amd.v4.1.Url] |
+| [Snapshot][Aquis.AquisEquities.Snapshot] | [Amd][Omi.Encoding.Amd] | [4.0][Aquis.AquisEquities.Snapshot.Amd.v4.0.Definition] | 8/1/2025 | 369 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.Snapshot.Amd.v4.0.Url] |
+| [Snapshot][Aquis.AquisEquities.Snapshot] | [Amd][Omi.Encoding.Amd] | [4.1][Aquis.AquisEquities.Snapshot.Amd.v4.1.Definition] | 1/1/2026 | 369 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.Snapshot.Amd.v4.1.Url] |
 | [TcpHeader][Aquis.AquisEquities.TcpHeader] | [Amd][Omi.Encoding.Amd] | [1.0][Aquis.AquisEquities.TcpHeader.Amd.v1.0.Definition] | 8/1/2025 | 95 | [Header][Omi.Glossary.Deployment.Header] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.TcpHeader.Amd.v1.0.Url] |
 | [TcpHeader][Aquis.AquisEquities.TcpHeader] | [Atp][Omi.Encoding.Atp] | [1.0][Aquis.AquisEquities.TcpHeader.Atp.v1.0.Definition] | 8/1/2025 | 94 | [Header][Omi.Glossary.Deployment.Header] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.TcpHeader.Atp.v1.0.Url] |
 | [TradingProtocol][Aquis.AquisEquities.TradingProtocol] | [Atp][Omi.Encoding.Atp] | [4.0][Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Definition] | 8/1/2025 | 1666 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Url] - [pdf][Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Pdf] |
@@ -48,27 +48,22 @@
 
 [Aquis.AquisEquities.RealTime.Amd.v4.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/aquis/realtime/AquisEquities_RealTime_v4_0.lean "Aquis RealTime Amd v4.0 Lean Definition"
 [Aquis.AquisEquities.RealTime.Amd.v4.0.Url]: https://www.aquis.eu/markets/documents "Aquis Exchange 4.0 Url"
-[Aquis.AquisEquities.RealTime.Amd.v4.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/ "Aquis Exchange 4.0 Pdf"
 [Aquis.AquisEquities.RealTime.Amd.v4.1.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/aquis/realtime/AquisEquities_RealTime_v4_1.lean "Aquis RealTime Amd v4.1 Lean Definition"
 [Aquis.AquisEquities.RealTime.Amd.v4.1.Url]: https://www.aquis.eu/markets/documents "Aquis Exchange 4.1 Url"
 [Aquis.AquisEquities.Replay.Amd.v4.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/aquis/replay/AquisEquities_Replay_v4_0.lean "Aquis Replay Amd v4.0 Lean Definition"
 [Aquis.AquisEquities.Replay.Amd.v4.0.Url]: https://www.aquis.eu/markets/documents "Aquis Exchange 4.0 Url"
-[Aquis.AquisEquities.Replay.Amd.v4.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/ "Aquis Exchange 4.0 Pdf"
 [Aquis.AquisEquities.Replay.Amd.v4.1.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/aquis/replay/AquisEquities_Replay_v4_1.lean "Aquis Replay Amd v4.1 Lean Definition"
 [Aquis.AquisEquities.Replay.Amd.v4.1.Url]: https://www.aquis.eu/markets/documents "Aquis Exchange 4.1 Url"
-[Aquis.AquisEquities.Replay.Amd.v4.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/ "Aquis Exchange 4.1 Pdf"
 [Aquis.AquisEquities.Snapshot.Amd.v4.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/aquis/snapshot/AquisEquities_Snapshot_v4_0.lean "Aquis Snapshot Amd v4.0 Lean Definition"
 [Aquis.AquisEquities.Snapshot.Amd.v4.0.Url]: https://www.aquis.eu/markets/documents "Aquis Exchange 4.0 Url"
-[Aquis.AquisEquities.Snapshot.Amd.v4.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/ "Aquis Exchange 4.0 Pdf"
 [Aquis.AquisEquities.Snapshot.Amd.v4.1.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/aquis/snapshot/AquisEquities_Snapshot_v4_1.lean "Aquis Snapshot Amd v4.1 Lean Definition"
 [Aquis.AquisEquities.Snapshot.Amd.v4.1.Url]: https://www.aquis.eu/markets/documents "Aquis Exchange 4.1 Url"
-[Aquis.AquisEquities.Snapshot.Amd.v4.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/ "Aquis Exchange 4.1 Pdf"
 [Aquis.AquisEquities.TcpHeader.Amd.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/aquis/tcpheader/AquisEquities_TcpHeader_Amd_v1_0.lean "Aquis TcpHeader Amd v1.0 Lean Definition"
 [Aquis.AquisEquities.TcpHeader.Amd.v1.0.Url]: https://www.aquis.eu/technologies "Aquis Exchange 1.0 Url"
 [Aquis.AquisEquities.TcpHeader.Atp.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/aquis/tcpheader/AquisEquities_TcpHeader_Atp_v1_0.lean "Aquis TcpHeader Atp v1.0 Lean Definition"
 [Aquis.AquisEquities.TcpHeader.Atp.v1.0.Url]: https://www.aquis.eu/technologies "Aquis Exchange 1.0 Url"
 [Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/aquis/tradingprotocol/AquisEquities_TradingProtocol_v4_0.lean "Aquis TradingProtocol Atp v4.0 Lean Definition"
 [Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Url]: https://www.aquis.eu/markets/documents "Aquis Exchange 4.0 Url"
-[Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/Atp/Aquis.AquisEquities.TradingProtocol.Atp.v4.0.pdf "Aquis Exchange 4.0 Pdf"
+[Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/TradingProtocol/Aquis.AquisEquities.TradingProtocol.Atp.v4.0.pdf "Aquis Exchange 4.0 Pdf"
 [Aquis.AquisEquities.UdpHeader.Amd.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-lean4-definitions/blob/main/aquis/udpheader/AquisEquities_UdpHeader_v1_0.lean "Aquis UdpHeader Amd v1.0 Lean Definition"
 [Aquis.AquisEquities.UdpHeader.Amd.v1.0.Url]: https://www.aquis.eu/technologies "Aquis Exchange 1.0 Url"

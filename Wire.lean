@@ -445,6 +445,37 @@ theorem decodeMany_bounded (n : Nat) (encode : α → List UInt8) (decode : List
     exact items.length_lt
   rw [BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits, decodeMany_encodeMany encode decode roundtrip]
 
+/-- A list whose length the prefix states with a constant added: the prefix counts the list and that
+    much besides, so the list is what the prefix states less the constant, and what must fit the
+    prefix is the pair of them. Nyse's options gateway states its sequenced message as the message
+    length less four, the four being the header the length also counts -/
+abbrev Counting (n offset : Nat) (α : Type) := { items : List α // items.length + offset < 256 ^ n }
+
+instance [DecidableEq α] : DecidableEq (Counting n offset α) :=
+  inferInstanceAs (DecidableEq { items : List α // items.length + offset < 256 ^ n })
+
+instance [Repr α] : Repr (Counting n offset α) where
+  reprPrec counting precedence := reprPrec counting.val precedence
+
+theorem Counting.length_lt (counting : Counting n offset α) : counting.val.length + offset < 256 ^ n :=
+  counting.property
+
+@[simp] theorem Counting.mk_val (counting : Counting n offset α) (fits : counting.val.length + offset < 256 ^ n) :
+    (⟨counting.val, fits⟩ : Counting n offset α) = counting :=
+  rfl
+
+/-- Read back by the prefix less the constant, which is the length the prefix was written from -/
+theorem decodeMany_counting (n offset : Nat) (encode : α → List UInt8) (decode : List UInt8 → Option (α × List UInt8))
+    (roundtrip : ∀ item rest, decode (encode item ++ rest) = some (item, rest))
+    (items : Counting n offset α) (rest : List UInt8) :
+    decodeMany decode ((BitVec.ofNat (8 * n) (items.val.length + offset)).toNat - offset) (encodeMany encode items.val ++ rest)
+      = some (items.val, rest) := by
+  have fits : items.val.length + offset < 2 ^ (8 * n) := by
+    rw [Nat.pow_mul]
+    exact items.length_lt
+  rw [BitVec.toNat_ofNat, Nat.mod_eq_of_lt fits, Nat.add_sub_cancel,
+    decodeMany_encodeMany encode decode roundtrip]
+
 /-- Items decoded until the bytes run out, each decoder call handed at most `fuel` more turns -/
 def decodeAll (item : List UInt8 → Option (α × List UInt8)) : Nat → List UInt8 → Option (List α)
   | _, [] => some []
@@ -768,5 +799,134 @@ theorem decodeFittingAllLE_encodeFramedLE (n offset : Nat) (encode : α → List
   dsimp only
   rw [dite_eq_left item.fits]
   rfl
+
+/-! ## Closed bodies -/
+
+/-- A body with the proof its encoding holds no terminator, so the terminator written after it is
+    the first and ends it. A stream of such bodies is read one terminator at a time: what a length
+    prefix does by counting, a terminator does by closing, and the body carries the proof because no
+    bound of the fields can rule the byte out -/
+abbrev Closed (encode : α → List UInt8) (terminator : UInt8) := { item : α // terminator ∉ encode item }
+
+instance [DecidableEq α] {encode : α → List UInt8} : DecidableEq (Closed encode terminator) :=
+  inferInstanceAs (DecidableEq { item : α // terminator ∉ encode item })
+
+instance [Repr α] {encode : α → List UInt8} : Repr (Closed encode terminator) where
+  reprPrec closed precedence := reprPrec closed.val precedence
+
+theorem Closed.free {encode : α → List UInt8} (closed : Closed encode terminator) :
+    terminator ∉ encode closed.val :=
+  closed.property
+
+/-- The body, then the terminator that closes it -/
+def encodeClosed (terminator : UInt8) (encode : α → List UInt8) (item : α) : List UInt8 :=
+  encode item ++ [terminator]
+
+theorem encodeClosed_length (terminator : UInt8) (encode : α → List UInt8) (item : α) :
+    (encodeClosed terminator encode item).length = (encode item).length + 1 := by
+  simp [encodeClosed]
+
+theorem encodeClosed_length_pos (terminator : UInt8) (encode : α → List UInt8) (item : α) :
+    (encodeClosed terminator encode item).length > 0 := by
+  rw [encodeClosed_length]
+  omega
+
+/-- Take the bytes up to the terminator and read them as a body that runs to their end -/
+def decodeClosedAll (terminator : UInt8) (decode : List UInt8 → Option α) (bytes : List UInt8) :
+    Option (α × List UInt8) := do
+  let (body, rest) ← takeTerminated terminator bytes
+  let item ← decode body
+  pure (item, rest)
+
+theorem decodeClosedAll_encodeClosed (terminator : UInt8) (encode : α → List UInt8)
+    (decode : List UInt8 → Option α)
+    (item : α)
+    (whole : decode (encode item) = some item)
+    (free : terminator ∉ encode item)
+    (rest : List UInt8) :
+    decodeClosedAll terminator decode (encodeClosed terminator encode item ++ rest) = some (item, rest) := by
+  have joined : encodeClosed terminator encode item ++ rest = encode item ++ terminator :: rest := by
+    simp [encodeClosed]
+  unfold decodeClosedAll
+  rw [joined, takeTerminated_append terminator (encode item) free rest, some_bind]
+  simp [whole]
+
+/-- The same, keeping the proof the body holds no terminator, which the decoder checks as it reads -/
+def decodeClosing (terminator : UInt8) (encode : α → List UInt8) (decode : List UInt8 → Option α)
+    (bytes : List UInt8) : Option (Closed encode terminator × List UInt8) := do
+  let (item, rest) ← decodeClosedAll terminator decode bytes
+  if free : terminator ∉ encode item then pure (⟨item, free⟩, rest) else none
+
+theorem decodeClosing_encodeClosed (terminator : UInt8) (encode : α → List UInt8)
+    (decode : List UInt8 → Option α)
+    (item : Closed encode terminator)
+    (whole : decode (encode item.val) = some item.val)
+    (rest : List UInt8) :
+    decodeClosing terminator encode decode (encodeClosed terminator encode item.val ++ rest) = some (item, rest) := by
+  unfold decodeClosing
+  rw [decodeClosedAll_encodeClosed terminator encode decode item.val whole item.free, some_bind]
+  dsimp only
+  rw [dite_eq_left item.free]
+  rfl
+
+/-! ## Fallbacks -/
+
+/-- A body framed by the very length its choice is keyed on, with the proof that length fits the
+    `w` bit key and is none of the values the choice lists: the case the choice falls back to when
+    no listed value matches. MoldUdp keys each message block on its length, zero ending the session
+    and any other length the bytes of a message -/
+abbrev Fallback (encode : α → List UInt8) (w : Nat) (listed : List Nat) :=
+  { item : α // (encode item).length < 2 ^ w ∧ (encode item).length ∉ listed }
+
+instance [DecidableEq α] {encode : α → List UInt8} : DecidableEq (Fallback encode w listed) :=
+  inferInstanceAs (DecidableEq { item : α // (encode item).length < 2 ^ w ∧ (encode item).length ∉ listed })
+
+instance [Repr α] {encode : α → List UInt8} : Repr (Fallback encode w listed) where
+  reprPrec fallback precedence := reprPrec fallback.val precedence
+
+/-- The key a fallback is written under: the length of its body -/
+def Fallback.key {encode : α → List UInt8} (fallback : Fallback encode w listed) : BitVec w :=
+  BitVec.ofNat w (encode fallback.val).length
+
+/-- The key a fallback is written under is none of the values the choice lists -/
+theorem Fallback.key_ne {encode : α → List UInt8} (fallback : Fallback encode w listed)
+    (code : Nat) (named : code ∈ listed) (small : code < 2 ^ w) :
+    fallback.key ≠ BitVec.ofNat w code := by
+  intro same
+  have spelled := congrArg BitVec.toNat same
+  simp only [Fallback.key, BitVec.toNat_ofNat, Nat.mod_eq_of_lt fallback.property.1, Nat.mod_eq_of_lt small] at spelled
+  exact fallback.property.2 (spelled ▸ named)
+
+/-- Read the bytes the key counts as one whole body, kept with the proof it fits the key and is none
+    of the listed values -/
+def decodeFallback (w : Nat) (listed : List Nat) (encode : α → List UInt8)
+    (decode : List UInt8 → Option (α × List UInt8)) (key : Nat) (bytes : List UInt8) :
+    Option (Fallback encode w listed × List UInt8) := do
+  let (body, rest) ← take? key bytes
+  let (item, tail) ← decode body
+  guard tail.isEmpty
+  if fits : (encode item).length < 2 ^ w ∧ (encode item).length ∉ listed then pure (⟨item, fits⟩, rest) else none
+
+/-- A fallback read back by its key: the bytes the key counts are its body, and the body is it -/
+theorem decodeFallback_encode (w : Nat) (listed : List Nat) (encode : α → List UInt8)
+    (decode : List UInt8 → Option (α × List UInt8))
+    (fallback : Fallback encode w listed)
+    (roundtrip : ∀ rest, decode (encode fallback.val ++ rest) = some (fallback.val, rest))
+    (rest : List UInt8) :
+    decodeFallback w listed encode decode fallback.key.toNat (encode fallback.val ++ rest) = some (fallback, rest) := by
+  have whole := roundtrip []
+  rw [List.append_nil] at whole
+  unfold decodeFallback Fallback.key
+  rw [BitVec.toNat_ofNat, Nat.mod_eq_of_lt fallback.property.1, take?_append rfl]
+  simp only [Bind.bind, Option.bind_some, whole]
+  simp [guard, fallback.property]
+
+/-! ## Session ends -/
+
+/-- Does an item that ends the session stand only last? Nothing in a packet follows the item that
+    ends its session: MoldUdp's zero length message must be the last block of its packet -/
+def endsLast (ends : α → Bool) : List α → Bool
+  | item :: next :: rest => !ends item && endsLast ends (next :: rest)
+  | _ => true
 
 end Omi

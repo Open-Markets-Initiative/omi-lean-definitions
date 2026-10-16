@@ -3743,7 +3743,7 @@ end FuturesTradeMessage
 /-- Strategy Trade Message: 66 bytes -/
 structure StrategyTradeMessage where
   exchangeId : ExchangeId
-  symbolStrategy : Alpha 30
+  symbol : Alpha 30
   volume : Alpha 8
   tradePriceSign : Alpha 1
   tradePrice : Alpha 7
@@ -3759,7 +3759,7 @@ namespace StrategyTradeMessage
 
 def encode (message : StrategyTradeMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
-    ++ (Alpha.encode message.symbolStrategy
+    ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.tradePriceSign
     ++ (Alpha.encode message.tradePrice
@@ -3772,7 +3772,7 @@ def encode (message : StrategyTradeMessage) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option (StrategyTradeMessage × List UInt8) := do
   let (exchangeId, bytes) ← ExchangeId.decode bytes
-  let (symbolStrategy, bytes) ← Alpha.decode 30 bytes
+  let (symbol, bytes) ← Alpha.decode 30 bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (tradePriceSign, bytes) ← Alpha.decode 1 bytes
   let (tradePrice, bytes) ← Alpha.decode 7 bytes
@@ -3782,7 +3782,7 @@ def decode (bytes : List UInt8) : Option (StrategyTradeMessage × List UInt8) :=
   let (netChangeFractionIndicator, bytes) ← NetChangeFractionIndicator.decode bytes
   let (priceIndicatorMarker, bytes) ← Alpha.decode 1 bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
-  pure ({ exchangeId, symbolStrategy, volume, tradePriceSign, tradePrice, tradePriceFractionIndicator, netChangeSign, netChange, netChangeFractionIndicator, priceIndicatorMarker, tradeNumber }, bytes)
+  pure ({ exchangeId, symbol, volume, tradePriceSign, tradePrice, tradePriceFractionIndicator, netChangeSign, netChange, netChangeFractionIndicator, priceIndicatorMarker, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : StrategyTradeMessage) : (encode message).length = 66 := by
   unfold encode
@@ -3958,7 +3958,7 @@ end FutureRequestForQuoteMessage
 /-- Strategy Request For Quote Message: 40 bytes -/
 structure StrategyRequestForQuoteMessage where
   exchangeId : ExchangeId
-  symbolStrategy : Alpha 30
+  symbol : Alpha 30
   requestedSize : Alpha 8
   requestedMarketSide : RequestedMarketSide
   deriving DecidableEq, Repr
@@ -3967,16 +3967,16 @@ namespace StrategyRequestForQuoteMessage
 
 def encode (message : StrategyRequestForQuoteMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
-    ++ (Alpha.encode message.symbolStrategy
+    ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.requestedSize
     ++ (RequestedMarketSide.encode message.requestedMarketSide)))
 
 def decode (bytes : List UInt8) : Option (StrategyRequestForQuoteMessage × List UInt8) := do
   let (exchangeId, bytes) ← ExchangeId.decode bytes
-  let (symbolStrategy, bytes) ← Alpha.decode 30 bytes
+  let (symbol, bytes) ← Alpha.decode 30 bytes
   let (requestedSize, bytes) ← Alpha.decode 8 bytes
   let (requestedMarketSide, bytes) ← RequestedMarketSide.decode bytes
-  pure ({ exchangeId, symbolStrategy, requestedSize, requestedMarketSide }, bytes)
+  pure ({ exchangeId, symbol, requestedSize, requestedMarketSide }, bytes)
 
 @[simp] theorem encode_length (message : StrategyRequestForQuoteMessage) : (encode message).length = 40 := by
   unfold encode
@@ -4393,7 +4393,7 @@ end FuturesQuoteMessage
 /-- Strategy Quote Message: 60 bytes -/
 structure StrategyQuoteMessage where
   exchangeId : ExchangeId
-  symbolStrategy : Alpha 30
+  symbol : Alpha 30
   bidPriceSign : Alpha 1
   bidPriceQuote : Alpha 7
   bidPriceFractionIndicator : BidPriceFractionIndicator
@@ -4409,7 +4409,7 @@ namespace StrategyQuoteMessage
 
 def encode (message : StrategyQuoteMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
-    ++ (Alpha.encode message.symbolStrategy
+    ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.bidPriceSign
     ++ (Alpha.encode message.bidPriceQuote
     ++ (BidPriceFractionIndicator.encode message.bidPriceFractionIndicator
@@ -4422,7 +4422,7 @@ def encode (message : StrategyQuoteMessage) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option (StrategyQuoteMessage × List UInt8) := do
   let (exchangeId, bytes) ← ExchangeId.decode bytes
-  let (symbolStrategy, bytes) ← Alpha.decode 30 bytes
+  let (symbol, bytes) ← Alpha.decode 30 bytes
   let (bidPriceSign, bytes) ← Alpha.decode 1 bytes
   let (bidPriceQuote, bytes) ← Alpha.decode 7 bytes
   let (bidPriceFractionIndicator, bytes) ← BidPriceFractionIndicator.decode bytes
@@ -4432,7 +4432,7 @@ def decode (bytes : List UInt8) : Option (StrategyQuoteMessage × List UInt8) :=
   let (askPriceFractionIndicator, bytes) ← AskPriceFractionIndicator.decode bytes
   let (askSize, bytes) ← Alpha.decode 5 bytes
   let (instrumentStatusMarker, bytes) ← Alpha.decode 1 bytes
-  pure ({ exchangeId, symbolStrategy, bidPriceSign, bidPriceQuote, bidPriceFractionIndicator, bidSize, askPriceSign, askPriceQuote, askPriceFractionIndicator, askSize, instrumentStatusMarker }, bytes)
+  pure ({ exchangeId, symbol, bidPriceSign, bidPriceQuote, bidPriceFractionIndicator, bidSize, askPriceSign, askPriceQuote, askPriceFractionIndicator, askSize, instrumentStatusMarker }, bytes)
 
 @[simp] theorem encode_length (message : StrategyQuoteMessage) : (encode message).length = 60 := by
   unfold encode
@@ -4934,7 +4934,7 @@ end StrategyMarketDepthTradingInstrument
 /-- Strategy Market Depth Message -/
 structure StrategyMarketDepthMessage where
   exchangeId : ExchangeId
-  symbolStrategy : Alpha 30
+  symbol : Alpha 30
   instrumentStatusMarker : Alpha 1
   strategyMarketDepthTradingInstrument : Digited 1 StrategyMarketDepthTradingInstrument
   deriving DecidableEq, Repr
@@ -4943,19 +4943,19 @@ namespace StrategyMarketDepthMessage
 
 def encode (message : StrategyMarketDepthMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
-    ++ (Alpha.encode message.symbolStrategy
+    ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.instrumentStatusMarker
     ++ (encodeDigits 1 message.strategyMarketDepthTradingInstrument.val.length
     ++ (encodeMany StrategyMarketDepthTradingInstrument.encode message.strategyMarketDepthTradingInstrument.val))))
 
 def decode (bytes : List UInt8) : Option (StrategyMarketDepthMessage × List UInt8) := do
   let (exchangeId, bytes) ← ExchangeId.decode bytes
-  let (symbolStrategy, bytes) ← Alpha.decode 30 bytes
+  let (symbol, bytes) ← Alpha.decode 30 bytes
   let (instrumentStatusMarker, bytes) ← Alpha.decode 1 bytes
   let (numberOfLevels, bytes) ← decodeDigits 1 bytes
   let (strategyMarketDepthTradingInstrument_, bytes) ← decodeMany StrategyMarketDepthTradingInstrument.decode numberOfLevels bytes
   if fits_strategyMarketDepthTradingInstrument : strategyMarketDepthTradingInstrument_.length < 10 ^ 1 then
-    pure ({ exchangeId, symbolStrategy, instrumentStatusMarker, strategyMarketDepthTradingInstrument := ⟨strategyMarketDepthTradingInstrument_, fits_strategyMarketDepthTradingInstrument⟩ }, bytes)
+    pure ({ exchangeId, symbol, instrumentStatusMarker, strategyMarketDepthTradingInstrument := ⟨strategyMarketDepthTradingInstrument_, fits_strategyMarketDepthTradingInstrument⟩ }, bytes)
   else none
 
 theorem encode_length_pos (message : StrategyMarketDepthMessage) : (encode message).length > 0 := by
@@ -5171,7 +5171,7 @@ end FutureTradeCancellationMessage
 /-- Strategy Trade Cancellation Message: 56 bytes -/
 structure StrategyTradeCancellationMessage where
   exchangeId : ExchangeId
-  symbolStrategy : Alpha 30
+  symbol : Alpha 30
   volume : Alpha 8
   tradePriceSign : Alpha 1
   tradePrice : Alpha 7
@@ -5183,7 +5183,7 @@ namespace StrategyTradeCancellationMessage
 
 def encode (message : StrategyTradeCancellationMessage) : List UInt8 :=
   ExchangeId.encode message.exchangeId
-    ++ (Alpha.encode message.symbolStrategy
+    ++ (Alpha.encode message.symbol
     ++ (Alpha.encode message.volume
     ++ (Alpha.encode message.tradePriceSign
     ++ (Alpha.encode message.tradePrice
@@ -5192,13 +5192,13 @@ def encode (message : StrategyTradeCancellationMessage) : List UInt8 :=
 
 def decode (bytes : List UInt8) : Option (StrategyTradeCancellationMessage × List UInt8) := do
   let (exchangeId, bytes) ← ExchangeId.decode bytes
-  let (symbolStrategy, bytes) ← Alpha.decode 30 bytes
+  let (symbol, bytes) ← Alpha.decode 30 bytes
   let (volume, bytes) ← Alpha.decode 8 bytes
   let (tradePriceSign, bytes) ← Alpha.decode 1 bytes
   let (tradePrice, bytes) ← Alpha.decode 7 bytes
   let (tradePriceFractionIndicator, bytes) ← TradePriceFractionIndicator.decode bytes
   let (tradeNumber, bytes) ← Alpha.decode 8 bytes
-  pure ({ exchangeId, symbolStrategy, volume, tradePriceSign, tradePrice, tradePriceFractionIndicator, tradeNumber }, bytes)
+  pure ({ exchangeId, symbol, volume, tradePriceSign, tradePrice, tradePriceFractionIndicator, tradeNumber }, bytes)
 
 @[simp] theorem encode_length (message : StrategyTradeCancellationMessage) : (encode message).length = 56 := by
   unfold encode
@@ -7054,7 +7054,7 @@ end RegularTextBulletin
 
 /-- Special Text Bulletin: 80 bytes -/
 structure SpecialTextBulletin where
-  symbolBulletin : Alpha 30
+  symbol : Alpha 30
   specialBulletinContents : Alpha 49
   continueMarker : Alpha 1
   deriving DecidableEq, Repr
@@ -7062,15 +7062,15 @@ structure SpecialTextBulletin where
 namespace SpecialTextBulletin
 
 def encode (message : SpecialTextBulletin) : List UInt8 :=
-  Alpha.encode message.symbolBulletin
+  Alpha.encode message.symbol
     ++ (Alpha.encode message.specialBulletinContents
     ++ (Alpha.encode message.continueMarker))
 
 def decode (bytes : List UInt8) : Option (SpecialTextBulletin × List UInt8) := do
-  let (symbolBulletin, bytes) ← Alpha.decode 30 bytes
+  let (symbol, bytes) ← Alpha.decode 30 bytes
   let (specialBulletinContents, bytes) ← Alpha.decode 49 bytes
   let (continueMarker, bytes) ← Alpha.decode 1 bytes
-  pure ({ symbolBulletin, specialBulletinContents, continueMarker }, bytes)
+  pure ({ symbol, specialBulletinContents, continueMarker }, bytes)
 
 @[simp] theorem encode_length (message : SpecialTextBulletin) : (encode message).length = 80 := by
   unfold encode

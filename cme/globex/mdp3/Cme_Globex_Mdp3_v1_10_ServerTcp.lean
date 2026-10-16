@@ -545,21 +545,21 @@ theorem encode_length_pos (message : AdminLogin) : (encode message).length > 0 :
 
 end AdminLogin
 
-/-- Admin Logout: 100 bytes -/
+/-- Admin Logout: 180 bytes -/
 structure AdminLogout where
-  text : Alpha 100
+  logoutText : Alpha 180
   deriving DecidableEq, Repr
 
 namespace AdminLogout
 
 def encode (message : AdminLogout) : List UInt8 :=
-  Alpha.encode message.text
+  Alpha.encode message.logoutText
 
 def decode (bytes : List UInt8) : Option (AdminLogout × List UInt8) := do
-  let (text, bytes) ← Alpha.decode 100 bytes
-  pure ({ text }, bytes)
+  let (logoutText, bytes) ← Alpha.decode 180 bytes
+  pure ({ logoutText }, bytes)
 
-@[simp] theorem encode_length (message : AdminLogout) : (encode message).length = 100 := by
+@[simp] theorem encode_length (message : AdminLogout) : (encode message).length = 180 := by
   unfold encode
   simp only [Alpha.encode_length]
 

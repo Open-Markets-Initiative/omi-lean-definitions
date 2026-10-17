@@ -1812,13 +1812,14 @@ end StrategyAllowImplied
 
 /-- Strategy Type: one byte code -/
 def StrategyType.codes : List UInt8 :=
-  [0x43, 0x53, 0x56, 0x52]
+  [0x43, 0x53, 0x56, 0x52, 0x55]
 
 inductive StrategyType where
   | classic -- Classic
   | strip -- Strip
   | coveredRegular -- Covered Regular
   | coveredReferenceFixed -- Covered Reference Fixed
+  | coveredWithStock -- Covered With Stock
   | unlisted (byte : { byte : UInt8 // byte ∉ StrategyType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -1829,6 +1830,7 @@ def toByte : StrategyType → UInt8
   | .strip => 0x53
   | .coveredRegular => 0x56
   | .coveredReferenceFixed => 0x52
+  | .coveredWithStock => 0x55
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -1836,7 +1838,8 @@ def listed (byte : UInt8) : StrategyType :=
   if byte = 0x43 then .classic
   else if byte = 0x53 then .strip
   else if byte = 0x56 then .coveredRegular
-  else .coveredReferenceFixed
+  else if byte = 0x52 then .coveredReferenceFixed
+  else .coveredWithStock
 
 def ofByte (byte : UInt8) : StrategyType :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -1847,6 +1850,7 @@ theorem ofByte_toByte (value : StrategyType) : ofByte value.toByte = value := by
   | strip => decide
   | coveredRegular => decide
   | coveredReferenceFixed => decide
+  | coveredWithStock => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : StrategyType) : List UInt8 :=

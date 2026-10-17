@@ -78,7 +78,7 @@ inductive AccountType where
   | brokerDealerClearedAsCustomer -- Broker Dealer Cleared As Customer
   | awayMarketMaker -- Away Market Maker
   | floorBrokerDealer -- Floor Broker Dealer
-  | floorMarketMakerFlexSymbologySymbolIsPrefixedByOneOfTheFollowing -- Floor Market Maker Flex Symbology Symbol Is Prefixed By One Of The Following
+  | floorMarketMaker -- Floor Market Maker
   | unlisted (byte : { byte : UInt8 // byte ∉ AccountType.codes }) -- any other code, kept as it is
   deriving DecidableEq, Repr
 
@@ -93,7 +93,7 @@ def toByte : AccountType → UInt8
   | .brokerDealerClearedAsCustomer => 0x57
   | .awayMarketMaker => 0x58
   | .floorBrokerDealer => 0x59
-  | .floorMarketMakerFlexSymbologySymbolIsPrefixedByOneOfTheFollowing => 0x5A
+  | .floorMarketMaker => 0x5A
   | .unlisted byte => byte.val
 
 /-- The constructor of a listed code -/
@@ -106,7 +106,7 @@ def listed (byte : UInt8) : AccountType :=
   else if byte = 0x57 then .brokerDealerClearedAsCustomer
   else if byte = 0x58 then .awayMarketMaker
   else if byte = 0x59 then .floorBrokerDealer
-  else .floorMarketMakerFlexSymbologySymbolIsPrefixedByOneOfTheFollowing
+  else .floorMarketMaker
 
 def ofByte (byte : UInt8) : AccountType :=
   if known : byte ∈ codes then listed byte else .unlisted ⟨byte, known⟩
@@ -121,7 +121,7 @@ theorem ofByte_toByte (value : AccountType) : ofByte value.toByte = value := by
   | brokerDealerClearedAsCustomer => decide
   | awayMarketMaker => decide
   | floorBrokerDealer => decide
-  | floorMarketMakerFlexSymbologySymbolIsPrefixedByOneOfTheFollowing => decide
+  | floorMarketMaker => decide
   | unlisted byte => simp [ofByte, toByte, byte.property]
 
 def encode (value : AccountType) : List UInt8 :=
